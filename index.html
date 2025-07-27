@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mad Night</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        
+        #gameContainer {
+            position: relative;
+        }
+        
+        canvas {
+            border: 2px solid #333;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        
+        #gameInfo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 14px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+        
+        #deathMessage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff0000;
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.9);
+            display: none;
+            text-align: center;
+        }
+        
+        #instructions {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 12px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="gameInfo">
+            <div>Mortes: <span id="deathCount">0</span>/5</div>
+            <div>Força de Pedal: <span id="pedalPower">████</span></div>
+        </div>
+        <div id="deathMessage"></div>
+        <div id="instructions">
+            Use as SETAS para mover | ESPAÇO para dash (após orelhão)
+        </div>
+    </div>
+
+    <script>
+        // Configurações do jogo
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false; // Mantém pixels nítidos
+        
+        // Estado do jogo
+        const gameState = {
+            currentMap: 0,
+            deaths: 0,
+            dashUnlocked: false,
+            pedalPower: 4,
+            maxPedalPower: 4,
+            pedalRechargeTime: 6000, // 6 segundos
+            lastMoveTime: Date.now(),
+            phase: 'infiltration' // 'infiltration', 'escape'
+        };
+        
+        // Player
+        const player = {
+            x: 100,
+            y: 300,
+            width: 56,
+            height: 56,
+            speed: 3,
+            dashSpeed: 8,
+            isDashing: false,
+            dashDuration: 300,
+            dashStartTime: 0,
+            direction: 'right', // up, down, left, right
+            frame: 0,
+            animationSpeed: 150, // ms entre frames
+            lastFrameTime: 0,
+            isDead: false
+        };
+        
+        // Sistema de input
+        const keys = {
+            ArrowUp: false,
+            ArrowDown: false,
+            ArrowLeft: false,
+            ArrowRight: false,
+            Space: false
+        };
+        
+        // Event listeners
+        window.addEventListener('keydown', (e) => {
+            if (keys.hasOwnProperty(e.code)) {
+                keys[e.code] = true;
+                e.preventDefault();
+            }
+        });
+        
+        window.addEventListener('keyup', (e) => {
+            if (keys.hasOwnProperty(e.code)) {
+                keys[e.code] = false;
+                e.preventDefault();
+            }
+        });
+        
+        // Função de movimento do player
+        function updatePlayer(deltaTime) {
+            if (player.isDead) return;
+            
+            let dx = 0;
+            let dy = 0;
+            let moving = false;
+            
+            // Movimento normal
+            if (keys.ArrowUp) {
+                dy = -1;
+                player.direction = 'up';
+                moving = true;
+            }
+            if (keys.ArrowDown) {
+                dy = 1;
+                player.direction = 'down';
+                moving = true;
+            }
+            if (keys.ArrowLeft) {
+                dx = -1;
+                player.direction = 'left';
+                moving = true;
+            }
+            if (keys.ArrowRight) {
+                dx = 1;
+                player.direction = 'right';
+                moving = true;
+            }
+            
+            // Normalizar movimento diagonal
+            if (dx !== 0 && dy !== 0) {
+                dx *= 0.707;
+                dy *= 0.707;
+            }
+            
+            // Dash
+            if (keys.Space && gameState.dashUnlocked && gameState.pedalPower > 0 && !player.isDashing) {
+                player.isDashing = true;
+                player.dashStartTime = Date.now();
+                gameState.pedalPower--;
+                updateUI();
+            }
+            
+            // Aplicar velocidade
+            const currentSpeed = player.isDashing ? player.dashSpeed : player.speed;
+            player.x += dx * currentSpeed;
+            player.y += dy * currentSpeed;
+            
+            // Limitar ao canvas
+            player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
+            player.y = Math.max(0, Math.min(canvas.height - player.height, player.y));
+            
+            // Atualizar dash
+            if (player.isDashing && Date.now() - player.dashStartTime > player.dashDuration) {
+                player.isDashing = false;
+            }
+            
+            // Recarregar pedal power
+            if (moving) {
+                gameState.lastMoveTime = Date.now();
+            } else if (Date.now() - gameState.lastMoveTime > gameState.pedalRechargeTime) {
+                if (gameState.pedalPower < gameState.maxPedalPower) {
+                    gameState.pedalPower++;
+                    gameState.lastMoveTime = Date.now();
+                    updateUI();
+                }
+            }
+            
+            // Animação
+            if (moving && Date.now() - player.lastFrameTime > player.animationSpeed) {
+                player.frame = (player.frame + 1) % 2;
+                player.lastFrameTime = Date.now();
+            }
+        }
+        
+        // Função de morte
+        function killPlayer() {
+            if (player.isDead) return;
+            
+            player.isDead = true;
+            gameState.deaths++;
+            
+            const deathMsg = document.getElementById('deathMessage');
+            if (gameState.deaths < 5) {
+                deathMsg.textContent = "ah véi, se liga carái";
+            } else {
+                deathMsg.textContent = "sifudêu";
+            }
+            deathMsg.style.display = 'block';
+            
+            updateUI();
+            
+            setTimeout(() => {
+                deathMsg.style.display = 'none';
+                if (gameState.deaths >= 5) {
+                    // Reiniciar jogo completo
+                    resetGame();
+                } else {
+                    // Reiniciar mapa atual
+                    resetMap();
+                }
+            }, 2000);
+        }
+        
+        // Reset do mapa
+        function resetMap() {
+            player.x = 100;
+            player.y = 300;
+            player.isDead = false;
+            player.isDashing = false;
+            gameState.pedalPower = gameState.maxPedalPower;
+            updateUI();
+        }
+        
+        // Reset completo do jogo
+        function resetGame() {
+            gameState.currentMap = 0;
+            gameState.deaths = 0;
+            gameState.dashUnlocked = false;
+            gameState.phase = 'infiltration';
+            resetMap();
+        }
+        
+        // Atualizar UI
+        function updateUI() {
+            document.getElementById('deathCount').textContent = gameState.deaths;
+            
+            const powerBar = document.getElementById('pedalPower');
+            let bar = '';
+            for (let i = 0; i < gameState.maxPedalPower; i++) {
+                bar += i < gameState.pedalPower ? '█' : '░';
+            }
+            powerBar.textContent = bar;
+        }
+        
+        // Função de desenho temporária
+        function draw() {
+            // Limpar canvas
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Desenhar "mapa" temporário
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(50, 50, 700, 500);
+            
+            // Desenhar player (placeholder)
+            ctx.fillStyle = player.isDashing ? '#ff0' : '#f00';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            
+            // Indicador de direção
+            ctx.fillStyle = '#fff';
+            const centerX = player.x + player.width / 2;
+            const centerY = player.y + player.height / 2;
+            
+            switch(player.direction) {
+                case 'up':
+                    ctx.fillRect(centerX - 2, player.y - 10, 4, 8);
+                    break;
+                case 'down':
+                    ctx.fillRect(centerX - 2, player.y + player.height + 2, 4, 8);
+                    break;
+                case 'left':
+                    ctx.fillRect(player.x - 10, centerY - 2, 8, 4);
+                    break;
+                case 'right':
+                    ctx.fillRect(player.x + player.width + 2, centerY - 2, 8, 4);
+                    break;
+            }
+            
+            // Texto do mapa atual
+            ctx.fillStyle = '#fff';
+            ctx.font = '20px Arial';
+            ctx.fillText('Mapa: ' + (gameState.currentMap + 1), 350, 30);
+        }
+        
+        // Game loop
+        let lastTime = 0;
+        function gameLoop(timestamp) {
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+            
+            updatePlayer(deltaTime);
+            draw();
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Iniciar jogo
+        updateUI();
+        requestAnimationFrame(gameLoop);
+        
+        // Mensagem de teste
+        console.log('Mad Night - Jogo iniciado!');
+        console.log('Use as setas para mover o quadrado vermelho');
+        console.log('Pressione F12 para ver o console');
+    </script>
+</body>
+</html>
