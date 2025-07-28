@@ -361,21 +361,35 @@ function checkWallCollision(entity, newX, newY) {
 function spawnEscapeEnemy() {
     const map = maps[gameState.currentMap];
     const corners = [
-        {x: 50, y: 50},              // Canto superior esquerdo
-        {x: map.width - 100, y: 50}, // Canto superior direito
-        {x: 50, y: map.height - 100}, // Canto inferior esquerdo
-        {x: map.width - 100, y: map.height - 100} // Canto inferior direito
+        {x: 50, y: 50, dir: 'down'},              // Canto superior esquerdo
+        {x: map.width - 100, y: 50, dir: 'down'}, // Canto superior direito
+        {x: 50, y: map.height - 100, dir: 'up'},   // Canto inferior esquerdo
+        {x: map.width - 100, y: map.height - 100, dir: 'up'} // Canto inferior direito
     ];
     
-    const corner = corners[gameState.spawnCorner % 4];
+    const cornerData = corners[gameState.spawnCorner % 4];
     gameState.spawnCorner++;
     
-    const enemy = new Enemy(corner.x, corner.y);
+    const enemy = new Enemy(cornerData.x, cornerData.y);
     enemy.sprites = faquinhaSprites;
     enemy.state = 'chase'; // Já começam em perseguição
+    enemy.alertVisionRange = 400; // Visão ampliada para spawn da bomba
+    
+    // Determinar direção inicial baseado na posição
+    const centerX = map.width / 2;
+    const centerY = map.height / 2;
+    
+    if (Math.abs(cornerData.x - centerX) > Math.abs(cornerData.y - centerY)) {
+        // Mais longe horizontalmente, virar para o centro horizontal
+        enemy.direction = cornerData.x < centerX ? 'right' : 'left';
+    } else {
+        // Mais longe verticalmente, virar para o centro vertical
+        enemy.direction = cornerData.y < centerY ? 'down' : 'up';
+    }
+    
     enemies.push(enemy);
     
-    console.log(`Inimigo spawnou no canto ${(gameState.spawnCorner - 1) % 4}`);
+    console.log(`Inimigo spawnou no canto ${(gameState.spawnCorner - 1) % 4} virado para ${enemy.direction}`);
 }
 
 // Classe Inimigo
@@ -386,6 +400,7 @@ class Enemy {
         this.width = 56;
         this.height = 56;
         this.speed = 2;
+        this.patrolSpeed = 1; // Velocidade mais lenta durante patrulha
         this.direction = 'down';
         this.frame = 0;
         this.state = 'patrol';
@@ -394,6 +409,17 @@ class Enemy {
         this.sprites = [];
         this.visionRange = 150;
         this.alertVisionRange = 200;
+        
+        // Sistema de patrulha
+        this.patrolTimer = 0;
+        this.patrolDirection = this.getRandomDirection();
+        this.lastDirectionChange = Date.now();
+        this.directionChangeInterval = 2000 + Math.random() * 2000; // 2-4 segundos
+    }
+    
+    getRandomDirection() {
+        const directions = ['up', 'down', 'left', 'right'];
+        return directions[Math.floor(Math.random() * directions.length)];
     }
     
     update() {
@@ -410,38 +436,99 @@ class Enemy {
             effectiveVisionRange *= 0.3;
         }
         
+        // Verificar se pode ver o player
         if (dist < effectiveVisionRange && !player.isDead) {
-            this.state = 'chase';
+            // Verificar se está olhando na direção do player
+            let canSeePlayer = false;
             
-            const moveX = (dx/dist) * this.speed;
-            const moveY = (dy/dist) * this.speed;
-            
-            // Verificação de colisão para X
-            if (!checkWallCollision(this, this.x + moveX, this.y)) {
-                this.x += moveX;
+            switch(this.direction) {
+                case 'up':
+                    canSeePlayer = dy < 0 && Math.abs(dx) < 50;
+                    break;
+                case 'down':
+                    canSeePlayer = dy > 0 && Math.abs(dx) < 50;
+                    break;
+                case 'left':
+                    canSeePlayer = dx < 0 && Math.abs(dy) < 50;
+                    break;
+                case 'right':
+                    canSeePlayer = dx > 0 && Math.abs(dy) < 50;
+                    break;
             }
             
-            // Verificação de colisão para Y
-            if (!checkWallCollision(this, this.x, this.y + moveY)) {
-                this.y += moveY;
-            }
-            
-            // Atualizar direção baseado no movimento
-            if (Math.abs(dx) > Math.abs(dy)) {
-                this.direction = dx > 0 ? 'right' : 'left';
-            } else {
-                this.direction = dy > 0 ? 'down' : 'up';
-            }
-            
-            // Checar colisão com player
-            if (dist < 30) {
-                killPlayer();
+            // Se estiver em chase ou puder ver o player, perseguir
+            if (this.state === 'chase' || canSeePlayer) {
+                this.state = 'chase';
+                
+                const moveX = (dx/dist) * this.speed;
+                const moveY = (dy/dist) * this.speed;
+                
+                // Verificação de colisão para X
+                if (!checkWallCollision(this, this.x + moveX, this.y)) {
+                    this.x += moveX;
+                }
+                
+                // Verificação de colisão para Y
+                if (!checkWallCollision(this, this.x, this.y + moveY)) {
+                    this.y += moveY;
+                }
+                
+                // Atualizar direção baseado no movimento
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    this.direction = dx > 0 ? 'right' : 'left';
+                } else {
+                    this.direction = dy > 0 ? 'down' : 'up';
+                }
+                
+                // Checar colisão com player
+                if (dist < 30) {
+                    killPlayer();
+                }
             }
         } else {
             if (this.state === 'chase') {
                 console.log('Perdeu o player!');
             }
             this.state = 'patrol';
+            
+            // Sistema de patrulha
+            if (Date.now() - this.lastDirectionChange > this.directionChangeInterval) {
+                // Mudar direção aleatoriamente
+                this.patrolDirection = this.getRandomDirection();
+                this.lastDirectionChange = Date.now();
+                this.directionChangeInterval = 2000 + Math.random() * 2000;
+                this.direction = this.patrolDirection;
+            }
+            
+            // Movimento de patrulha
+            let patrolDx = 0;
+            let patrolDy = 0;
+            
+            switch(this.patrolDirection) {
+                case 'up':
+                    patrolDy = -this.patrolSpeed;
+                    break;
+                case 'down':
+                    patrolDy = this.patrolSpeed;
+                    break;
+                case 'left':
+                    patrolDx = -this.patrolSpeed;
+                    break;
+                case 'right':
+                    patrolDx = this.patrolSpeed;
+                    break;
+            }
+            
+            // Tentar mover na direção de patrulha
+            if (!checkWallCollision(this, this.x + patrolDx, this.y + patrolDy)) {
+                this.x += patrolDx;
+                this.y += patrolDy;
+            } else {
+                // Se bater na parede, mudar direção imediatamente
+                this.patrolDirection = this.getRandomDirection();
+                this.lastDirectionChange = Date.now();
+                this.direction = this.patrolDirection;
+            }
         }
         
         // Morte por dash
@@ -721,24 +808,27 @@ function update() {
     
     // Checar saída do mapa
     if (currentMapData.exit && checkRectCollision(player, currentMapData.exit)) {
-        if (gameState.phase === 'escape' && gameState.currentMap === 5) {
-            // Volta do mapa da bomba
-            gameState.currentMap = 4;
-            loadMap(4, true);
-        } else if (gameState.phase === 'escape' && gameState.currentMap > 2) {
-            // Voltando pelos mapas durante a fuga
-            gameState.currentMap--;
-            loadMap(gameState.currentMap, true);
-        } else if (gameState.phase === 'infiltration' && gameState.currentMap < maps.length - 1) {
-            // Avançando durante infiltração
-            gameState.currentMap++;
-            loadMap(gameState.currentMap);
-        } else if (gameState.phase === 'infiltration' && gameState.currentMap === 5) {
-            console.log('Chegou no último mapa! Plante a bomba!');
-        } else {
-            console.log('Fim da demo!');
-            gameState.currentMap = 0;
-            loadMap(0);
+        if (gameState.phase === 'escape') {
+            if (gameState.currentMap === 5) {
+                // Volta do mapa da bomba
+                gameState.currentMap = 4;
+                loadMap(4, true);
+            } else if (gameState.currentMap > 0) {
+                // Voltando pelos mapas durante a fuga
+                gameState.currentMap--;
+                loadMap(gameState.currentMap, true);
+            } else if (gameState.currentMap === 0) {
+                // Chegou no primeiro mapa durante a fuga - fim da demo por enquanto
+                console.log('BOSS FIGHT do Chacal virá aqui! Por enquanto, fim da fuga.');
+            }
+        } else if (gameState.phase === 'infiltration') {
+            if (gameState.currentMap < maps.length - 1) {
+                // Avançando durante infiltração
+                gameState.currentMap++;
+                loadMap(gameState.currentMap);
+            } else if (gameState.currentMap === 5) {
+                console.log('Chegou no último mapa! Plante a bomba!');
+            }
         }
     }
     
@@ -961,10 +1051,10 @@ setTimeout(() => {
 }, 1000);
 
 gameLoop();
-console.log('🎮 Mad Night v1.3.3 - Correções Implementadas! 🎮');
-console.log('✅ Sistema de colisão melhorado para todos os inimigos');
-console.log('✅ Inimigos diferentes na fase de fuga');
-console.log('✅ Player começa na posição correta durante escape');
-console.log('✅ Spawn contínuo de inimigos no mapa da bomba (1/segundo)');
-console.log('✅ Inimigos surgem dos 4 cantos alternadamente');
-console.log('📹 Preparado para sistema de câmera futuro');
+console.log('🎮 Mad Night v1.3.5 - Sistema de Patrulha Hotline Miami! 🎮');
+console.log('✅ Inimigos fazem ronda quando não veem o player');
+console.log('✅ Mudam de direção a cada 2-4 segundos');
+console.log('✅ Visão em cone - só detectam player na direção que olham');
+console.log('✅ Mudam direção ao bater em paredes');
+console.log('✅ Velocidade de patrulha mais lenta que perseguição');
+console.log('📹 Sistema completo estilo Hotline Miami!');
