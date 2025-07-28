@@ -1,109 +1,23 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mad Night</title>
     <style>
         body {
             margin: 0;
-            padding: 0;
-            background-color: #000;
+            background: #000;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            font-family: Arial, sans-serif;
+            height: 100vh;
         }
-        
-        #gameContainer {
-            position: relative;
-        }
-        
         canvas {
             border: 2px solid #333;
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-        }
-        
-        #gameInfo {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: white;
-            font-size: 14px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-        }
-        
-        #console {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 300px;
-            height: 200px;
-            background: rgba(0,0,0,0.9);
-            border: 2px solid #0f0;
-            color: #0f0;
-            font-family: monospace;
-            font-size: 10px;
-            padding: 5px;
-            overflow-y: auto;
-            display: none;
-        }
-        
-        #deathMessage {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #ff0000;
-            font-size: 32px;
-            font-weight: bold;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.9);
-            display: none;
-            text-align: center;
-        }
-        
-        #instructions {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            font-size: 12px;
-            text-align: center;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-        }
-        
-        #debugInfo {
-            position: absolute;
-            top: 10px;
-            right: 320px;
-            color: #0f0;
-            font-size: 12px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
         }
     </style>
 </head>
 <body>
-    <div id="gameContainer">
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
-        <div id="gameInfo">
-            <div>Mortes: <span id="deathCount">0</span>/5</div>
-            <div>Força de Pedal: <span id="pedalPower">████</span></div>
-        </div>
-        <div id="console">
-            <div style="color: #ff0; margin-bottom: 5px;">CONSOLE DEBUG</div>
-            <div id="consoleContent"></div>
-        </div>
-        <div id="deathMessage"></div>
-        <div id="instructions">
-            Use as SETAS para mover | ESPAÇO para dash (após orelhão)
-        </div>
-        <div id="debugInfo">
-            Pressione C para mostrar/ocultar console
-        </div>
-    </div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
     <script src="game.js"></script>
 </body>
 </html>
