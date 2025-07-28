@@ -1139,7 +1139,7 @@ function draw() {
     // Indicador de versão
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.4.1 - Dash e Velocidade Fix', camera.width - 160, camera.height - 5);
+    ctx.fillText('v1.4.2 - Mapas e Spawn Fix', camera.width - 160, camera.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
@@ -1166,9 +1166,9 @@ setTimeout(() => {
 }, 1000);
 
 gameLoop();
-console.log('🎮 Mad Night v1.4.1 - CORREÇÕES APLICADAS! 🎮');
-console.log('📷 Sistema de câmera funcionando');
-console.log('⚡ Dash corrigido - funciona em todos os mapas após orelhão');
-console.log('🏃 Velocidade do MadMax: 3 (corrigida)');
-console.log('🗺️ Mapas reorganizados - sem duplicação');
-console.log('🎯 Controles: C = Alterar velocidade da câmera');
+console.log('🎮 Mad Night v1.4.2 - MAPAS E SPAWN CORRIGIDOS! 🎮');
+console.log('🗺️ Sequência correta: Maconhão → Eixão → Fronteira → KS → Entre Prédios → Ninho');
+console.log('📐 Dimensões corretas: 1920x1080, 3440x1080, 1080x5000, 1080x1920');
+console.log('🎯 Player sempre spawna em posição segura');
+console.log('🏙️ Bordas finas como cidade real (não labirinto)');
+console.log('📷 Sistema de câmera otimizado para mapas grandes');
