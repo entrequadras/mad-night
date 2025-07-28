@@ -1,59 +1,8 @@
-console.log('Mad Night v1.4 - Sistema de Câmera');
+console.log('Mad Night v1.3.1 - Volta ao Estado Funcional');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
-
-// SISTEMA DE CÂMERA - Ajustável por mapa
-const camera = {
-    x: 0,
-    y: 0,
-    width: 800,  // Viewport inicial
-    height: 600, // Viewport inicial
-    followSpeed: 0.1,
-    deadZone: {
-        x: 200,
-        y: 150
-    }
-};
-
-// Atualizar câmera para seguir o player
-function updateCamera() {
-    const currentMapData = maps[gameState.currentMap];
-    
-    // Posição ideal da câmera (centralizada no player)
-    const targetX = player.x + player.width/2 - camera.width/2;
-    const targetY = player.y + player.height/2 - camera.height/2;
-    
-    // Sistema de zona morta (câmera só move se player sair da zona central)
-    const playerScreenX = player.x - camera.x;
-    const playerScreenY = player.y - camera.y;
-    
-    let moveX = 0;
-    let moveY = 0;
-    
-    // Verificar se player saiu da zona morta horizontal
-    if (playerScreenX < camera.deadZone.x) {
-        moveX = targetX - camera.x;
-    } else if (playerScreenX > camera.width - camera.deadZone.x) {
-        moveX = targetX - camera.x;
-    }
-    
-    // Verificar se player saiu da zona morta vertical
-    if (playerScreenY < camera.deadZone.y) {
-        moveY = targetY - camera.y;
-    } else if (playerScreenY > camera.height - camera.deadZone.y) {
-        moveY = targetY - camera.y;
-    }
-    
-    // Aplicar movimento suave
-    camera.x += moveX * camera.followSpeed;
-    camera.y += moveY * camera.followSpeed;
-    
-    // Limitar câmera aos limites do mapa
-    camera.x = Math.max(0, Math.min(currentMapData.width - camera.width, camera.x));
-    camera.y = Math.max(0, Math.min(currentMapData.height - camera.height, camera.y));
-}
 
 // Estado do jogo
 const gameState = {
@@ -75,7 +24,7 @@ const player = {
     y: 300,
     width: 56,
     height: 56,
-    speed: 3, // CORRIGIDO: Velocidade volta para 3
+    speed: 4,
     direction: 'right',
     frame: 0,
     sprites: [],
@@ -91,9 +40,9 @@ const player = {
     inShadow: false
 };
 
-// Sistema de Mapas - Agora com mapas maiores!
+// Sistema de Mapas Completo
 const maps = [
-    // MAPAS ORIGINAIS (800x600) - Câmera centralizada
+    // FASE 1: INFILTRAÇÃO
     {
         name: "Maconhão",
         subtitle: "Tutorial de movimento",
@@ -184,203 +133,49 @@ const maps = [
         orelhao: {x: 680, y: 480, w: 40, h: 60},
         direction: 'right'
     },
+    
+    // FASE 2: INFILTRAÇÃO AVANÇADA - MAPAS VERTICAIS
     {
-        name: "Eixão da Morte - EXPANDIDO",
-        subtitle: "Túnel gigante com câmera horizontal",
-        width: 3440,
-        height: 1080,
+        name: "Na área da KS",
+        subtitle: "Estacionamento estreito",
+        width: 600,
+        height: 800,
         enemies: [
-            {x: 400, y: 300, type: 'faquinha'},
-            {x: 800, y: 400, type: 'faquinha'},
-            {x: 1200, y: 300, type: 'faquinha'},
-            {x: 1600, y: 500, type: 'faquinha'},
-            {x: 2000, y: 400, type: 'faquinha'},
-            {x: 2400, y: 300, type: 'faquinha'},
-            {x: 2800, y: 500, type: 'faquinha'},
-            {x: 3200, y: 400, type: 'faquinha'}
+            {x: 300, y: 200, type: 'faquinha'},
+            {x: 200, y: 500, type: 'faquinha'}
         ],
         walls: [
-            // Bordas
-            {x: 0, y: 0, w: 3440, h: 100},
-            {x: 0, y: 980, w: 3440, h: 100},
-            {x: 0, y: 0, w: 100, h: 1080},
-            {x: 3340, y: 0, w: 100, h: 1080},
-            
-            // Pilares do túnel (padrão repetitivo)
-            {x: 300, y: 100, w: 80, h: 880},
-            {x: 600, y: 100, w: 80, h: 880},
-            {x: 900, y: 100, w: 80, h: 880},
-            {x: 1200, y: 100, w: 80, h: 880},
-            {x: 1500, y: 100, w: 80, h: 880},
-            {x: 1800, y: 100, w: 80, h: 880},
-            {x: 2100, y: 100, w: 80, h: 880},
-            {x: 2400, y: 100, w: 80, h: 880},
-            {x: 2700, y: 100, w: 80, h: 880},
-            {x: 3000, y: 100, w: 80, h: 880},
+            {x: 0, y: 0, w: 50, h: 800},
+            {x: 550, y: 0, w: 50, h: 800},
+            {x: 50, y: 0, w: 200, h: 50},  // Parede superior esquerda
+            {x: 350, y: 0, w: 200, h: 50}, // Parede superior direita
+            {x: 0, y: 750, w: 600, h: 50},
+            // Carros estacionados
+            {x: 80, y: 150, w: 120, h: 60},
+            {x: 400, y: 150, w: 120, h: 60},
+            {x: 80, y: 300, w: 120, h: 60},
+            {x: 400, y: 300, w: 120, h: 60},
+            {x: 80, y: 450, w: 120, h: 60},
+            {x: 400, y: 450, w: 120, h: 60},
         ],
         lights: [
-            {x: 200, y: 540, radius: 120},
-            {x: 500, y: 540, radius: 120},
-            {x: 800, y: 540, radius: 120},
-            {x: 1100, y: 540, radius: 120},
-            {x: 1400, y: 540, radius: 120},
-            {x: 1700, y: 540, radius: 120},
-            {x: 2000, y: 540, radius: 120},
-            {x: 2300, y: 540, radius: 120},
-            {x: 2600, y: 540, radius: 120},
-            {x: 2900, y: 540, radius: 120},
-            {x: 3200, y: 540, radius: 120}
-        ],
-        shadows: [],
-        playerStart: {x: 150, y: 500},
-        exit: {x: 3200, y: 440, w: 100, h: 200},
-        direction: 'right'
-    },
-    {
-        name: "Na área da KS - EXPANDIDO",
-        subtitle: "Estacionamento gigante com câmera",
-        width: 1080,
-        height: 5000,
-        enemies: [
-            {x: 300, y: 400, type: 'faquinha'},
-            {x: 600, y: 800, type: 'faquinha'},
-            {x: 400, y: 1200, type: 'faquinha'},
-            {x: 700, y: 1600, type: 'faquinha'},
-            {x: 300, y: 2000, type: 'faquinha'},
-            {x: 600, y: 2400, type: 'faquinha'},
-            {x: 500, y: 2800, type: 'faquinha'},
-            {x: 300, y: 3200, type: 'faquinha'},
-            {x: 700, y: 3600, type: 'faquinha'},
-            {x: 400, y: 4000, type: 'faquinha'},
-            {x: 600, y: 4400, type: 'faquinha'}
-        ],
-        walls: [
-            // Bordas do mapa
-            {x: 0, y: 0, w: 50, h: 5000},
-            {x: 1030, y: 0, w: 50, h: 5000},
-            {x: 50, y: 0, w: 400, h: 50},
-            {x: 630, y: 0, w: 400, h: 50},
-            {x: 0, y: 4950, w: 1080, h: 50},
-            
-            // Carros em fileiras (padrão repetitivo)
-            // Fileira 1
-            {x: 100, y: 200, w: 200, h: 100},
-            {x: 400, y: 200, w: 200, h: 100},
-            {x: 700, y: 200, w: 200, h: 100},
-            
-            // Fileira 2  
-            {x: 150, y: 500, w: 200, h: 100},
-            {x: 450, y: 500, w: 200, h: 100},
-            {x: 750, y: 500, w: 200, h: 100},
-            
-            // Fileira 3
-            {x: 100, y: 800, w: 200, h: 100},
-            {x: 400, y: 800, w: 200, h: 100},
-            {x: 700, y: 800, w: 200, h: 100},
-            
-            // Fileira 4
-            {x: 150, y: 1100, w: 200, h: 100},
-            {x: 450, y: 1100, w: 200, h: 100},
-            {x: 750, y: 1100, w: 200, h: 100},
-            
-            // Fileira 5
-            {x: 100, y: 1400, w: 200, h: 100},
-            {x: 400, y: 1400, w: 200, h: 100},
-            {x: 700, y: 1400, w: 200, h: 100},
-            
-            // Fileira 6
-            {x: 150, y: 1700, w: 200, h: 100},
-            {x: 450, y: 1700, w: 200, h: 100},
-            {x: 750, y: 1700, w: 200, h: 100},
-            
-            // Fileira 7
-            {x: 100, y: 2000, w: 200, h: 100},
-            {x: 400, y: 2000, w: 200, h: 100},
-            {x: 700, y: 2000, w: 200, h: 100},
-            
-            // Fileira 8
-            {x: 150, y: 2300, w: 200, h: 100},
-            {x: 450, y: 2300, w: 200, h: 100},
-            {x: 750, y: 2300, w: 200, h: 100},
-            
-            // Fileira 9
-            {x: 100, y: 2600, w: 200, h: 100},
-            {x: 400, y: 2600, w: 200, h: 100},
-            {x: 700, y: 2600, w: 200, h: 100},
-            
-            // Fileira 10
-            {x: 150, y: 2900, w: 200, h: 100},
-            {x: 450, y: 2900, w: 200, h: 100},
-            {x: 750, y: 2900, w: 200, h: 100},
-            
-            // Fileira 11
-            {x: 100, y: 3200, w: 200, h: 100},
-            {x: 400, y: 3200, w: 200, h: 100},
-            {x: 700, y: 3200, w: 200, h: 100},
-            
-            // Fileira 12
-            {x: 150, y: 3500, w: 200, h: 100},
-            {x: 450, y: 3500, w: 200, h: 100},
-            {x: 750, y: 3500, w: 200, h: 100},
-            
-            // Fileira 13
-            {x: 100, y: 3800, w: 200, h: 100},
-            {x: 400, y: 3800, w: 200, h: 100},
-            {x: 700, y: 3800, w: 200, h: 100},
-            
-            // Fileira 14
-            {x: 150, y: 4100, w: 200, h: 100},
-            {x: 450, y: 4100, w: 200, h: 100},
-            {x: 750, y: 4100, w: 200, h: 100},
-            
-            // Fileira 15
-            {x: 100, y: 4400, w: 200, h: 100},
-            {x: 400, y: 4400, w: 200, h: 100},
-            {x: 700, y: 4400, w: 200, h: 100},
-        ],
-        lights: [
-            {x: 540, y: 150, radius: 150},
-            {x: 540, y: 600, radius: 150},
-            {x: 540, y: 1000, radius: 150},
-            {x: 540, y: 1400, radius: 150},
-            {x: 540, y: 1800, radius: 150},
-            {x: 540, y: 2200, radius: 150},
-            {x: 540, y: 2600, radius: 150},
-            {x: 540, y: 3000, radius: 150},
-            {x: 540, y: 3400, radius: 150},
-            {x: 540, y: 3800, radius: 150},
-            {x: 540, y: 4200, radius: 150},
-            {x: 540, y: 4600, radius: 150},
-            {x: 540, y: 4900, radius: 150}
+            {x: 300, y: 100, radius: 100},
+            {x: 300, y: 300, radius: 100},
+            {x: 300, y: 500, radius: 100},
+            {x: 300, y: 700, radius: 100}
         ],
         shadows: [
-            {x: 200, y: 250, radius: 80},
-            {x: 500, y: 250, radius: 80},
-            {x: 800, y: 250, radius: 80},
-            {x: 250, y: 550, radius: 80},
-            {x: 550, y: 550, radius: 80},
-            {x: 850, y: 550, radius: 80},
-            {x: 200, y: 850, radius: 80},
-            {x: 500, y: 850, radius: 80},
-            {x: 800, y: 850, radius: 80},
-            {x: 250, y: 1150, radius: 80},
-            {x: 550, y: 1150, radius: 80},
-            {x: 850, y: 1150, radius: 80},
-            {x: 200, y: 1450, radius: 80},
-            {x: 500, y: 1450, radius: 80},
-            {x: 800, y: 1450, radius: 80},
-            {x: 250, y: 1750, radius: 80},
-            {x: 550, y: 1750, radius: 80},
-            {x: 850, y: 1750, radius: 80},
-            {x: 200, y: 2050, radius: 80},
-            {x: 500, y: 2050, radius: 80},
-            {x: 800, y: 2050, radius: 80}
+            {x: 140, y: 180, radius: 50},
+            {x: 460, y: 180, radius: 50},
+            {x: 140, y: 330, radius: 50},
+            {x: 460, y: 330, radius: 50},
+            {x: 140, y: 480, radius: 50},
+            {x: 460, y: 480, radius: 50}
         ],
-        playerStart: {x: 540, y: 4800},
-        exit: {x: 450, y: 10, w: 180, h: 40},
+        playerStart: {x: 300, y: 650}, // CORRIGIDO: Posição mais segura
+        exit: {x: 250, y: 10, w: 100, h: 30}, // CORRIGIDO: Saída mais acessível
         direction: 'up'
     },
-    // MAPAS VERTICAIS EXPANDIDOS (1080x5000) - Teste de câmera vertical
     {
         name: "Entre Prédios",
         subtitle: "Muitas sombras",
@@ -393,8 +188,8 @@ const maps = [
         walls: [
             {x: 0, y: 0, w: 50, h: 800},
             {x: 550, y: 0, w: 50, h: 800},
-            {x: 50, y: 0, w: 200, h: 50},
-            {x: 350, y: 0, w: 200, h: 50},
+            {x: 50, y: 0, w: 200, h: 50},  // Parede superior esquerda
+            {x: 350, y: 0, w: 200, h: 50}, // Parede superior direita
             {x: 0, y: 750, w: 600, h: 50},
             // Blocos residenciais - redimensionados
             {x: 80, y: 120, w: 160, h: 160},
@@ -414,8 +209,8 @@ const maps = [
             {x: 440, y: 580, radius: 100},
             {x: 300, y: 400, radius: 120}
         ],
-        playerStart: {x: 300, y: 650},
-        exit: {x: 250, y: 10, w: 100, h: 30},
+        playerStart: {x: 300, y: 650}, // CORRIGIDO: Posição mais segura
+        exit: {x: 250, y: 10, w: 100, h: 30}, // CORRIGIDO: Saída mais acessível
         direction: 'up'
     },
     {
@@ -432,8 +227,8 @@ const maps = [
             {x: 0, y: 0, w: 50, h: 800},
             {x: 550, y: 0, w: 50, h: 800},
             {x: 0, y: 0, w: 600, h: 50},
-            {x: 0, y: 750, w: 200, h: 50},
-            {x: 350, y: 750, w: 250, h: 50},
+            {x: 0, y: 750, w: 200, h: 50}, // Parede inferior esquerda
+            {x: 350, y: 750, w: 250, h: 50}, // Parede inferior direita
             // Carros grandes - redimensionados
             {x: 120, y: 200, w: 140, h: 80},
             {x: 340, y: 200, w: 140, h: 80},
@@ -451,9 +246,9 @@ const maps = [
             {x: 190, y: 440, radius: 60},
             {x: 410, y: 440, radius: 60}
         ],
-        playerStart: {x: 300, y: 650},
-        exit: {x: 200, y: 750, w: 150, h: 40},
-        lixeira: {x: 280, y: 120, w: 40, h: 40},
+        playerStart: {x: 300, y: 650}, // CORRIGIDO: Posição mais segura
+        exit: {x: 200, y: 750, w: 150, h: 40}, // CORRIGIDO: Saída mais acessível no sul
+        lixeira: {x: 280, y: 120, w: 40, h: 40}, // Objetivo da bomba
         direction: 'up'
     }
 ];
@@ -684,21 +479,13 @@ function loadMap(mapIndex) {
     player.isDead = false;
     player.isDashing = false;
     
-    // Inicializar câmera na posição do player
-    camera.x = player.x + player.width/2 - camera.width/2;
-    camera.y = player.y + player.height/2 - camera.height/2;
-    
-    // Limitar câmera aos limites do mapa
-    camera.x = Math.max(0, Math.min(map.width - camera.width, camera.x));
-    camera.y = Math.max(0, Math.min(map.height - camera.height, camera.y));
-    
     map.enemies.forEach(enemyData => {
         const enemy = new Enemy(enemyData.x, enemyData.y);
         enemy.sprites = faquinhaSprites;
         enemies.push(enemy);
     });
     
-    console.log(`Mapa ${mapIndex + 1}: ${map.name} (${map.width}x${map.height})`);
+    console.log(`Mapa ${mapIndex + 1}: ${map.name}`);
 }
 
 // Detectar teclas
@@ -711,7 +498,7 @@ window.addEventListener('keydown', (e) => {
         const enemy = new Enemy(player.x + 150, player.y);
         enemy.sprites = faquinhaSprites;
         enemies.push(enemy);
-        console.log('Inimigo criado!');
+        console.log('Inimigo criado com sistema de colisão corrigido!');
     }
     
     if (e.key === 'm' || e.key === 'M') {
@@ -725,12 +512,6 @@ window.addEventListener('keydown', (e) => {
     if (e.key === 'n' || e.key === 'N') {
         gameState.currentMap = (gameState.currentMap + 1) % maps.length;
         loadMap(gameState.currentMap);
-    }
-    
-    // Controles de câmera para debug
-    if (e.key === 'c' || e.key === 'C') {
-        camera.followSpeed = camera.followSpeed === 0.1 ? 1.0 : 0.1;
-        console.log(`Velocidade da câmera: ${camera.followSpeed === 0.1 ? 'Suave' : 'Instantânea'}`);
     }
 });
 
@@ -843,6 +624,7 @@ function update() {
             moving = true;
         }
         
+        // Primeiro tenta mover em X
         if (dx !== 0) {
             const newX = player.x + dx * player.speed;
             if (!checkWallCollision(player, newX, player.y)) {
@@ -850,6 +632,7 @@ function update() {
             }
         }
         
+        // Depois tenta mover em Y
         if (dy !== 0) {
             const newY = player.y + dy * player.speed;
             if (!checkWallCollision(player, player.x, newY)) {
@@ -857,17 +640,13 @@ function update() {
             }
         }
         
-        // CORRIGIDO: Dash funciona em TODAS as fases desde o início
-        if (keys[' '] && gameState.pedalPower > 0 && !player.isDashing) {
+        // Dash
+        if (keys[' '] && gameState.pedalPower > 0 && !player.isDashing && gameState.dashUnlocked) {
             player.isDashing = true;
             player.dashStart = Date.now();
             gameState.pedalPower--;
-            console.log('Dash ativado! Energia restante:', gameState.pedalPower);
         }
     }
-    
-    // ATUALIZAR CÂMERA
-    updateCamera();
     
     // Checar interações especiais
     if (currentMapData.orelhao && checkRectCollision(player, currentMapData.orelhao)) {
@@ -895,8 +674,8 @@ function update() {
     
     // Checar saída do mapa
     if (currentMapData.exit && checkRectCollision(player, currentMapData.exit)) {
-        if (gameState.phase === 'escape' && gameState.currentMap === 5) { // Ninho dos Ratos (último mapa)
-            gameState.currentMap = 4; // Volta para Entre Prédios
+        if (gameState.phase === 'escape' && gameState.currentMap === 5) {
+            gameState.currentMap = 4;
             loadMap(4);
         } else if (gameState.phase === 'escape' && gameState.currentMap > 2) {
             gameState.currentMap--;
@@ -904,7 +683,7 @@ function update() {
         } else if (gameState.phase === 'infiltration' && gameState.currentMap < maps.length - 1) {
             gameState.currentMap++;
             loadMap(gameState.currentMap);
-        } else if (gameState.phase === 'infiltration' && gameState.currentMap === 5) { // Último mapa
+        } else if (gameState.phase === 'infiltration' && gameState.currentMap === 5) {
             console.log('Chegou no último mapa! Plante a bomba!');
         } else {
             console.log('Fim da demo!');
@@ -948,68 +727,45 @@ function getPlayerSprite() {
 function draw() {
     const currentMapData = maps[gameState.currentMap];
     
-    // CORRIGIDO: Redimensionar canvas para o tamanho do mapa atual
+    // Ajustar canvas se necessário
     if (canvas.width !== currentMapData.width || canvas.height !== currentMapData.height) {
         canvas.width = currentMapData.width;
         canvas.height = currentMapData.height;
-        
-        // Ajustar câmera para o novo tamanho
-        camera.width = Math.min(800, currentMapData.width);
-        camera.height = Math.min(600, currentMapData.height);
-        
-        console.log(`Canvas redimensionado para: ${currentMapData.width}x${currentMapData.height}`);
-        console.log(`Câmera ajustada para: ${camera.width}x${camera.height}`);
     }
-    
-    // Salvar contexto para aplicar transformação da câmera
-    ctx.save();
-    ctx.translate(-camera.x, -camera.y);
     
     // Fundo
     ctx.fillStyle = '#0a0a0a';
-    ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Luzes (só desenhar as visíveis)
+    // Luzes
     currentMapData.lights.forEach(light => {
-        // Culling: só desenhar se estiver na tela
-        if (light.x + light.radius > camera.x && light.x - light.radius < camera.x + camera.width &&
-            light.y + light.radius > camera.y && light.y - light.radius < camera.y + camera.height) {
-            
-            const gradient = ctx.createRadialGradient(light.x, light.y, 0, light.x, light.y, light.radius);
-            gradient.addColorStop(0, 'rgba(255, 255, 200, 0.3)');
-            gradient.addColorStop(0.5, 'rgba(255, 255, 200, 0.1)');
-            gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
-            
-            ctx.fillStyle = gradient;
-            ctx.fillRect(light.x - light.radius, light.y - light.radius, light.radius * 2, light.radius * 2);
-        }
+        const gradient = ctx.createRadialGradient(light.x, light.y, 0, light.x, light.y, light.radius);
+        gradient.addColorStop(0, 'rgba(255, 255, 200, 0.3)');
+        gradient.addColorStop(0.5, 'rgba(255, 255, 200, 0.1)');
+        gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(light.x - light.radius, light.y - light.radius, light.radius * 2, light.radius * 2);
     });
     
-    // Sombras (só as visíveis)
+    // Sombras
     currentMapData.shadows.forEach(shadow => {
-        if (shadow.x + shadow.radius > camera.x && shadow.x - shadow.radius < camera.x + camera.width &&
-            shadow.y + shadow.radius > camera.y && shadow.y - shadow.radius < camera.y + camera.height) {
-            
-            const gradient = ctx.createRadialGradient(shadow.x, shadow.y, 0, shadow.x, shadow.y, shadow.radius);
-            gradient.addColorStop(0, 'rgba(0, 0, 0, 0.8)');
-            gradient.addColorStop(0.7, 'rgba(0, 0, 0, 0.5)');
-            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            
-            ctx.fillStyle = gradient;
-            ctx.fillRect(shadow.x - shadow.radius, shadow.y - shadow.radius, shadow.radius * 2, shadow.radius * 2);
-        }
+        const gradient = ctx.createRadialGradient(shadow.x, shadow.y, 0, shadow.x, shadow.y, shadow.radius);
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.8)');
+        gradient.addColorStop(0.7, 'rgba(0, 0, 0, 0.5)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(shadow.x - shadow.radius, shadow.y - shadow.radius, shadow.radius * 2, shadow.radius * 2);
     });
     
-    // Paredes (só as visíveis)
+    // Paredes
     ctx.fillStyle = '#333';
     currentMapData.walls.forEach(wall => {
-        if (wall.x + wall.w > camera.x && wall.x < camera.x + camera.width &&
-            wall.y + wall.h > camera.y && wall.y < camera.y + camera.height) {
-            ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
-        }
+        ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
     });
     
     // Objetos especiais
@@ -1043,32 +799,28 @@ function draw() {
         ctx.fillText(exitText, currentMapData.exit.x + 5, currentMapData.exit.y + 30);
     }
     
-    // Inimigos (só os visíveis)
+    // Inimigos
     enemies.forEach(enemy => {
-        if (enemy.x + enemy.width > camera.x && enemy.x < camera.x + camera.width &&
-            enemy.y + enemy.height > camera.y && enemy.y < camera.y + camera.height) {
-            
-            if (faquinhaLoaded >= 16) {
-                const sprite = enemy.getSprite();
-                if (sprite) {
-                    if (isInShadow(enemy.x + enemy.width/2, enemy.y + enemy.height/2)) {
-                        ctx.globalAlpha = 0.5;
-                    }
-                    ctx.drawImage(sprite, enemy.x, enemy.y, enemy.width, enemy.height);
-                    ctx.globalAlpha = 1;
+        if (faquinhaLoaded >= 16) {
+            const sprite = enemy.getSprite();
+            if (sprite) {
+                if (isInShadow(enemy.x + enemy.width/2, enemy.y + enemy.height/2)) {
+                    ctx.globalAlpha = 0.5;
                 }
-            } else {
-                if (!enemy.isDead) {
-                    ctx.fillStyle = enemy.state === 'chase' ? '#f0f' : '#808';
-                    ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-                }
+                ctx.drawImage(sprite, enemy.x, enemy.y, enemy.width, enemy.height);
+                ctx.globalAlpha = 1;
             }
-            
-            if (!enemy.isDead && gameState.phase === 'escape') {
-                ctx.fillStyle = '#f00';
-                ctx.font = '10px Arial';
-                ctx.fillText('!', enemy.x + 25, enemy.y - 5);
+        } else {
+            if (!enemy.isDead) {
+                ctx.fillStyle = enemy.state === 'chase' ? '#f0f' : '#808';
+                ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
             }
+        }
+        
+        if (!enemy.isDead && gameState.phase === 'escape') {
+            ctx.fillStyle = '#f00';
+            ctx.font = '10px Arial';
+            ctx.fillText('!', enemy.x + 25, enemy.y - 5);
         }
     });
     
@@ -1091,30 +843,20 @@ function draw() {
         ctx.globalAlpha = 1;
     }
     
-    // Restaurar contexto (remove transformação da câmera para UI)
-    ctx.restore();
-    
-    // UI FIXA (não afetada pela câmera)
     // Nome do mapa
     ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#ff0';
     ctx.font = 'bold 24px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText(currentMapData.name, camera.width/2, 40);
+    ctx.fillText(currentMapData.name, canvas.width/2, 40);
     ctx.font = '16px Arial';
-    ctx.fillText(currentMapData.subtitle, camera.width/2, 60);
+    ctx.fillText(currentMapData.subtitle, canvas.width/2, 60);
     ctx.textAlign = 'left';
     
-    // UI principal
+    // UI
     ctx.fillStyle = '#fff';
     ctx.font = '14px Arial';
-    ctx.fillText(`Mapa: ${gameState.currentMap + 1}/${maps.length} | Fase: ${gameState.phase === 'escape' ? 'FUGA!' : 'Infiltração'}`, 10, camera.height - 40);
-    ctx.fillText(`Mortes: ${gameState.deaths}/5 | Inimigos: ${enemies.filter(e => !e.isDead).length}`, 10, camera.height - 20);
-    
-    // Info da câmera
-    ctx.fillStyle = '#aaa';
-    ctx.font = '12px Arial';
-    ctx.fillText(`Câmera: (${Math.floor(camera.x)}, ${Math.floor(camera.y)}) | Mapa: ${currentMapData.width}x${currentMapData.height}`, 10, camera.height - 60);
-    ctx.fillText(`Player: (${Math.floor(player.x)}, ${Math.floor(player.y)})`, 10, camera.height - 80);
+    ctx.fillText(`Mapa: ${gameState.currentMap + 1}/6 | Fase: ${gameState.phase === 'escape' ? 'FUGA!' : 'Infiltração'}`, 10, canvas.height - 40);
+    ctx.fillText(`Mortes: ${gameState.deaths}/5 | Inimigos: ${enemies.filter(e => !e.isDead).length}`, 10, canvas.height - 20);
     
     if (player.inShadow) {
         ctx.fillStyle = '#0f0';
@@ -1124,17 +866,12 @@ function draw() {
     // Avisos especiais
     if (currentMapData.orelhao && !gameState.dashUnlocked) {
         ctx.fillStyle = '#ff0';
-        ctx.fillText('Chegue no TELEFONE azul (opcional - dash já funciona)', 10, 105);
-    }
-    
-    if (gameState.pedalPower === 0) {
-        ctx.fillStyle = '#f80';
-        ctx.fillText('DASH recarregando... pare para recuperar energia!', 10, 125);
+        ctx.fillText('Chegue no TELEFONE azul!', 10, 105);
     }
     
     if (currentMapData.lixeira && !gameState.bombPlaced) {
         ctx.fillStyle = '#ff0';
-        ctx.fillText('Mate todos e coloque a BOMBA!', 10, 145);
+        ctx.fillText('Mate todos e coloque a BOMBA!', 10, 105);
     }
     
     ctx.fillStyle = '#fff';
@@ -1144,26 +881,17 @@ function draw() {
         ctx.fillText('█', 120 + i * 12, 65);
     }
     
-    // Controles da câmera e debug
-    ctx.fillStyle = '#888';
-    ctx.font = '10px Arial';
-    ctx.fillText('Controles: C = Câmera | ESPAÇO = Dash (sempre ativo) | N = Próximo mapa', 10, 165);
-    
-    // Status do dash
-    ctx.fillStyle = '#0f0';
-    ctx.fillText('✓ DASH sempre disponível', 10, 185);
-    
     // Indicador de versão
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.4.5 - Canvas Dinâmico Fix', camera.width - 170, camera.height - 5);
+    ctx.fillText('v1.3.1 - Estado Funcional Restaurado', canvas.width - 200, canvas.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
         ctx.font = '32px Arial';
         ctx.textAlign = 'center';
         const msg = gameState.deaths < 5 ? "ah véi, se liga carái" : "sifudêu";
-        ctx.fillText(msg, camera.width / 2, camera.height / 2);
+        ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
         ctx.textAlign = 'left';
     }
 }
@@ -1183,9 +911,10 @@ setTimeout(() => {
 }, 1000);
 
 gameLoop();
-console.log('🎮 Mad Night v1.4.5 - CANVAS DINÂMICO CORRIGIDO! 🎮');
-console.log('📐 Canvas agora redimensiona para cada mapa');
-console.log('🗺️ Sequência correta: 6 mapas apenas (sem sobra)');
-console.log('📏 Dimensões reais: 1920x1080, 3440x1080, 1080x5000, etc');
-console.log('📷 Câmera se adapta automaticamente');
-console.log('🎯 Logs mostram redimensionamento do canvas');
+console.log('🎮 Mad Night v1.3.1 - ESTADO FUNCIONAL RESTAURADO! 🎮');
+console.log('✅ Velocidade do player: 4');
+console.log('✅ Mapas verticais: funcionando perfeitamente');
+console.log('✅ Inimigos com "E": não atravessam paredes');
+console.log('✅ Sistema de colisão robusto');
+console.log('✅ Dash funciona após orelhão');
+console.log('🔄 Voltamos ao ponto onde você disse "resolvido"');
