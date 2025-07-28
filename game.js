@@ -1022,7 +1022,25 @@ function draw() {
     ctx.fillStyle = '#fff';
     ctx.font = '14px Arial';
     ctx.fillText(`Mapa: ${gameState.currentMap + 1}/6 | Fase: ${gameState.phase === 'escape' ? 'FUGA!' : 'Infiltração'}`, 10, canvas.height - 40);
-    ctx.fillText(`Mortes: ${gameState.deaths}/5 | Inimigos: ${enemies.filter(e => !e.isDead).length}`, 10, canvas.height - 20);
+    ctx.fillText(`Inimigos: ${enemies.filter(e => !e.isDead).length}`, 10, canvas.height - 20);
+    
+    // Contador de vidas (bikes)
+    ctx.fillStyle = '#fff';
+    ctx.fillText('Vidas: ', 10, 25);
+    for (let i = 0; i < 5; i++) {
+        if (i < (5 - gameState.deaths)) {
+            // Bike cheia (vida disponível)
+            ctx.fillStyle = '#0f0';
+            ctx.font = '20px Arial';
+            ctx.fillText('🚲', 60 + i * 30, 25);
+        } else {
+            // Bike quebrada (vida perdida)
+            ctx.fillStyle = '#800';
+            ctx.font = '20px Arial';
+            ctx.fillText('💀', 60 + i * 30, 25);
+        }
+    }
+    ctx.font = '14px Arial';
     
     if (player.inShadow) {
         ctx.fillStyle = '#0f0';
@@ -1077,10 +1095,9 @@ setTimeout(() => {
 }, 1000);
 
 gameLoop();
-console.log('🎮 Mad Night v1.3.5 - Sistema de Patrulha Hotline Miami! 🎮');
-console.log('✅ Inimigos fazem ronda quando não veem o player');
-console.log('✅ Mudam de direção a cada 2-4 segundos');
-console.log('✅ Visão em cone - só detectam player na direção que olham');
-console.log('✅ Mudam direção ao bater em paredes');
-console.log('✅ Velocidade de patrulha mais lenta que perseguição');
-console.log('📹 Sistema completo estilo Hotline Miami!');
+console.log('🎮 Mad Night v1.3.6 - Patrulha Limitada + Contador de Vidas! 🎮');
+console.log('✅ Inimigos patrulham em raio de 150px do ponto original');
+console.log('✅ Voltam automaticamente se se afastarem demais');
+console.log('🚲 Contador visual de vidas com bikes');
+console.log('💀 Bikes viram caveiras quando perde vida');
+console.log('📹 Interface mais limpa e informativa!');
