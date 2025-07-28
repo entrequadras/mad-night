@@ -1024,7 +1024,7 @@ function draw() {
     // Indicador de versão
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.3.3 - Colisão e Respawn Fix', canvas.width - 150, canvas.height - 5);
+    ctx.fillText('v1.3.5 - Patrulha Hotline Miami', canvas.width - 150, canvas.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
