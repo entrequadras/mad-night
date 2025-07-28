@@ -857,11 +857,12 @@ function update() {
             }
         }
         
-        // CORRIGIDO: Dash funciona em todos os mapas, não só nos primeiros 3
+        // CORRIGIDO: Dash funciona em todos os mapas após desbloqueado no orelhão
         if (keys[' '] && gameState.pedalPower > 0 && !player.isDashing && gameState.dashUnlocked) {
             player.isDashing = true;
             player.dashStart = Date.now();
             gameState.pedalPower--;
+            console.log('Dash ativado! Energia restante:', gameState.pedalPower);
         }
     }
     
@@ -894,16 +895,16 @@ function update() {
     
     // Checar saída do mapa
     if (currentMapData.exit && checkRectCollision(player, currentMapData.exit)) {
-        if (gameState.phase === 'escape' && gameState.currentMap === 6) {
-            gameState.currentMap = 5;
-            loadMap(5);
+        if (gameState.phase === 'escape' && gameState.currentMap === 5) { // Ninho dos Ratos (último mapa)
+            gameState.currentMap = 4; // Volta para Entre Prédios
+            loadMap(4);
         } else if (gameState.phase === 'escape' && gameState.currentMap > 2) {
             gameState.currentMap--;
             loadMap(gameState.currentMap);
         } else if (gameState.phase === 'infiltration' && gameState.currentMap < maps.length - 1) {
             gameState.currentMap++;
             loadMap(gameState.currentMap);
-        } else if (gameState.phase === 'infiltration' && gameState.currentMap === 6) {
+        } else if (gameState.phase === 'infiltration' && gameState.currentMap === 5) { // Último mapa
             console.log('Chegou no último mapa! Plante a bomba!');
         } else {
             console.log('Fim da demo!');
@@ -1116,12 +1117,17 @@ function draw() {
     // Avisos especiais
     if (currentMapData.orelhao && !gameState.dashUnlocked) {
         ctx.fillStyle = '#ff0';
-        ctx.fillText('Chegue no TELEFONE azul!', 10, 105);
+        ctx.fillText('Chegue no TELEFONE azul para desbloquear DASH!', 10, 105);
+    }
+    
+    if (gameState.dashUnlocked && gameState.pedalPower === 0) {
+        ctx.fillStyle = '#f80';
+        ctx.fillText('DASH recarregando... pare para recuperar energia!', 10, 105);
     }
     
     if (currentMapData.lixeira && !gameState.bombPlaced) {
         ctx.fillStyle = '#ff0';
-        ctx.fillText('Mate todos e coloque a BOMBA!', 10, 105);
+        ctx.fillText('Mate todos e coloque a BOMBA!', 10, 125);
     }
     
     ctx.fillStyle = '#fff';
@@ -1131,15 +1137,24 @@ function draw() {
         ctx.fillText('█', 120 + i * 12, 65);
     }
     
-    // Controles da câmera
+    // Controles da câmera e debug
     ctx.fillStyle = '#888';
     ctx.font = '10px Arial';
-    ctx.fillText('C = Mudar velocidade da câmera', 10, 125);
+    ctx.fillText('Controles: C = Câmera | ESPAÇO = Dash (após orelhão) | N = Próximo mapa', 10, 145);
+    
+    // Status do dash
+    if (gameState.dashUnlocked) {
+        ctx.fillStyle = '#0f0';
+        ctx.fillText('✓ DASH desbloqueado', 10, 165);
+    } else {
+        ctx.fillStyle = '#f80';
+        ctx.fillText('✗ DASH bloqueado - vá ao orelhão!', 10, 165);
+    }
     
     // Indicador de versão
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.4.2 - Mapas e Spawn Fix', camera.width - 160, camera.height - 5);
+    ctx.fillText('v1.4.3 - Dash Debug & Fix', camera.width - 150, camera.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
@@ -1166,9 +1181,9 @@ setTimeout(() => {
 }, 1000);
 
 gameLoop();
-console.log('🎮 Mad Night v1.4.2 - MAPAS E SPAWN CORRIGIDOS! 🎮');
-console.log('🗺️ Sequência correta: Maconhão → Eixão → Fronteira → KS → Entre Prédios → Ninho');
-console.log('📐 Dimensões corretas: 1920x1080, 3440x1080, 1080x5000, 1080x1920');
-console.log('🎯 Player sempre spawna em posição segura');
-console.log('🏙️ Bordas finas como cidade real (não labirinto)');
-console.log('📷 Sistema de câmera otimizado para mapas grandes');
+console.log('🎮 Mad Night v1.4.3 - DASH DEBUG & FIX! 🎮');
+console.log('⚡ Dash com debug melhorado');
+console.log('🔧 Sistema de transição de mapas corrigido');
+console.log('🎯 Indicadores visuais de status do dash');
+console.log('📝 Logs detalhados para diagnóstico');
+console.log('🗺️ Sequência de mapas ajustada (0-5 = 6 mapas)');
