@@ -9,7 +9,9 @@ const gameState = {
     deaths: 0,
     pedalPower: 4,
     maxPedalPower: 4,
-    lastRecharge: Date.now()
+    lastRecharge: Date.now(),
+    musicPhase: 'inicio', // 'inicio' ou 'fuga'
+    currentMusic: null
 };
 
 // Player
@@ -26,8 +28,8 @@ const player = {
     deathFrame: 12,
     isDashing: false,
     dashStart: 0,
-    dashDuration: 150, // Dash mais curto ainda
-    dashDistance: 60,  // Distância menor
+    dashDuration: 150,
+    dashDistance: 60,
     dashStartX: 0,
     dashStartY: 0,
     lastMove: Date.now()
@@ -35,6 +37,49 @@ const player = {
 
 // Inimigos
 const enemies = [];
+
+// Áudios
+const audio = {
+    inicio: null,
+    fuga: null,
+    creditos: null
+};
+
+// Carregar áudios
+function loadAudio() {
+    audio.inicio = new Audio('assets/audio/musica_etqgame_tema_inicio.mp3');
+    audio.fuga = new Audio('assets/audio/musica_etqgame_fuga.mp3');
+    audio.creditos = new Audio('assets/audio/musica_etqgame_end_credits.mp3');
+    
+    audio.inicio.loop = true;
+    audio.fuga.loop = true;
+    
+    console.log('Áudios carregados!');
+}
+
+// Tocar música
+function playMusic(phase) {
+    // Parar música atual
+    if (gameState.currentMusic) {
+        gameState.currentMusic.pause();
+        gameState.currentMusic.currentTime = 0;
+    }
+    
+    // Tocar nova música
+    if (phase === 'inicio' && audio.inicio) {
+        audio.inicio.play().catch(e => {
+            console.log('Clique na tela para ativar áudio');
+        });
+        gameState.currentMusic = audio.inicio;
+        gameState.musicPhase = 'inicio';
+    } else if (phase === 'fuga' && audio.fuga) {
+        audio.fuga.play().catch(e => {
+            console.log('Clique na tela para ativar áudio');
+        });
+        gameState.currentMusic = audio.fuga;
+        gameState.musicPhase = 'fuga';
+    }
+}
 
 // Classe Inimigo
 class Enemy {
@@ -71,7 +116,6 @@ class Enemy {
                 this.direction = dy > 0 ? 'down' : 'up';
             }
             
-            // Mata mesmo durante dash
             if (dist < 30) {
                 killPlayer();
             }
@@ -79,7 +123,6 @@ class Enemy {
             this.state = 'patrol';
         }
         
-        // Checar colisão durante dash do player
         if (player.isDashing && dist < 40) {
             this.die();
         }
@@ -95,7 +138,7 @@ class Enemy {
         if (this.isDead) return;
         this.isDead = true;
         this.deathFrame = Math.floor(Math.random() * 4) + 12;
-        console.log('Inimigo morto! Frame:', this.deathFrame);
+        console.log('Inimigo morto!');
     }
     
     getSprite() {
@@ -142,10 +185,29 @@ window.addEventListener('keydown', (e) => {
         enemy.sprites = faquinhaSprites;
         enemies.push(enemy);
     }
+    
+    // M - trocar música
+    if (e.key === 'm' || e.key === 'M') {
+        if (gameState.musicPhase === 'inicio') {
+            playMusic('fuga');
+            console.log('Música de fuga!');
+        } else {
+            playMusic('inicio');
+            console.log('Música inicial!');
+        }
+    }
 });
 
 window.addEventListener('keyup', (e) => {
     keys[e.key] = false;
+});
+
+// Clique para ativar áudio
+canvas.addEventListener('click', () => {
+    if (gameState.currentMusic && gameState.currentMusic.paused) {
+        gameState.currentMusic.play();
+        console.log('Áudio ativado!');
+    }
 });
 
 // Matar player
@@ -161,6 +223,7 @@ function killPlayer() {
         if (gameState.deaths >= 5) {
             gameState.deaths = 0;
             enemies.length = 0;
+            playMusic('inicio'); // Volta música inicial
         }
         resetPlayer();
     }, 2000);
@@ -179,13 +242,11 @@ function resetPlayer() {
 // Atualizar
 let lastFrameTime = 0;
 function update() {
-    // Atualizar inimigos
     enemies.forEach(enemy => enemy.update());
     
-    // Remover inimigos mortos após 3 segundos
     enemies.forEach((enemy, index) => {
         if (enemy.isDead && !enemy.removeTime) {
-            enemy.removeTime = Date.now() + 3000; // 3 segundos
+            enemy.removeTime = Date.now() + 3000;
         }
         if (enemy.removeTime && Date.now() > enemy.removeTime) {
             enemies.splice(index, 1);
@@ -198,14 +259,12 @@ function update() {
     let dx = 0;
     let dy = 0;
     
-    // Durante o dash, movimento automático
     if (player.isDashing) {
         const progress = (Date.now() - player.dashStart) / player.dashDuration;
         
         if (progress >= 1) {
             player.isDashing = false;
         } else {
-            // Movimento do dash baseado na direção
             const dashSpeed = player.dashDistance / player.dashDuration * 16;
             switch(player.direction) {
                 case 'up': player.y -= dashSpeed; break;
@@ -215,7 +274,6 @@ function update() {
             }
         }
     } else {
-        // Movimento normal
         if (keys['ArrowUp']) {
             dy = -1;
             player.direction = 'up';
@@ -240,25 +298,21 @@ function update() {
         player.x += dx * player.speed;
         player.y += dy * player.speed;
         
-        // Dash com espaço
         if (keys[' '] && gameState.pedalPower > 0 && !player.isDashing) {
             player.isDashing = true;
             player.dashStart = Date.now();
             player.dashStartX = player.x;
             player.dashStartY = player.y;
             gameState.pedalPower--;
-            console.log('Dash! Pedal:', gameState.pedalPower);
         }
     }
     
-    // Recarregar pedal
     if (moving || player.isDashing) {
         player.lastMove = Date.now();
     } else if (Date.now() - player.lastMove > 1000) {
         if (Date.now() - gameState.lastRecharge > 6000 && gameState.pedalPower < gameState.maxPedalPower) {
             gameState.pedalPower++;
             gameState.lastRecharge = Date.now();
-            console.log('Pedal recarregado:', gameState.pedalPower);
         }
     }
     
@@ -271,7 +325,6 @@ function update() {
     }
 }
 
-// Sprite do player
 function getPlayerSprite() {
     if (player.isDead) return player.sprites[player.deathFrame];
     
@@ -286,7 +339,6 @@ function getPlayerSprite() {
     return player.sprites[base + offset];
 }
 
-// Desenhar
 function draw() {
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -294,7 +346,6 @@ function draw() {
     ctx.fillStyle = '#1a1a1a';
     ctx.fillRect(50, 50, 700, 500);
     
-    // Inimigos
     enemies.forEach(enemy => {
         if (faquinhaLoaded >= 16) {
             const sprite = enemy.getSprite();
@@ -315,7 +366,6 @@ function draw() {
         }
     });
     
-    // Player
     if (madmaxLoaded >= 16) {
         const sprite = getPlayerSprite();
         if (sprite) {
@@ -326,13 +376,11 @@ function draw() {
         ctx.fillRect(player.x, player.y, player.width, player.height);
     }
     
-    // UI
     ctx.fillStyle = '#fff';
     ctx.font = '14px Arial';
-    ctx.fillText('Setas: mover | ESPAÇO: dash | K: morrer | E: add inimigo', 10, 25);
-    ctx.fillText(`Mortes: ${gameState.deaths}/5 | Inimigos vivos: ${enemies.filter(e => !e.isDead).length}`, 10, 45);
+    ctx.fillText('Setas: mover | ESPAÇO: dash | M: trocar música | Clique para ativar som', 10, 25);
+    ctx.fillText(`Mortes: ${gameState.deaths}/5 | Inimigos: ${enemies.filter(e => !e.isDead).length} | Música: ${gameState.musicPhase}`, 10, 45);
     
-    // Barra de pedal
     ctx.fillText('Força de Pedal: ', 10, 65);
     for (let i = 0; i < gameState.maxPedalPower; i++) {
         ctx.fillStyle = i < gameState.pedalPower ? '#0f0' : '#333';
@@ -349,21 +397,25 @@ function draw() {
     }
 }
 
-// Game loop
 function gameLoop() {
     update();
     draw();
     requestAnimationFrame(gameLoop);
 }
 
-// Iniciar com 2 inimigos
+// Inicializar
+loadAudio();
+
 setTimeout(() => {
     for (let i = 0; i < 2; i++) {
         const enemy = new Enemy(400 + i*100, 300);
         enemy.sprites = faquinhaSprites;
         enemies.push(enemy);
     }
+    
+    // Iniciar música
+    playMusic('inicio');
 }, 1000);
 
 gameLoop();
-console.log('Dash ajustado: 60px em 150ms!');
+console.log('M: trocar música | Clique na tela se o som não tocar!');
