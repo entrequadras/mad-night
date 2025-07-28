@@ -26,8 +26,8 @@ const player = {
     deathFrame: 12,
     isDashing: false,
     dashStart: 0,
-    dashDuration: 200, // Dash mais curto
-    dashDistance: 80,  // Distância fixa do dash
+    dashDuration: 150, // Dash mais curto ainda
+    dashDistance: 60,  // Distância menor
     dashStartX: 0,
     dashStartY: 0,
     lastMove: Date.now()
@@ -71,7 +71,7 @@ class Enemy {
                 this.direction = dy > 0 ? 'down' : 'up';
             }
             
-            // Mata mesmo durante dash (sem invencibilidade)
+            // Mata mesmo durante dash
             if (dist < 30) {
                 killPlayer();
             }
@@ -182,10 +182,10 @@ function update() {
     // Atualizar inimigos
     enemies.forEach(enemy => enemy.update());
     
-    // Remover inimigos mortos após 2 segundos
+    // Remover inimigos mortos após 3 segundos
     enemies.forEach((enemy, index) => {
         if (enemy.isDead && !enemy.removeTime) {
-            enemy.removeTime = Date.now() + 2000;
+            enemy.removeTime = Date.now() + 3000; // 3 segundos
         }
         if (enemy.removeTime && Date.now() > enemy.removeTime) {
             enemies.splice(index, 1);
@@ -366,4 +366,4 @@ setTimeout(() => {
 }, 1000);
 
 gameLoop();
-console.log('ESPAÇO para dash curto!');
+console.log('Dash ajustado: 60px em 150ms!');
