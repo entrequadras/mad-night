@@ -19,7 +19,6 @@ const player = {
     width: 56,
     height: 56,
     speed: 3,
-    dashSpeed: 8,
     direction: 'right',
     frame: 0,
     sprites: [],
@@ -27,7 +26,10 @@ const player = {
     deathFrame: 12,
     isDashing: false,
     dashStart: 0,
-    dashDuration: 300,
+    dashDuration: 200, // Dash mais curto
+    dashDistance: 80,  // Distância fixa do dash
+    dashStartX: 0,
+    dashStartY: 0,
     lastMove: Date.now()
 };
 
@@ -69,8 +71,8 @@ class Enemy {
                 this.direction = dy > 0 ? 'down' : 'up';
             }
             
-            // Só mata se não estiver dando dash
-            if (dist < 30 && !player.isDashing) {
+            // Mata mesmo durante dash (sem invencibilidade)
+            if (dist < 30) {
                 killPlayer();
             }
         } else {
@@ -93,7 +95,7 @@ class Enemy {
         if (this.isDead) return;
         this.isDead = true;
         this.deathFrame = Math.floor(Math.random() * 4) + 12;
-        console.log('Inimigo morto!');
+        console.log('Inimigo morto! Frame:', this.deathFrame);
     }
     
     getSprite() {
@@ -151,6 +153,7 @@ function killPlayer() {
     if (player.isDead) return;
     
     player.isDead = true;
+    player.isDashing = false;
     player.deathFrame = Math.floor(Math.random() * 4) + 12;
     gameState.deaths++;
     
@@ -176,49 +179,80 @@ function resetPlayer() {
 // Atualizar
 let lastFrameTime = 0;
 function update() {
+    // Atualizar inimigos
     enemies.forEach(enemy => enemy.update());
+    
+    // Remover inimigos mortos após 2 segundos
+    enemies.forEach((enemy, index) => {
+        if (enemy.isDead && !enemy.removeTime) {
+            enemy.removeTime = Date.now() + 2000;
+        }
+        if (enemy.removeTime && Date.now() > enemy.removeTime) {
+            enemies.splice(index, 1);
+        }
+    });
     
     if (player.isDead) return;
     
     let moving = false;
+    let dx = 0;
+    let dy = 0;
     
-    // Movimento normal
-    if (keys['ArrowUp']) {
-        player.y -= player.isDashing ? player.dashSpeed : player.speed;
-        player.direction = 'up';
-        moving = true;
-    }
-    if (keys['ArrowDown']) {
-        player.y += player.isDashing ? player.dashSpeed : player.speed;
-        player.direction = 'down';
-        moving = true;
-    }
-    if (keys['ArrowLeft']) {
-        player.x -= player.isDashing ? player.dashSpeed : player.speed;
-        player.direction = 'left';
-        moving = true;
-    }
-    if (keys['ArrowRight']) {
-        player.x += player.isDashing ? player.dashSpeed : player.speed;
-        player.direction = 'right';
-        moving = true;
+    // Durante o dash, movimento automático
+    if (player.isDashing) {
+        const progress = (Date.now() - player.dashStart) / player.dashDuration;
+        
+        if (progress >= 1) {
+            player.isDashing = false;
+        } else {
+            // Movimento do dash baseado na direção
+            const dashSpeed = player.dashDistance / player.dashDuration * 16;
+            switch(player.direction) {
+                case 'up': player.y -= dashSpeed; break;
+                case 'down': player.y += dashSpeed; break;
+                case 'left': player.x -= dashSpeed; break;
+                case 'right': player.x += dashSpeed; break;
+            }
+        }
+    } else {
+        // Movimento normal
+        if (keys['ArrowUp']) {
+            dy = -1;
+            player.direction = 'up';
+            moving = true;
+        }
+        if (keys['ArrowDown']) {
+            dy = 1;
+            player.direction = 'down';
+            moving = true;
+        }
+        if (keys['ArrowLeft']) {
+            dx = -1;
+            player.direction = 'left';
+            moving = true;
+        }
+        if (keys['ArrowRight']) {
+            dx = 1;
+            player.direction = 'right';
+            moving = true;
+        }
+        
+        player.x += dx * player.speed;
+        player.y += dy * player.speed;
+        
+        // Dash com espaço
+        if (keys[' '] && gameState.pedalPower > 0 && !player.isDashing) {
+            player.isDashing = true;
+            player.dashStart = Date.now();
+            player.dashStartX = player.x;
+            player.dashStartY = player.y;
+            gameState.pedalPower--;
+            console.log('Dash! Pedal:', gameState.pedalPower);
+        }
     }
     
-    // Dash com espaço
-    if (keys[' '] && gameState.pedalPower > 0 && !player.isDashing) {
-        player.isDashing = true;
-        player.dashStart = Date.now();
-        gameState.pedalPower--;
-        console.log('Dash! Pedal:', gameState.pedalPower);
-    }
-    
-    // Terminar dash
-    if (player.isDashing && Date.now() - player.dashStart > player.dashDuration) {
-        player.isDashing = false;
-    }
-    
-    // Recarregar pedal (6 segundos parado)
-    if (moving) {
+    // Recarregar pedal
+    if (moving || player.isDashing) {
         player.lastMove = Date.now();
     } else if (Date.now() - player.lastMove > 1000) {
         if (Date.now() - gameState.lastRecharge > 6000 && gameState.pedalPower < gameState.maxPedalPower) {
@@ -244,7 +278,6 @@ function getPlayerSprite() {
     const dirMap = {'right': 0, 'down': 1, 'left': 2, 'up': 3};
     const base = dirMap[player.direction];
     
-    // Se está dando dash, usa sprites 8-11
     if (player.isDashing) {
         return player.sprites[8 + base];
     }
@@ -263,14 +296,16 @@ function draw() {
     
     // Inimigos
     enemies.forEach(enemy => {
-        if (faquinhaLoaded >= 16 && !enemy.isDead) {
+        if (faquinhaLoaded >= 16) {
             const sprite = enemy.getSprite();
             if (sprite) {
                 ctx.drawImage(sprite, enemy.x, enemy.y, enemy.width, enemy.height);
             }
-        } else if (!enemy.isDead) {
-            ctx.fillStyle = enemy.state === 'chase' ? '#f0f' : '#808';
-            ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+        } else {
+            if (!enemy.isDead) {
+                ctx.fillStyle = enemy.state === 'chase' ? '#f0f' : '#808';
+                ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+            }
         }
         
         if (!enemy.isDead) {
@@ -295,7 +330,7 @@ function draw() {
     ctx.fillStyle = '#fff';
     ctx.font = '14px Arial';
     ctx.fillText('Setas: mover | ESPAÇO: dash | K: morrer | E: add inimigo', 10, 25);
-    ctx.fillText(`Mortes: ${gameState.deaths}/5 | Inimigos: ${enemies.filter(e => !e.isDead).length}`, 10, 45);
+    ctx.fillText(`Mortes: ${gameState.deaths}/5 | Inimigos vivos: ${enemies.filter(e => !e.isDead).length}`, 10, 45);
     
     // Barra de pedal
     ctx.fillText('Força de Pedal: ', 10, 65);
@@ -331,4 +366,4 @@ setTimeout(() => {
 }, 1000);
 
 gameLoop();
-console.log('ESPAÇO para dash! Mate inimigos com o dash!');
+console.log('ESPAÇO para dash curto!');
