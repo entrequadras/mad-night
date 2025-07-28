@@ -2,41 +2,55 @@
 const visualConsole = {
     messages: [],
     maxMessages: 20,
+    enabled: false,
     
     log: function(message, color = '#0f0') {
-        console.log(message); // Mantém o console normal também
-        this.messages.push({ text: message, color: color, time: new Date().toLocaleTimeString() });
+        const originalLog = window.console.log;
+        originalLog(message); // Mantém o console normal também
+        
+        this.messages.push({ 
+            text: String(message), 
+            color: color, 
+            time: new Date().toLocaleTimeString() 
+        });
+        
         if (this.messages.length > this.maxMessages) {
             this.messages.shift();
         }
-        this.updateDisplay();
+        
+        if (this.enabled) {
+            this.updateDisplay();
+        }
     },
     
     error: function(message) {
-        console.error(message);
-        this.log(message, '#f00');
+        const originalError = window.console.error;
+        originalError(message);
+        this.log(String(message), '#f00');
     },
     
     updateDisplay: function() {
         const content = document.getElementById('consoleContent');
         if (content) {
             content.innerHTML = this.messages.map(msg => 
-                `<div style="color: ${msg.color}">[${msg.time}] ${msg.text}</div>`
+                `<div style="color: ${msg.color}; margin: 2px 0;">[${msg.time}] ${msg.text}</div>`
             ).join('');
             content.scrollTop = content.scrollHeight;
         }
+    },
+    
+    show: function() {
+        this.enabled = true;
+        this.updateDisplay();
     }
 };
 
-// Substituir console.log e console.error globalmente
-const originalLog = console.log;
-const originalError = console.error;
-console.log = (...args) => {
-    originalLog(...args);
+// Redirecionar console.log e console.error
+console.log = function(...args) {
     visualConsole.log(args.join(' '));
 };
-console.error = (...args) => {
-    originalError(...args);
+
+console.error = function(...args) {
     visualConsole.error(args.join(' '));
 };
 
@@ -362,8 +376,19 @@ window.addEventListener('keydown', (e) => {
     // Comandos especiais (não usar e.code aqui)
     if (e.key === 'c' || e.key === 'C') {
         const consoleDiv = document.getElementById('console');
-        consoleDiv.style.display = consoleDiv.style.display === 'none' ? 'block' : 'none';
-        console.log('Console:', consoleDiv.style.display);
+        const isVisible = consoleDiv.style.display !== 'none';
+        consoleDiv.style.display = isVisible ? 'none' : 'block';
+        
+        if (!isVisible) {
+            visualConsole.show();
+            console.log('=== CONSOLE ATIVADO ===');
+            console.log('MadMax carregado:', assets.sprites.madmax.length > 0 ? 'SIM' : 'NÃO');
+            console.log('Faquinha carregado:', assets.sprites.faquinha.length > 0 ? 'SIM' : 'NÃO');
+            console.log('Inimigos na tela:', enemies.length);
+            console.log('Música tocando:', gameState.currentMusic && !gameState.currentMusic.paused ? 'SIM' : 'NÃO');
+            console.log('Dash ativado:', gameState.dashUnlocked ? 'SIM' : 'NÃO');
+            console.log('Mortes:', gameState.deaths + '/5');
+        }
     }
     
     if (e.key === 'k' || e.key === 'K') {
