@@ -24,7 +24,7 @@ const player = {
     y: 300,
     width: 56,
     height: 56,
-    speed: 3,
+    speed: 4, // Aumentado de 3 para 4
     direction: 'right',
     frame: 0,
     sprites: [],
@@ -40,9 +40,9 @@ const player = {
     inShadow: false
 };
 
-// Sistema de Mapas Completo
+// Sistema de Mapas (preparado para dimensões futuras)
 const maps = [
-    // FASE 1: INFILTRAÇÃO
+    // FASE 1: INFILTRAÇÃO (futuramente 3440x1080)
     {
         name: "Maconhão",
         subtitle: "Tutorial de movimento",
@@ -94,7 +94,7 @@ const maps = [
             {x: 530, y: 300, radius: 80},
             {x: 730, y: 300, radius: 80}
         ],
-        shadows: [], // Túnel já é escuro
+        shadows: [],
         playerStart: {x: 80, y: 300},
         exit: {x: 700, y: 250, w: 50, h: 100},
         direction: 'right'
@@ -134,7 +134,7 @@ const maps = [
         direction: 'right'
     },
     
-    // FASE 2: INFILTRAÇÃO AVANÇADA
+    // FASE 2: INFILTRAÇÃO AVANÇADA (futuramente 1080x5000)
     {
         name: "Na área da KS",
         subtitle: "Estacionamento estreito",
@@ -172,7 +172,7 @@ const maps = [
             {x: 475, y: 590, radius: 60}
         ],
         playerStart: {x: 300, y: 700},
-        exit: {x: 250, y: 50, w: 100, h: 50},
+        exit: {x: 250, y: 0, w: 100, h: 50}, // Saída no topo
         direction: 'up'
     },
     {
@@ -208,7 +208,7 @@ const maps = [
             {x: 300, y: 400, radius: 150}
         ],
         playerStart: {x: 300, y: 700},
-        exit: {x: 250, y: 50, w: 100, h: 50},
+        exit: {x: 250, y: 0, w: 100, h: 50},
         direction: 'up'
     },
     {
@@ -360,8 +360,31 @@ class Enemy {
         
         if (dist < effectiveVisionRange && !player.isDead) {
             this.state = 'chase';
-            this.x += (dx/dist) * this.speed;
-            this.y += (dy/dist) * this.speed;
+            
+            // Movimento com verificação de colisão
+            const moveX = (dx/dist) * this.speed;
+            const moveY = (dy/dist) * this.speed;
+            
+            // Testar colisão antes de mover
+            const currentMapData = maps[gameState.currentMap];
+            const testEnemy = {
+                x: this.x + moveX,
+                y: this.y + moveY,
+                width: this.width,
+                height: this.height
+            };
+            
+            let canMove = true;
+            currentMapData.walls.forEach(wall => {
+                if (checkRectCollision(testEnemy, wall)) {
+                    canMove = false;
+                }
+            });
+            
+            if (canMove) {
+                this.x += moveX;
+                this.y += moveY;
+            }
             
             if (Math.abs(dx) > Math.abs(dy)) {
                 this.direction = dx > 0 ? 'right' : 'left';
@@ -606,21 +629,39 @@ function update() {
             moving = true;
         }
         
-        // Aplicar movimento
-        const newX = player.x + dx * player.speed;
-        const newY = player.y + dy * player.speed;
-        const testPlayer = {x: newX, y: newY, width: player.width, height: player.height};
-        
-        let canMove = true;
-        currentMapData.walls.forEach(wall => {
-            if (checkRectCollision(testPlayer, wall)) {
-                canMove = false;
+        // Aplicar movimento COM VERIFICAÇÃO SEPARADA PARA X E Y
+        // Primeiro tenta mover em X
+        if (dx !== 0) {
+            const newX = player.x + dx * player.speed;
+            const testPlayer = {x: newX, y: player.y, width: player.width, height: player.height};
+            
+            let canMoveX = true;
+            currentMapData.walls.forEach(wall => {
+                if (checkRectCollision(testPlayer, wall)) {
+                    canMoveX = false;
+                }
+            });
+            
+            if (canMoveX) {
+                player.x = newX;
             }
-        });
+        }
         
-        if (canMove) {
-            player.x = newX;
-            player.y = newY;
+        // Depois tenta mover em Y
+        if (dy !== 0) {
+            const newY = player.y + dy * player.speed;
+            const testPlayer = {x: player.x, y: newY, width: player.width, height: player.height};
+            
+            let canMoveY = true;
+            currentMapData.walls.forEach(wall => {
+                if (checkRectCollision(testPlayer, wall)) {
+                    canMoveY = false;
+                }
+            });
+            
+            if (canMoveY) {
+                player.y = newY;
+            }
         }
         
         // Dash
@@ -871,7 +912,7 @@ function draw() {
         ctx.fillStyle = '#f00';
         ctx.font = '32px Arial';
         ctx.textAlign = 'center';
-        const msg = gameState.deaths < 5 ? "Ah véi, se liga carái!" : "SIFUDÊU";
+        const msg = gameState.deaths < 5 ? "ah véi, se liga carái" : "sifudêu";
         ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
         ctx.textAlign = 'left';
     }
@@ -892,4 +933,4 @@ setTimeout(() => {
 }, 1000);
 
 gameLoop();
-console.log('6 mapas carregados! Complete a missão!');
+console.log('Velocidade aumentada! Dimensões preparadas para expansão futura.');
