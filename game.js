@@ -53,7 +53,16 @@ console.log = function(...args) {
 console.error = function(...args) {
     visualConsole.error(args.join(' '));
 };
+// Debug de erro global
+window.addEventListener('error', (e) => {
+    console.error('ERRO GLOBAL:', e.message, 'na linha', e.lineno);
+});
 
+// Verificar se o DOM carregou
+console.log('Script carregado!');
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM pronto!');
+});
 // Configurações do jogo
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
