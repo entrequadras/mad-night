@@ -189,7 +189,10 @@ class Enemy {
         
         // Checar se vê o player
         if (this.canSeePlayer()) {
-            this.state = 'alert';
+            if (this.state === 'patrol') {
+                this.state = 'alert';
+                console.log('Inimigo te viu!');
+            }
         }
         
         // Comportamento baseado no estado
@@ -241,8 +244,8 @@ class Enemy {
     canSeePlayer() {
         if (player.isDead) return false;
         
-        const dx = player.x - this.x;
-        const dy = player.y - this.y;
+        const dx = player.x + player.width/2 - (this.x + this.width/2);
+        const dy = player.y + player.height/2 - (this.y + this.height/2);
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         // Fora do alcance de visão
@@ -270,10 +273,39 @@ class Enemy {
     checkCollisionWithPlayer() {
         if (player.isDead || player.isDashing) return false;
         
-        return this.x < player.x + player.width &&
-               this.x + this.width > player.x &&
-               this.y < player.y + player.height &&
-               this.y + this.height > player.y;
+        // Primeiro verifica colisão básica
+        const hasCollision = this.x < player.x + player.width &&
+                           this.x + this.width > player.x &&
+                           this.y < player.y + player.height &&
+                           this.y + this.height > player.y;
+        
+        if (!hasCollision) return false;
+        
+        // Se colidiu, verifica se o player está na frente do inimigo
+        const dx = (player.x + player.width/2) - (this.x + this.width/2);
+        const dy = (player.y + player.height/2) - (this.y + this.height/2);
+        const angleToPlayer = Math.atan2(dy, dx);
+        
+        // Ângulo que o inimigo está olhando
+        const facingAngle = {
+            'right': 0,
+            'down': Math.PI / 2,
+            'left': Math.PI,
+            'up': -Math.PI / 2
+        }[this.direction];
+        
+        // Diferença entre os ângulos
+        let angleDiff = Math.abs(angleToPlayer - facingAngle);
+        if (angleDiff > Math.PI) angleDiff = 2 * Math.PI - angleDiff;
+        
+        // Só mata se o player estiver em um cone de 90 graus na frente (45 graus para cada lado)
+        const killAngle = Math.PI / 4; // 45 graus para cada lado = 90 graus total
+        
+        // E precisa estar bem próximo (metade da distância de colisão)
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const killDistance = 30; // Bem próximo para matar
+        
+        return angleDiff < killAngle && distance < killDistance;
     }
     
     die() {
@@ -325,6 +357,33 @@ window.addEventListener('keydown', (e) => {
     if (keys.hasOwnProperty(e.code)) {
         keys[e.code] = true;
         e.preventDefault();
+    }
+    
+    // Comandos especiais (não usar e.code aqui)
+    if (e.key === 'c' || e.key === 'C') {
+        const consoleDiv = document.getElementById('console');
+        consoleDiv.style.display = consoleDiv.style.display === 'none' ? 'block' : 'none';
+        console.log('Console:', consoleDiv.style.display);
+    }
+    
+    if (e.key === 'k' || e.key === 'K') {
+        killPlayer();
+    }
+    
+    if (e.key === 'e' || e.key === 'E') {
+        enemies.push(new Enemy(player.x + 100, player.y));
+        console.log('Inimigo adicionado! Total:', enemies.length);
+    }
+    
+    if (e.key === 'd' || e.key === 'D') {
+        gameState.dashUnlocked = !gameState.dashUnlocked;
+        console.log('Dash:', gameState.dashUnlocked ? 'ATIVADO' : 'DESATIVADO');
+    }
+    
+    if (e.key === 'm' || e.key === 'M') {
+        playMusic(gameState.phase === 'infiltration' ? 'fuga' : 'inicio');
+        gameState.phase = gameState.phase === 'infiltration' ? 'escape' : 'infiltration';
+        console.log('Música trocada para:', gameState.phase === 'infiltration' ? 'início' : 'fuga');
     }
 });
 
@@ -432,6 +491,7 @@ function updatePlayer(deltaTime) {
                 gameState.pedalPower++;
                 gameState.lastRechargeTime = Date.now();
                 updateUI();
+                console.log('Pedal recarregado! Power:', gameState.pedalPower);
             }
         }
     }
@@ -458,6 +518,8 @@ function killPlayer() {
     player.isDead = true;
     player.deathFrame = Math.floor(Math.random() * 4) + 12; // Frames 12-15
     gameState.deaths++;
+    
+    console.log(`MORTE ${gameState.deaths}/5`);
     
     const deathMsg = document.getElementById('deathMessage');
     if (gameState.deaths < 5) {
@@ -490,10 +552,12 @@ function resetMap() {
     player.frame = 0;
     gameState.pedalPower = gameState.maxPedalPower;
     
-    // Resetar inimigos
+    // Resetar inimigos (volta ao estado original)
     enemies.forEach(enemy => {
         enemy.isDead = false;
         enemy.state = 'patrol';
+        enemy.x = enemy.patrolTarget.x;
+        enemy.y = enemy.patrolTarget.y;
     });
     
     updateUI();
@@ -508,6 +572,12 @@ function resetGame() {
     
     // Limpar inimigos
     enemies.length = 0;
+    
+    // Recriar inimigos iniciais
+    enemies.push(new Enemy(400, 200));
+    enemies.push(new Enemy(500, 400));
+    
+    console.log('JOGO REINICIADO COMPLETAMENTE!');
     
     resetMap();
     playMusic('inicio');
@@ -586,13 +656,37 @@ function draw() {
             ctx.fillText('F' + index, enemy.x + 20, enemy.y + 30);
         }
         
-        // Debug: mostrar cone de visão
-        if (!enemy.isDead && enemy.state === 'alert') {
-            ctx.strokeStyle = '#ff0';
+        // Debug: mostrar área de ataque como meia-lua
+        if (!enemy.isDead && (enemy.state === 'alert' || enemy.state === 'chase')) {
+            ctx.save();
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = '#ff0000';
+            ctx.translate(enemy.x + enemy.width/2, enemy.y + enemy.height/2);
+            
+            // Rotacionar baseado na direção
+            const rotation = {
+                'right': 0,
+                'down': Math.PI / 2,
+                'left': Math.PI,
+                'up': -Math.PI / 2
+            }[enemy.direction];
+            ctx.rotate(rotation);
+            
+            // Desenhar meia-lua (setor circular)
             ctx.beginPath();
-            ctx.moveTo(enemy.x + enemy.width/2, enemy.y + enemy.height/2);
-            ctx.arc(enemy.x + enemy.width/2, enemy.y + enemy.height/2, 50, 0, Math.PI * 2);
-            ctx.stroke();
+            ctx.moveTo(0, 0);
+            ctx.arc(0, 0, 30, -Math.PI/4, Math.PI/4); // 90 graus de abertura
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.restore();
+        }
+        
+        // Debug: mostrar estado
+        if (!enemy.isDead) {
+            ctx.fillStyle = enemy.state === 'alert' ? '#ff0' : '#0f0';
+            ctx.font = '10px Arial';
+            ctx.fillText(enemy.state, enemy.x, enemy.y - 5);
         }
     });
     
@@ -644,38 +738,6 @@ function gameLoop(timestamp) {
     requestAnimationFrame(gameLoop);
 }
 
-// Comandos de teste
-window.addEventListener('keydown', (e) => {
-    // C - Mostrar/ocultar console
-    if (e.key === 'c' || e.key === 'C') {
-        const consoleDiv = document.getElementById('console');
-        consoleDiv.style.display = consoleDiv.style.display === 'none' ? 'block' : 'none';
-    }
-    
-    // K - Mata o player
-    if (e.key === 'k' || e.key === 'K') {
-        killPlayer();
-    }
-    
-    // E - Adiciona um inimigo onde o player está
-    if (e.key === 'e' || e.key === 'E') {
-        enemies.push(new Enemy(player.x + 100, player.y));
-        console.log('Inimigo adicionado! Total:', enemies.length);
-    }
-    
-    // D - Ativa/desativa dash
-    if (e.key === 'd' || e.key === 'D') {
-        gameState.dashUnlocked = !gameState.dashUnlocked;
-        console.log('Dash:', gameState.dashUnlocked ? 'ATIVADO' : 'DESATIVADO');
-    }
-    
-    // M - Muda música
-    if (e.key === 'm' || e.key === 'M') {
-        playMusic(gameState.phase === 'infiltration' ? 'fuga' : 'inicio');
-        gameState.phase = gameState.phase === 'infiltration' ? 'escape' : 'infiltration';
-    }
-});
-
 // Iniciar jogo
 async function init() {
     console.log('Mad Night - Iniciando...');
@@ -715,3 +777,11 @@ async function init() {
 
 // Iniciar quando a página carregar
 window.addEventListener('load', init);
+
+// Clique para ativar áudio se necessário
+canvas.addEventListener('click', () => {
+    if (gameState.currentMusic && gameState.currentMusic.paused) {
+        gameState.currentMusic.play();
+        console.log('Áudio ativado!');
+    }
+});
