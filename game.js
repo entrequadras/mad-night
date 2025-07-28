@@ -415,6 +415,11 @@ class Enemy {
         this.patrolDirection = this.getRandomDirection();
         this.lastDirectionChange = Date.now();
         this.directionChangeInterval = 2000 + Math.random() * 2000; // 2-4 segundos
+        
+        // Ponto de origem para limitar patrulha
+        this.originX = x;
+        this.originY = y;
+        this.patrolRadius = 150; // Raio máximo de patrulha
     }
     
     getRandomDirection() {
@@ -498,6 +503,27 @@ class Enemy {
                 this.lastDirectionChange = Date.now();
                 this.directionChangeInterval = 2000 + Math.random() * 2000;
                 this.direction = this.patrolDirection;
+            }
+            
+            // Checar distância do ponto de origem
+            const distFromOrigin = Math.sqrt(
+                Math.pow(this.x - this.originX, 2) + 
+                Math.pow(this.y - this.originY, 2)
+            );
+            
+            // Se estiver muito longe, voltar para origem
+            if (distFromOrigin > this.patrolRadius) {
+                // Calcular direção de volta
+                const backDx = this.originX - this.x;
+                const backDy = this.originY - this.y;
+                
+                if (Math.abs(backDx) > Math.abs(backDy)) {
+                    this.patrolDirection = backDx > 0 ? 'right' : 'left';
+                } else {
+                    this.patrolDirection = backDy > 0 ? 'down' : 'up';
+                }
+                this.direction = this.patrolDirection;
+                this.lastDirectionChange = Date.now();
             }
             
             // Movimento de patrulha
@@ -1024,7 +1050,7 @@ function draw() {
     // Indicador de versão
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.3.5 - Patrulha Hotline Miami', canvas.width - 150, canvas.height - 5);
+    ctx.fillText('v1.3.6 - Patrulha com Raio Limitado', canvas.width - 170, canvas.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
