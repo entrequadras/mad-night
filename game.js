@@ -7,8 +7,7 @@ ctx.imageSmoothingEnabled = false; // Mantém pixels nítidos
 const assets = {
     sprites: {
         madmax: [],
-        faquinha: [],
-        faquinhaAlerta: []
+        faquinha: []
     },
     audio: {
         inicio: null,
@@ -32,8 +31,8 @@ async function loadAssets() {
             assets.sprites.madmax[i] = img;
         }
         
-        // Carregar sprites do Faquinha
-        for (let i = 0; i <= 7; i++) {
+        // Carregar TODOS os sprites do Faquinha (0-15)
+        for (let i = 0; i <= 15; i++) {
             const img = new Image();
             img.src = `assets/sprites/faquinha${String(i).padStart(3, '0')}.png`;
             await new Promise((resolve, reject) => {
@@ -41,17 +40,6 @@ async function loadAssets() {
                 img.onerror = reject;
             });
             assets.sprites.faquinha[i] = img;
-        }
-        
-        // Sprites de alerta do Faquinha (008-011)
-        for (let i = 8; i <= 11; i++) {
-            const img = new Image();
-            img.src = `assets/sprites/faquinha${String(i).padStart(3, '0')}.png`;
-            await new Promise((resolve, reject) => {
-                img.onload = resolve;
-                img.onerror = reject;
-            });
-            assets.sprites.faquinhaAlerta[i-8] = img;
         }
         
         // Carregar áudios
@@ -104,6 +92,153 @@ const player = {
     deathFrame: 0
 };
 
+// Sistema de inimigos
+const enemies = [];
+
+// Classe base para inimigos
+class Enemy {
+    constructor(x, y, type = 'faquinha') {
+        this.x = x;
+        this.y = y;
+        this.width = 56;
+        this.height = 56;
+        this.type = type;
+        this.speed = 2;
+        this.direction = 'down';
+        this.frame = 0;
+        this.animationSpeed = 200;
+        this.lastFrameTime = 0;
+        this.state = 'patrol'; // 'patrol', 'alert', 'chase'
+        this.isDead = false;
+        this.deathFrame = 0;
+        this.visionRange = 150;
+        this.visionAngle = Math.PI / 3; // 60 graus
+        this.patrolTarget = { x: x, y: y };
+        this.patrolRange = 100;
+    }
+    
+    update(deltaTime) {
+        if (this.isDead) return;
+        
+        // Checar se vê o player
+        if (this.canSeePlayer()) {
+            this.state = 'alert';
+        }
+        
+        // Comportamento baseado no estado
+        switch (this.state) {
+            case 'patrol':
+                this.patrol();
+                break;
+            case 'alert':
+            case 'chase':
+                this.chasePlayer();
+                break;
+        }
+        
+        // Animação
+        if (Date.now() - this.lastFrameTime > this.animationSpeed) {
+            this.frame = (this.frame + 1) % 2;
+            this.lastFrameTime = Date.now();
+        }
+        
+        // Checar colisão com player
+        if (this.checkCollisionWithPlayer()) {
+            killPlayer();
+        }
+    }
+    
+    patrol() {
+        // Movimento simples de patrulha (por enquanto, só fica parado)
+        // Implementaremos movimento de patrulha depois
+    }
+    
+    chasePlayer() {
+        const dx = player.x - this.x;
+        const dy = player.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance > 0) {
+            this.x += (dx / distance) * this.speed;
+            this.y += (dy / distance) * this.speed;
+            
+            // Atualizar direção baseado no movimento
+            if (Math.abs(dx) > Math.abs(dy)) {
+                this.direction = dx > 0 ? 'right' : 'left';
+            } else {
+                this.direction = dy > 0 ? 'down' : 'up';
+            }
+        }
+    }
+    
+    canSeePlayer() {
+        if (player.isDead) return false;
+        
+        const dx = player.x - this.x;
+        const dy = player.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        // Fora do alcance de visão
+        if (distance > this.visionRange) return false;
+        
+        // Calcular ângulo para o player
+        const angleToPlayer = Math.atan2(dy, dx);
+        
+        // Ângulo que o inimigo está olhando
+        const facingAngle = {
+            'right': 0,
+            'down': Math.PI / 2,
+            'left': Math.PI,
+            'up': -Math.PI / 2
+        }[this.direction];
+        
+        // Diferença entre os ângulos
+        let angleDiff = Math.abs(angleToPlayer - facingAngle);
+        if (angleDiff > Math.PI) angleDiff = 2 * Math.PI - angleDiff;
+        
+        // Está dentro do cone de visão?
+        return angleDiff < this.visionAngle / 2;
+    }
+    
+    checkCollisionWithPlayer() {
+        if (player.isDead || player.isDashing) return false;
+        
+        return this.x < player.x + player.width &&
+               this.x + this.width > player.x &&
+               this.y < player.y + player.height &&
+               this.y + this.height > player.y;
+    }
+    
+    die() {
+        this.isDead = true;
+        this.deathFrame = Math.floor(Math.random() * 4) + 12; // Frames 12-15
+    }
+    
+    getSprite() {
+        if (this.isDead) {
+            return assets.sprites.faquinha[this.deathFrame];
+        }
+        
+        const directionMap = {
+            'right': 0,
+            'down': 1,
+            'left': 2,
+            'up': 3
+        };
+        
+        const baseIndex = directionMap[this.direction];
+        
+        if (this.state === 'alert' || this.state === 'chase') {
+            // Sprites de alerta (8-11)
+            return assets.sprites.faquinha[8 + baseIndex];
+        } else {
+            // Sprites normais (0-7)
+            const offset = this.frame * 4;
+            return assets.sprites.faquinha[baseIndex + offset];
+        }
+    }
+}
+
 // Sistema de input
 const keys = {
     ArrowUp: false,
@@ -138,7 +273,9 @@ function playMusic(musicName) {
     
     // Tocar nova música
     if (assets.audio[musicName]) {
-        assets.audio[musicName].play();
+        assets.audio[musicName].play().catch(e => {
+            console.log('Erro ao tocar música:', e);
+        });
         gameState.currentMusic = assets.audio[musicName];
     }
 }
@@ -201,6 +338,15 @@ function updatePlayer(deltaTime) {
         player.isDashing = false;
     }
     
+    // Checar colisão com inimigos durante dash
+    if (player.isDashing) {
+        enemies.forEach(enemy => {
+            if (!enemy.isDead && checkCollision(player, enemy)) {
+                enemy.die();
+            }
+        });
+    }
+    
     // Recarregar pedal power quando parado
     if (moving) {
         gameState.lastMoveTime = Date.now();
@@ -222,6 +368,14 @@ function updatePlayer(deltaTime) {
         player.frame = (player.frame + 1) % 2;
         player.lastFrameTime = Date.now();
     }
+}
+
+// Função auxiliar de colisão
+function checkCollision(a, b) {
+    return a.x < b.x + b.width &&
+           a.x + a.width > b.x &&
+           a.y < b.y + b.height &&
+           a.y + a.height > b.y;
 }
 
 // Função de morte
@@ -262,6 +416,13 @@ function resetMap() {
     player.isDashing = false;
     player.frame = 0;
     gameState.pedalPower = gameState.maxPedalPower;
+    
+    // Resetar inimigos
+    enemies.forEach(enemy => {
+        enemy.isDead = false;
+        enemy.state = 'patrol';
+    });
+    
     updateUI();
 }
 
@@ -271,6 +432,10 @@ function resetGame() {
     gameState.deaths = 0;
     gameState.dashUnlocked = false;
     gameState.phase = 'infiltration';
+    
+    // Limpar inimigos
+    enemies.length = 0;
+    
     resetMap();
     playMusic('inicio');
 }
@@ -325,6 +490,29 @@ function draw() {
     ctx.fillStyle = '#1a1a1a';
     ctx.fillRect(50, 50, 700, 500);
     
+    // Desenhar inimigos
+    enemies.forEach(enemy => {
+        if (assets.loaded) {
+            const sprite = enemy.getSprite();
+            if (sprite) {
+                ctx.drawImage(sprite, enemy.x, enemy.y, enemy.width, enemy.height);
+            }
+        } else {
+            // Placeholder
+            ctx.fillStyle = enemy.isDead ? '#444' : '#f0f';
+            ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+        }
+        
+        // Debug: mostrar cone de visão
+        if (!enemy.isDead && enemy.state === 'alert') {
+            ctx.strokeStyle = '#ff0';
+            ctx.beginPath();
+            ctx.moveTo(enemy.x + enemy.width/2, enemy.y + enemy.height/2);
+            ctx.arc(enemy.x + enemy.width/2, enemy.y + enemy.height/2, 50, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+    });
+    
     // Desenhar player
     if (assets.loaded) {
         const sprite = getPlayerSprite();
@@ -350,6 +538,11 @@ function draw() {
     }
 }
 
+// Atualizar todos os inimigos
+function updateEnemies(deltaTime) {
+    enemies.forEach(enemy => enemy.update(deltaTime));
+}
+
 // Game loop
 let lastTime = 0;
 function gameLoop(timestamp) {
@@ -357,15 +550,35 @@ function gameLoop(timestamp) {
     lastTime = timestamp;
     
     updatePlayer(deltaTime);
+    updateEnemies(deltaTime);
     draw();
     
     requestAnimationFrame(gameLoop);
 }
 
-// Teste de morte (pressione K para testar)
+// Comandos de teste
 window.addEventListener('keydown', (e) => {
+    // K - Mata o player
     if (e.key === 'k' || e.key === 'K') {
         killPlayer();
+    }
+    
+    // E - Adiciona um inimigo onde o player está
+    if (e.key === 'e' || e.key === 'E') {
+        enemies.push(new Enemy(player.x + 100, player.y));
+        console.log('Inimigo adicionado! Total:', enemies.length);
+    }
+    
+    // D - Ativa/desativa dash
+    if (e.key === 'd' || e.key === 'D') {
+        gameState.dashUnlocked = !gameState.dashUnlocked;
+        console.log('Dash:', gameState.dashUnlocked ? 'ATIVADO' : 'DESATIVADO');
+    }
+    
+    // M - Muda música
+    if (e.key === 'm' || e.key === 'M') {
+        playMusic(gameState.phase === 'infiltration' ? 'fuga' : 'inicio');
+        gameState.phase = gameState.phase === 'infiltration' ? 'escape' : 'infiltration';
     }
 });
 
@@ -381,12 +594,21 @@ async function init() {
     // Carregar assets em paralelo
     await loadAssets();
     
+    // Adicionar alguns inimigos de teste
+    enemies.push(new Enemy(400, 200));
+    enemies.push(new Enemy(500, 400));
+    
     // Tocar música inicial
     playMusic('inicio');
     
     console.log('Mad Night - Pronto!');
-    console.log('Use as setas para mover');
-    console.log('Pressione K para testar morte');
+    console.log('Controles:');
+    console.log('- Setas: mover');
+    console.log('- K: testar morte');
+    console.log('- E: adicionar inimigo');
+    console.log('- D: ativar/desativar dash');
+    console.log('- M: mudar música');
+    console.log('- Espaço: dash (quando ativado)');
 }
 
 // Iniciar quando a página carregar
