@@ -62,23 +62,13 @@ const assets = {
 // Carregar assets
 async function loadAssets() {
     try {
-        console.log('=== INICIANDO CARREGAMENTO DE ASSETS ===');
-        
         // Carregar sprites do MadMax
-        console.log('Carregando sprites do MadMax...');
         for (let i = 0; i <= 15; i++) {
             const img = new Image();
-            const filename = `assets/sprites/madmax${String(i).padStart(3, '0')}.png`;
-            img.src = filename;
+            img.src = `assets/sprites/madmax${String(i).padStart(3, '0')}.png`;
             await new Promise((resolve, reject) => {
-                img.onload = () => {
-                    console.log(`✓ MadMax ${i}`);
-                    resolve();
-                };
-                img.onerror = () => {
-                    console.error(`✗ Erro: ${filename}`);
-                    reject();
-                };
+                img.onload = resolve;
+                img.onerror = reject;
             });
             assets.sprites.madmax[i] = img;
         }
@@ -92,11 +82,11 @@ async function loadAssets() {
             try {
                 await new Promise((resolve, reject) => {
                     img.onload = () => {
-                        console.log(`✓ Faquinha ${i}`);
+                        console.log(`✓ Carregado: ${filename}`);
                         resolve();
                     };
                     img.onerror = () => {
-                        console.error(`✗ Erro: ${filename}`);
+                        console.error(`✗ Erro ao carregar: ${filename}`);
                         reject();
                     };
                 });
@@ -109,7 +99,6 @@ async function loadAssets() {
         }
         
         // Carregar áudios
-        console.log('Carregando músicas...');
         assets.audio.inicio = new Audio('assets/audio/musica_etqgame_tema_inicio.mp3');
         assets.audio.fuga = new Audio('assets/audio/musica_etqgame_fuga.mp3');
         assets.audio.creditos = new Audio('assets/audio/musica_etqgame_end_credits.mp3');
@@ -119,10 +108,10 @@ async function loadAssets() {
         assets.audio.fuga.loop = true;
         
         assets.loaded = true;
-        console.log('=== ASSETS CARREGADOS COM SUCESSO! ===');
+        console.log('Assets carregados com sucesso!');
         
     } catch (error) {
-        console.error('ERRO CRÍTICO ao carregar assets:', error);
+        console.error('Erro ao carregar assets:', error);
     }
 }
 
@@ -279,14 +268,9 @@ class Enemy {
     die() {
         this.isDead = true;
         this.deathFrame = Math.floor(Math.random() * 4) + 12; // Frames 12-15
-        console.log(`Inimigo morreu! Frame de morte: ${this.deathFrame}`);
     }
     
     getSprite() {
-        if (!assets.sprites.faquinha || assets.sprites.faquinha.length === 0) {
-            return null;
-        }
-        
         if (this.isDead) {
             return assets.sprites.faquinha[this.deathFrame];
         }
@@ -347,7 +331,6 @@ function playMusic(musicName) {
     if (assets.audio[musicName]) {
         assets.audio[musicName].play().catch(e => {
             console.log('Erro ao tocar música:', e);
-            console.log('Clique na tela para ativar o áudio');
         });
         gameState.currentMusic = assets.audio[musicName];
     }
@@ -564,7 +547,7 @@ function draw() {
     ctx.fillRect(50, 50, 700, 500);
     
     // Desenhar inimigos
-    enemies.forEach((enemy, index) => {
+    enemies.forEach(enemy => {
         if (assets.loaded && assets.sprites.faquinha.length > 0) {
             const sprite = enemy.getSprite();
             if (sprite) {
@@ -573,17 +556,11 @@ function draw() {
                 // Fallback se sprite não existir
                 ctx.fillStyle = enemy.isDead ? '#444' : '#a0a';
                 ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-                ctx.fillStyle = '#fff';
-                ctx.font = '10px Arial';
-                ctx.fillText('F' + index, enemy.x + 20, enemy.y + 30);
             }
         } else {
             // Placeholder
             ctx.fillStyle = enemy.isDead ? '#444' : '#f0f';
             ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-            ctx.fillStyle = '#fff';
-            ctx.font = '10px Arial';
-            ctx.fillText('F' + index, enemy.x + 20, enemy.y + 30);
         }
         
         // Debug: mostrar cone de visão
@@ -619,11 +596,6 @@ function draw() {
         ctx.font = '16px Arial';
         ctx.fillText('Carregando sprites...', 320, 300);
     }
-    
-    // Debug: quantidade de inimigos
-    ctx.fillStyle = '#0f0';
-    ctx.font = '12px Arial';
-    ctx.fillText(`Inimigos: ${enemies.length} (${enemies.filter(e => !e.isDead).length} vivos)`, 650, 30);
 }
 
 // Atualizar todos os inimigos
@@ -679,7 +651,6 @@ window.addEventListener('keydown', (e) => {
 // Iniciar jogo
 async function init() {
     console.log('Mad Night - Iniciando...');
-    console.log('GitHub: entrequadras');
     
     updateUI();
     
@@ -697,20 +668,20 @@ async function init() {
         enemies.push(new Enemy(400, 200));
         enemies.push(new Enemy(500, 400));
         console.log('2 inimigos adicionados na tela!');
-        console.log('Posições:', enemies.map(e => ({x: e.x, y: e.y})));
     }, 100);
     
     // Tocar música inicial
     playMusic('inicio');
     
-    console.log('=== CONTROLES ===');
-    console.log('Setas: mover');
-    console.log('C: console');
-    console.log('K: morte');
-    console.log('E: add inimigo');
-    console.log('D: dash on/off');
-    console.log('M: trocar música');
-    console.log('Espaço: dash');
+    console.log('Mad Night - Pronto!');
+    console.log('Controles:');
+    console.log('- Setas: mover');
+    console.log('- C: mostrar/ocultar console');
+    console.log('- K: testar morte');
+    console.log('- E: adicionar inimigo');
+    console.log('- D: ativar/desativar dash');
+    console.log('- M: mudar música');
+    console.log('- Espaço: dash (quando ativado)');
 }
 
 // Iniciar quando a página carregar
