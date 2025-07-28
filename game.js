@@ -40,7 +40,7 @@ const player = {
     inShadow: false
 };
 
-// Sistema de Mapas Completo
+// Sistema de Mapas - SEM BORDAS (cidade aberta)
 const maps = [
     // FASE 1: INFILTRAÇÃO
     {
@@ -50,12 +50,7 @@ const maps = [
         height: 600,
         enemies: [],
         walls: [
-            {x: 0, y: 0, w: 800, h: 50},
-            {x: 0, y: 550, w: 800, h: 50},
-            {x: 0, y: 0, w: 50, h: 250},
-            {x: 0, y: 350, w: 50, h: 250},
-            {x: 750, y: 0, w: 50, h: 600},
-            // Campo de futebol
+            // Apenas campo de futebol (sem bordas do mapa)
             {x: 200, y: 150, w: 400, h: 20},
             {x: 200, y: 430, w: 400, h: 20},
         ],
@@ -79,10 +74,9 @@ const maps = [
         height: 600,
         enemies: [],
         walls: [
+            // Apenas teto e chão do túnel (sem bordas laterais)
             {x: 0, y: 0, w: 800, h: 100},
             {x: 0, y: 500, w: 800, h: 100},
-            {x: 0, y: 0, w: 50, h: 600},
-            {x: 750, y: 0, w: 50, h: 600},
             // Pilares do túnel
             {x: 200, y: 100, w: 60, h: 400},
             {x: 400, y: 100, w: 60, h: 400},
@@ -109,11 +103,7 @@ const maps = [
             {x: 500, y: 400, type: 'faquinha'}
         ],
         walls: [
-            {x: 0, y: 0, w: 800, h: 50},
-            {x: 0, y: 550, w: 800, h: 50},
-            {x: 0, y: 0, w: 50, h: 600},
-            {x: 750, y: 0, w: 50, h: 600},
-            // Prédios
+            // Apenas prédios (sem bordas do mapa)
             {x: 150, y: 100, w: 120, h: 150},
             {x: 350, y: 350, w: 120, h: 150},
             {x: 550, y: 150, w: 120, h: 100},
@@ -134,7 +124,7 @@ const maps = [
         direction: 'right'
     },
     
-    // FASE 2: INFILTRAÇÃO AVANÇADA - MAPAS VERTICAIS
+    // FASE 2: INFILTRAÇÃO AVANÇADA - MAPAS VERTICAIS SEM BORDAS
     {
         name: "Na área da KS",
         subtitle: "Estacionamento estreito",
@@ -145,12 +135,7 @@ const maps = [
             {x: 200, y: 500, type: 'faquinha'}
         ],
         walls: [
-            {x: 0, y: 0, w: 50, h: 800},
-            {x: 550, y: 0, w: 50, h: 800},
-            {x: 50, y: 0, w: 200, h: 50},  // Parede superior esquerda
-            {x: 350, y: 0, w: 200, h: 50}, // Parede superior direita
-            {x: 0, y: 750, w: 600, h: 50},
-            // Carros estacionados
+            // Apenas carros estacionados (sem bordas do mapa)
             {x: 80, y: 150, w: 120, h: 60},
             {x: 400, y: 150, w: 120, h: 60},
             {x: 80, y: 300, w: 120, h: 60},
@@ -172,8 +157,8 @@ const maps = [
             {x: 140, y: 480, radius: 50},
             {x: 460, y: 480, radius: 50}
         ],
-        playerStart: {x: 300, y: 650}, // CORRIGIDO: Posição mais segura
-        exit: {x: 250, y: 10, w: 100, h: 30}, // CORRIGIDO: Saída mais acessível
+        playerStart: {x: 300, y: 650},
+        exit: {x: 250, y: 10, w: 100, h: 30},
         direction: 'up'
     },
     {
@@ -186,12 +171,7 @@ const maps = [
             {x: 450, y: 400, type: 'faquinha'}
         ],
         walls: [
-            {x: 0, y: 0, w: 50, h: 800},
-            {x: 550, y: 0, w: 50, h: 800},
-            {x: 50, y: 0, w: 200, h: 50},  // Parede superior esquerda
-            {x: 350, y: 0, w: 200, h: 50}, // Parede superior direita
-            {x: 0, y: 750, w: 600, h: 50},
-            // Blocos residenciais - redimensionados
+            // Apenas blocos residenciais (sem bordas do mapa)
             {x: 80, y: 120, w: 160, h: 160},
             {x: 360, y: 120, w: 160, h: 160},
             {x: 80, y: 500, w: 160, h: 160},
@@ -209,8 +189,8 @@ const maps = [
             {x: 440, y: 580, radius: 100},
             {x: 300, y: 400, radius: 120}
         ],
-        playerStart: {x: 300, y: 650}, // CORRIGIDO: Posição mais segura
-        exit: {x: 250, y: 10, w: 100, h: 30}, // CORRIGIDO: Saída mais acessível
+        playerStart: {x: 300, y: 650},
+        exit: {x: 250, y: 10, w: 100, h: 30},
         direction: 'up'
     },
     {
@@ -224,12 +204,7 @@ const maps = [
             {x: 300, y: 500, type: 'faquinha'}
         ],
         walls: [
-            {x: 0, y: 0, w: 50, h: 800},
-            {x: 550, y: 0, w: 50, h: 800},
-            {x: 0, y: 0, w: 600, h: 50},
-            {x: 0, y: 750, w: 200, h: 50}, // Parede inferior esquerda
-            {x: 350, y: 750, w: 250, h: 50}, // Parede inferior direita
-            // Carros grandes - redimensionados
+            // Apenas carros grandes (sem bordas do mapa)
             {x: 120, y: 200, w: 140, h: 80},
             {x: 340, y: 200, w: 140, h: 80},
             {x: 120, y: 400, w: 140, h: 80},
@@ -246,9 +221,9 @@ const maps = [
             {x: 190, y: 440, radius: 60},
             {x: 410, y: 440, radius: 60}
         ],
-        playerStart: {x: 300, y: 650}, // CORRIGIDO: Posição mais segura
-        exit: {x: 200, y: 750, w: 150, h: 40}, // CORRIGIDO: Saída mais acessível no sul
-        lixeira: {x: 280, y: 120, w: 40, h: 40}, // Objetivo da bomba
+        playerStart: {x: 300, y: 650},
+        exit: {x: 200, y: 750, w: 150, h: 40},
+        lixeira: {x: 280, y: 120, w: 40, h: 40},
         direction: 'up'
     }
 ];
@@ -884,7 +859,7 @@ function draw() {
     // Indicador de versão
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.3.1 - Estado Funcional Restaurado', canvas.width - 200, canvas.height - 5);
+    ctx.fillText('v1.3.2 - Sem Bordas', canvas.width - 120, canvas.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
@@ -911,10 +886,9 @@ setTimeout(() => {
 }, 1000);
 
 gameLoop();
-console.log('🎮 Mad Night v1.3.1 - ESTADO FUNCIONAL RESTAURADO! 🎮');
-console.log('✅ Velocidade do player: 4');
-console.log('✅ Mapas verticais: funcionando perfeitamente');
-console.log('✅ Inimigos com "E": não atravessam paredes');
-console.log('✅ Sistema de colisão robusto');
-console.log('✅ Dash funciona após orelhão');
-console.log('🔄 Voltamos ao ponto onde você disse "resolvido"');
+console.log('🎮 Mad Night v1.3.2 - SEM BORDAS! 🎮');
+console.log('🏙️ Todas as bordas dos mapas removidas');
+console.log('🚗 Apenas obstáculos naturais: carros, prédios, pilares');
+console.log('🌃 Cidade completamente aberta');
+console.log('⚡ Player pode sair pelas extremidades');
+console.log('✅ Base estável mantida');
