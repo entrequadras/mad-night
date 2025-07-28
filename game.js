@@ -151,12 +151,12 @@ const maps = [
             {x: 350, y: 0, w: 200, h: 50}, // Parede superior direita
             {x: 0, y: 750, w: 600, h: 50},
             // Carros estacionados
-            {x: 50, y: 150, w: 150, h: 80},
-            {x: 400, y: 150, w: 150, h: 80},
-            {x: 50, y: 350, w: 150, h: 80},
-            {x: 400, y: 350, w: 150, h: 80},
-            {x: 50, y: 550, w: 150, h: 80},
-            {x: 400, y: 550, w: 150, h: 80},
+            {x: 80, y: 150, w: 120, h: 60},
+            {x: 400, y: 150, w: 120, h: 60},
+            {x: 80, y: 300, w: 120, h: 60},
+            {x: 400, y: 300, w: 120, h: 60},
+            {x: 80, y: 450, w: 120, h: 60},
+            {x: 400, y: 450, w: 120, h: 60},
         ],
         lights: [
             {x: 300, y: 100, radius: 100},
@@ -165,15 +165,15 @@ const maps = [
             {x: 300, y: 700, radius: 100}
         ],
         shadows: [
-            {x: 125, y: 190, radius: 60},
-            {x: 475, y: 190, radius: 60},
-            {x: 125, y: 390, radius: 60},
-            {x: 475, y: 390, radius: 60},
-            {x: 125, y: 590, radius: 60},
-            {x: 475, y: 590, radius: 60}
+            {x: 140, y: 180, radius: 50},
+            {x: 460, y: 180, radius: 50},
+            {x: 140, y: 330, radius: 50},
+            {x: 460, y: 330, radius: 50},
+            {x: 140, y: 480, radius: 50},
+            {x: 460, y: 480, radius: 50}
         ],
-        playerStart: {x: 300, y: 700},
-        exit: {x: 250, y: 0, w: 100, h: 50}, // Saída no topo
+        playerStart: {x: 300, y: 650}, // CORRIGIDO: Posição mais segura
+        exit: {x: 250, y: 10, w: 100, h: 30}, // CORRIGIDO: Saída mais acessível
         direction: 'up'
     },
     {
@@ -191,26 +191,26 @@ const maps = [
             {x: 50, y: 0, w: 200, h: 50},  // Parede superior esquerda
             {x: 350, y: 0, w: 200, h: 50}, // Parede superior direita
             {x: 0, y: 750, w: 600, h: 50},
-            // Blocos residenciais
-            {x: 50, y: 100, w: 200, h: 200},
-            {x: 350, y: 100, w: 200, h: 200},
-            {x: 50, y: 500, w: 200, h: 200},
-            {x: 350, y: 500, w: 200, h: 200},
+            // Blocos residenciais - redimensionados
+            {x: 80, y: 120, w: 160, h: 160},
+            {x: 360, y: 120, w: 160, h: 160},
+            {x: 80, y: 500, w: 160, h: 160},
+            {x: 360, y: 500, w: 160, h: 160},
         ],
         lights: [
-            {x: 300, y: 50, radius: 80},
+            {x: 300, y: 80, radius: 80},
             {x: 300, y: 400, radius: 120},
-            {x: 300, y: 750, radius: 80}
+            {x: 300, y: 720, radius: 80}
         ],
         shadows: [
-            {x: 150, y: 200, radius: 120},
-            {x: 450, y: 200, radius: 120},
-            {x: 150, y: 600, radius: 120},
-            {x: 450, y: 600, radius: 120},
-            {x: 300, y: 400, radius: 150}
+            {x: 160, y: 200, radius: 100},
+            {x: 440, y: 200, radius: 100},
+            {x: 160, y: 580, radius: 100},
+            {x: 440, y: 580, radius: 100},
+            {x: 300, y: 400, radius: 120}
         ],
-        playerStart: {x: 300, y: 700},
-        exit: {x: 250, y: 0, w: 100, h: 50},
+        playerStart: {x: 300, y: 650}, // CORRIGIDO: Posição mais segura
+        exit: {x: 250, y: 10, w: 100, h: 30}, // CORRIGIDO: Saída mais acessível
         direction: 'up'
     },
     {
@@ -229,26 +229,26 @@ const maps = [
             {x: 0, y: 0, w: 600, h: 50},
             {x: 0, y: 750, w: 200, h: 50}, // Parede inferior esquerda
             {x: 350, y: 750, w: 250, h: 50}, // Parede inferior direita
-            // Carros grandes
-            {x: 100, y: 200, w: 180, h: 100},
-            {x: 320, y: 200, w: 180, h: 100},
-            {x: 100, y: 400, w: 180, h: 100},
-            {x: 320, y: 400, w: 180, h: 100},
+            // Carros grandes - redimensionados
+            {x: 120, y: 200, w: 140, h: 80},
+            {x: 340, y: 200, w: 140, h: 80},
+            {x: 120, y: 400, w: 140, h: 80},
+            {x: 340, y: 400, w: 140, h: 80},
         ],
         lights: [
-            {x: 100, y: 100, radius: 100},
-            {x: 500, y: 100, radius: 100},
+            {x: 150, y: 100, radius: 100},
+            {x: 450, y: 100, radius: 100},
             {x: 300, y: 650, radius: 150}
         ],
         shadows: [
-            {x: 190, y: 250, radius: 80},
-            {x: 410, y: 250, radius: 80},
-            {x: 190, y: 450, radius: 80},
-            {x: 410, y: 450, radius: 80}
+            {x: 190, y: 240, radius: 60},
+            {x: 410, y: 240, radius: 60},
+            {x: 190, y: 440, radius: 60},
+            {x: 410, y: 440, radius: 60}
         ],
-        playerStart: {x: 300, y: 700},
-        exit: {x: 200, y: 750, w: 150, h: 50}, // Saída no sul (volta)
-        lixeira: {x: 280, y: 100, w: 40, h: 40}, // Objetivo da bomba
+        playerStart: {x: 300, y: 650}, // CORRIGIDO: Posição mais segura
+        exit: {x: 200, y: 750, w: 150, h: 40}, // CORRIGIDO: Saída mais acessível no sul
+        lixeira: {x: 280, y: 120, w: 40, h: 40}, // Objetivo da bomba
         direction: 'up'
     }
 ];
@@ -906,7 +906,7 @@ function draw() {
     // Indicador de versão
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.3 - Bugs Corrigidos', canvas.width - 120, canvas.height - 5);
+    ctx.fillText('v1.3.1 - Mapas Verticais Fix', canvas.width - 150, canvas.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
@@ -933,8 +933,9 @@ setTimeout(() => {
 }, 1000);
 
 gameLoop();
-console.log('🎮 Mad Night v1.3 - TODOS OS BUGS CORRIGIDOS! 🎮');
+console.log('🎮 Mad Night v1.3.1 - MAPAS VERTICAIS CORRIGIDOS! 🎮');
 console.log('✅ Velocidade do player: 4 (era 3)');
-console.log('✅ Mapas verticais: movimento funcional');
+console.log('✅ Mapas verticais: posições iniciais e saídas corrigidas');
 console.log('✅ Inimigos com "E": não atravessam mais paredes');
 console.log('✅ Sistema de colisão aprimorado');
+console.log('✅ Mapas 4,5,6: obstáculos redimensionados para movimento fluido');
