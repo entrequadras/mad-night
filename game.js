@@ -4,16 +4,16 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
-// SISTEMA DE CÂMERA
+// SISTEMA DE CÂMERA - Ajustável por mapa
 const camera = {
     x: 0,
     y: 0,
-    width: 800,  // Viewport da câmera
-    height: 600, // Viewport da câmera
-    followSpeed: 0.1, // Suavidade do movimento (0.1 = suave, 1.0 = instantâneo)
+    width: 800,  // Viewport inicial
+    height: 600, // Viewport inicial
+    followSpeed: 0.1,
     deadZone: {
-        x: 200, // Zona morta horizontal
-        y: 150  // Zona morta vertical
+        x: 200,
+        y: 150
     }
 };
 
@@ -857,8 +857,8 @@ function update() {
             }
         }
         
-        // CORRIGIDO: Dash funciona em todos os mapas após desbloqueado no orelhão
-        if (keys[' '] && gameState.pedalPower > 0 && !player.isDashing && gameState.dashUnlocked) {
+        // CORRIGIDO: Dash funciona em TODAS as fases desde o início
+        if (keys[' '] && gameState.pedalPower > 0 && !player.isDashing) {
             player.isDashing = true;
             player.dashStart = Date.now();
             gameState.pedalPower--;
@@ -948,10 +948,17 @@ function getPlayerSprite() {
 function draw() {
     const currentMapData = maps[gameState.currentMap];
     
-    // Canvas sempre mantém tamanho fixo da câmera
-    if (canvas.width !== camera.width || canvas.height !== camera.height) {
-        canvas.width = camera.width;
-        canvas.height = camera.height;
+    // CORRIGIDO: Redimensionar canvas para o tamanho do mapa atual
+    if (canvas.width !== currentMapData.width || canvas.height !== currentMapData.height) {
+        canvas.width = currentMapData.width;
+        canvas.height = currentMapData.height;
+        
+        // Ajustar câmera para o novo tamanho
+        camera.width = Math.min(800, currentMapData.width);
+        camera.height = Math.min(600, currentMapData.height);
+        
+        console.log(`Canvas redimensionado para: ${currentMapData.width}x${currentMapData.height}`);
+        console.log(`Câmera ajustada para: ${camera.width}x${camera.height}`);
     }
     
     // Salvar contexto para aplicar transformação da câmera
@@ -1117,17 +1124,17 @@ function draw() {
     // Avisos especiais
     if (currentMapData.orelhao && !gameState.dashUnlocked) {
         ctx.fillStyle = '#ff0';
-        ctx.fillText('Chegue no TELEFONE azul para desbloquear DASH!', 10, 105);
+        ctx.fillText('Chegue no TELEFONE azul (opcional - dash já funciona)', 10, 105);
     }
     
-    if (gameState.dashUnlocked && gameState.pedalPower === 0) {
+    if (gameState.pedalPower === 0) {
         ctx.fillStyle = '#f80';
-        ctx.fillText('DASH recarregando... pare para recuperar energia!', 10, 105);
+        ctx.fillText('DASH recarregando... pare para recuperar energia!', 10, 125);
     }
     
     if (currentMapData.lixeira && !gameState.bombPlaced) {
         ctx.fillStyle = '#ff0';
-        ctx.fillText('Mate todos e coloque a BOMBA!', 10, 125);
+        ctx.fillText('Mate todos e coloque a BOMBA!', 10, 145);
     }
     
     ctx.fillStyle = '#fff';
@@ -1140,21 +1147,16 @@ function draw() {
     // Controles da câmera e debug
     ctx.fillStyle = '#888';
     ctx.font = '10px Arial';
-    ctx.fillText('Controles: C = Câmera | ESPAÇO = Dash (após orelhão) | N = Próximo mapa', 10, 145);
+    ctx.fillText('Controles: C = Câmera | ESPAÇO = Dash (sempre ativo) | N = Próximo mapa', 10, 165);
     
     // Status do dash
-    if (gameState.dashUnlocked) {
-        ctx.fillStyle = '#0f0';
-        ctx.fillText('✓ DASH desbloqueado', 10, 165);
-    } else {
-        ctx.fillStyle = '#f80';
-        ctx.fillText('✗ DASH bloqueado - vá ao orelhão!', 10, 165);
-    }
+    ctx.fillStyle = '#0f0';
+    ctx.fillText('✓ DASH sempre disponível', 10, 185);
     
     // Indicador de versão
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.4.3 - Dash Debug & Fix', camera.width - 150, camera.height - 5);
+    ctx.fillText('v1.4.5 - Canvas Dinâmico Fix', camera.width - 170, camera.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
@@ -1181,9 +1183,9 @@ setTimeout(() => {
 }, 1000);
 
 gameLoop();
-console.log('🎮 Mad Night v1.4.3 - DASH DEBUG & FIX! 🎮');
-console.log('⚡ Dash com debug melhorado');
-console.log('🔧 Sistema de transição de mapas corrigido');
-console.log('🎯 Indicadores visuais de status do dash');
-console.log('📝 Logs detalhados para diagnóstico');
-console.log('🗺️ Sequência de mapas ajustada (0-5 = 6 mapas)');
+console.log('🎮 Mad Night v1.4.5 - CANVAS DINÂMICO CORRIGIDO! 🎮');
+console.log('📐 Canvas agora redimensiona para cada mapa');
+console.log('🗺️ Sequência correta: 6 mapas apenas (sem sobra)');
+console.log('📏 Dimensões reais: 1920x1080, 3440x1080, 1080x5000, etc');
+console.log('📷 Câmera se adapta automaticamente');
+console.log('🎯 Logs mostram redimensionamento do canvas');
