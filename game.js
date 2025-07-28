@@ -909,7 +909,7 @@ function draw() {
         ctx.fillRect(stone.x - 5, stone.y - 5, stone.width, stone.height);
     });
     
-    // Desenhar inimigos
+    // Desenhar inimigos com fallback aprimorado
     enemies.forEach(enemy => {
         const loadedCheck = {
             'faquinha': faquinhaLoaded >= 16,
@@ -920,7 +920,7 @@ function draw() {
         
         if (loadedCheck[enemy.type]) {
             const sprite = enemy.getSprite();
-            if (sprite) {
+            if (sprite && sprite.complete && sprite.naturalWidth > 0) {
                 if (isInShadow(enemy.x + enemy.width/2, enemy.y + enemy.height/2)) {
                     ctx.globalAlpha = 0.5;
                 }
@@ -940,19 +940,13 @@ function draw() {
                 
                 ctx.drawImage(sprite, enemy.x, enemy.y, enemy.width, enemy.height);
                 ctx.globalAlpha = 1;
+            } else {
+                // Fallback se sprite não carregou corretamente
+                drawEnemyPlaceholder(enemy);
             }
         } else {
-            // Placeholder colorido por tipo
-            if (!enemy.isDead) {
-                const colors = {
-                    'faquinha': '#808',
-                    'caveirinha': '#c0c',
-                    'janis': '#0cc',
-                    'chacal': '#f80'
-                };
-                ctx.fillStyle = enemy.state === 'chase' ? '#f0f' : colors[enemy.type];
-                ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-            }
+            // Placeholder enquanto carrega
+            drawEnemyPlaceholder(enemy);
         }
         
         if (!enemy.isDead && gameState.phase === 'escape') {
@@ -961,6 +955,7 @@ function draw() {
             ctx.fillText('!', enemy.x + 25, enemy.y - 5);
         }
     });
+}
     
     if (madmaxLoaded >= 16) {
         const sprite = getPlayerSprite();
@@ -1030,7 +1025,7 @@ function draw() {
     
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.3.8 - Sprites Debug & UI Fix', canvas.width - 160, canvas.height - 5);
+    ctx.fillText('v1.3.9 - Sprite Fallback System', canvas.width - 170, canvas.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
@@ -1074,7 +1069,13 @@ for (let i = 0; i <= 15; i++) {
     img.src = `assets/sprites/caveirinha${String(i).padStart(3, '0')}.png`;
     img.onload = () => {
         caveirinhaLoaded++;
-        console.log(`Caveirinha sprite ${i} carregado (${caveirinhaLoaded}/16)`);
+        console.log(`✅ Caveirinha sprite ${i} carregado (${caveirinhaLoaded}/16)`);
+    };
+    img.onerror = () => {
+        console.log(`❌ ERRO: Caveirinha sprite ${i} não encontrado em: assets/sprites/caveirinha${String(i).padStart(3, '0')}.png`);
+        // Fallback para sprite de faquinha
+        caveirinhaSprites[i] = faquinhaSprites[i];
+        caveirinhaLoaded++;
     };
     caveirinhaSprites[i] = img;
 }
@@ -1084,7 +1085,13 @@ for (let i = 0; i <= 15; i++) {
     img.src = `assets/sprites/janis${String(i).padStart(3, '0')}.png`;
     img.onload = () => {
         janisLoaded++;
-        console.log(`Janis sprite ${i} carregado (${janisLoaded}/16)`);
+        console.log(`✅ Janis sprite ${i} carregado (${janisLoaded}/16)`);
+    };
+    img.onerror = () => {
+        console.log(`❌ ERRO: Janis sprite ${i} não encontrado em: assets/sprites/janis${String(i).padStart(3, '0')}.png`);
+        // Fallback para sprite de faquinha
+        janisSprites[i] = faquinhaSprites[i];
+        janisLoaded++;
     };
     janisSprites[i] = img;
 }
@@ -1102,9 +1109,9 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.3.8 - NOVOS INIMIGOS + CORREÇÕES! 🎮');
-console.log('💀 Sistema de vida com caveiras (vermelho = morto, cinza = vivo)');
-console.log('👧 Janis removida da entrada do mapa 6');
-console.log('🏴‍☠️ Caveirinha só aparece na fase de fuga');
-console.log('🔍 Debug adicionado para Caveirinha e Janis sprites');
-console.log('📊 Verifique se os sprites estão carregando no console!');
+console.log('🎮 Mad Night v1.3.9 - SISTEMA DE FALLBACK PARA SPRITES! 🎮');
+console.log('🔍 Debug aprimorado: Mostra erros de carregamento no console');
+console.log('🎯 Fallback: Se Caveirinha/Janis não carregarem, usa sprites de Faquinha');
+console.log('📊 Placeholder: Mostra nome do inimigo se sprite falhar');
+console.log('✅ Sistema robusto: Jogo funciona mesmo sem sprites específicos');
+console.log('🔧 Verifique se você tem os arquivos: caveirinha000.png até caveirinha015.png e janis000.png até janis015.png');
