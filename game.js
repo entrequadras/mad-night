@@ -32,14 +32,28 @@ async function loadAssets() {
         }
         
         // Carregar TODOS os sprites do Faquinha (0-15)
+        console.log('Carregando sprites do Faquinha...');
         for (let i = 0; i <= 15; i++) {
             const img = new Image();
-            img.src = `assets/sprites/faquinha${String(i).padStart(3, '0')}.png`;
-            await new Promise((resolve, reject) => {
-                img.onload = resolve;
-                img.onerror = reject;
-            });
-            assets.sprites.faquinha[i] = img;
+            const filename = `assets/sprites/faquinha${String(i).padStart(3, '0')}.png`;
+            img.src = filename;
+            try {
+                await new Promise((resolve, reject) => {
+                    img.onload = () => {
+                        console.log(`✓ Carregado: ${filename}`);
+                        resolve();
+                    };
+                    img.onerror = () => {
+                        console.error(`✗ Erro ao carregar: ${filename}`);
+                        reject();
+                    };
+                });
+                assets.sprites.faquinha[i] = img;
+            } catch (error) {
+                console.error(`Falha ao carregar sprite ${i} do Faquinha`);
+                // Criar placeholder para não quebrar o jogo
+                assets.sprites.faquinha[i] = null;
+            }
         }
         
         // Carregar áudios
@@ -492,10 +506,14 @@ function draw() {
     
     // Desenhar inimigos
     enemies.forEach(enemy => {
-        if (assets.loaded) {
+        if (assets.loaded && assets.sprites.faquinha.length > 0) {
             const sprite = enemy.getSprite();
             if (sprite) {
                 ctx.drawImage(sprite, enemy.x, enemy.y, enemy.width, enemy.height);
+            } else {
+                // Fallback se sprite não existir
+                ctx.fillStyle = enemy.isDead ? '#444' : '#a0a';
+                ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
             }
         } else {
             // Placeholder
