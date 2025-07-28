@@ -13,7 +13,7 @@ const gameState = {
     musicPhase: 'inicio',
     currentMusic: null,
     currentMap: 0,
-    phase: 'infiltration' // 'infiltration' ou 'escape'
+    phase: 'infiltration'
 };
 
 // Player
@@ -34,7 +34,8 @@ const player = {
     dashDistance: 60,
     dashStartX: 0,
     dashStartY: 0,
-    lastMove: Date.now()
+    lastMove: Date.now(),
+    inShadow: false
 };
 
 // Sistema de Mapas
@@ -45,13 +46,21 @@ const maps = [
         height: 600,
         enemies: [],
         walls: [
-            {x: 0, y: 0, w: 800, h: 50},      // Parede superior
-            {x: 0, y: 550, w: 800, h: 50},    // Parede inferior
-            {x: 0, y: 0, w: 50, h: 600},      // Parede esquerda
-            {x: 750, y: 0, w: 50, h: 600},    // Parede direita
+            {x: 0, y: 0, w: 800, h: 50},
+            {x: 0, y: 550, w: 800, h: 50},
+            {x: 0, y: 0, w: 50, h: 600},
+            {x: 750, y: 0, w: 50, h: 600},
+        ],
+        lights: [
+            {x: 200, y: 200, radius: 120},
+            {x: 600, y: 400, radius: 120}
+        ],
+        shadows: [
+            {x: 300, y: 250, radius: 80},
+            {x: 500, y: 150, radius: 100}
         ],
         playerStart: {x: 100, y: 300},
-        exit: {x: 700, y: 250, w: 50, h: 100} // Saída à direita
+        exit: {x: 700, y: 250, w: 50, h: 100}
     },
     {
         name: "Eixão da Morte",
@@ -59,15 +68,21 @@ const maps = [
         height: 600,
         enemies: [],
         walls: [
-            {x: 0, y: 0, w: 800, h: 150},     // Parede superior (túnel)
-            {x: 0, y: 450, w: 800, h: 150},   // Parede inferior (túnel)
-            {x: 0, y: 0, w: 50, h: 600},      // Parede esquerda
-            {x: 750, y: 0, w: 50, h: 600},    // Parede direita
-            // Pilares do túnel
+            {x: 0, y: 0, w: 800, h: 150},
+            {x: 0, y: 450, w: 800, h: 150},
+            {x: 0, y: 0, w: 50, h: 600},
+            {x: 750, y: 0, w: 50, h: 600},
             {x: 200, y: 150, w: 50, h: 300},
             {x: 400, y: 150, w: 50, h: 300},
             {x: 600, y: 150, w: 50, h: 300},
         ],
+        lights: [
+            {x: 100, y: 300, radius: 100},
+            {x: 325, y: 300, radius: 100},
+            {x: 525, y: 300, radius: 100},
+            {x: 700, y: 300, radius: 100}
+        ],
+        shadows: [], // Túnel escuro
         playerStart: {x: 100, y: 300},
         exit: {x: 700, y: 250, w: 50, h: 100}
     },
@@ -81,14 +96,23 @@ const maps = [
             {x: 0, y: 550, w: 800, h: 50},
             {x: 0, y: 0, w: 50, h: 600},
             {x: 750, y: 0, w: 50, h: 600},
-            // Prédios
             {x: 150, y: 100, w: 100, h: 150},
             {x: 350, y: 400, w: 100, h: 100},
             {x: 550, y: 150, w: 100, h: 100},
         ],
+        lights: [
+            {x: 100, y: 100, radius: 120},
+            {x: 400, y: 200, radius: 150},
+            {x: 700, y: 500, radius: 120}
+        ],
+        shadows: [
+            {x: 200, y: 175, radius: 100}, // Sombra do prédio
+            {x: 400, y: 450, radius: 80},   // Sombra do prédio
+            {x: 600, y: 200, radius: 80}    // Sombra do prédio
+        ],
         playerStart: {x: 100, y: 300},
         exit: {x: 700, y: 250, w: 50, h: 100},
-        special: 'orelhao' // Cutscene do orelhão
+        special: 'orelhao'
     }
 ];
 
@@ -136,6 +160,38 @@ function playMusic(phase) {
     }
 }
 
+// Checar se ponto está na luz
+function isInLight(x, y) {
+    const map = maps[gameState.currentMap];
+    
+    for (let light of map.lights) {
+        const dx = x - light.x;
+        const dy = y - light.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        
+        if (dist < light.radius) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Checar se ponto está na sombra
+function isInShadow(x, y) {
+    const map = maps[gameState.currentMap];
+    
+    for (let shadow of map.shadows) {
+        const dx = x - shadow.x;
+        const dy = y - shadow.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        
+        if (dist < shadow.radius) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // Classe Inimigo
 class Enemy {
     constructor(x, y) {
@@ -151,6 +207,7 @@ class Enemy {
         this.deathFrame = 12;
         this.sprites = [];
         this.visionRange = 150;
+        this.alertVisionRange = 200; // Visão maior quando alerta
     }
     
     update() {
@@ -160,7 +217,16 @@ class Enemy {
         const dy = player.y - this.y;
         const dist = Math.sqrt(dx*dx + dy*dy);
         
-        if (dist < this.visionRange && !player.isDead) {
+        // Ajustar visão baseado no estado
+        const currentVisionRange = this.state === 'chase' ? this.alertVisionRange : this.visionRange;
+        
+        // Se player está na sombra, visão reduzida
+        let effectiveVisionRange = currentVisionRange;
+        if (player.inShadow) {
+            effectiveVisionRange *= 0.3; // 30% da visão na sombra
+        }
+        
+        if (dist < effectiveVisionRange && !player.isDead) {
             this.state = 'chase';
             this.x += (dx/dist) * this.speed;
             this.y += (dy/dist) * this.speed;
@@ -175,6 +241,10 @@ class Enemy {
                 killPlayer();
             }
         } else {
+            // Perder o player se ele entrar na sombra
+            if (this.state === 'chase') {
+                console.log('Perdeu o player!');
+            }
             this.state = 'patrol';
         }
         
@@ -234,16 +304,13 @@ function loadMap(mapIndex) {
     const map = maps[mapIndex];
     if (!map) return;
     
-    // Limpar inimigos
     enemies.length = 0;
     
-    // Posicionar player
     player.x = map.playerStart.x;
     player.y = map.playerStart.y;
     player.isDead = false;
     player.isDashing = false;
     
-    // Criar inimigos do mapa
     map.enemies.forEach(enemyData => {
         const enemy = new Enemy(enemyData.x, enemyData.y);
         enemy.sprites = faquinhaSprites;
@@ -252,11 +319,10 @@ function loadMap(mapIndex) {
     
     console.log(`Mapa carregado: ${map.name}`);
     
-    // Verificar eventos especiais
     if (map.special === 'orelhao' && gameState.phase === 'infiltration') {
         setTimeout(() => {
             console.log('CUTSCENE: Orelhão - Dash desbloqueado!');
-            gameState.dashUnlocked = true; // Para futuro uso
+            gameState.dashUnlocked = true;
         }, 2000);
     }
 }
@@ -291,7 +357,6 @@ window.addEventListener('keydown', (e) => {
         }
     }
     
-    // N - próximo mapa (para teste)
     if (e.key === 'n' || e.key === 'N') {
         gameState.currentMap = (gameState.currentMap + 1) % maps.length;
         loadMap(gameState.currentMap);
@@ -348,6 +413,11 @@ function update() {
     
     if (player.isDead) return;
     
+    // Checar se player está na sombra
+    const playerCenterX = player.x + player.width/2;
+    const playerCenterY = player.y + player.height/2;
+    player.inShadow = isInShadow(playerCenterX, playerCenterY);
+    
     let moving = false;
     let dx = 0;
     let dy = 0;
@@ -388,7 +458,6 @@ function update() {
             moving = true;
         }
         
-        // Teste de colisão antes de mover
         const newX = player.x + dx * player.speed;
         const newY = player.y + dy * player.speed;
         const testPlayer = {x: newX, y: newY, width: player.width, height: player.height};
@@ -414,7 +483,6 @@ function update() {
         }
     }
     
-    // Checar saída do mapa
     if (currentMapData.exit && checkRectCollision(player, currentMapData.exit)) {
         gameState.currentMap++;
         if (gameState.currentMap < maps.length) {
@@ -461,19 +529,43 @@ function getPlayerSprite() {
 function draw() {
     const currentMapData = maps[gameState.currentMap];
     
-    ctx.fillStyle = '#000';
+    // Fundo
+    ctx.fillStyle = '#0a0a0a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
+    // Chão base
     ctx.fillStyle = '#1a1a1a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Desenhar paredes
+    // Desenhar áreas de luz (mais claras)
+    currentMapData.lights.forEach(light => {
+        const gradient = ctx.createRadialGradient(light.x, light.y, 0, light.x, light.y, light.radius);
+        gradient.addColorStop(0, 'rgba(255, 255, 200, 0.3)');
+        gradient.addColorStop(0.5, 'rgba(255, 255, 200, 0.1)');
+        gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(light.x - light.radius, light.y - light.radius, light.radius * 2, light.radius * 2);
+    });
+    
+    // Desenhar áreas de sombra (mais escuras)
+    currentMapData.shadows.forEach(shadow => {
+        const gradient = ctx.createRadialGradient(shadow.x, shadow.y, 0, shadow.x, shadow.y, shadow.radius);
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.8)');
+        gradient.addColorStop(0.7, 'rgba(0, 0, 0, 0.5)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(shadow.x - shadow.radius, shadow.y - shadow.radius, shadow.radius * 2, shadow.radius * 2);
+    });
+    
+    // Paredes
     ctx.fillStyle = '#333';
     currentMapData.walls.forEach(wall => {
         ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
     });
     
-    // Desenhar saída
+    // Saída
     if (currentMapData.exit) {
         ctx.fillStyle = '#0f0';
         ctx.fillRect(currentMapData.exit.x, currentMapData.exit.y, 
@@ -488,7 +580,12 @@ function draw() {
         if (faquinhaLoaded >= 16) {
             const sprite = enemy.getSprite();
             if (sprite) {
+                // Escurecer sprite se estiver na sombra
+                if (isInShadow(enemy.x + enemy.width/2, enemy.y + enemy.height/2)) {
+                    ctx.globalAlpha = 0.5;
+                }
                 ctx.drawImage(sprite, enemy.x, enemy.y, enemy.width, enemy.height);
+                ctx.globalAlpha = 1;
             }
         } else {
             if (!enemy.isDead) {
@@ -508,11 +605,20 @@ function draw() {
     if (madmaxLoaded >= 16) {
         const sprite = getPlayerSprite();
         if (sprite) {
+            // Escurecer se estiver na sombra
+            if (player.inShadow) {
+                ctx.globalAlpha = 0.5;
+            }
             ctx.drawImage(sprite, player.x, player.y, player.width, player.height);
+            ctx.globalAlpha = 1;
         }
     } else {
         ctx.fillStyle = player.isDashing ? '#ff0' : (player.isDead ? '#800' : '#f00');
+        if (player.inShadow) {
+            ctx.globalAlpha = 0.5;
+        }
         ctx.fillRect(player.x, player.y, player.width, player.height);
+        ctx.globalAlpha = 1;
     }
     
     // Nome do mapa
@@ -525,9 +631,16 @@ function draw() {
     // UI
     ctx.fillStyle = '#fff';
     ctx.font = '14px Arial';
-    ctx.fillText('ESPAÇO: dash | N: próximo mapa (teste)', 10, canvas.height - 40);
+    ctx.fillText('ESPAÇO: dash | N: próximo mapa', 10, canvas.height - 40);
     ctx.fillText(`Mortes: ${gameState.deaths}/5 | Inimigos: ${enemies.filter(e => !e.isDead).length}`, 10, canvas.height - 20);
     
+    // Status de sombra
+    if (player.inShadow) {
+        ctx.fillStyle = '#0f0';
+        ctx.fillText('NA SOMBRA - Invisível!', 10, 85);
+    }
+    
+    ctx.fillStyle = '#fff';
     ctx.fillText('Força de Pedal: ', 10, 65);
     for (let i = 0; i < gameState.maxPedalPower; i++) {
         ctx.fillStyle = i < gameState.pedalPower ? '#0f0' : '#333';
@@ -559,4 +672,4 @@ setTimeout(() => {
 }, 1000);
 
 gameLoop();
-console.log('N: próximo mapa | Chegue na SAÍDA verde para avançar!');
+console.log('Entre nas SOMBRAS para ficar invisível!');
