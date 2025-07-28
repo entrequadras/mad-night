@@ -24,7 +24,7 @@ const player = {
     y: 300,
     width: 56,
     height: 56,
-    speed: 4, // Aumentado de 3 para 4
+    speed: 3, // Mantendo velocidade 3
     direction: 'right',
     frame: 0,
     sprites: [],
@@ -40,9 +40,9 @@ const player = {
     inShadow: false
 };
 
-// Sistema de Mapas (preparado para dimensões futuras)
+// Sistema de Mapas Completo
 const maps = [
-    // FASE 1: INFILTRAÇÃO (futuramente 3440x1080)
+    // FASE 1: INFILTRAÇÃO
     {
         name: "Maconhão",
         subtitle: "Tutorial de movimento",
@@ -134,7 +134,7 @@ const maps = [
         direction: 'right'
     },
     
-    // FASE 2: INFILTRAÇÃO AVANÇADA (futuramente 1080x5000)
+    // FASE 2: INFILTRAÇÃO AVANÇADA - MAPAS VERTICAIS
     {
         name: "Na área da KS",
         subtitle: "Estacionamento estreito",
@@ -147,7 +147,8 @@ const maps = [
         walls: [
             {x: 0, y: 0, w: 50, h: 800},
             {x: 550, y: 0, w: 50, h: 800},
-            {x: 0, y: 0, w: 600, h: 50},
+            {x: 50, y: 0, w: 200, h: 50},  // Parede superior esquerda
+            {x: 350, y: 0, w: 200, h: 50}, // Parede superior direita
             {x: 0, y: 750, w: 600, h: 50},
             // Carros estacionados
             {x: 50, y: 150, w: 150, h: 80},
@@ -187,7 +188,8 @@ const maps = [
         walls: [
             {x: 0, y: 0, w: 50, h: 800},
             {x: 550, y: 0, w: 50, h: 800},
-            {x: 0, y: 0, w: 600, h: 50},
+            {x: 50, y: 0, w: 200, h: 50},  // Parede superior esquerda
+            {x: 350, y: 0, w: 200, h: 50}, // Parede superior direita
             {x: 0, y: 750, w: 600, h: 50},
             // Blocos residenciais
             {x: 50, y: 100, w: 200, h: 200},
@@ -225,7 +227,8 @@ const maps = [
             {x: 0, y: 0, w: 50, h: 800},
             {x: 550, y: 0, w: 50, h: 800},
             {x: 0, y: 0, w: 600, h: 50},
-            {x: 0, y: 750, w: 600, h: 50},
+            {x: 0, y: 750, w: 200, h: 50}, // Parede inferior esquerda
+            {x: 350, y: 750, w: 250, h: 50}, // Parede inferior direita
             // Carros grandes
             {x: 100, y: 200, w: 180, h: 100},
             {x: 320, y: 200, w: 180, h: 100},
@@ -244,7 +247,7 @@ const maps = [
             {x: 410, y: 450, radius: 80}
         ],
         playerStart: {x: 300, y: 700},
-        exit: {x: 250, y: 750, w: 100, h: 50}, // Volta pelo sul
+        exit: {x: 200, y: 750, w: 150, h: 50}, // Saída no sul (volta)
         lixeira: {x: 280, y: 100, w: 40, h: 40}, // Objetivo da bomba
         direction: 'up'
     }
@@ -933,4 +936,4 @@ setTimeout(() => {
 }, 1000);
 
 gameLoop();
-console.log('Velocidade aumentada! Dimensões preparadas para expansão futura.');
+console.log('Mapas verticais corrigidos! Agora com saídas funcionais.');
