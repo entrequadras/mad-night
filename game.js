@@ -1,4 +1,4 @@
-console.log('Mad Night v1.3.1 - Volta ao Estado Funcional');
+console.log('Mad Night v1.3.8 - Novos Inimigos + Correções');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -15,7 +15,10 @@ const gameState = {
     currentMap: 0,
     phase: 'infiltration',
     dashUnlocked: false,
-    bombPlaced: false
+    bombPlaced: false,
+    lastEnemySpawn: 0,
+    enemySpawnDelay: 1000,
+    spawnCorner: 0
 };
 
 // Player
@@ -40,9 +43,8 @@ const player = {
     inShadow: false
 };
 
-// Sistema de Mapas - SEM BORDAS (cidade aberta)
+// Sistema de Mapas
 const maps = [
-    // FASE 1: INFILTRAÇÃO
     {
         name: "Maconhão",
         subtitle: "Tutorial de movimento",
@@ -50,7 +52,6 @@ const maps = [
         height: 600,
         enemies: [],
         walls: [
-            // Apenas campo de futebol (sem bordas do mapa)
             {x: 200, y: 150, w: 400, h: 20},
             {x: 200, y: 430, w: 400, h: 20},
         ],
@@ -64,6 +65,7 @@ const maps = [
             {x: 650, y: 150, radius: 100}
         ],
         playerStart: {x: 100, y: 300},
+        playerStartEscape: {x: 700, y: 300},
         exit: {x: 700, y: 250, w: 50, h: 100},
         direction: 'right'
     },
@@ -74,10 +76,8 @@ const maps = [
         height: 600,
         enemies: [],
         walls: [
-            // Apenas teto e chão do túnel (sem bordas laterais)
             {x: 0, y: 0, w: 800, h: 100},
             {x: 0, y: 500, w: 800, h: 100},
-            // Pilares do túnel
             {x: 200, y: 100, w: 60, h: 400},
             {x: 400, y: 100, w: 60, h: 400},
             {x: 600, y: 100, w: 60, h: 400},
@@ -90,6 +90,7 @@ const maps = [
         ],
         shadows: [],
         playerStart: {x: 80, y: 300},
+        playerStartEscape: {x: 700, y: 300},
         exit: {x: 700, y: 250, w: 50, h: 100},
         direction: 'right'
     },
@@ -100,10 +101,14 @@ const maps = [
         height: 600,
         enemies: [
             {x: 400, y: 200, type: 'faquinha'},
-            {x: 500, y: 400, type: 'faquinha'}
+            {x: 500, y: 400, type: 'janis'} // Menina que joga pedra
+        ],
+        escapeEnemies: [
+            {x: 400, y: 300, type: 'chacal'}, // Boss aparece na fuga!
+            {x: 200, y: 200, type: 'caveirinha'},
+            {x: 600, y: 400, type: 'caveirinha'}
         ],
         walls: [
-            // Apenas prédios (sem bordas do mapa)
             {x: 150, y: 100, w: 120, h: 150},
             {x: 350, y: 350, w: 120, h: 150},
             {x: 550, y: 150, w: 120, h: 100},
@@ -119,12 +124,11 @@ const maps = [
             {x: 610, y: 200, radius: 80}
         ],
         playerStart: {x: 80, y: 300},
+        playerStartEscape: {x: 700, y: 300},
         exit: {x: 600, y: 480, w: 60, h: 60},
         orelhao: {x: 680, y: 480, w: 40, h: 60},
         direction: 'right'
     },
-    
-    // FASE 2: INFILTRAÇÃO AVANÇADA - MAPAS VERTICAIS SEM BORDAS
     {
         name: "Na área da KS",
         subtitle: "Estacionamento estreito",
@@ -134,8 +138,12 @@ const maps = [
             {x: 300, y: 200, type: 'faquinha'},
             {x: 200, y: 500, type: 'faquinha'}
         ],
+        escapeEnemies: [
+            {x: 150, y: 350, type: 'caveirinha'},
+            {x: 450, y: 250, type: 'caveirinha'},
+            {x: 300, y: 600, type: 'faquinha'}
+        ],
         walls: [
-            // Apenas carros estacionados (sem bordas do mapa)
             {x: 80, y: 150, w: 120, h: 60},
             {x: 400, y: 150, w: 120, h: 60},
             {x: 80, y: 300, w: 120, h: 60},
@@ -158,6 +166,7 @@ const maps = [
             {x: 460, y: 480, radius: 50}
         ],
         playerStart: {x: 300, y: 650},
+        playerStartEscape: {x: 300, y: 50},
         exit: {x: 250, y: 10, w: 100, h: 30},
         direction: 'up'
     },
@@ -168,10 +177,14 @@ const maps = [
         height: 800,
         enemies: [
             {x: 150, y: 400, type: 'faquinha'},
-            {x: 450, y: 400, type: 'faquinha'}
+            {x: 450, y: 400, type: 'janis'} // Janis também aqui
+        ],
+        escapeEnemies: [
+            {x: 300, y: 200, type: 'janis'},
+            {x: 200, y: 600, type: 'caveirinha'},
+            {x: 400, y: 350, type: 'caveirinha'}
         ],
         walls: [
-            // Apenas blocos residenciais (sem bordas do mapa)
             {x: 80, y: 120, w: 160, h: 160},
             {x: 360, y: 120, w: 160, h: 160},
             {x: 80, y: 500, w: 160, h: 160},
@@ -190,6 +203,7 @@ const maps = [
             {x: 300, y: 400, radius: 120}
         ],
         playerStart: {x: 300, y: 650},
+        playerStartEscape: {x: 300, y: 50},
         exit: {x: 250, y: 10, w: 100, h: 30},
         direction: 'up'
     },
@@ -201,10 +215,9 @@ const maps = [
         enemies: [
             {x: 200, y: 300, type: 'faquinha'},
             {x: 400, y: 300, type: 'faquinha'},
-            {x: 300, y: 500, type: 'faquinha'}
+            {x: 300, y: 500, type: 'faquinha'} // CORRIGIDO: Removido Janis da entrada
         ],
         walls: [
-            // Apenas carros grandes (sem bordas do mapa)
             {x: 120, y: 200, w: 140, h: 80},
             {x: 340, y: 200, w: 140, h: 80},
             {x: 120, y: 400, w: 140, h: 80},
@@ -222,89 +235,47 @@ const maps = [
             {x: 410, y: 440, radius: 60}
         ],
         playerStart: {x: 300, y: 650},
+        playerStartEscape: {x: 300, y: 50},
         exit: {x: 200, y: 750, w: 150, h: 40},
         lixeira: {x: 280, y: 120, w: 40, h: 40},
         direction: 'up'
     }
 ];
 
-// Inimigos
+// Arrays
 const enemies = [];
+const projectiles = [];
+const faquinhaSprites = [];
+const caveirinhaSprites = [];
+const janisSprites = [];
+const chacalSprites = [];
 
-// Áudios
+// Audio
 const audio = {
     inicio: null,
     fuga: null,
     creditos: null
 };
 
-// Carregar áudios
-function loadAudio() {
-    audio.inicio = new Audio('assets/audio/musica_etqgame_tema_inicio.mp3');
-    audio.fuga = new Audio('assets/audio/musica_etqgame_fuga.mp3');
-    audio.creditos = new Audio('assets/audio/musica_etqgame_end_credits.mp3');
-    
-    audio.inicio.loop = true;
-    audio.fuga.loop = true;
-    
-    console.log('Áudios carregados!');
-}
-
-// Tocar música
-function playMusic(phase) {
-    if (gameState.currentMusic) {
-        gameState.currentMusic.pause();
-        gameState.currentMusic.currentTime = 0;
-    }
-    
-    if (phase === 'inicio' && audio.inicio) {
-        audio.inicio.play().catch(e => {
-            console.log('Clique na tela para ativar áudio');
-        });
-        gameState.currentMusic = audio.inicio;
-        gameState.musicPhase = 'inicio';
-    } else if (phase === 'fuga' && audio.fuga) {
-        audio.fuga.play().catch(e => {
-            console.log('Clique na tela para ativar áudio');
-        });
-        gameState.currentMusic = audio.fuga;
-        gameState.musicPhase = 'fuga';
-    }
-}
-
-// Checar se ponto está na luz
+// Funções auxiliares
 function isInLight(x, y) {
     const map = maps[gameState.currentMap];
-    
     for (let light of map.lights) {
-        const dx = x - light.x;
-        const dy = y - light.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        
-        if (dist < light.radius) {
-            return true;
-        }
+        const dist = Math.sqrt(Math.pow(x - light.x, 2) + Math.pow(y - light.y, 2));
+        if (dist < light.radius) return true;
     }
     return false;
 }
 
-// Checar se ponto está na sombra
 function isInShadow(x, y) {
     const map = maps[gameState.currentMap];
-    
     for (let shadow of map.shadows) {
-        const dx = x - shadow.x;
-        const dy = y - shadow.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        
-        if (dist < shadow.radius) {
-            return true;
-        }
+        const dist = Math.sqrt(Math.pow(x - shadow.x, 2) + Math.pow(y - shadow.y, 2));
+        if (dist < shadow.radius) return true;
     }
     return false;
 }
 
-// Sistema de colisão
 function checkRectCollision(obj1, obj2) {
     return obj1.x < obj2.x + obj2.w &&
            obj1.x + obj1.width > obj2.x &&
@@ -313,7 +284,7 @@ function checkRectCollision(obj1, obj2) {
 }
 
 function checkWallCollision(entity, newX, newY) {
-    const currentMapData = maps[gameState.currentMap];
+    const map = maps[gameState.currentMap];
     const testEntity = {
         x: newX,
         y: newY,
@@ -321,7 +292,7 @@ function checkWallCollision(entity, newX, newY) {
         height: entity.height
     };
     
-    for (let wall of currentMapData.walls) {
+    for (let wall of map.walls) {
         if (checkRectCollision(testEntity, wall)) {
             return true;
         }
@@ -329,14 +300,18 @@ function checkWallCollision(entity, newX, newY) {
     return false;
 }
 
-// Classe Inimigo
+// Classe Enemy melhorada
 class Enemy {
-    constructor(x, y) {
+    constructor(x, y, type = 'faquinha') {
         this.x = x;
         this.y = y;
-        this.width = 56;
-        this.height = 56;
-        this.speed = 2;
+        this.originX = x;
+        this.originY = y;
+        this.type = type;
+        this.width = type === 'chacal' ? 84 : 56;
+        this.height = type === 'chacal' ? 84 : 56;
+        this.speed = type === 'caveirinha' ? 2.5 : 2;
+        this.patrolSpeed = 1;
         this.direction = 'down';
         this.frame = 0;
         this.state = 'patrol';
@@ -345,60 +320,180 @@ class Enemy {
         this.sprites = [];
         this.visionRange = 150;
         this.alertVisionRange = 200;
+        this.patrolRadius = 150;
+        this.patrolDirection = this.getRandomDirection();
+        this.lastDirectionChange = Date.now();
+        this.directionChangeInterval = 2000 + Math.random() * 2000;
+        
+        // Específico para Janis
+        this.attackRange = 200;
+        this.lastAttack = 0;
+        this.attackCooldown = 2000;
+        
+        // Específico para Chacal
+        this.health = type === 'chacal' ? 3 : 1;
+        this.maxHealth = this.health;
+        this.isInvulnerable = false;
+        this.invulnerableTime = 0;
+        this.invulnerableDuration = 500;
     }
     
-    update() {
-        if (this.isDead) return;
+    getRandomDirection() {
+        const dirs = ['up', 'down', 'left', 'right'];
+        return dirs[Math.floor(Math.random() * dirs.length)];
+    }
+    
+    throwStone() {
+        if (this.type !== 'janis' || Date.now() - this.lastAttack < this.attackCooldown) return;
         
         const dx = player.x - this.x;
         const dy = player.y - this.y;
         const dist = Math.sqrt(dx*dx + dy*dy);
         
-        const currentVisionRange = this.state === 'chase' ? this.alertVisionRange : this.visionRange;
+        if (dist < this.attackRange && !player.isDead) {
+            this.lastAttack = Date.now();
+            
+            const stone = {
+                x: this.x + this.width/2,
+                y: this.y + this.height/2,
+                vx: (dx/dist) * 4,
+                vy: (dy/dist) * 4,
+                width: 10,
+                height: 10,
+                active: true
+            };
+            
+            projectiles.push(stone);
+        }
+    }
+    
+    update() {
+        if (this.isDead) return;
         
-        let effectiveVisionRange = currentVisionRange;
-        if (player.inShadow) {
-            effectiveVisionRange *= 0.3;
+        if (this.isInvulnerable && Date.now() - this.invulnerableTime > this.invulnerableDuration) {
+            this.isInvulnerable = false;
         }
         
-        if (dist < effectiveVisionRange && !player.isDead) {
-            this.state = 'chase';
-            
-            const moveX = (dx/dist) * this.speed;
-            const moveY = (dy/dist) * this.speed;
-            
-            if (!checkWallCollision(this, this.x + moveX, this.y)) {
-                this.x += moveX;
-            }
-            
-            if (!checkWallCollision(this, this.x, this.y + moveY)) {
-                this.y += moveY;
-            }
-            
-            if (Math.abs(dx) > Math.abs(dy)) {
-                this.direction = dx > 0 ? 'right' : 'left';
+        const dx = player.x - this.x;
+        const dy = player.y - this.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        
+        let visionRange = this.state === 'chase' ? this.alertVisionRange : this.visionRange;
+        if (player.inShadow) visionRange *= 0.3;
+        
+        // Comportamento da Janis
+        if (this.type === 'janis') {
+            if (dist < this.attackRange && !player.isDead) {
+                this.state = 'attack';
+                this.throwStone();
+                this.direction = Math.abs(dx) > Math.abs(dy) ? 
+                    (dx > 0 ? 'right' : 'left') : 
+                    (dy > 0 ? 'down' : 'up');
             } else {
-                this.direction = dy > 0 ? 'down' : 'up';
+                this.state = 'patrol';
+            }
+        }
+        
+        // Comportamento do Chacal
+        if (this.type === 'chacal' && dist < 300 && !player.isDead) {
+            this.state = 'chase';
+        }
+        
+        // Comportamento padrão
+        if (this.type !== 'janis' && dist < visionRange && !player.isDead) {
+            let canSee = false;
+            
+            switch(this.direction) {
+                case 'up': canSee = dy < 0 && Math.abs(dx) < 50; break;
+                case 'down': canSee = dy > 0 && Math.abs(dx) < 50; break;
+                case 'left': canSee = dx < 0 && Math.abs(dy) < 50; break;
+                case 'right': canSee = dx > 0 && Math.abs(dy) < 50; break;
             }
             
-            if (dist < 30) {
-                killPlayer();
+            if (this.state === 'chase' || canSee || this.type === 'chacal') {
+                this.state = 'chase';
+                const moveX = (dx/dist) * this.speed;
+                const moveY = (dy/dist) * this.speed;
+                
+                if (!checkWallCollision(this, this.x + moveX, this.y)) {
+                    this.x += moveX;
+                }
+                if (!checkWallCollision(this, this.x, this.y + moveY)) {
+                    this.y += moveY;
+                }
+                
+                this.direction = Math.abs(dx) > Math.abs(dy) ? 
+                    (dx > 0 ? 'right' : 'left') : 
+                    (dy > 0 ? 'down' : 'up');
+                
+                if (dist < 30) killPlayer();
             }
-        } else {
-            if (this.state === 'chase') {
-                console.log('Perdeu o player!');
-            }
+        } else if (this.type !== 'janis' || this.state !== 'attack') {
             this.state = 'patrol';
+            
+            if (Date.now() - this.lastDirectionChange > this.directionChangeInterval) {
+                this.patrolDirection = this.getRandomDirection();
+                this.lastDirectionChange = Date.now();
+                this.directionChangeInterval = 2000 + Math.random() * 2000;
+                this.direction = this.patrolDirection;
+            }
+            
+            const distFromOrigin = Math.sqrt(
+                Math.pow(this.x - this.originX, 2) + 
+                Math.pow(this.y - this.originY, 2)
+            );
+            
+            if (distFromOrigin > this.patrolRadius) {
+                const backDx = this.originX - this.x;
+                const backDy = this.originY - this.y;
+                this.patrolDirection = Math.abs(backDx) > Math.abs(backDy) ?
+                    (backDx > 0 ? 'right' : 'left') :
+                    (backDy > 0 ? 'down' : 'up');
+                this.direction = this.patrolDirection;
+                this.lastDirectionChange = Date.now();
+            }
+            
+            let pdx = 0, pdy = 0;
+            switch(this.patrolDirection) {
+                case 'up': pdy = -this.patrolSpeed; break;
+                case 'down': pdy = this.patrolSpeed; break;
+                case 'left': pdx = -this.patrolSpeed; break;
+                case 'right': pdx = this.patrolSpeed; break;
+            }
+            
+            if (!checkWallCollision(this, this.x + pdx, this.y + pdy)) {
+                this.x += pdx;
+                this.y += pdy;
+            } else {
+                this.patrolDirection = this.getRandomDirection();
+                this.lastDirectionChange = Date.now();
+                this.direction = this.patrolDirection;
+            }
         }
         
-        if (player.isDashing && dist < 40) {
+        if (player.isDashing && dist < 40 && !this.isInvulnerable) {
+            if (this.type === 'chacal') {
+                this.takeDamage();
+            } else {
+                this.die();
+            }
+        }
+        
+        this.frame = Date.now() % 400 < 200 ? 0 : 1;
+    }
+    
+    takeDamage() {
+        if (this.isInvulnerable) return;
+        
+        this.health--;
+        this.isInvulnerable = true;
+        this.invulnerableTime = Date.now();
+        
+        console.log(`Chacal tomou dano! Vida: ${this.health}/${this.maxHealth}`);
+        
+        if (this.health <= 0) {
             this.die();
-        }
-        
-        if (Date.now() % 400 < 200) {
-            this.frame = 0;
-        } else {
-            this.frame = 1;
+            console.log('CHACAL DERROTADO!');
         }
     }
     
@@ -406,101 +501,115 @@ class Enemy {
         if (this.isDead) return;
         this.isDead = true;
         this.deathFrame = Math.floor(Math.random() * 4) + 12;
-        console.log('Inimigo morto!');
     }
     
     getSprite() {
         if (this.isDead) return this.sprites[this.deathFrame];
-        
         const dirMap = {'right': 0, 'down': 1, 'left': 2, 'up': 3};
         const base = dirMap[this.direction];
-        const offset = this.state === 'chase' ? 8 : this.frame * 4;
-        
+        const offset = (this.state === 'chase' || this.state === 'attack') ? 8 : this.frame * 4;
         return this.sprites[base + offset];
     }
 }
 
-// Teclas
-const keys = {};
-
-// Carregar sprites
-let madmaxLoaded = 0;
-let faquinhaLoaded = 0;
-
-for (let i = 0; i <= 15; i++) {
-    const img = new Image();
-    img.src = `assets/sprites/madmax${String(i).padStart(3, '0')}.png`;
-    img.onload = () => madmaxLoaded++;
-    player.sprites[i] = img;
+// Funções do jogo
+function loadAudio() {
+    audio.inicio = new Audio('assets/audio/musica_etqgame_tema_inicio.mp3');
+    audio.fuga = new Audio('assets/audio/musica_etqgame_fuga.mp3');
+    audio.creditos = new Audio('assets/audio/musica_etqgame_end_credits.mp3');
+    audio.inicio.loop = true;
+    audio.fuga.loop = true;
 }
 
-const faquinhaSprites = [];
-for (let i = 0; i <= 15; i++) {
-    const img = new Image();
-    img.src = `assets/sprites/faquinha${String(i).padStart(3, '0')}.png`;
-    img.onload = () => faquinhaLoaded++;
-    faquinhaSprites[i] = img;
+function playMusic(phase) {
+    if (gameState.currentMusic) {
+        gameState.currentMusic.pause();
+        gameState.currentMusic.currentTime = 0;
+    }
+    
+    if (phase === 'inicio' && audio.inicio) {
+        audio.inicio.play().catch(e => {});
+        gameState.currentMusic = audio.inicio;
+        gameState.musicPhase = 'inicio';
+    } else if (phase === 'fuga' && audio.fuga) {
+        audio.fuga.play().catch(e => {});
+        gameState.currentMusic = audio.fuga;
+        gameState.musicPhase = 'fuga';
+    }
 }
 
-// Carregar mapa
-function loadMap(mapIndex) {
+function spawnEscapeEnemy() {
+    const map = maps[gameState.currentMap];
+    const corners = [
+        {x: 50, y: 50, dir: 'down'},
+        {x: map.width - 100, y: 50, dir: 'down'},
+        {x: 50, y: map.height - 100, dir: 'up'},
+        {x: map.width - 100, y: map.height - 100, dir: 'up'}
+    ];
+    
+    const corner = corners[gameState.spawnCorner % 4];
+    gameState.spawnCorner++;
+    
+    const types = ['faquinha', 'caveirinha', 'caveirinha']; // Mais caveirinhas na fuga
+    const randomType = types[Math.floor(Math.random() * types.length)];
+    
+    const enemy = new Enemy(corner.x, corner.y, randomType);
+    enemy.sprites = randomType === 'caveirinha' ? caveirinhaSprites : faquinhaSprites;
+    enemy.state = 'chase';
+    enemy.alertVisionRange = 400;
+    
+    const centerX = map.width / 2;
+    const centerY = map.height / 2;
+    enemy.direction = Math.abs(corner.x - centerX) > Math.abs(corner.y - centerY) ?
+        (corner.x < centerX ? 'right' : 'left') :
+        (corner.y < centerY ? 'down' : 'up');
+    
+    enemies.push(enemy);
+}
+
+function loadMap(mapIndex, isEscape = false) {
     const map = maps[mapIndex];
     if (!map) return;
     
     enemies.length = 0;
+    projectiles.length = 0;
     
-    player.x = map.playerStart.x;
-    player.y = map.playerStart.y;
+    if (isEscape && map.playerStartEscape) {
+        player.x = map.playerStartEscape.x;
+        player.y = map.playerStartEscape.y;
+    } else {
+        player.x = map.playerStart.x;
+        player.y = map.playerStart.y;
+    }
+    
     player.isDead = false;
     player.isDashing = false;
     
-    map.enemies.forEach(enemyData => {
-        const enemy = new Enemy(enemyData.x, enemyData.y);
-        enemy.sprites = faquinhaSprites;
+    const enemyList = (isEscape && map.escapeEnemies) ? map.escapeEnemies : map.enemies;
+    
+    enemyList.forEach(enemyData => {
+        const enemy = new Enemy(enemyData.x, enemyData.y, enemyData.type || 'faquinha');
+        
+        switch(enemy.type) {
+            case 'faquinha':
+                enemy.sprites = faquinhaSprites;
+                break;
+            case 'caveirinha':
+                enemy.sprites = caveirinhaSprites;
+                break;
+            case 'janis':
+                enemy.sprites = janisSprites;
+                break;
+            case 'chacal':
+                enemy.sprites = chacalSprites;
+                break;
+        }
+        
+        if (isEscape) enemy.state = 'chase';
         enemies.push(enemy);
     });
-    
-    console.log(`Mapa ${mapIndex + 1}: ${map.name}`);
 }
 
-// Detectar teclas
-window.addEventListener('keydown', (e) => {
-    keys[e.key] = true;
-    
-    if (e.key === 'k' || e.key === 'K') killPlayer();
-    
-    if (e.key === 'e' || e.key === 'E') {
-        const enemy = new Enemy(player.x + 150, player.y);
-        enemy.sprites = faquinhaSprites;
-        enemies.push(enemy);
-        console.log('Inimigo criado com sistema de colisão corrigido!');
-    }
-    
-    if (e.key === 'm' || e.key === 'M') {
-        if (gameState.musicPhase === 'inicio') {
-            playMusic('fuga');
-        } else {
-            playMusic('inicio');
-        }
-    }
-    
-    if (e.key === 'n' || e.key === 'N') {
-        gameState.currentMap = (gameState.currentMap + 1) % maps.length;
-        loadMap(gameState.currentMap);
-    }
-});
-
-window.addEventListener('keyup', (e) => {
-    keys[e.key] = false;
-});
-
-canvas.addEventListener('click', () => {
-    if (gameState.currentMusic && gameState.currentMusic.paused) {
-        gameState.currentMusic.play();
-    }
-});
-
-// Matar player
 function killPlayer() {
     if (player.isDead) return;
     
@@ -519,17 +628,84 @@ function killPlayer() {
             loadMap(0);
             playMusic('inicio');
         } else {
-            loadMap(gameState.currentMap);
+            loadMap(gameState.currentMap, gameState.phase === 'escape');
         }
     }, 2000);
 }
 
-// Atualizar
+function updateProjectiles() {
+    projectiles.forEach((stone, index) => {
+        if (!stone.active) return;
+        
+        stone.x += stone.vx;
+        stone.y += stone.vy;
+        
+        if (stone.x < player.x + player.width &&
+            stone.x + stone.width > player.x &&
+            stone.y < player.y + player.height &&
+            stone.y + stone.height > player.y) {
+            killPlayer();
+            stone.active = false;
+        }
+        
+        const map = maps[gameState.currentMap];
+        if (stone.x < 0 || stone.x > map.width || stone.y < 0 || stone.y > map.height) {
+            stone.active = false;
+        }
+        
+        if (checkWallCollision(stone, stone.x, stone.y)) {
+            stone.active = false;
+        }
+    });
+    
+    for (let i = projectiles.length - 1; i >= 0; i--) {
+        if (!projectiles[i].active) {
+            projectiles.splice(i, 1);
+        }
+    }
+}
+
+// Input
+const keys = {};
+
+window.addEventListener('keydown', (e) => {
+    keys[e.key] = true;
+    
+    if (e.key === 'k' || e.key === 'K') killPlayer();
+    
+    if (e.key === 'e' || e.key === 'E') {
+        const enemy = new Enemy(player.x + 150, player.y);
+        enemy.sprites = faquinhaSprites;
+        enemies.push(enemy);
+    }
+    
+    if (e.key === 'm' || e.key === 'M') {
+        playMusic(gameState.musicPhase === 'inicio' ? 'fuga' : 'inicio');
+    }
+    
+    if (e.key === 'n' || e.key === 'N') {
+        gameState.currentMap = (gameState.currentMap + 1) % maps.length;
+        loadMap(gameState.currentMap);
+    }
+});
+
+window.addEventListener('keyup', (e) => {
+    keys[e.key] = false;
+});
+
+canvas.addEventListener('click', () => {
+    if (gameState.currentMusic && gameState.currentMusic.paused) {
+        gameState.currentMusic.play();
+    }
+});
+
+// Update
 let lastFrameTime = 0;
 function update() {
-    const currentMapData = maps[gameState.currentMap];
+    const map = maps[gameState.currentMap];
     
     enemies.forEach(enemy => enemy.update());
+    updateProjectiles();
     
     enemies.forEach((enemy, index) => {
         if (enemy.isDead && !enemy.removeTime) {
@@ -540,6 +716,13 @@ function update() {
         }
     });
     
+    if (gameState.phase === 'escape' && gameState.currentMap === 5 && gameState.bombPlaced) {
+        if (Date.now() - gameState.lastEnemySpawn > gameState.enemySpawnDelay) {
+            spawnEscapeEnemy();
+            gameState.lastEnemySpawn = Date.now();
+        }
+    }
+    
     if (player.isDead) return;
     
     const playerCenterX = player.x + player.width/2;
@@ -547,8 +730,7 @@ function update() {
     player.inShadow = isInShadow(playerCenterX, playerCenterY);
     
     let moving = false;
-    let dx = 0;
-    let dy = 0;
+    let dx = 0, dy = 0;
     
     if (player.isDashing) {
         const progress = (Date.now() - player.dashStart) / player.dashDuration;
@@ -557,8 +739,7 @@ function update() {
             player.isDashing = false;
         } else {
             const dashSpeed = player.dashDistance / player.dashDuration * 16;
-            let dashDx = 0;
-            let dashDy = 0;
+            let dashDx = 0, dashDy = 0;
             
             switch(player.direction) {
                 case 'up': dashDy = -dashSpeed; break;
@@ -567,39 +748,19 @@ function update() {
                 case 'right': dashDx = dashSpeed; break;
             }
             
-            const newX = player.x + dashDx;
-            const newY = player.y + dashDy;
-            
-            if (!checkWallCollision(player, newX, newY)) {
-                player.x = newX;
-                player.y = newY;
+            if (!checkWallCollision(player, player.x + dashDx, player.y + dashDy)) {
+                player.x += dashDx;
+                player.y += dashDy;
             } else {
                 player.isDashing = false;
             }
         }
     } else {
-        if (keys['ArrowUp']) {
-            dy = -1;
-            player.direction = 'up';
-            moving = true;
-        }
-        if (keys['ArrowDown']) {
-            dy = 1;
-            player.direction = 'down';
-            moving = true;
-        }
-        if (keys['ArrowLeft']) {
-            dx = -1;
-            player.direction = 'left';
-            moving = true;
-        }
-        if (keys['ArrowRight']) {
-            dx = 1;
-            player.direction = 'right';
-            moving = true;
-        }
+        if (keys['ArrowUp']) { dy = -1; player.direction = 'up'; moving = true; }
+        if (keys['ArrowDown']) { dy = 1; player.direction = 'down'; moving = true; }
+        if (keys['ArrowLeft']) { dx = -1; player.direction = 'left'; moving = true; }
+        if (keys['ArrowRight']) { dx = 1; player.direction = 'right'; moving = true; }
         
-        // Primeiro tenta mover em X
         if (dx !== 0) {
             const newX = player.x + dx * player.speed;
             if (!checkWallCollision(player, newX, player.y)) {
@@ -607,7 +768,6 @@ function update() {
             }
         }
         
-        // Depois tenta mover em Y
         if (dy !== 0) {
             const newY = player.y + dy * player.speed;
             if (!checkWallCollision(player, player.x, newY)) {
@@ -615,7 +775,6 @@ function update() {
             }
         }
         
-        // Dash
         if (keys[' '] && gameState.pedalPower > 0 && !player.isDashing && gameState.dashUnlocked) {
             player.isDashing = true;
             player.dashStart = Date.now();
@@ -623,47 +782,39 @@ function update() {
         }
     }
     
-    // Checar interações especiais
-    if (currentMapData.orelhao && checkRectCollision(player, currentMapData.orelhao)) {
+    if (map.orelhao && checkRectCollision(player, map.orelhao)) {
         if (!gameState.dashUnlocked) {
             gameState.dashUnlocked = true;
-            console.log('CUTSCENE: Orelhão - Dash permanente desbloqueado!');
+            console.log('CUTSCENE: Dash desbloqueado!');
         }
     }
     
-    if (currentMapData.lixeira && checkRectCollision(player, currentMapData.lixeira)) {
+    if (map.lixeira && checkRectCollision(player, map.lixeira)) {
         if (!gameState.bombPlaced && enemies.filter(e => !e.isDead).length === 0) {
             gameState.bombPlaced = true;
             gameState.phase = 'escape';
+            gameState.lastEnemySpawn = Date.now();
             playMusic('fuga');
             console.log('BOMBA PLANTADA! FUJA!');
-            
-            for (let i = 0; i < 4; i++) {
-                const enemy = new Enemy(300, 600 + i * 50);
-                enemy.sprites = faquinhaSprites;
-                enemy.state = 'chase';
-                enemies.push(enemy);
-            }
         }
     }
     
-    // Checar saída do mapa
-    if (currentMapData.exit && checkRectCollision(player, currentMapData.exit)) {
-        if (gameState.phase === 'escape' && gameState.currentMap === 5) {
-            gameState.currentMap = 4;
-            loadMap(4);
-        } else if (gameState.phase === 'escape' && gameState.currentMap > 2) {
-            gameState.currentMap--;
-            loadMap(gameState.currentMap);
-        } else if (gameState.phase === 'infiltration' && gameState.currentMap < maps.length - 1) {
-            gameState.currentMap++;
-            loadMap(gameState.currentMap);
-        } else if (gameState.phase === 'infiltration' && gameState.currentMap === 5) {
-            console.log('Chegou no último mapa! Plante a bomba!');
-        } else {
-            console.log('Fim da demo!');
-            gameState.currentMap = 0;
-            loadMap(0);
+    if (map.exit && checkRectCollision(player, map.exit)) {
+        if (gameState.phase === 'escape') {
+            if (gameState.currentMap === 5) {
+                gameState.currentMap = 4;
+                loadMap(4, true);
+            } else if (gameState.currentMap > 0) {
+                gameState.currentMap--;
+                loadMap(gameState.currentMap, true);
+            } else if (gameState.currentMap === 0) {
+                console.log('BOSS do Chacal virá aqui!');
+            }
+        } else if (gameState.phase === 'infiltration') {
+            if (gameState.currentMap < maps.length - 1) {
+                gameState.currentMap++;
+                loadMap(gameState.currentMap);
+            }
         }
     }
     
@@ -676,8 +827,8 @@ function update() {
         }
     }
     
-    player.x = Math.max(0, Math.min(currentMapData.width - player.width, player.x));
-    player.y = Math.max(0, Math.min(currentMapData.height - player.height, player.y));
+    player.x = Math.max(0, Math.min(map.width - player.width, player.x));
+    player.y = Math.max(0, Math.min(map.height - player.height, player.y));
     
     if (moving && !player.isDashing && Date.now() - lastFrameTime > 150) {
         player.frame = (player.frame + 1) % 2;
@@ -687,107 +838,119 @@ function update() {
 
 function getPlayerSprite() {
     if (player.isDead) return player.sprites[player.deathFrame];
-    
     const dirMap = {'right': 0, 'down': 1, 'left': 2, 'up': 3};
     const base = dirMap[player.direction];
-    
-    if (player.isDashing) {
-        return player.sprites[8 + base];
-    }
-    
-    const offset = player.frame * 4;
-    return player.sprites[base + offset];
+    if (player.isDashing) return player.sprites[8 + base];
+    return player.sprites[base + player.frame * 4];
 }
 
+// Draw
 function draw() {
-    const currentMapData = maps[gameState.currentMap];
+    const map = maps[gameState.currentMap];
     
-    // Ajustar canvas se necessário
-    if (canvas.width !== currentMapData.width || canvas.height !== currentMapData.height) {
-        canvas.width = currentMapData.width;
-        canvas.height = currentMapData.height;
+    if (canvas.width !== map.width || canvas.height !== map.height) {
+        canvas.width = map.width;
+        canvas.height = map.height;
     }
-    
-    // Fundo
-    ctx.fillStyle = '#0a0a0a';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     ctx.fillStyle = '#1a1a1a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Luzes
-    currentMapData.lights.forEach(light => {
+    map.lights.forEach(light => {
         const gradient = ctx.createRadialGradient(light.x, light.y, 0, light.x, light.y, light.radius);
         gradient.addColorStop(0, 'rgba(255, 255, 200, 0.3)');
         gradient.addColorStop(0.5, 'rgba(255, 255, 200, 0.1)');
         gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
-        
         ctx.fillStyle = gradient;
         ctx.fillRect(light.x - light.radius, light.y - light.radius, light.radius * 2, light.radius * 2);
     });
     
-    // Sombras
-    currentMapData.shadows.forEach(shadow => {
+    map.shadows.forEach(shadow => {
         const gradient = ctx.createRadialGradient(shadow.x, shadow.y, 0, shadow.x, shadow.y, shadow.radius);
         gradient.addColorStop(0, 'rgba(0, 0, 0, 0.8)');
         gradient.addColorStop(0.7, 'rgba(0, 0, 0, 0.5)');
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        
         ctx.fillStyle = gradient;
         ctx.fillRect(shadow.x - shadow.radius, shadow.y - shadow.radius, shadow.radius * 2, shadow.radius * 2);
     });
     
-    // Paredes
     ctx.fillStyle = '#333';
-    currentMapData.walls.forEach(wall => {
+    map.walls.forEach(wall => {
         ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
     });
     
-    // Objetos especiais
-    if (currentMapData.orelhao) {
+    if (map.orelhao) {
         ctx.fillStyle = '#00f';
-        ctx.fillRect(currentMapData.orelhao.x, currentMapData.orelhao.y, 
-                    currentMapData.orelhao.w, currentMapData.orelhao.h);
+        ctx.fillRect(map.orelhao.x, map.orelhao.y, map.orelhao.w, map.orelhao.h);
         ctx.fillStyle = '#fff';
         ctx.font = '10px Arial';
-        ctx.fillText('TEL', currentMapData.orelhao.x + 5, currentMapData.orelhao.y + 30);
+        ctx.fillText('TEL', map.orelhao.x + 5, map.orelhao.y + 30);
     }
     
-    if (currentMapData.lixeira) {
+    if (map.lixeira) {
         ctx.fillStyle = gameState.bombPlaced ? '#f00' : '#080';
-        ctx.fillRect(currentMapData.lixeira.x, currentMapData.lixeira.y, 
-                    currentMapData.lixeira.w, currentMapData.lixeira.h);
+        ctx.fillRect(map.lixeira.x, map.lixeira.y, map.lixeira.w, map.lixeira.h);
         ctx.fillStyle = '#fff';
         ctx.font = '10px Arial';
-        ctx.fillText(gameState.bombPlaced ? 'BOOM!' : 'LIXO', 
-                    currentMapData.lixeira.x + 2, currentMapData.lixeira.y + 25);
+        ctx.fillText(gameState.bombPlaced ? 'BOOM!' : 'LIXO', map.lixeira.x + 2, map.lixeira.y + 25);
     }
     
-    // Saída
-    if (currentMapData.exit) {
+    if (map.exit) {
         ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#0f0';
-        ctx.fillRect(currentMapData.exit.x, currentMapData.exit.y, 
-                    currentMapData.exit.w, currentMapData.exit.h);
+        ctx.fillRect(map.exit.x, map.exit.y, map.exit.w, map.exit.h);
         ctx.fillStyle = '#fff';
         ctx.font = '12px Arial';
-        const exitText = gameState.phase === 'escape' ? 'VOLTA' : 'SAÍDA';
-        ctx.fillText(exitText, currentMapData.exit.x + 5, currentMapData.exit.y + 30);
+        ctx.fillText(gameState.phase === 'escape' ? 'VOLTA' : 'SAÍDA', map.exit.x + 5, map.exit.y + 30);
     }
     
-    // Inimigos
+    // Desenhar projéteis
+    projectiles.forEach(stone => {
+        ctx.fillStyle = '#888';
+        ctx.fillRect(stone.x - 5, stone.y - 5, stone.width, stone.height);
+    });
+    
+    // Desenhar inimigos
     enemies.forEach(enemy => {
-        if (faquinhaLoaded >= 16) {
+        const loadedCheck = {
+            'faquinha': faquinhaLoaded >= 16,
+            'caveirinha': caveirinhaLoaded >= 16,
+            'janis': janisLoaded >= 16,
+            'chacal': chacalLoaded >= 16
+        };
+        
+        if (loadedCheck[enemy.type]) {
             const sprite = enemy.getSprite();
             if (sprite) {
                 if (isInShadow(enemy.x + enemy.width/2, enemy.y + enemy.height/2)) {
                     ctx.globalAlpha = 0.5;
                 }
+                
+                // Desenhar barra de vida do Chacal
+                if (enemy.type === 'chacal' && !enemy.isDead && enemy.health < enemy.maxHealth) {
+                    ctx.fillStyle = '#800';
+                    ctx.fillRect(enemy.x, enemy.y - 10, enemy.width, 5);
+                    ctx.fillStyle = '#f00';
+                    ctx.fillRect(enemy.x, enemy.y - 10, enemy.width * (enemy.health / enemy.maxHealth), 5);
+                }
+                
+                // Efeito de invulnerabilidade
+                if (enemy.isInvulnerable) {
+                    ctx.globalAlpha = 0.5;
+                }
+                
                 ctx.drawImage(sprite, enemy.x, enemy.y, enemy.width, enemy.height);
                 ctx.globalAlpha = 1;
             }
         } else {
+            // Placeholder colorido por tipo
             if (!enemy.isDead) {
-                ctx.fillStyle = enemy.state === 'chase' ? '#f0f' : '#808';
+                const colors = {
+                    'faquinha': '#808',
+                    'caveirinha': '#c0c',
+                    'janis': '#0cc',
+                    'chacal': '#f80'
+                };
+                ctx.fillStyle = enemy.state === 'chase' ? '#f0f' : colors[enemy.type];
                 ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
             }
         }
@@ -799,52 +962,61 @@ function draw() {
         }
     });
     
-    // Player
     if (madmaxLoaded >= 16) {
         const sprite = getPlayerSprite();
         if (sprite) {
-            if (player.inShadow) {
-                ctx.globalAlpha = 0.5;
-            }
+            if (player.inShadow) ctx.globalAlpha = 0.5;
             ctx.drawImage(sprite, player.x, player.y, player.width, player.height);
             ctx.globalAlpha = 1;
         }
     } else {
         ctx.fillStyle = player.isDashing ? '#ff0' : (player.isDead ? '#800' : '#f00');
-        if (player.inShadow) {
-            ctx.globalAlpha = 0.5;
-        }
+        if (player.inShadow) ctx.globalAlpha = 0.5;
         ctx.fillRect(player.x, player.y, player.width, player.height);
         ctx.globalAlpha = 1;
     }
     
-    // Nome do mapa
     ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#ff0';
     ctx.font = 'bold 24px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText(currentMapData.name, canvas.width/2, 40);
+    ctx.fillText(map.name, canvas.width/2, 40);
     ctx.font = '16px Arial';
-    ctx.fillText(currentMapData.subtitle, canvas.width/2, 60);
+    ctx.fillText(map.subtitle, canvas.width/2, 60);
     ctx.textAlign = 'left';
     
-    // UI
     ctx.fillStyle = '#fff';
     ctx.font = '14px Arial';
     ctx.fillText(`Mapa: ${gameState.currentMap + 1}/6 | Fase: ${gameState.phase === 'escape' ? 'FUGA!' : 'Infiltração'}`, 10, canvas.height - 40);
-    ctx.fillText(`Mortes: ${gameState.deaths}/5 | Inimigos: ${enemies.filter(e => !e.isDead).length}`, 10, canvas.height - 20);
+    ctx.fillText(`Inimigos: ${enemies.filter(e => !e.isDead).length}`, 10, canvas.height - 20);
+    
+    // CORRIGIDO: Sistema de vida com caveiras
+    ctx.fillStyle = '#fff';
+    ctx.fillText('Vidas: ', 10, 25);
+    for (let i = 0; i < 5; i++) {
+        ctx.font = '20px Arial';
+        if (i < gameState.deaths) {
+            // Caveiras vermelhas indicam mortes já sofridas
+            ctx.fillStyle = '#f00';
+            ctx.fillText('💀', 60 + i * 30, 25);
+        } else {
+            // Caveiras cinzas indicam vidas restantes
+            ctx.fillStyle = '#666';
+            ctx.fillText('💀', 60 + i * 30, 25);
+        }
+    }
+    ctx.font = '14px Arial';
     
     if (player.inShadow) {
         ctx.fillStyle = '#0f0';
         ctx.fillText('NA SOMBRA - Invisível!', 10, 85);
     }
     
-    // Avisos especiais
-    if (currentMapData.orelhao && !gameState.dashUnlocked) {
+    if (map.orelhao && !gameState.dashUnlocked) {
         ctx.fillStyle = '#ff0';
         ctx.fillText('Chegue no TELEFONE azul!', 10, 105);
     }
     
-    if (currentMapData.lixeira && !gameState.bombPlaced) {
+    if (map.lixeira && !gameState.bombPlaced) {
         ctx.fillStyle = '#ff0';
         ctx.fillText('Mate todos e coloque a BOMBA!', 10, 105);
     }
@@ -856,10 +1028,9 @@ function draw() {
         ctx.fillText('█', 120 + i * 12, 65);
     }
     
-    // Indicador de versão
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.3.2 - Sem Bordas', canvas.width - 120, canvas.height - 5);
+    ctx.fillText('v1.3.8 - Sprites Debug & UI Fix', canvas.width - 160, canvas.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
@@ -877,18 +1048,63 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
+// Carregar sprites com debug
+let madmaxLoaded = 0;
+let faquinhaLoaded = 0;
+let caveirinhaLoaded = 0;
+let janisLoaded = 0;
+let chacalLoaded = 0;
+
+for (let i = 0; i <= 15; i++) {
+    const img = new Image();
+    img.src = `assets/sprites/madmax${String(i).padStart(3, '0')}.png`;
+    img.onload = () => madmaxLoaded++;
+    player.sprites[i] = img;
+}
+
+for (let i = 0; i <= 15; i++) {
+    const img = new Image();
+    img.src = `assets/sprites/faquinha${String(i).padStart(3, '0')}.png`;
+    img.onload = () => faquinhaLoaded++;
+    faquinhaSprites[i] = img;
+}
+
+for (let i = 0; i <= 15; i++) {
+    const img = new Image();
+    img.src = `assets/sprites/caveirinha${String(i).padStart(3, '0')}.png`;
+    img.onload = () => {
+        caveirinhaLoaded++;
+        console.log(`Caveirinha sprite ${i} carregado (${caveirinhaLoaded}/16)`);
+    };
+    caveirinhaSprites[i] = img;
+}
+
+for (let i = 0; i <= 15; i++) {
+    const img = new Image();
+    img.src = `assets/sprites/janis${String(i).padStart(3, '0')}.png`;
+    img.onload = () => {
+        janisLoaded++;
+        console.log(`Janis sprite ${i} carregado (${janisLoaded}/16)`);
+    };
+    janisSprites[i] = img;
+}
+
+for (let i = 0; i <= 15; i++) {
+    const img = new Image();
+    img.src = `assets/sprites/chacal${String(i).padStart(3, '0')}.png`;
+    img.onload = () => chacalLoaded++;
+    chacalSprites[i] = img;
+}
+
 // Inicializar
 loadAudio();
 loadMap(0);
-
-setTimeout(() => {
-    playMusic('inicio');
-}, 1000);
-
+setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
-console.log('🎮 Mad Night v1.3.2 - SEM BORDAS! 🎮');
-console.log('🏙️ Todas as bordas dos mapas removidas');
-console.log('🚗 Apenas obstáculos naturais: carros, prédios, pilares');
-console.log('🌃 Cidade completamente aberta');
-console.log('⚡ Player pode sair pelas extremidades');
-console.log('✅ Base estável mantida');
+
+console.log('🎮 Mad Night v1.3.8 - NOVOS INIMIGOS + CORREÇÕES! 🎮');
+console.log('💀 Sistema de vida com caveiras (vermelho = morto, cinza = vivo)');
+console.log('👧 Janis removida da entrada do mapa 6');
+console.log('🏴‍☠️ Caveirinha só aparece na fase de fuga');
+console.log('🔍 Debug adicionado para Caveirinha e Janis sprites');
+console.log('📊 Verifique se os sprites estão carregando no console!');
