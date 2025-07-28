@@ -1,4 +1,4 @@
-console.log('Mad Night v1.3.1 - Volta ao Estado Funcional');
+console.log('Mad Night v1.3.2 - OPUS');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
