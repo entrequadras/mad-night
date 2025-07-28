@@ -35,6 +35,22 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
         }
         
+        #console {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 300px;
+            height: 200px;
+            background: rgba(0,0,0,0.9);
+            border: 2px solid #0f0;
+            color: #0f0;
+            font-family: monospace;
+            font-size: 10px;
+            padding: 5px;
+            overflow-y: auto;
+            display: none;
+        }
+        
         #deathMessage {
             position: absolute;
             top: 50%;
@@ -58,6 +74,15 @@
             text-align: center;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
         }
+        
+        #debugInfo {
+            position: absolute;
+            top: 10px;
+            right: 320px;
+            color: #0f0;
+            font-size: 12px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
     </style>
 </head>
 <body>
@@ -67,12 +92,18 @@
             <div>Mortes: <span id="deathCount">0</span>/5</div>
             <div>Força de Pedal: <span id="pedalPower">████</span></div>
         </div>
+        <div id="console">
+            <div style="color: #ff0; margin-bottom: 5px;">CONSOLE DEBUG</div>
+            <div id="consoleContent"></div>
+        </div>
         <div id="deathMessage"></div>
         <div id="instructions">
             Use as SETAS para mover | ESPAÇO para dash (após orelhão)
         </div>
+        <div id="debugInfo">
+            Pressione C para mostrar/ocultar console
+        </div>
     </div>
-
-      <script src="game.js"></script>
+    <script src="game.js"></script>
 </body>
 </html>
