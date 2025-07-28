@@ -10,8 +10,10 @@ const gameState = {
     pedalPower: 4,
     maxPedalPower: 4,
     lastRecharge: Date.now(),
-    musicPhase: 'inicio', // 'inicio' ou 'fuga'
-    currentMusic: null
+    musicPhase: 'inicio',
+    currentMusic: null,
+    currentMap: 0,
+    phase: 'infiltration' // 'infiltration' ou 'escape'
 };
 
 // Player
@@ -34,6 +36,61 @@ const player = {
     dashStartY: 0,
     lastMove: Date.now()
 };
+
+// Sistema de Mapas
+const maps = [
+    {
+        name: "Maconhão",
+        width: 800,
+        height: 600,
+        enemies: [],
+        walls: [
+            {x: 0, y: 0, w: 800, h: 50},      // Parede superior
+            {x: 0, y: 550, w: 800, h: 50},    // Parede inferior
+            {x: 0, y: 0, w: 50, h: 600},      // Parede esquerda
+            {x: 750, y: 0, w: 50, h: 600},    // Parede direita
+        ],
+        playerStart: {x: 100, y: 300},
+        exit: {x: 700, y: 250, w: 50, h: 100} // Saída à direita
+    },
+    {
+        name: "Eixão da Morte",
+        width: 800,
+        height: 600,
+        enemies: [],
+        walls: [
+            {x: 0, y: 0, w: 800, h: 150},     // Parede superior (túnel)
+            {x: 0, y: 450, w: 800, h: 150},   // Parede inferior (túnel)
+            {x: 0, y: 0, w: 50, h: 600},      // Parede esquerda
+            {x: 750, y: 0, w: 50, h: 600},    // Parede direita
+            // Pilares do túnel
+            {x: 200, y: 150, w: 50, h: 300},
+            {x: 400, y: 150, w: 50, h: 300},
+            {x: 600, y: 150, w: 50, h: 300},
+        ],
+        playerStart: {x: 100, y: 300},
+        exit: {x: 700, y: 250, w: 50, h: 100}
+    },
+    {
+        name: "Fronteira com o Komando Satânico",
+        width: 800,
+        height: 600,
+        enemies: [{x: 400, y: 300, type: 'faquinha'}],
+        walls: [
+            {x: 0, y: 0, w: 800, h: 50},
+            {x: 0, y: 550, w: 800, h: 50},
+            {x: 0, y: 0, w: 50, h: 600},
+            {x: 750, y: 0, w: 50, h: 600},
+            // Prédios
+            {x: 150, y: 100, w: 100, h: 150},
+            {x: 350, y: 400, w: 100, h: 100},
+            {x: 550, y: 150, w: 100, h: 100},
+        ],
+        playerStart: {x: 100, y: 300},
+        exit: {x: 700, y: 250, w: 50, h: 100},
+        special: 'orelhao' // Cutscene do orelhão
+    }
+];
 
 // Inimigos
 const enemies = [];
@@ -59,13 +116,11 @@ function loadAudio() {
 
 // Tocar música
 function playMusic(phase) {
-    // Parar música atual
     if (gameState.currentMusic) {
         gameState.currentMusic.pause();
         gameState.currentMusic.currentTime = 0;
     }
     
-    // Tocar nova música
     if (phase === 'inicio' && audio.inicio) {
         audio.inicio.play().catch(e => {
             console.log('Clique na tela para ativar áudio');
@@ -174,6 +229,46 @@ for (let i = 0; i <= 15; i++) {
     faquinhaSprites[i] = img;
 }
 
+// Carregar mapa
+function loadMap(mapIndex) {
+    const map = maps[mapIndex];
+    if (!map) return;
+    
+    // Limpar inimigos
+    enemies.length = 0;
+    
+    // Posicionar player
+    player.x = map.playerStart.x;
+    player.y = map.playerStart.y;
+    player.isDead = false;
+    player.isDashing = false;
+    
+    // Criar inimigos do mapa
+    map.enemies.forEach(enemyData => {
+        const enemy = new Enemy(enemyData.x, enemyData.y);
+        enemy.sprites = faquinhaSprites;
+        enemies.push(enemy);
+    });
+    
+    console.log(`Mapa carregado: ${map.name}`);
+    
+    // Verificar eventos especiais
+    if (map.special === 'orelhao' && gameState.phase === 'infiltration') {
+        setTimeout(() => {
+            console.log('CUTSCENE: Orelhão - Dash desbloqueado!');
+            gameState.dashUnlocked = true; // Para futuro uso
+        }, 2000);
+    }
+}
+
+// Checar colisão com retângulo
+function checkRectCollision(obj1, obj2) {
+    return obj1.x < obj2.x + obj2.w &&
+           obj1.x + obj1.width > obj2.x &&
+           obj1.y < obj2.y + obj2.h &&
+           obj1.y + obj1.height > obj2.y;
+}
+
 // Detectar teclas
 window.addEventListener('keydown', (e) => {
     keys[e.key] = true;
@@ -186,7 +281,6 @@ window.addEventListener('keydown', (e) => {
         enemies.push(enemy);
     }
     
-    // M - trocar música
     if (e.key === 'm' || e.key === 'M') {
         if (gameState.musicPhase === 'inicio') {
             playMusic('fuga');
@@ -196,13 +290,18 @@ window.addEventListener('keydown', (e) => {
             console.log('Música inicial!');
         }
     }
+    
+    // N - próximo mapa (para teste)
+    if (e.key === 'n' || e.key === 'N') {
+        gameState.currentMap = (gameState.currentMap + 1) % maps.length;
+        loadMap(gameState.currentMap);
+    }
 });
 
 window.addEventListener('keyup', (e) => {
     keys[e.key] = false;
 });
 
-// Clique para ativar áudio
 canvas.addEventListener('click', () => {
     if (gameState.currentMusic && gameState.currentMusic.paused) {
         gameState.currentMusic.play();
@@ -222,26 +321,20 @@ function killPlayer() {
     setTimeout(() => {
         if (gameState.deaths >= 5) {
             gameState.deaths = 0;
-            enemies.length = 0;
-            playMusic('inicio'); // Volta música inicial
+            gameState.currentMap = 0;
+            loadMap(0);
+            playMusic('inicio');
+        } else {
+            loadMap(gameState.currentMap);
         }
-        resetPlayer();
     }, 2000);
-}
-
-// Resetar player
-function resetPlayer() {
-    player.x = 100;
-    player.y = 300;
-    player.isDead = false;
-    player.isDashing = false;
-    player.frame = 0;
-    gameState.pedalPower = gameState.maxPedalPower;
 }
 
 // Atualizar
 let lastFrameTime = 0;
 function update() {
+    const currentMapData = maps[gameState.currentMap];
+    
     enemies.forEach(enemy => enemy.update());
     
     enemies.forEach((enemy, index) => {
@@ -295,8 +388,22 @@ function update() {
             moving = true;
         }
         
-        player.x += dx * player.speed;
-        player.y += dy * player.speed;
+        // Teste de colisão antes de mover
+        const newX = player.x + dx * player.speed;
+        const newY = player.y + dy * player.speed;
+        const testPlayer = {x: newX, y: newY, width: player.width, height: player.height};
+        
+        let canMove = true;
+        currentMapData.walls.forEach(wall => {
+            if (checkRectCollision(testPlayer, wall)) {
+                canMove = false;
+            }
+        });
+        
+        if (canMove) {
+            player.x = newX;
+            player.y = newY;
+        }
         
         if (keys[' '] && gameState.pedalPower > 0 && !player.isDashing) {
             player.isDashing = true;
@@ -304,6 +411,18 @@ function update() {
             player.dashStartX = player.x;
             player.dashStartY = player.y;
             gameState.pedalPower--;
+        }
+    }
+    
+    // Checar saída do mapa
+    if (currentMapData.exit && checkRectCollision(player, currentMapData.exit)) {
+        gameState.currentMap++;
+        if (gameState.currentMap < maps.length) {
+            loadMap(gameState.currentMap);
+        } else {
+            console.log('Fim da demo! Voltando ao início...');
+            gameState.currentMap = 0;
+            loadMap(0);
         }
     }
     
@@ -340,12 +459,31 @@ function getPlayerSprite() {
 }
 
 function draw() {
+    const currentMapData = maps[gameState.currentMap];
+    
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(50, 50, 700, 500);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     
+    // Desenhar paredes
+    ctx.fillStyle = '#333';
+    currentMapData.walls.forEach(wall => {
+        ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
+    });
+    
+    // Desenhar saída
+    if (currentMapData.exit) {
+        ctx.fillStyle = '#0f0';
+        ctx.fillRect(currentMapData.exit.x, currentMapData.exit.y, 
+                    currentMapData.exit.w, currentMapData.exit.h);
+        ctx.fillStyle = '#fff';
+        ctx.font = '12px Arial';
+        ctx.fillText('SAÍDA', currentMapData.exit.x + 5, currentMapData.exit.y + 50);
+    }
+    
+    // Inimigos
     enemies.forEach(enemy => {
         if (faquinhaLoaded >= 16) {
             const sprite = enemy.getSprite();
@@ -366,6 +504,7 @@ function draw() {
         }
     });
     
+    // Player
     if (madmaxLoaded >= 16) {
         const sprite = getPlayerSprite();
         if (sprite) {
@@ -376,10 +515,18 @@ function draw() {
         ctx.fillRect(player.x, player.y, player.width, player.height);
     }
     
+    // Nome do mapa
+    ctx.fillStyle = '#ff0';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(currentMapData.name, canvas.width/2, 40);
+    ctx.textAlign = 'left';
+    
+    // UI
     ctx.fillStyle = '#fff';
     ctx.font = '14px Arial';
-    ctx.fillText('Setas: mover | ESPAÇO: dash | M: trocar música | Clique para ativar som', 10, 25);
-    ctx.fillText(`Mortes: ${gameState.deaths}/5 | Inimigos: ${enemies.filter(e => !e.isDead).length} | Música: ${gameState.musicPhase}`, 10, 45);
+    ctx.fillText('ESPAÇO: dash | N: próximo mapa (teste)', 10, canvas.height - 40);
+    ctx.fillText(`Mortes: ${gameState.deaths}/5 | Inimigos: ${enemies.filter(e => !e.isDead).length}`, 10, canvas.height - 20);
     
     ctx.fillText('Força de Pedal: ', 10, 65);
     for (let i = 0; i < gameState.maxPedalPower; i++) {
@@ -405,17 +552,11 @@ function gameLoop() {
 
 // Inicializar
 loadAudio();
+loadMap(0);
 
 setTimeout(() => {
-    for (let i = 0; i < 2; i++) {
-        const enemy = new Enemy(400 + i*100, 300);
-        enemy.sprites = faquinhaSprites;
-        enemies.push(enemy);
-    }
-    
-    // Iniciar música
     playMusic('inicio');
 }, 1000);
 
 gameLoop();
-console.log('M: trocar música | Clique na tela se o som não tocar!');
+console.log('N: próximo mapa | Chegue na SAÍDA verde para avançar!');
