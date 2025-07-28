@@ -75,7 +75,7 @@ const player = {
     y: 300,
     width: 56,
     height: 56,
-    speed: 4,
+    speed: 3, // CORRIGIDO: Velocidade volta para 3
     direction: 'right',
     frame: 0,
     sprites: [],
@@ -184,8 +184,58 @@ const maps = [
         orelhao: {x: 680, y: 480, w: 40, h: 60},
         direction: 'right'
     },
-    
-    // MAPAS VERTICAIS EXPANDIDOS (1080x5000) - Teste de câmera vertical
+    {
+        name: "Eixão da Morte - EXPANDIDO",
+        subtitle: "Túnel gigante com câmera horizontal",
+        width: 3440,
+        height: 1080,
+        enemies: [
+            {x: 400, y: 300, type: 'faquinha'},
+            {x: 800, y: 400, type: 'faquinha'},
+            {x: 1200, y: 300, type: 'faquinha'},
+            {x: 1600, y: 500, type: 'faquinha'},
+            {x: 2000, y: 400, type: 'faquinha'},
+            {x: 2400, y: 300, type: 'faquinha'},
+            {x: 2800, y: 500, type: 'faquinha'},
+            {x: 3200, y: 400, type: 'faquinha'}
+        ],
+        walls: [
+            // Bordas
+            {x: 0, y: 0, w: 3440, h: 100},
+            {x: 0, y: 980, w: 3440, h: 100},
+            {x: 0, y: 0, w: 100, h: 1080},
+            {x: 3340, y: 0, w: 100, h: 1080},
+            
+            // Pilares do túnel (padrão repetitivo)
+            {x: 300, y: 100, w: 80, h: 880},
+            {x: 600, y: 100, w: 80, h: 880},
+            {x: 900, y: 100, w: 80, h: 880},
+            {x: 1200, y: 100, w: 80, h: 880},
+            {x: 1500, y: 100, w: 80, h: 880},
+            {x: 1800, y: 100, w: 80, h: 880},
+            {x: 2100, y: 100, w: 80, h: 880},
+            {x: 2400, y: 100, w: 80, h: 880},
+            {x: 2700, y: 100, w: 80, h: 880},
+            {x: 3000, y: 100, w: 80, h: 880},
+        ],
+        lights: [
+            {x: 200, y: 540, radius: 120},
+            {x: 500, y: 540, radius: 120},
+            {x: 800, y: 540, radius: 120},
+            {x: 1100, y: 540, radius: 120},
+            {x: 1400, y: 540, radius: 120},
+            {x: 1700, y: 540, radius: 120},
+            {x: 2000, y: 540, radius: 120},
+            {x: 2300, y: 540, radius: 120},
+            {x: 2600, y: 540, radius: 120},
+            {x: 2900, y: 540, radius: 120},
+            {x: 3200, y: 540, radius: 120}
+        ],
+        shadows: [],
+        playerStart: {x: 150, y: 500},
+        exit: {x: 3200, y: 440, w: 100, h: 200},
+        direction: 'right'
+    },
     {
         name: "Na área da KS - EXPANDIDO",
         subtitle: "Estacionamento gigante com câmera",
@@ -330,62 +380,7 @@ const maps = [
         exit: {x: 450, y: 10, w: 180, h: 40},
         direction: 'up'
     },
-    
-    // MAPA HORIZONTAL EXPANDIDO (3440x1080) - Teste de câmera horizontal
-    {
-        name: "Eixão Expandido - ULTRA WIDE",
-        subtitle: "Túnel gigante com câmera horizontal",
-        width: 3440,
-        height: 1080,
-        enemies: [
-            {x: 400, y: 300, type: 'faquinha'},
-            {x: 800, y: 400, type: 'faquinha'},
-            {x: 1200, y: 300, type: 'faquinha'},
-            {x: 1600, y: 500, type: 'faquinha'},
-            {x: 2000, y: 400, type: 'faquinha'},
-            {x: 2400, y: 300, type: 'faquinha'},
-            {x: 2800, y: 500, type: 'faquinha'},
-            {x: 3200, y: 400, type: 'faquinha'}
-        ],
-        walls: [
-            // Bordas
-            {x: 0, y: 0, w: 3440, h: 100},
-            {x: 0, y: 980, w: 3440, h: 100},
-            {x: 0, y: 0, w: 100, h: 1080},
-            {x: 3340, y: 0, w: 100, h: 1080},
-            
-            // Pilares do túnel (padrão repetitivo)
-            {x: 300, y: 100, w: 80, h: 880},
-            {x: 600, y: 100, w: 80, h: 880},
-            {x: 900, y: 100, w: 80, h: 880},
-            {x: 1200, y: 100, w: 80, h: 880},
-            {x: 1500, y: 100, w: 80, h: 880},
-            {x: 1800, y: 100, w: 80, h: 880},
-            {x: 2100, y: 100, w: 80, h: 880},
-            {x: 2400, y: 100, w: 80, h: 880},
-            {x: 2700, y: 100, w: 80, h: 880},
-            {x: 3000, y: 100, w: 80, h: 880},
-        ],
-        lights: [
-            {x: 200, y: 540, radius: 120},
-            {x: 500, y: 540, radius: 120},
-            {x: 800, y: 540, radius: 120},
-            {x: 1100, y: 540, radius: 120},
-            {x: 1400, y: 540, radius: 120},
-            {x: 1700, y: 540, radius: 120},
-            {x: 2000, y: 540, radius: 120},
-            {x: 2300, y: 540, radius: 120},
-            {x: 2600, y: 540, radius: 120},
-            {x: 2900, y: 540, radius: 120},
-            {x: 3200, y: 540, radius: 120}
-        ],
-        shadows: [],
-        playerStart: {x: 150, y: 500},
-        exit: {x: 3200, y: 440, w: 100, h: 200},
-        direction: 'right'
-    },
-    
-    // MAPA ORIGINAL VERTICAL (corrigido)
+    // MAPAS VERTICAIS EXPANDIDOS (1080x5000) - Teste de câmera vertical
     {
         name: "Entre Prédios",
         subtitle: "Muitas sombras",
@@ -862,7 +857,8 @@ function update() {
             }
         }
         
-        if (keys[' '] && gameState.pedalPower > 0 && !player.isDashing && (gameState.dashUnlocked || gameState.currentMap < 3)) {
+        // CORRIGIDO: Dash funciona em todos os mapas, não só nos primeiros 3
+        if (keys[' '] && gameState.pedalPower > 0 && !player.isDashing && gameState.dashUnlocked) {
             player.isDashing = true;
             player.dashStart = Date.now();
             gameState.pedalPower--;
@@ -1143,7 +1139,7 @@ function draw() {
     // Indicador de versão
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.4 - Sistema de Câmera', camera.width - 150, camera.height - 5);
+    ctx.fillText('v1.4.1 - Dash e Velocidade Fix', camera.width - 160, camera.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
@@ -1170,9 +1166,9 @@ setTimeout(() => {
 }, 1000);
 
 gameLoop();
-console.log('🎮 Mad Night v1.4 - SISTEMA DE CÂMERA IMPLEMENTADO! 🎮');
-console.log('📷 Câmera com zona morta e movimento suave');
-console.log('🗺️ Suporte para mapas grandes (3440x1080 e 1080x5000)');
-console.log('⚡ Culling otimizado - só desenha elementos visíveis');  
+console.log('🎮 Mad Night v1.4.1 - CORREÇÕES APLICADAS! 🎮');
+console.log('📷 Sistema de câmera funcionando');
+console.log('⚡ Dash corrigido - funciona em todos os mapas após orelhão');
+console.log('🏃 Velocidade do MadMax: 3 (corrigida)');
+console.log('🗺️ Mapas reorganizados - sem duplicação');
 console.log('🎯 Controles: C = Alterar velocidade da câmera');
-console.log('🔍 Debug: Posições de câmera e player visíveis na UI');
