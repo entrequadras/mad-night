@@ -76,19 +76,38 @@ const maps = [
         height: 600,
         enemies: [],
         walls: [
+            // Teto e chão principais
             {x: 0, y: 0, w: 800, h: 100},
             {x: 0, y: 500, w: 800, h: 100},
+            
+            // Pilares que dividem os túneis
             {x: 200, y: 100, w: 60, h: 400},
             {x: 400, y: 100, w: 60, h: 400},
             {x: 600, y: 100, w: 60, h: 400},
+            
+            // Paredes laterais dos túneis centrais (claraboias)
+            // Túnel 2 (entre pilar 1 e 2) - fechado
+            {x: 260, y: 100, w: 140, h: 20},  // teto da claraboia
+            {x: 260, y: 480, w: 140, h: 20},  // chão da claraboia
+            
+            // Túnel 3 (entre pilar 2 e 3) - fechado
+            {x: 460, y: 100, w: 140, h: 20},  // teto da claraboia
+            {x: 460, y: 480, w: 140, h: 20},  // chão da claraboia
         ],
         lights: [
-            {x: 130, y: 300, radius: 80},
-            {x: 330, y: 300, radius: 80},
-            {x: 530, y: 300, radius: 80},
-            {x: 730, y: 300, radius: 80}
+            // Luzes nos túneis abertos (extremidades)
+            {x: 100, y: 300, radius: 80},
+            {x: 700, y: 300, radius: 80},
+            // Luzes menores nas claraboias
+            {x: 330, y: 300, radius: 60},
+            {x: 530, y: 300, radius: 60}
         ],
-        shadows: [],
+        shadows: [
+            // Sombras sob os pilares
+            {x: 230, y: 300, radius: 30},
+            {x: 430, y: 300, radius: 30},
+            {x: 630, y: 300, radius: 30}
+        ],
         playerStart: {x: 80, y: 300},
         playerStartEscape: {x: 700, y: 300},
         exit: {x: 700, y: 250, w: 50, h: 100},
@@ -448,28 +467,48 @@ class Enemy {
         if (this.type !== 'janis' && dist < visionRange && !player.isDead) {
             let canSee = false;
             
+            // Sistema de visão em cone
+            const angleThreshold = 50; // largura do cone de visão
+            
             switch(this.direction) {
-                case 'up': canSee = dy < 0 && Math.abs(dx) < 50; break;
-                case 'down': canSee = dy > 0 && Math.abs(dx) < 50; break;
-                case 'left': canSee = dx < 0 && Math.abs(dy) < 50; break;
-                case 'right': canSee = dx > 0 && Math.abs(dy) < 50; break;
+                case 'up': 
+                    canSee = dy < 0 && Math.abs(dx) < angleThreshold;
+                    break;
+                case 'down': 
+                    canSee = dy > 0 && Math.abs(dx) < angleThreshold;
+                    break;
+                case 'left': 
+                    canSee = dx < 0 && Math.abs(dy) < angleThreshold;
+                    break;
+                case 'right': 
+                    canSee = dx > 0 && Math.abs(dy) < angleThreshold;
+                    break;
             }
             
             if (this.state === 'chase' || canSee || this.type === 'chacal') {
                 this.state = 'chase';
-                const moveX = (dx/dist) * this.speed;
-                const moveY = (dy/dist) * this.speed;
                 
+                // Calcular movimento normalizado
+                const angle = Math.atan2(dy, dx);
+                const moveX = Math.cos(angle) * this.speed;
+                const moveY = Math.sin(angle) * this.speed;
+                
+                // Tentar mover em X
                 if (!checkWallCollision(this, this.x + moveX, this.y)) {
                     this.x += moveX;
                 }
+                
+                // Tentar mover em Y
                 if (!checkWallCollision(this, this.x, this.y + moveY)) {
                     this.y += moveY;
                 }
                 
-                this.direction = Math.abs(dx) > Math.abs(dy) ? 
-                    (dx > 0 ? 'right' : 'left') : 
-                    (dy > 0 ? 'down' : 'up');
+                // Atualizar direção baseado no movimento real
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    this.direction = dx > 0 ? 'right' : 'left';
+                } else {
+                    this.direction = dy > 0 ? 'down' : 'up';
+                }
                 
                 if (dist < 30) killPlayer();
             }
@@ -1100,7 +1139,7 @@ function draw() {
     
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.3.9 - Morcego e Ajustes 2', canvas.width - 170, canvas.height - 5);
+    ctx.fillText('v1.4.1 - Eixão Corrigido', canvas.width - 150, canvas.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
@@ -1194,11 +1233,10 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.3.9 - Morcego e Ajustes 2! 🎮');
-console.log('🦇 Morcego: Novo inimigo básico (igual ao Faquinha)');
-console.log('💀 Sistema de vidas: caveiras somem conforme morre');
-console.log('🏴‍☠️ Caveirinha: 25% mais rápido');
-console.log('👧 Janis: Ataca com pedras à distância');
-console.log('🐺 Chacal: Boss com 3 vidas (agora 56x56 pixels)');
-console.log('✅ Sistema de spawn seguro implementado');
-console.log('⚠️ NOTA: Se os sprites do Morcego não carregarem, o jogo usará placeholders coloridos');
+console.log('🎮 Mad Night v1.4.1 - Eixão Corrigido! 🎮');
+console.log('🚇 Eixão da Morte agora tem 4 túneis corretos:');
+console.log('  - Túneis 1 e 4: Abertos nas laterais');
+console.log('  - Túneis 2 e 3: Claraboias fechadas (caixas)');
+console.log('✅ Perseguição em todas as direções funcionando');
+console.log('🦇 Morcego: Sprites devem estar carregando agora');
+console.log('💀 Sistema completo de inimigos e mecânicas');
