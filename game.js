@@ -589,8 +589,8 @@ function loadMap(mapIndex, isEscape = false) {
     const enemyList = (isEscape && map.escapeEnemies) ? map.escapeEnemies : map.enemies;
     
     enemyList.forEach(enemyData => {
-        const enemyWidth = enemyData.type === 'chacal' ? 84 : 56;
-        const enemyHeight = enemyData.type === 'chacal' ? 84 : 56;
+        const enemyWidth = enemyData.type === 'chacal' ? 56 : 56; // Todos mesmo tamanho agora
+        const enemyHeight = enemyData.type === 'chacal' ? 56 : 56;
         
         // Verifica e ajusta posição se necessário
         const validPos = findValidSpawnPosition(enemyData.x, enemyData.y, enemyWidth, enemyHeight);
@@ -617,6 +617,8 @@ function loadMap(mapIndex, isEscape = false) {
         
         if (isEscape) enemy.state = 'chase';
         enemies.push(enemy);
+        
+        console.log(`Inimigo ${enemy.type} criado em (${enemy.x}, ${enemy.y})`);
     });
 }
 
@@ -1039,7 +1041,7 @@ function draw() {
     
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.3.8 - Spawn Seguro', canvas.width - 140, canvas.height - 5);
+    ctx.fillText('v1.3.8 - Morcego e Ajustes', canvas.width - 160, canvas.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
