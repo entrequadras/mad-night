@@ -1149,7 +1149,7 @@ function draw() {
     
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.4.1 - Eixão Corrigido', canvas.width - 150, canvas.height - 5);
+    ctx.fillText('v1.4.2 - Sprites Alinhados', canvas.width - 160, canvas.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
