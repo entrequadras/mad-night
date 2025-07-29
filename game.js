@@ -1,56 +1,8 @@
-console.log('Mad Night v1.7.2 - Light System Fix');
+console.log('Mad Night v1.7.3 - Night Filter Correct');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
-
-// Sistema de assets
-const assets = {
-    campo: { img: new Image(), loaded: false },
-    arvore001: { img: new Image(), loaded: false, width: 180, height: 194 },
-    arvore002: { img: new Image(), loaded: false, width: 194, height: 200 },
-    arvore003: { img: new Image(), loaded: false, width: 162, height: 200 },
-    arvore004: { img: new Image(), loaded: false, width: 150, height: 190 },
-    arvorebloco001: { img: new Image(), loaded: false, width: 354, height: 186 }
-};
-
-// Carregar assets
-assets.campo.img.src = 'assets/buildings/campo_de_futebol.png';
-assets.campo.img.onload = () => {
-    assets.campo.loaded = true;
-    console.log('Campo de futebol carregado!');
-};
-
-// Carregar árvores
-assets.arvore001.img.src = 'assets/scenary/arvore001.png';
-assets.arvore001.img.onload = () => {
-    assets.arvore001.loaded = true;
-    console.log('Árvore 001 carregada!');
-};
-
-assets.arvore002.img.src = 'assets/scenary/arvore002.png';
-assets.arvore002.img.onload = () => {
-    assets.arvore002.loaded = true;
-    console.log('Árvore 002 carregada!');
-};
-
-assets.arvore003.img.src = 'assets/scenary/arvore003.png';
-assets.arvore003.img.onload = () => {
-    assets.arvore003.loaded = true;
-    console.log('Árvore 003 carregada!');
-};
-
-assets.arvore004.img.src = 'assets/scenary/arvore004.png';
-assets.arvore004.img.onload = () => {
-    assets.arvore004.loaded = true;
-    console.log('Árvore 004 carregada!');
-};
-
-assets.arvorebloco001.img.src = 'assets/scenary/arvorebloco001.png';
-assets.arvorebloco001.img.onload = () => {
-    assets.arvorebloco001.loaded = true;
-    console.log('Árvore bloco carregada!');
-};
 
 // Configurações de câmera
 const camera = {
@@ -104,6 +56,54 @@ const player = {
     inShadow: false
 };
 
+// Sistema de assets
+const assets = {
+    campo: { img: new Image(), loaded: false },
+    arvore001: { img: new Image(), loaded: false, width: 180, height: 194 },
+    arvore002: { img: new Image(), loaded: false, width: 194, height: 200 },
+    arvore003: { img: new Image(), loaded: false, width: 162, height: 200 },
+    arvore004: { img: new Image(), loaded: false, width: 150, height: 190 },
+    arvorebloco001: { img: new Image(), loaded: false, width: 354, height: 186 }
+};
+
+// Carregar assets
+assets.campo.img.src = 'assets/buildings/campo_de_futebol.png';
+assets.campo.img.onload = () => {
+    assets.campo.loaded = true;
+    console.log('Campo de futebol carregado!');
+};
+
+// Carregar árvores
+assets.arvore001.img.src = 'assets/scenary/arvore001.png';
+assets.arvore001.img.onload = () => {
+    assets.arvore001.loaded = true;
+    console.log('Árvore 001 carregada!');
+};
+
+assets.arvore002.img.src = 'assets/scenary/arvore002.png';
+assets.arvore002.img.onload = () => {
+    assets.arvore002.loaded = true;
+    console.log('Árvore 002 carregada!');
+};
+
+assets.arvore003.img.src = 'assets/scenary/arvore003.png';
+assets.arvore003.img.onload = () => {
+    assets.arvore003.loaded = true;
+    console.log('Árvore 003 carregada!');
+};
+
+assets.arvore004.img.src = 'assets/scenary/arvore004.png';
+assets.arvore004.img.onload = () => {
+    assets.arvore004.loaded = true;
+    console.log('Árvore 004 carregada!');
+};
+
+assets.arvorebloco001.img.src = 'assets/scenary/arvorebloco001.png';
+assets.arvorebloco001.img.onload = () => {
+    assets.arvorebloco001.loaded = true;
+    console.log('Árvore bloco carregada!');
+};
+
 // Sistema de Mapas
 const maps = [
     {
@@ -138,7 +138,6 @@ const maps = [
             {x: 0, y: 1060, w: 1920, h: 20},   // fundo
             {x: 0, y: 20, w: 20, h: 1040},     // esquerda
             {x: 1900, y: 20, w: 20, h: 1040}   // direita
-            // Removidos os 4 blocos sólidos
         ],
         lights: [
             {x: 960, y: 540, radius: 300},
@@ -154,10 +153,6 @@ const maps = [
             {x: 1540, y: 890, radius: 100}
         ],
         playerStart: {x: 200, y: 300},  // Movido mais para cima
-        playerStartEscape: {x: 1700, y: 540},
-        exit: {x: 1800, y: 490, w: 80, h: 100},
-        direction: 'right'
-    },
         playerStartEscape: {x: 1700, y: 540},
         exit: {x: 1800, y: 490, w: 80, h: 100},
         direction: 'right'
@@ -494,8 +489,8 @@ class Enemy {
         this.originX = x;
         this.originY = y;
         this.type = type;
-        this.width = 46;  // MUDANÇA: de 50 para 46
-        this.height = 46; // MUDANÇA: de 50 para 46
+        this.width = 46;  // Ajustado de 50 para 46
+        this.height = 46; // Ajustado de 50 para 46
         this.speed = type === 'caveirinha' ? 2.5 : 2;
         this.patrolSpeed = 1;
         this.direction = 'down';
@@ -698,7 +693,6 @@ class Enemy {
     getSprite() {
         if (this.isDead) return this.sprites[this.deathFrame];
         
-        // Mapeamento unificado para todos os personagens
         const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
         const base = dirMap[this.direction];
         const offset = (this.state === 'chase' || this.state === 'attack') ? 8 : this.frame * 4;
@@ -747,7 +741,7 @@ function spawnEscapeEnemy() {
     const types = ['faquinha', 'morcego', 'caveirinha', 'caveirinha'];
     const randomType = types[Math.floor(Math.random() * types.length)];
     
-    const validPos = findValidSpawnPosition(corner.x, corner.y, 46, 46); // MUDANÇA: de 50 para 46
+    const validPos = findValidSpawnPosition(corner.x, corner.y, 46, 46);
     
     const enemy = new Enemy(validPos.x, validPos.y, randomType);
     
@@ -795,7 +789,7 @@ function loadMap(mapIndex, isEscape = false) {
     const enemyList = (isEscape && map.escapeEnemies) ? map.escapeEnemies : map.enemies;
     
     enemyList.forEach(enemyData => {
-        const validPos = findValidSpawnPosition(enemyData.x, enemyData.y, 46, 46); // MUDANÇA: de 50 para 46
+        const validPos = findValidSpawnPosition(enemyData.x, enemyData.y, 46, 46);
         const enemy = new Enemy(validPos.x, validPos.y, enemyData.type || 'faquinha');
         
         switch(enemy.type) {
@@ -914,7 +908,6 @@ canvas.addEventListener('click', () => {
 function getPlayerSprite() {
     if (player.isDead) return player.sprites[player.deathFrame];
     
-    // Mapeamento unificado: baixo, direita, esquerda, cima
     const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
     const base = dirMap[player.direction];
     
@@ -1065,113 +1058,12 @@ function update() {
     }
 }
 
-function renderNightFilter(map, visibleArea) {
-    // Aplicar filtro azul escuro sobre toda a cena (METADE da intensidade)
-    ctx.fillStyle = 'rgba(0, 0, 40, 0.35)'; // Reduzido de 0.7 para 0.35
-    ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
-    
-    // "Furar" o filtro onde tem luz (criar buracos de luz)
-    ctx.save();
-    ctx.globalCompositeOperation = 'destination-out';
-    
-    map.lights.forEach(light => {
-        if (light.x + light.radius > visibleArea.left && 
-            light.x - light.radius < visibleArea.right &&
-            light.y + light.radius > visibleArea.top && 
-            light.y - light.radius < visibleArea.bottom) {
-            
-            const gradient = ctx.createRadialGradient(
-                light.x, light.y, 0,
-                light.x, light.y, light.radius
-            );
-            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)'); // Reduzido de 0.9
-            gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.4)'); // Reduzido de 0.5
-            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            
-            ctx.fillStyle = gradient;
-            ctx.beginPath();
-            ctx.arc(light.x, light.y, light.radius, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    });
-    
-    ctx.restore();
-    
-    // Adicionar um toque amarelado nas áreas iluminadas (mais sutil)
-    ctx.save();
-    ctx.globalCompositeOperation = 'overlay';
-    
-    map.lights.forEach(light => {
-        if (light.x + light.radius > visibleArea.left && 
-            light.x - light.radius < visibleArea.right &&
-            light.y + light.radius > visibleArea.top && 
-            light.y - light.radius < visibleArea.bottom) {
-            
-            const gradient = ctx.createRadialGradient(
-                light.x, light.y, 0,
-                light.x, light.y, light.radius * 0.8
-            );
-            gradient.addColorStop(0, 'rgba(255, 255, 200, 0.1)'); // Reduzido de 0.2
-            gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
-            
-            ctx.fillStyle = gradient;
-            ctx.beginPath();
-            ctx.arc(light.x, light.y, light.radius * 0.8, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    });
-    
-    ctx.restore();
-}
-
-// Função de desenho principal
-function draw() {
-    const map = maps[gameState.currentMap];
-    
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.save();
-    ctx.scale(camera.zoom, camera.zoom);
-    ctx.translate(-camera.x, -camera.y);
-    
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
-    
-    const visibleArea = {
-        left: camera.x - 100,
-        right: camera.x + camera.width + 100,
-        top: camera.y - 100,
-        bottom: camera.y + camera.height + 100
-    };
-    
-    // Renderizar elementos do mapa
-    renderCampo(map);
-    renderLights(map, visibleArea); // Voltando com as luzes
-    renderShadows(map, visibleArea);
-    renderTrees(map, visibleArea, 'bottom');
-    renderWalls(map, visibleArea);
-    renderSpecialObjects(map);
-    renderProjectiles(visibleArea);
-    renderEnemies(visibleArea);
-    renderPlayer();
-    renderTrees(map, visibleArea, 'top');
-    renderNightFilter(map, visibleArea);
-    
-    ctx.restore();
-    
-    // Renderizar UI
-    renderUI(map);
-}
-
 // Funções de renderização
 function renderCampo(map) {
     // Renderizar campo apenas no Maconhão
     if (gameState.currentMap === 0 && assets.campo.loaded) {
-        // Posicionar o campo no centro do mapa
-        const campoX = (map.width - 800) / 2; // Campo de 800px de largura
-        const campoY = (map.height - 462) / 2; // Campo de 462px de altura (dimensão real)
-        
+        const campoX = (map.width - 800) / 2;
+        const campoY = (map.height - 462) / 2;
         ctx.drawImage(assets.campo.img, campoX, campoY);
     }
 }
@@ -1182,7 +1074,6 @@ function renderTrees(map, visibleArea, layer = 'bottom') {
     map.trees.forEach(tree => {
         const treeAsset = assets[tree.type];
         if (treeAsset && treeAsset.loaded) {
-            // Só renderizar se estiver na área visível
             if (tree.x + treeAsset.width > visibleArea.left && 
                 tree.x < visibleArea.right &&
                 tree.y + treeAsset.height > visibleArea.top && 
@@ -1209,9 +1100,8 @@ function renderTrees(map, visibleArea, layer = 'bottom') {
                                           player.y + player.height > tree.y &&
                                           player.y < tree.y + treeAsset.height * 0.75;
                     
-                    // Se o player estiver sob a copa, aplicar transparência
                     if (playerUnderTree) {
-                        ctx.globalAlpha = 0.7; // 70% opacidade (30% transparência)
+                        ctx.globalAlpha = 0.7;
                     }
                     
                     ctx.drawImage(treeAsset.img, tree.x, tree.y);
@@ -1261,13 +1151,8 @@ function renderShadows(map, visibleArea) {
         map.trees.forEach(tree => {
             const treeAsset = assets[tree.type];
             if (treeAsset && treeAsset.loaded) {
-                // Calcular posição e tamanho da sombra baseado no tipo de árvore
-                let shadowRadius;
-                if (tree.type === 'arvorebloco001') {
-                    shadowRadius = treeAsset.width * 0.25; // Bloco tem sombra mais larga
-                } else {
-                    shadowRadius = treeAsset.width * 0.35; // Árvores individuais
-                }
+                let shadowRadius = tree.type === 'arvorebloco001' ? 
+                    treeAsset.width * 0.25 : treeAsset.width * 0.35;
                 
                 const shadowX = tree.x + treeAsset.width * 0.5;
                 const shadowY = tree.y + treeAsset.height * 0.85;
@@ -1281,8 +1166,8 @@ function renderShadows(map, visibleArea) {
                         shadowX, shadowY, 0,
                         shadowX, shadowY, shadowRadius
                     );
-                    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)'); // Mais claro (era 0.9)
-                    gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)'); // Mais claro (era 0.6)
+                    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+                    gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
                     gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
                     ctx.fillStyle = gradient;
                     ctx.fillRect(
@@ -1398,7 +1283,7 @@ function renderEnemies(visibleArea) {
             if (!enemy.isDead && gameState.phase === 'escape') {
                 ctx.fillStyle = '#f00';
                 ctx.font = '10px Arial';
-                ctx.fillText('!', enemy.x + 23, enemy.y - 5); // MUDANÇA: ajustado posição do ! (de 25 para 23)
+                ctx.fillText('!', enemy.x + 23, enemy.y - 5);
             }
         }
     });
@@ -1418,6 +1303,65 @@ function renderPlayer() {
         ctx.fillRect(player.x, player.y, player.width, player.height);
         ctx.globalAlpha = 1;
     }
+}
+
+function renderNightFilter(map, visibleArea) {
+    // Aplicar filtro azul escuro sobre toda a cena (40% opacidade)
+    ctx.fillStyle = 'rgba(0, 0, 40, 0.4)';
+    ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
+    
+    // "Furar" o filtro onde tem luz
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    
+    map.lights.forEach(light => {
+        if (light.x + light.radius > visibleArea.left && 
+            light.x - light.radius < visibleArea.right &&
+            light.y + light.radius > visibleArea.top && 
+            light.y - light.radius < visibleArea.bottom) {
+            
+            const gradient = ctx.createRadialGradient(
+                light.x, light.y, 0,
+                light.x, light.y, light.radius
+            );
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+            gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.4)');
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(light.x, light.y, light.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    });
+    
+    ctx.restore();
+    
+    // Adicionar um toque amarelado nas áreas iluminadas
+    ctx.save();
+    ctx.globalCompositeOperation = 'overlay';
+    
+    map.lights.forEach(light => {
+        if (light.x + light.radius > visibleArea.left && 
+            light.x - light.radius < visibleArea.right &&
+            light.y + light.radius > visibleArea.top && 
+            light.y - light.radius < visibleArea.bottom) {
+            
+            const gradient = ctx.createRadialGradient(
+                light.x, light.y, 0,
+                light.x, light.y, light.radius * 0.8
+            );
+            gradient.addColorStop(0, 'rgba(255, 255, 200, 0.1)');
+            gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(light.x, light.y, light.radius * 0.8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    });
+    
+    ctx.restore();
 }
 
 function renderUI(map) {
@@ -1475,7 +1419,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.7.2 - Light System Fix', canvas.width - 350, canvas.height - 10); // MUDANÇA: versão atualizada
+    ctx.fillText('v1.7.3 - Night Filter Correct', canvas.width - 350, canvas.height - 10);
     
     // Morte
     if (player.isDead) {
@@ -1486,6 +1430,46 @@ function renderUI(map) {
         ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
         ctx.textAlign = 'left';
     }
+}
+
+// Função de desenho principal
+function draw() {
+    const map = maps[gameState.currentMap];
+    
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.save();
+    ctx.scale(camera.zoom, camera.zoom);
+    ctx.translate(-camera.x, -camera.y);
+    
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
+    
+    const visibleArea = {
+        left: camera.x - 100,
+        right: camera.x + camera.width + 100,
+        top: camera.y - 100,
+        bottom: camera.y + camera.height + 100
+    };
+    
+    // Renderizar elementos do mapa
+    renderCampo(map);
+    renderLights(map, visibleArea);
+    renderShadows(map, visibleArea);
+    renderTrees(map, visibleArea, 'bottom');
+    renderWalls(map, visibleArea);
+    renderSpecialObjects(map);
+    renderProjectiles(visibleArea);
+    renderEnemies(visibleArea);
+    renderPlayer();
+    renderTrees(map, visibleArea, 'top');
+    renderNightFilter(map, visibleArea);
+    
+    ctx.restore();
+    
+    // Renderizar UI
+    renderUI(map);
 }
 
 // Game loop
@@ -1551,8 +1535,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.7.2 - Light System Fix! 🎮');
-console.log('💡 Removida renderização dupla de luzes');
-console.log('🌙 Filtro noturno agora controla toda iluminação');
-console.log('✨ Luzes não são mais escurecidas pelo filtro');
-console.log('🎯 Sistema de iluminação unificado!');
+console.log('🎮 Mad Night v1.7.3 - Night Filter Correct! 🎮');
+console.log('🌙 Filtro noturno a 40% de opacidade');
+console.log('💡 Sistema de iluminação corrigido');
+console.log('🌳 Todas as features anteriores funcionando');
+console.log('✅ Código limpo e organizado!');
