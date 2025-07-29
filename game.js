@@ -1,4 +1,4 @@
-console.log('Mad Night v1.6.3 - Tree Shadows Fix');
+console.log('Mad Night v1.7.0 - Night Filter Update');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -1052,6 +1052,65 @@ function update() {
     }
 }
 
+function renderNightFilter(map, visibleArea) {
+    // Aplicar filtro azul escuro sobre toda a cena
+    ctx.fillStyle = 'rgba(0, 0, 40, 0.7)'; // Azul escuro com 70% opacidade
+    ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
+    
+    // "Furar" o filtro onde tem luz (criar buracos de luz)
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    
+    map.lights.forEach(light => {
+        if (light.x + light.radius > visibleArea.left && 
+            light.x - light.radius < visibleArea.right &&
+            light.y + light.radius > visibleArea.top && 
+            light.y - light.radius < visibleArea.bottom) {
+            
+            const gradient = ctx.createRadialGradient(
+                light.x, light.y, 0,
+                light.x, light.y, light.radius
+            );
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+            gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(light.x, light.y, light.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    });
+    
+    ctx.restore();
+    
+    // Adicionar um toque amarelado nas áreas iluminadas
+    ctx.save();
+    ctx.globalCompositeOperation = 'overlay';
+    
+    map.lights.forEach(light => {
+        if (light.x + light.radius > visibleArea.left && 
+            light.x - light.radius < visibleArea.right &&
+            light.y + light.radius > visibleArea.top && 
+            light.y - light.radius < visibleArea.bottom) {
+            
+            const gradient = ctx.createRadialGradient(
+                light.x, light.y, 0,
+                light.x, light.y, light.radius * 0.8
+            );
+            gradient.addColorStop(0, 'rgba(255, 255, 200, 0.2)');
+            gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(light.x, light.y, light.radius * 0.8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    });
+    
+    ctx.restore();
+}
+
 // Função de desenho principal
 function draw() {
     const map = maps[gameState.currentMap];
@@ -1076,14 +1135,15 @@ function draw() {
     // Renderizar elementos do mapa
     renderCampo(map);
     renderLights(map, visibleArea);
-    renderShadows(map, visibleArea); // Sombras ANTES das árvores
-    renderTrees(map, visibleArea, 'bottom'); // Troncos
+    renderShadows(map, visibleArea);
+    renderTrees(map, visibleArea, 'bottom');
     renderWalls(map, visibleArea);
     renderSpecialObjects(map);
     renderProjectiles(visibleArea);
     renderEnemies(visibleArea);
     renderPlayer();
-    renderTrees(map, visibleArea, 'top'); // Copas (por último)
+    renderTrees(map, visibleArea, 'top');
+    renderNightFilter(map, visibleArea); // Filtro noturno por último!
     
     ctx.restore();
     
@@ -1402,7 +1462,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.6.3 - Tree Shadows Fix', canvas.width - 350, canvas.height - 10); // MUDANÇA: versão atualizada
+    ctx.fillText('v1.7.0 - Night Filter Update', canvas.width - 350, canvas.height - 10); // MUDANÇA: versão atualizada
     
     // Morte
     if (player.isDead) {
@@ -1478,8 +1538,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.6.3 - Tree Shadows Fix! 🎮');
-console.log('🌑 Sombras renderizadas ANTES das árvores');
-console.log('💡 Sombras mais claras (60% → 30% opacidade)');
-console.log('🌳 Copas das árvores não são mais escurecidas');
-console.log('✅ Ordem de renderização corrigida!');
+console.log('🎮 Mad Night v1.7.0 - Night Filter Update! 🎮');
+console.log('🌙 Filtro noturno azul escuro aplicado');
+console.log('💡 Postes criam "buracos" de luz no filtro');
+console.log('✨ Luz amarelada quente nos postes');
+console.log('🌃 Atmosfera noturna anos 80/90!');
