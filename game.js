@@ -1,4 +1,4 @@
-console.log('Mad Night v1.7.0 - Night Filter Update');
+console.log('Mad Night v1.7.1 - Night Adjust & Trees Update');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -114,6 +114,7 @@ const maps = [
         enemies: [],
         // Árvores espalhadas pelo mapa
         trees: [
+            // Árvores originais
             {type: 'arvore001', x: 300, y: 150},
             {type: 'arvore002', x: 1400, y: 120},
             {type: 'arvore003', x: 150, y: 700},
@@ -122,19 +123,22 @@ const maps = [
             {type: 'arvore002', x: 450, y: 850},
             {type: 'arvore001', x: 1200, y: 880},
             {type: 'arvore003', x: 950, y: 100},
-            {type: 'arvore004', x: 100, y: 400}
+            {type: 'arvore004', x: 100, y: 400},
+            // Novas árvores no lugar dos blocos sólidos
+            {type: 'arvore001', x: 200, y: 180},    // Canto superior esquerdo
+            {type: 'arvore002', x: 1580, y: 130},   // Canto superior direito
+            {type: 'arvore003', x: 280, y: 780},    // Canto inferior esquerdo
+            // Duas árvores juntas no canto inferior direito
+            {type: 'arvore004', x: 1480, y: 830},
+            {type: 'arvore001', x: 1550, y: 850}
         ],
         walls: [
             // Paredes externas apenas
             {x: 0, y: 0, w: 1920, h: 20},      // topo
             {x: 0, y: 1060, w: 1920, h: 20},   // fundo
             {x: 0, y: 20, w: 20, h: 1040},     // esquerda
-            {x: 1900, y: 20, w: 20, h: 1040},  // direita
-            // Alguns obstáculos nos cantos
-            {x: 200, y: 200, w: 80, h: 80},
-            {x: 1600, y: 150, w: 80, h: 80},
-            {x: 300, y: 800, w: 80, h: 80},
-            {x: 1500, y: 850, w: 80, h: 80}
+            {x: 1900, y: 20, w: 20, h: 1040}   // direita
+            // Removidos os 4 blocos sólidos
         ],
         lights: [
             {x: 960, y: 540, radius: 300},
@@ -1053,8 +1057,8 @@ function update() {
 }
 
 function renderNightFilter(map, visibleArea) {
-    // Aplicar filtro azul escuro sobre toda a cena
-    ctx.fillStyle = 'rgba(0, 0, 40, 0.7)'; // Azul escuro com 70% opacidade
+    // Aplicar filtro azul escuro sobre toda a cena (METADE da intensidade)
+    ctx.fillStyle = 'rgba(0, 0, 40, 0.35)'; // Reduzido de 0.7 para 0.35
     ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
     
     // "Furar" o filtro onde tem luz (criar buracos de luz)
@@ -1071,8 +1075,8 @@ function renderNightFilter(map, visibleArea) {
                 light.x, light.y, 0,
                 light.x, light.y, light.radius
             );
-            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-            gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)'); // Reduzido de 0.9
+            gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.4)'); // Reduzido de 0.5
             gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
             
             ctx.fillStyle = gradient;
@@ -1084,7 +1088,7 @@ function renderNightFilter(map, visibleArea) {
     
     ctx.restore();
     
-    // Adicionar um toque amarelado nas áreas iluminadas
+    // Adicionar um toque amarelado nas áreas iluminadas (mais sutil)
     ctx.save();
     ctx.globalCompositeOperation = 'overlay';
     
@@ -1098,7 +1102,7 @@ function renderNightFilter(map, visibleArea) {
                 light.x, light.y, 0,
                 light.x, light.y, light.radius * 0.8
             );
-            gradient.addColorStop(0, 'rgba(255, 255, 200, 0.2)');
+            gradient.addColorStop(0, 'rgba(255, 255, 200, 0.1)'); // Reduzido de 0.2
             gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
             
             ctx.fillStyle = gradient;
@@ -1462,7 +1466,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.7.0 - Night Filter Update', canvas.width - 350, canvas.height - 10); // MUDANÇA: versão atualizada
+    ctx.fillText('v1.7.1 - Night Adjust & Trees Update', canvas.width - 400, canvas.height - 10); // MUDANÇA: versão atualizada
     
     // Morte
     if (player.isDead) {
@@ -1538,8 +1542,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.7.0 - Night Filter Update! 🎮');
-console.log('🌙 Filtro noturno azul escuro aplicado');
-console.log('💡 Postes criam "buracos" de luz no filtro');
-console.log('✨ Luz amarelada quente nos postes');
-console.log('🌃 Atmosfera noturna anos 80/90!');
+console.log('🎮 Mad Night v1.7.1 - Night Adjust & Trees Update! 🎮');
+console.log('🌙 Filtro noturno reduzido para 35% (metade da intensidade)');
+console.log('🌳 Blocos sólidos substituídos por árvores');
+console.log('🌲 14 árvores no total (2 juntas no canto inferior direito)');
+console.log('✅ Visual mais sutil e natural!');
