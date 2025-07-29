@@ -1,4 +1,4 @@
-console.log('Mad Night v1.7.8 - Light Blend Fix');
+console.log('Mad Night v1.7.9 - Screen Blend Mode');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -1341,7 +1341,7 @@ function renderNightFilter(map, visibleArea) {
     
     // Adicionar um toque amarelado nas áreas iluminadas
     ctx.save();
-    ctx.globalCompositeOperation = 'overlay';  // Voltando para overlay
+    ctx.globalCompositeOperation = 'screen';  // Testando com screen
     
     map.lights.forEach(light => {
         if (light.x + light.radius > visibleArea.left && 
@@ -1353,7 +1353,7 @@ function renderNightFilter(map, visibleArea) {
                 light.x, light.y, 0,
                 light.x, light.y, light.radius * 0.8
             );
-            gradient.addColorStop(0, 'rgba(255, 255, 200, 0.2)');  // Meio termo: 0.2
+            gradient.addColorStop(0, 'rgba(255, 255, 200, 0.2)');  // Mantendo 0.2
             gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
             
             ctx.fillStyle = gradient;
@@ -1421,7 +1421,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.7.8 - Light Blend Fix', canvas.width - 320, canvas.height - 10);
+    ctx.fillText('v1.7.9 - Screen Blend Mode', canvas.width - 340, canvas.height - 10);
     
     // Morte
     if (player.isDead) {
@@ -1537,8 +1537,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.7.8 - Light Blend Fix! 🎮');
-console.log('💡 Voltando para overlay (lighter era muito forte)');
-console.log('✨ Intensidade ajustada para 0.2');
-console.log('👤 Personagem não será mais obscurecido');
-console.log('✅ Balanço entre visibilidade e atmosfera!');
+console.log('🎮 Mad Night v1.7.9 - Screen Blend Mode! 🎮');
+console.log('💡 Testando blend mode "screen"');
+console.log('✨ Screen é mais suave que lighter');
+console.log('🔦 Deve criar um brilho mais natural');
+console.log('✅ Vamos ver como fica!');
