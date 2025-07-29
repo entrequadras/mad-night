@@ -1,4 +1,4 @@
-console.log('Mad Night v1.7.5 - Light Fix');
+console.log('Mad Night v1.7.6 - Test Light Post');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -144,7 +144,9 @@ const maps = [
             {x: 300, y: 300, radius: 150},
             {x: 1620, y: 300, radius: 150},
             {x: 300, y: 780, radius: 150},
-            {x: 1620, y: 780, radius: 150}
+            {x: 1620, y: 780, radius: 150},
+            // NOVO POSTE: ao lado esquerdo do campo
+            {x: 460, y: 540, radius: 180}  // Teste de poste mais próximo do campo
         ],
         shadows: [
             {x: 240, y: 240, radius: 100},
@@ -1419,7 +1421,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.7.5 - Light Fix', canvas.width - 300, canvas.height - 10);
+    ctx.fillText('v1.7.6 - Test Light Post', canvas.width - 320, canvas.height - 10);
     
     // Morte
     if (player.isDead) {
@@ -1535,8 +1537,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.7.5 - Light Fix! 🎮');
-console.log('💡 Luzes dos postes não são mais escurecidas');
-console.log('🌙 Filtro noturno cria iluminação limpa');
-console.log('✨ Áreas iluminadas mais visíveis');
-console.log('✅ Sistema de iluminação unificado!');
+console.log('🎮 Mad Night v1.7.6 - Test Light Post! 🎮');
+console.log('💡 Novo poste adicionado ao lado do campo (X:460)');
+console.log('🔦 Raio de 180 pixels para teste');
+console.log('⚽ Observe como ilumina parte do campo');
+console.log('✅ Teste de iluminação em andamento!');
