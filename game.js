@@ -135,7 +135,7 @@ const maps = [
         width: 600,
         height: 800,
         enemies: [
-            {x: 300, y: 200, type: 'faquinha'},
+            {x: 300, y: 200, type: 'morcego'},
             {x: 200, y: 500, type: 'faquinha'}
         ],
         escapeEnemies: [
@@ -176,7 +176,7 @@ const maps = [
         width: 600,
         height: 800,
         enemies: [
-            {x: 150, y: 400, type: 'faquinha'},
+            {x: 150, y: 400, type: 'morcego'},
             {x: 450, y: 400, type: 'faquinha'}
         ],
         escapeEnemies: [
@@ -213,7 +213,7 @@ const maps = [
         width: 600,
         height: 800,
         enemies: [
-            {x: 200, y: 300, type: 'faquinha'},
+            {x: 200, y: 300, type: 'morcego'},
             {x: 400, y: 300, type: 'faquinha'},
             {x: 300, y: 500, type: 'janis'}
         ],
@@ -246,6 +246,7 @@ const maps = [
 const enemies = [];
 const projectiles = [];
 const faquinhaSprites = [];
+const morcegoSprites = [];
 const caveirinhaSprites = [];
 const janisSprites = [];
 const chacalSprites = [];
@@ -308,8 +309,8 @@ class Enemy {
         this.originX = x;
         this.originY = y;
         this.type = type;
-        this.width = type === 'chacal' ? 84 : 56;
-        this.height = type === 'chacal' ? 84 : 56;
+        this.width = 56;  // Todos com mesmo tamanho agora
+        this.height = 56;
         this.speed = type === 'caveirinha' ? 2.5 : 2;
         this.patrolSpeed = 1;
         this.direction = 'down';
@@ -588,11 +589,20 @@ function loadMap(mapIndex, isEscape = false) {
     const enemyList = (isEscape && map.escapeEnemies) ? map.escapeEnemies : map.enemies;
     
     enemyList.forEach(enemyData => {
-        const enemy = new Enemy(enemyData.x, enemyData.y, enemyData.type || 'faquinha');
+        const enemyWidth = enemyData.type === 'chacal' ? 84 : 56;
+        const enemyHeight = enemyData.type === 'chacal' ? 84 : 56;
+        
+        // Verifica e ajusta posição se necessário
+        const validPos = findValidSpawnPosition(enemyData.x, enemyData.y, enemyWidth, enemyHeight);
+        
+        const enemy = new Enemy(validPos.x, validPos.y, enemyData.type || 'faquinha');
         
         switch(enemy.type) {
             case 'faquinha':
                 enemy.sprites = faquinhaSprites;
+                break;
+            case 'morcego':
+                enemy.sprites = morcegoSprites;
                 break;
             case 'caveirinha':
                 enemy.sprites = caveirinhaSprites;
@@ -913,6 +923,7 @@ function draw() {
     enemies.forEach(enemy => {
         const loadedCheck = {
             'faquinha': faquinhaLoaded >= 16,
+            'morcego': morcegoLoaded >= 16,
             'caveirinha': caveirinhaLoaded >= 16,
             'janis': janisLoaded >= 16,
             'chacal': chacalLoaded >= 16
@@ -946,6 +957,7 @@ function draw() {
             if (!enemy.isDead) {
                 const colors = {
                     'faquinha': '#808',
+                    'morcego': '#408',
                     'caveirinha': '#c0c',
                     'janis': '#0cc',
                     'chacal': '#f80'
@@ -1027,7 +1039,7 @@ function draw() {
     
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.3.7 - Novos Inimigos', canvas.width - 140, canvas.height - 5);
+    ctx.fillText('v1.3.8 - Spawn Seguro', canvas.width - 140, canvas.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
@@ -1048,6 +1060,7 @@ function gameLoop() {
 // Carregar sprites
 let madmaxLoaded = 0;
 let faquinhaLoaded = 0;
+let morcegoLoaded = 0;
 let caveirinhaLoaded = 0;
 let janisLoaded = 0;
 let chacalLoaded = 0;
@@ -1064,6 +1077,18 @@ for (let i = 0; i <= 15; i++) {
     img.src = `assets/sprites/faquinha${String(i).padStart(3, '0')}.png`;
     img.onload = () => faquinhaLoaded++;
     faquinhaSprites[i] = img;
+}
+
+for (let i = 0; i <= 15; i++) {
+    const img = new Image();
+    img.src = `assets/sprites/morcego${String(i).padStart(3, '0')}.png`;
+    img.onload = () => {
+        morcegoLoaded++;
+        if (morcegoLoaded === 1) console.log('Morcego sprites carregando...');
+        if (morcegoLoaded === 16) console.log('Todos sprites Morcego carregados!');
+    };
+    img.onerror = () => console.error(`Erro ao carregar morcego${String(i).padStart(3, '0')}.png`);
+    morcegoSprites[i] = img;
 }
 
 for (let i = 0; i <= 15; i++) {
@@ -1108,12 +1133,11 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.3.7 - Novos Inimigos Implementados! 🎮');
+console.log('🎮 Mad Night v1.3.8 - Morcego e Ajustes! 🎮');
+console.log('🦇 Morcego: Novo inimigo básico (igual ao Faquinha)');
 console.log('💀 Sistema de vidas: caveiras somem conforme morre');
-console.log('🏴‍☠️ Caveirinha: 25% mais rápido que Faquinha');
-console.log('👧 Janis: Ataca com pedras à distância (200px)');
-console.log('🐺 Chacal: Boss com 3 vidas, aparece na fuga do mapa 3');
-console.log('⚠️ Verificar nomes dos arquivos:');
-console.log('- caveirinha000.png até caveirinha015.png');
-console.log('- janis000.png até janis015.png');
-console.log('- chacal000.png até chacal015.png');
+console.log('🏴‍☠️ Caveirinha: 25% mais rápido');
+console.log('👧 Janis: Ataca com pedras à distância');
+console.log('🐺 Chacal: Boss com 3 vidas (agora 56x56 pixels)');
+console.log('✅ Sistema de spawn seguro implementado');
+console.log('✅ Variedade visual nos inimigos básicos');
