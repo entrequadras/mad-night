@@ -1,4 +1,4 @@
-console.log('Mad Night v1.6 - Enemy Size Update');
+console.log('Mad Night v1.5.3 - Ajuste de Tamanho dos Inimigos');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -377,8 +377,8 @@ class Enemy {
         this.originX = x;
         this.originY = y;
         this.type = type;
-        this.width = 46;  // Ajustado de 50 para 46 (v1.6)
-        this.height = 46; // Ajustado de 50 para 46 (v1.6)
+        this.width = 46;  // MUDANÇA: de 50 para 46
+        this.height = 46; // MUDANÇA: de 50 para 46
         this.speed = type === 'caveirinha' ? 2.5 : 2;
         this.patrolSpeed = 1;
         this.direction = 'down';
@@ -630,7 +630,7 @@ function spawnEscapeEnemy() {
     const types = ['faquinha', 'morcego', 'caveirinha', 'caveirinha'];
     const randomType = types[Math.floor(Math.random() * types.length)];
     
-    const validPos = findValidSpawnPosition(corner.x, corner.y, 46, 46); // v1.6 - ajustado tamanho
+    const validPos = findValidSpawnPosition(corner.x, corner.y, 46, 46); // MUDANÇA: de 50 para 46
     
     const enemy = new Enemy(validPos.x, validPos.y, randomType);
     
@@ -678,7 +678,7 @@ function loadMap(mapIndex, isEscape = false) {
     const enemyList = (isEscape && map.escapeEnemies) ? map.escapeEnemies : map.enemies;
     
     enemyList.forEach(enemyData => {
-        const validPos = findValidSpawnPosition(enemyData.x, enemyData.y, 46, 46); // v1.6 - ajustado tamanho
+        const validPos = findValidSpawnPosition(enemyData.x, enemyData.y, 46, 46); // MUDANÇA: de 50 para 46
         const enemy = new Enemy(validPos.x, validPos.y, enemyData.type || 'faquinha');
         
         switch(enemy.type) {
@@ -1120,7 +1120,7 @@ function renderEnemies(visibleArea) {
             if (!enemy.isDead && gameState.phase === 'escape') {
                 ctx.fillStyle = '#f00';
                 ctx.font = '10px Arial';
-                ctx.fillText('!', enemy.x + 23, enemy.y - 5); // v1.6 - ajustado posição
+                ctx.fillText('!', enemy.x + 23, enemy.y - 5); // MUDANÇA: ajustado posição do ! (de 25 para 23)
             }
         }
     });
@@ -1197,7 +1197,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.6 - Enemy Size Update', canvas.width - 320, canvas.height - 10);
+    ctx.fillText('v1.5.3 - Ajuste de Tamanho dos Inimigos', canvas.width - 400, canvas.height - 10); // MUDANÇA: versão atualizada
     
     // Morte
     if (player.isDead) {
@@ -1273,7 +1273,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.6 - Enemy Size Update! 🎮');
-console.log('📏 Inimigos ajustados para 46x46 pixels');
-console.log('✅ Mudança simples e incremental');
-console.log('🎯 Próximo passo: expandir o Maconhão');
+console.log('🎮 Mad Night v1.5.3 - Ajuste de Tamanho dos Inimigos! 🎮');
+console.log('📏 Inimigos ajustados para 46x46 pixels (de 50x50)');
+console.log('✅ Única mudança: tamanho dos inimigos');
+console.log('🎯 Próximo passo: expandir o Maconhão com assets');
