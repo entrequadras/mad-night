@@ -4,6 +4,19 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
+// Configurações de câmera e viewport
+const camera = {
+    x: 0,
+    y: 0,
+    width: 960,   // Metade da largura HD
+    height: 540,  // Metade da altura HD
+    zoom: 2       // Zoom 2x para preencher a tela
+};
+
+// Configurar tamanho do canvas
+canvas.width = camera.width * camera.zoom;
+canvas.height = camera.height * camera.zoom;
+
 // Estado do jogo
 const gameState = {
     deaths: 0,
@@ -926,6 +939,14 @@ function update() {
         }
     }
     
+    // Atualizar câmera para seguir o player
+    camera.x = player.x + player.width/2 - camera.width/2;
+    camera.y = player.y + player.height/2 - camera.height/2;
+    
+    // Limitar câmera aos limites do mapa
+    camera.x = Math.max(0, Math.min(map.width - camera.width, camera.x));
+    camera.y = Math.max(0, Math.min(map.height - camera.height, camera.y));
+    
     if (map.orelhao && checkRectCollision(player, map.orelhao)) {
         if (!gameState.dashUnlocked) {
             gameState.dashUnlocked = true;
@@ -980,14 +1001,24 @@ function update() {
     }
 }
 
+// Mapeamento universal dos sprites para TODOS os personagens
+// 000/004: Descendo | 001/005: Direita | 002/006: Esquerda | 003/007: Subindo
+// 008: Descendo armado | 009: Direita armado | 010: Esquerda armado | 011: Subindo armado
+// 012-015: Poses de morte
+
 function getPlayerSprite() {
     if (player.isDead) return player.sprites[player.deathFrame];
     
-    // Mapeamento correto conforme os arquivos de sprite
+    // Mapeamento idêntico ao dos inimigos
     const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
     const base = dirMap[player.direction];
     
-    if (player.isDashing) return player.sprites[8 + base];
+    if (player.isDashing) {
+        // Sprites de dash (8-11)
+        return player.sprites[8 + base];
+    }
+    
+    // Sprites normais com animação (0-7)
     return player.sprites[base + player.frame * 4];
 }
 
@@ -995,37 +1026,71 @@ function getPlayerSprite() {
 function draw() {
     const map = maps[gameState.currentMap];
     
-    if (canvas.width !== map.width || canvas.height !== map.height) {
-        canvas.width = map.width;
-        canvas.height = map.height;
-    }
-    
-    ctx.fillStyle = '#1a1a1a';
+    // Limpar canvas
+    ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
+    // Salvar contexto e aplicar zoom
+    ctx.save();
+    ctx.scale(camera.zoom, camera.zoom);
+    ctx.translate(-camera.x, -camera.y);
+    
+    // Fundo
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
+    
+    // Desenhar apenas o que está visível na câmera
+    const visibleArea = {
+        left: camera.x - 100,
+        right: camera.x + camera.width + 100,
+        top: camera.y - 100,
+        bottom: camera.y + camera.height + 100
+    };
+    
+    // Luzes (apenas visíveis)
     map.lights.forEach(light => {
-        const gradient = ctx.createRadialGradient(light.x, light.y, 0, light.x, light.y, light.radius);
-        gradient.addColorStop(0, 'rgba(255, 255, 200, 0.3)');
-        gradient.addColorStop(0.5, 'rgba(255, 255, 200, 0.1)');
-        gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(light.x - light.radius, light.y - light.radius, light.radius * 2, light.radius * 2);
+        if (light.x + light.radius > visibleArea.left && 
+            light.x - light.radius < visibleArea.right &&
+            light.y + light.radius > visibleArea.top && 
+            light.y - light.radius < visibleArea.bottom) {
+            
+            const gradient = ctx.createRadialGradient(light.x, light.y, 0, light.x, light.y, light.radius);
+            gradient.addColorStop(0, 'rgba(255, 255, 200, 0.3)');
+            gradient.addColorStop(0.5, 'rgba(255, 255, 200, 0.1)');
+            gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(light.x - light.radius, light.y - light.radius, light.radius * 2, light.radius * 2);
+        }
     });
     
+    // Sombras (apenas visíveis)
     map.shadows.forEach(shadow => {
-        const gradient = ctx.createRadialGradient(shadow.x, shadow.y, 0, shadow.x, shadow.y, shadow.radius);
-        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.8)');
-        gradient.addColorStop(0.7, 'rgba(0, 0, 0, 0.5)');
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(shadow.x - shadow.radius, shadow.y - shadow.radius, shadow.radius * 2, shadow.radius * 2);
+        if (shadow.x + shadow.radius > visibleArea.left && 
+            shadow.x - shadow.radius < visibleArea.right &&
+            shadow.y + shadow.radius > visibleArea.top && 
+            shadow.y - shadow.radius < visibleArea.bottom) {
+            
+            const gradient = ctx.createRadialGradient(shadow.x, shadow.y, 0, shadow.x, shadow.y, shadow.radius);
+            gradient.addColorStop(0, 'rgba(0, 0, 0, 0.8)');
+            gradient.addColorStop(0.7, 'rgba(0, 0, 0, 0.5)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(shadow.x - shadow.radius, shadow.y - shadow.radius, shadow.radius * 2, shadow.radius * 2);
+        }
     });
     
+    // Paredes (apenas visíveis)
     ctx.fillStyle = '#333';
     map.walls.forEach(wall => {
-        ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
+        if (wall.x + wall.w > visibleArea.left && 
+            wall.x < visibleArea.right &&
+            wall.y + wall.h > visibleArea.top && 
+            wall.y < visibleArea.bottom) {
+            ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
+        }
     });
     
+    // Objetos especiais
     if (map.orelhao) {
         ctx.fillStyle = '#00f';
         ctx.fillRect(map.orelhao.x, map.orelhao.y, map.orelhao.w, map.orelhao.h);
@@ -1050,67 +1115,74 @@ function draw() {
         ctx.fillText(gameState.phase === 'escape' ? 'VOLTA' : 'SAÍDA', map.exit.x + 5, map.exit.y + 30);
     }
     
-    // Desenhar projéteis
+    // Projéteis (apenas visíveis)
     projectiles.forEach(stone => {
-        ctx.fillStyle = '#888';
-        ctx.fillRect(stone.x - 5, stone.y - 5, stone.width, stone.height);
+        if (stone.x > visibleArea.left && stone.x < visibleArea.right &&
+            stone.y > visibleArea.top && stone.y < visibleArea.bottom) {
+            ctx.fillStyle = '#888';
+            ctx.fillRect(stone.x - 5, stone.y - 5, stone.width, stone.height);
+        }
     });
     
-    // Desenhar inimigos
+    // Inimigos (apenas visíveis)
     enemies.forEach(enemy => {
-        const loadedCheck = {
-            'faquinha': faquinhaLoaded >= 16,
-            'morcego': morcegoLoaded >= 16,
-            'caveirinha': caveirinhaLoaded >= 16,
-            'janis': janisLoaded >= 16,
-            'chacal': chacalLoaded >= 16
-        };
-        
-        if (loadedCheck[enemy.type]) {
-            const sprite = enemy.getSprite();
-            if (sprite) {
-                if (isInShadow(enemy.x + enemy.width/2, enemy.y + enemy.height/2)) {
-                    ctx.globalAlpha = 0.5;
+        if (enemy.x + enemy.width > visibleArea.left && 
+            enemy.x < visibleArea.right &&
+            enemy.y + enemy.height > visibleArea.top && 
+            enemy.y < visibleArea.bottom) {
+            
+            const loadedCheck = {
+                'faquinha': faquinhaLoaded >= 16,
+                'morcego': morcegoLoaded >= 16,
+                'caveirinha': caveirinhaLoaded >= 16,
+                'janis': janisLoaded >= 16,
+                'chacal': chacalLoaded >= 16
+            };
+            
+            if (loadedCheck[enemy.type]) {
+                const sprite = enemy.getSprite();
+                if (sprite) {
+                    if (isInShadow(enemy.x + enemy.width/2, enemy.y + enemy.height/2)) {
+                        ctx.globalAlpha = 0.5;
+                    }
+                    
+                    if (enemy.type === 'chacal' && !enemy.isDead && enemy.health < enemy.maxHealth) {
+                        ctx.fillStyle = '#800';
+                        ctx.fillRect(enemy.x, enemy.y - 10, enemy.width, 5);
+                        ctx.fillStyle = '#f00';
+                        ctx.fillRect(enemy.x, enemy.y - 10, enemy.width * (enemy.health / enemy.maxHealth), 5);
+                    }
+                    
+                    if (enemy.isInvulnerable) {
+                        ctx.globalAlpha = 0.5;
+                    }
+                    
+                    ctx.drawImage(sprite, enemy.x, enemy.y, enemy.width, enemy.height);
+                    ctx.globalAlpha = 1;
                 }
-                
-                // Desenhar barra de vida do Chacal
-                if (enemy.type === 'chacal' && !enemy.isDead && enemy.health < enemy.maxHealth) {
-                    ctx.fillStyle = '#800';
-                    ctx.fillRect(enemy.x, enemy.y - 10, enemy.width, 5);
-                    ctx.fillStyle = '#f00';
-                    ctx.fillRect(enemy.x, enemy.y - 10, enemy.width * (enemy.health / enemy.maxHealth), 5);
+            } else {
+                if (!enemy.isDead) {
+                    const colors = {
+                        'faquinha': '#808',
+                        'morcego': '#408',
+                        'caveirinha': '#c0c',
+                        'janis': '#0cc',
+                        'chacal': '#f80'
+                    };
+                    ctx.fillStyle = enemy.state === 'chase' ? '#f0f' : colors[enemy.type];
+                    ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
                 }
-                
-                // Efeito de invulnerabilidade
-                if (enemy.isInvulnerable) {
-                    ctx.globalAlpha = 0.5;
-                }
-                
-                ctx.drawImage(sprite, enemy.x, enemy.y, enemy.width, enemy.height);
-                ctx.globalAlpha = 1;
             }
-        } else {
-            // Placeholder colorido por tipo
-            if (!enemy.isDead) {
-                const colors = {
-                    'faquinha': '#808',
-                    'morcego': '#408',
-                    'caveirinha': '#c0c',
-                    'janis': '#0cc',
-                    'chacal': '#f80'
-                };
-                ctx.fillStyle = enemy.state === 'chase' ? '#f0f' : colors[enemy.type];
-                ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+            
+            if (!enemy.isDead && gameState.phase === 'escape') {
+                ctx.fillStyle = '#f00';
+                ctx.font = '10px Arial';
+                ctx.fillText('!', enemy.x + 25, enemy.y - 5);
             }
-        }
-        
-        if (!enemy.isDead && gameState.phase === 'escape') {
-            ctx.fillStyle = '#f00';
-            ctx.font = '10px Arial';
-            ctx.fillText('!', enemy.x + 25, enemy.y - 5);
         }
     });
     
+    // Player (sempre visível pois câmera segue ele)
     if (madmaxLoaded >= 16) {
         const sprite = getPlayerSprite();
         if (sprite) {
@@ -1125,62 +1197,71 @@ function draw() {
         ctx.globalAlpha = 1;
     }
     
+    // Restaurar contexto (remove zoom e translação)
+    ctx.restore();
+    
+    // UI (desenhada sem zoom, sempre na mesma posição)
+    // Nome do mapa
     ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#ff0';
-    ctx.font = 'bold 24px Arial';
+    ctx.font = 'bold 48px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText(map.name, canvas.width/2, 40);
-    ctx.font = '16px Arial';
-    ctx.fillText(map.subtitle, canvas.width/2, 60);
+    ctx.fillText(map.name, canvas.width/2, 80);
+    ctx.font = '32px Arial';
+    ctx.fillText(map.subtitle, canvas.width/2, 120);
     ctx.textAlign = 'left';
     
+    // UI inferior
     ctx.fillStyle = '#fff';
-    ctx.font = '14px Arial';
-    ctx.fillText(`Mapa: ${gameState.currentMap + 1}/6 | Fase: ${gameState.phase === 'escape' ? 'FUGA!' : 'Infiltração'}`, 10, canvas.height - 40);
-    ctx.fillText(`Inimigos: ${enemies.filter(e => !e.isDead).length}`, 10, canvas.height - 20);
+    ctx.font = '28px Arial';
+    ctx.fillText(`Mapa: ${gameState.currentMap + 1}/6 | Fase: ${gameState.phase === 'escape' ? 'FUGA!' : 'Infiltração'}`, 20, canvas.height - 80);
+    ctx.fillText(`Inimigos: ${enemies.filter(e => !e.isDead).length}`, 20, canvas.height - 40);
     
-    ctx.fillStyle = '#fff';
-    ctx.fillText('Vidas: ', 10, 25);
+    // Vidas
+    ctx.fillText('Vidas: ', 20, 50);
     for (let i = 0; i < 5; i++) {
-        ctx.font = '20px Arial';
+        ctx.font = '40px Arial';
         if (i < gameState.deaths) {
-            // Vidas perdidas - não desenha nada (vazio)
+            // Vidas perdidas - não desenha nada
         } else {
             // Vidas restantes - mostra caveira
             ctx.fillStyle = '#f00';
-            ctx.fillText('💀', 60 + i * 30, 25);
+            ctx.fillText('💀', 120 + i * 60, 50);
         }
     }
-    ctx.font = '14px Arial';
+    ctx.font = '28px Arial';
     
     if (player.inShadow) {
         ctx.fillStyle = '#0f0';
-        ctx.fillText('NA SOMBRA - Invisível!', 10, 85);
+        ctx.fillText('NA SOMBRA - Invisível!', 20, 170);
     }
     
     if (map.orelhao && !gameState.dashUnlocked) {
         ctx.fillStyle = '#ff0';
-        ctx.fillText('Chegue no TELEFONE azul!', 10, 105);
+        ctx.fillText('Chegue no TELEFONE azul!', 20, 210);
     }
     
     if (map.lixeira && !gameState.bombPlaced) {
         ctx.fillStyle = '#ff0';
-        ctx.fillText('Mate todos e coloque a BOMBA!', 10, 105);
+        ctx.fillText('Mate todos e coloque a BOMBA!', 20, 210);
     }
     
+    // Força de Pedal
     ctx.fillStyle = '#fff';
-    ctx.fillText('Força de Pedal: ', 10, 65);
+    ctx.fillText('Força de Pedal: ', 20, 130);
     for (let i = 0; i < gameState.maxPedalPower; i++) {
         ctx.fillStyle = i < gameState.pedalPower ? '#0f0' : '#333';
-        ctx.fillText('█', 120 + i * 12, 65);
+        ctx.fillText('█', 240 + i * 24, 130);
     }
     
+    // Versão
     ctx.fillStyle = '#666';
-    ctx.font = '10px Arial';
-    ctx.fillText('v1.5.0 - Mapas Expandidos', canvas.width - 160, canvas.height - 5);
+    ctx.font = '20px Arial';
+    ctx.fillText('v1.5.1 - Sistema de Câmera', canvas.width - 300, canvas.height - 10);
     
+    // Mensagem de morte
     if (player.isDead) {
         ctx.fillStyle = '#f00';
-        ctx.font = '32px Arial';
+        ctx.font = '64px Arial';
         ctx.textAlign = 'center';
         const msg = gameState.deaths < 5 ? "ah véi, se liga carái" : "sifudêu";
         ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
@@ -1270,11 +1351,11 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.4.1 - Eixão Corrigido! 🎮');
-console.log('🚇 Eixão da Morte com passagens nos pilares:');
-console.log('  - 4 túneis conectados por passagens');
-console.log('  - Túneis 1 e 4: Abertos nas laterais');
-console.log('  - Túneis 2 e 3: Claraboias quadradas');
-console.log('  - Pilares com vãos de 200px no meio');
-console.log('✅ Player pode atravessar entre todos os túneis');
-console.log('🦇 Todos os sprites funcionando corretamente');
+console.log('🎮 Mad Night v1.5.1 - Sistema de Câmera! 🎮');
+console.log('📹 Câmera implementada:');
+console.log('  - Viewport: 960x540 (metade do HD)');
+console.log('  - Zoom: 2x (tudo aparece maior)');
+console.log('  - Câmera segue o player');
+console.log('  - UI aumentada proporcionalmente');
+console.log('🎯 Sensação mais próxima do Hotline Miami');
+console.log('✅ Performance otimizada - só desenha o que está visível');
