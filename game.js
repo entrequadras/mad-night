@@ -1,4 +1,4 @@
-console.log('Mad Night v1.5.6 - Campo 800px Update');
+console.log('Mad Night v1.5.7 - Campo Dimensions Update');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -1005,7 +1005,7 @@ function renderCampo(map) {
     if (gameState.currentMap === 0 && campoLoaded) {
         // Posicionar o campo no centro do mapa
         const campoX = (map.width - 800) / 2; // Campo de 800px de largura
-        const campoY = (map.height - 533) / 2; // Assumindo proporção 3:2 (800x533)
+        const campoY = (map.height - 462) / 2; // Campo de 462px de altura (dimensão real)
         
         ctx.drawImage(campoImage, campoX, campoY);
     }
@@ -1223,7 +1223,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.5.6 - Campo 800px Update', canvas.width - 350, canvas.height - 10); // MUDANÇA: versão atualizada
+    ctx.fillText('v1.5.7 - Campo Dimensions Update', canvas.width - 380, canvas.height - 10); // MUDANÇA: versão atualizada
     
     // Morte
     if (player.isDead) {
@@ -1299,7 +1299,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.5.6 - Campo 800px Update! 🎮');
-console.log('⚽ Campo ajustado para 800px de largura');
-console.log('📏 Centralizado no Maconhão');
-console.log('✅ Pronto para adicionar árvores ao redor!');
+console.log('🎮 Mad Night v1.5.7 - Campo Dimensions Update! 🎮');
+console.log('⚽ Campo com dimensões exatas: 800x462 pixels');
+console.log('📏 Posição: X=' + ((1920-800)/2) + ', Y=' + ((1080-462)/2));
+console.log('✅ Centralizado perfeitamente no Maconhão!');
