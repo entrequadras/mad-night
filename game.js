@@ -1,19 +1,19 @@
-console.log('Mad Night v1.3.9 - Morcego e Ajustes 2');
+console.log('Mad Night v1.5.1 - Sistema de Câmera');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
-// Configurações de câmera e viewport
+// Configurações de câmera
 const camera = {
     x: 0,
     y: 0,
-    width: 960,   // Metade da largura HD
-    height: 540,  // Metade da altura HD
-    zoom: 2       // Zoom 2x para preencher a tela
+    width: 960,
+    height: 540,
+    zoom: 2
 };
 
-// Configurar tamanho do canvas
+// Configurar canvas
 canvas.width = camera.width * camera.zoom;
 canvas.height = camera.height * camera.zoom;
 
@@ -65,39 +65,27 @@ const maps = [
         height: 1080,
         enemies: [],
         walls: [
-            // Campo de futebol central
-            {x: 600, y: 300, w: 720, h: 20},   // linha superior
-            {x: 600, y: 760, w: 720, h: 20},   // linha inferior
-            {x: 600, y: 320, w: 20, h: 440},   // trave esquerda
-            {x: 1300, y: 320, w: 20, h: 440},  // trave direita
-            
-            // Algumas árvores espalhadas
+            {x: 600, y: 300, w: 720, h: 20},
+            {x: 600, y: 760, w: 720, h: 20},
+            {x: 600, y: 320, w: 20, h: 440},
+            {x: 1300, y: 320, w: 20, h: 440},
             {x: 200, y: 200, w: 80, h: 80},
             {x: 1600, y: 150, w: 80, h: 80},
             {x: 300, y: 800, w: 80, h: 80},
-            {x: 1500, y: 850, w: 80, h: 80},
-            {x: 900, y: 100, w: 60, h: 60},
-            {x: 1000, y: 900, w: 60, h: 60}
+            {x: 1500, y: 850, w: 80, h: 80}
         ],
         lights: [
-            {x: 960, y: 540, radius: 300},      // luz central grande
-            {x: 300, y: 300, radius: 150},      // luz canto superior esquerdo
-            {x: 1620, y: 300, radius: 150},     // luz canto superior direito
-            {x: 300, y: 780, radius: 150},      // luz canto inferior esquerdo
-            {x: 1620, y: 780, radius: 150}      // luz canto inferior direito
+            {x: 960, y: 540, radius: 300},
+            {x: 300, y: 300, radius: 150},
+            {x: 1620, y: 300, radius: 150},
+            {x: 300, y: 780, radius: 150},
+            {x: 1620, y: 780, radius: 150}
         ],
         shadows: [
-            // Sombras das árvores
             {x: 240, y: 240, radius: 100},
             {x: 1640, y: 190, radius: 100},
             {x: 340, y: 840, radius: 100},
-            {x: 1540, y: 890, radius: 100},
-            {x: 930, y: 130, radius: 80},
-            {x: 1030, y: 930, radius: 80},
-            
-            // Sombras extras para atmosfera
-            {x: 150, y: 540, radius: 120},
-            {x: 1770, y: 540, radius: 120}
+            {x: 1540, y: 890, radius: 100}
         ],
         playerStart: {x: 200, y: 540},
         playerStartEscape: {x: 1700, y: 540},
@@ -111,44 +99,26 @@ const maps = [
         height: 600,
         enemies: [],
         walls: [
-            // Paredes externas (teto e chão gerais)
             {x: 0, y: 0, w: 800, h: 100},
             {x: 0, y: 500, w: 800, h: 100},
-            
-            // Pilar 1 (x=200) com passagem no meio
-            {x: 200, y: 100, w: 60, h: 100},   // parte superior
-            {x: 200, y: 400, w: 60, h: 100},   // parte inferior
-            // Passagem: y=200 até y=400 (200px de altura)
-            
-            // Pilar 2 (x=400) com passagem no meio
-            {x: 400, y: 100, w: 60, h: 100},   // parte superior
-            {x: 400, y: 400, w: 60, h: 100},   // parte inferior
-            // Passagem: y=200 até y=400 (200px de altura)
-            
-            // Pilar 3 (x=600) com passagem no meio
-            {x: 600, y: 100, w: 60, h: 100},   // parte superior
-            {x: 600, y: 400, w: 60, h: 100},   // parte inferior
-            // Passagem: y=200 até y=400 (200px de altura)
-            
-            // Claraboias (túneis 2 e 3 como quadrados)
-            // Claraboia 2 (entre pilares 1 e 2)
-            {x: 260, y: 150, w: 140, h: 20},   // parede superior
-            {x: 260, y: 430, w: 140, h: 20},   // parede inferior
-            
-            // Claraboia 3 (entre pilares 2 e 3)
-            {x: 460, y: 150, w: 140, h: 20},   // parede superior
-            {x: 460, y: 430, w: 140, h: 20},   // parede inferior
+            {x: 200, y: 100, w: 60, h: 100},
+            {x: 200, y: 400, w: 60, h: 100},
+            {x: 400, y: 100, w: 60, h: 100},
+            {x: 400, y: 400, w: 60, h: 100},
+            {x: 600, y: 100, w: 60, h: 100},
+            {x: 600, y: 400, w: 60, h: 100},
+            {x: 260, y: 150, w: 140, h: 20},
+            {x: 260, y: 430, w: 140, h: 20},
+            {x: 460, y: 150, w: 140, h: 20},
+            {x: 460, y: 430, w: 140, h: 20}
         ],
         lights: [
-            // Luzes nos túneis abertos
             {x: 100, y: 300, radius: 100},
             {x: 700, y: 300, radius: 100},
-            // Luzes nas claraboias (menores, mais focadas)
             {x: 330, y: 300, radius: 70},
             {x: 530, y: 300, radius: 70}
         ],
         shadows: [
-            // Sombras nas passagens dos pilares
             {x: 230, y: 300, radius: 40},
             {x: 430, y: 300, radius: 40},
             {x: 630, y: 300, radius: 40}
@@ -165,17 +135,17 @@ const maps = [
         height: 600,
         enemies: [
             {x: 400, y: 200, type: 'faquinha'},
-            {x: 500, y: 400, type: 'morcego'} // Alternando com morcego
+            {x: 500, y: 400, type: 'janis'}
         ],
         escapeEnemies: [
-            {x: 400, y: 300, type: 'chacal'}, // Boss aparece na fuga!
+            {x: 400, y: 300, type: 'chacal'},
             {x: 200, y: 200, type: 'caveirinha'},
             {x: 600, y: 400, type: 'caveirinha'}
         ],
         walls: [
             {x: 150, y: 100, w: 120, h: 150},
             {x: 350, y: 350, w: 120, h: 150},
-            {x: 550, y: 150, w: 120, h: 100},
+            {x: 550, y: 150, w: 120, h: 100}
         ],
         lights: [
             {x: 100, y: 100, radius: 100},
@@ -213,7 +183,7 @@ const maps = [
             {x: 80, y: 300, w: 120, h: 60},
             {x: 400, y: 300, w: 120, h: 60},
             {x: 80, y: 450, w: 120, h: 60},
-            {x: 400, y: 450, w: 120, h: 60},
+            {x: 400, y: 450, w: 120, h: 60}
         ],
         lights: [
             {x: 300, y: 100, radius: 100},
@@ -252,7 +222,7 @@ const maps = [
             {x: 80, y: 120, w: 160, h: 160},
             {x: 360, y: 120, w: 160, h: 160},
             {x: 80, y: 500, w: 160, h: 160},
-            {x: 360, y: 500, w: 160, h: 160},
+            {x: 360, y: 500, w: 160, h: 160}
         ],
         lights: [
             {x: 300, y: 80, radius: 80},
@@ -285,7 +255,7 @@ const maps = [
             {x: 120, y: 200, w: 140, h: 80},
             {x: 340, y: 200, w: 140, h: 80},
             {x: 120, y: 400, w: 140, h: 80},
-            {x: 340, y: 400, w: 140, h: 80},
+            {x: 340, y: 400, w: 140, h: 80}
         ],
         lights: [
             {x: 150, y: 100, radius: 100},
@@ -365,51 +335,41 @@ function checkWallCollision(entity, newX, newY) {
     return false;
 }
 
-// Função para encontrar posição válida para spawn
 function findValidSpawnPosition(x, y, width, height) {
-    // Primeiro tenta a posição original
     if (!checkWallCollision({x, y, width, height}, x, y)) {
         return {x, y};
     }
     
-    console.log(`Posição original (${x},${y}) está bloqueada, procurando alternativa...`);
-    
-    // Se não for válida, procura em espiral ao redor
     const maxDistance = 200;
     const step = 20;
     
     for (let dist = step; dist <= maxDistance; dist += step) {
-        // Tenta 8 direções
         const positions = [
-            {x: x + dist, y: y},           // direita
-            {x: x - dist, y: y},           // esquerda
-            {x: x, y: y + dist},           // baixo
-            {x: x, y: y - dist},           // cima
-            {x: x + dist, y: y + dist},    // diagonal baixo-direita
-            {x: x - dist, y: y - dist},    // diagonal cima-esquerda
-            {x: x + dist, y: y - dist},    // diagonal cima-direita
-            {x: x - dist, y: y + dist}     // diagonal baixo-esquerda
+            {x: x + dist, y: y},
+            {x: x - dist, y: y},
+            {x: x, y: y + dist},
+            {x: x, y: y - dist},
+            {x: x + dist, y: y + dist},
+            {x: x - dist, y: y - dist},
+            {x: x + dist, y: y - dist},
+            {x: x - dist, y: y + dist}
         ];
         
         for (let pos of positions) {
-            // Verifica se está dentro dos limites do mapa
             const map = maps[gameState.currentMap];
             if (pos.x >= 0 && pos.x + width <= map.width && 
                 pos.y >= 0 && pos.y + height <= map.height) {
                 if (!checkWallCollision({x: pos.x, y: pos.y, width, height}, pos.x, pos.y)) {
-                    console.log(`Spawn ajustado de (${x},${y}) para (${pos.x},${pos.y})`);
                     return pos;
                 }
             }
         }
     }
     
-    // Se não encontrar posição válida, retorna a original (último recurso)
-    console.warn(`AVISO: Não foi possível encontrar posição válida, usando posição original (${x},${y})`);
     return {x, y};
 }
 
-// Classe Enemy melhorada
+// Classe Enemy
 class Enemy {
     constructor(x, y, type = 'faquinha') {
         this.x = x;
@@ -417,7 +377,7 @@ class Enemy {
         this.originX = x;
         this.originY = y;
         this.type = type;
-        this.width = 56;  // Todos com mesmo tamanho agora
+        this.width = 56;
         this.height = 56;
         this.speed = type === 'caveirinha' ? 2.5 : 2;
         this.patrolSpeed = 1;
@@ -434,12 +394,10 @@ class Enemy {
         this.lastDirectionChange = Date.now();
         this.directionChangeInterval = 2000 + Math.random() * 2000;
         
-        // Específico para Janis
         this.attackRange = 200;
         this.lastAttack = 0;
         this.attackCooldown = 2000;
         
-        // Específico para Chacal
         this.health = type === 'chacal' ? 3 : 1;
         this.maxHealth = this.health;
         this.isInvulnerable = false;
@@ -490,7 +448,6 @@ class Enemy {
         let visionRange = this.state === 'chase' ? this.alertVisionRange : this.visionRange;
         if (player.inShadow) visionRange *= 0.3;
         
-        // Comportamento da Janis
         if (this.type === 'janis') {
             if (dist < this.attackRange && !player.isDead) {
                 this.state = 'attack';
@@ -503,17 +460,13 @@ class Enemy {
             }
         }
         
-        // Comportamento do Chacal
         if (this.type === 'chacal' && dist < 300 && !player.isDead) {
             this.state = 'chase';
         }
         
-        // Comportamento padrão
         if (this.type !== 'janis' && dist < visionRange && !player.isDead) {
             let canSee = false;
-            
-            // Sistema de visão em cone
-            const angleThreshold = 50; // largura do cone de visão
+            const angleThreshold = 50;
             
             switch(this.direction) {
                 case 'up': 
@@ -533,22 +486,18 @@ class Enemy {
             if (this.state === 'chase' || canSee || this.type === 'chacal') {
                 this.state = 'chase';
                 
-                // Calcular movimento normalizado
                 const angle = Math.atan2(dy, dx);
                 const moveX = Math.cos(angle) * this.speed;
                 const moveY = Math.sin(angle) * this.speed;
                 
-                // Tentar mover em X
                 if (!checkWallCollision(this, this.x + moveX, this.y)) {
                     this.x += moveX;
                 }
                 
-                // Tentar mover em Y
                 if (!checkWallCollision(this, this.x, this.y + moveY)) {
                     this.y += moveY;
                 }
                 
-                // Atualizar direção baseado no movimento real
                 if (Math.abs(dx) > Math.abs(dy)) {
                     this.direction = dx > 0 ? 'right' : 'left';
                 } else {
@@ -618,11 +567,8 @@ class Enemy {
         this.isInvulnerable = true;
         this.invulnerableTime = Date.now();
         
-        console.log(`Chacal tomou dano! Vida: ${this.health}/${this.maxHealth}`);
-        
         if (this.health <= 0) {
             this.die();
-            console.log('CHACAL DERROTADO!');
         }
     }
     
@@ -634,8 +580,6 @@ class Enemy {
     
     getSprite() {
         if (this.isDead) return this.sprites[this.deathFrame];
-        
-        // Mapeamento correto conforme os arquivos de sprite
         const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
         const base = dirMap[this.direction];
         const offset = (this.state === 'chase' || this.state === 'attack') ? 8 : this.frame * 4;
@@ -681,15 +625,13 @@ function spawnEscapeEnemy() {
     const corner = corners[gameState.spawnCorner % 4];
     gameState.spawnCorner++;
     
-    const types = ['faquinha', 'morcego', 'caveirinha', 'caveirinha']; // Variedade de inimigos
+    const types = ['faquinha', 'morcego', 'caveirinha', 'caveirinha'];
     const randomType = types[Math.floor(Math.random() * types.length)];
     
-    // Encontra posição válida para spawn
     const validPos = findValidSpawnPosition(corner.x, corner.y, 56, 56);
     
     const enemy = new Enemy(validPos.x, validPos.y, randomType);
     
-    // Atribui sprites corretos
     switch(randomType) {
         case 'faquinha':
             enemy.sprites = faquinhaSprites;
@@ -734,12 +676,7 @@ function loadMap(mapIndex, isEscape = false) {
     const enemyList = (isEscape && map.escapeEnemies) ? map.escapeEnemies : map.enemies;
     
     enemyList.forEach(enemyData => {
-        const enemyWidth = enemyData.type === 'chacal' ? 56 : 56; // Todos mesmo tamanho agora
-        const enemyHeight = enemyData.type === 'chacal' ? 56 : 56;
-        
-        // Verifica e ajusta posição se necessário
-        const validPos = findValidSpawnPosition(enemyData.x, enemyData.y, enemyWidth, enemyHeight);
-        
+        const validPos = findValidSpawnPosition(enemyData.x, enemyData.y, 56, 56);
         const enemy = new Enemy(validPos.x, validPos.y, enemyData.type || 'faquinha');
         
         switch(enemy.type) {
@@ -762,8 +699,6 @@ function loadMap(mapIndex, isEscape = false) {
         
         if (isEscape) enemy.state = 'chase';
         enemies.push(enemy);
-        
-        console.log(`Inimigo ${enemy.type} criado em (${enemy.x}, ${enemy.y})`);
     });
 }
 
@@ -856,7 +791,16 @@ canvas.addEventListener('click', () => {
     }
 });
 
-// Update
+// Função para obter sprite do player
+function getPlayerSprite() {
+    if (player.isDead) return player.sprites[player.deathFrame];
+    const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
+    const base = dirMap[player.direction];
+    if (player.isDashing) return player.sprites[8 + base];
+    return player.sprites[base + player.frame * 4];
+}
+
+// Update principal
 let lastFrameTime = 0;
 function update() {
     const map = maps[gameState.currentMap];
@@ -939,11 +883,9 @@ function update() {
         }
     }
     
-    // Atualizar câmera para seguir o player
+    // Atualizar câmera
     camera.x = player.x + player.width/2 - camera.width/2;
     camera.y = player.y + player.height/2 - camera.height/2;
-    
-    // Limitar câmera aos limites do mapa
     camera.x = Math.max(0, Math.min(map.width - camera.width, camera.x));
     camera.y = Math.max(0, Math.min(map.height - camera.height, camera.y));
     
@@ -1001,45 +943,20 @@ function update() {
     }
 }
 
-// Mapeamento universal dos sprites para TODOS os personagens
-// 000/004: Descendo | 001/005: Direita | 002/006: Esquerda | 003/007: Subindo
-// 008: Descendo armado | 009: Direita armado | 010: Esquerda armado | 011: Subindo armado
-// 012-015: Poses de morte
-
-function getPlayerSprite() {
-    if (player.isDead) return player.sprites[player.deathFrame];
-    
-    // Mapeamento idêntico ao dos inimigos
-    const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
-    const base = dirMap[player.direction];
-    
-    if (player.isDashing) {
-        // Sprites de dash (8-11)
-        return player.sprites[8 + base];
-    }
-    
-    // Sprites normais com animação (0-7)
-    return player.sprites[base + player.frame * 4];
-}
-
-// Draw
+// Função de desenho principal
 function draw() {
     const map = maps[gameState.currentMap];
     
-    // Limpar canvas
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Salvar contexto e aplicar zoom
     ctx.save();
     ctx.scale(camera.zoom, camera.zoom);
     ctx.translate(-camera.x, -camera.y);
     
-    // Fundo
     ctx.fillStyle = '#1a1a1a';
     ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
     
-    // Desenhar apenas o que está visível na câmera
     const visibleArea = {
         left: camera.x - 100,
         right: camera.x + camera.width + 100,
@@ -1047,7 +964,23 @@ function draw() {
         bottom: camera.y + camera.height + 100
     };
     
-    // Luzes (apenas visíveis)
+    // Renderizar elementos do mapa
+    renderLights(map, visibleArea);
+    renderShadows(map, visibleArea);
+    renderWalls(map, visibleArea);
+    renderSpecialObjects(map);
+    renderProjectiles(visibleArea);
+    renderEnemies(visibleArea);
+    renderPlayer();
+    
+    ctx.restore();
+    
+    // Renderizar UI
+    renderUI(map);
+}
+
+// Funções de renderização
+function renderLights(map, visibleArea) {
     map.lights.forEach(light => {
         if (light.x + light.radius > visibleArea.left && 
             light.x - light.radius < visibleArea.right &&
@@ -1062,8 +995,9 @@ function draw() {
             ctx.fillRect(light.x - light.radius, light.y - light.radius, light.radius * 2, light.radius * 2);
         }
     });
-    
-    // Sombras (apenas visíveis)
+}
+
+function renderShadows(map, visibleArea) {
     map.shadows.forEach(shadow => {
         if (shadow.x + shadow.radius > visibleArea.left && 
             shadow.x - shadow.radius < visibleArea.right &&
@@ -1078,8 +1012,9 @@ function draw() {
             ctx.fillRect(shadow.x - shadow.radius, shadow.y - shadow.radius, shadow.radius * 2, shadow.radius * 2);
         }
     });
-    
-    // Paredes (apenas visíveis)
+}
+
+function renderWalls(map, visibleArea) {
     ctx.fillStyle = '#333';
     map.walls.forEach(wall => {
         if (wall.x + wall.w > visibleArea.left && 
@@ -1089,8 +1024,9 @@ function draw() {
             ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
         }
     });
-    
-    // Objetos especiais
+}
+
+function renderSpecialObjects(map) {
     if (map.orelhao) {
         ctx.fillStyle = '#00f';
         ctx.fillRect(map.orelhao.x, map.orelhao.y, map.orelhao.w, map.orelhao.h);
@@ -1114,8 +1050,9 @@ function draw() {
         ctx.font = '12px Arial';
         ctx.fillText(gameState.phase === 'escape' ? 'VOLTA' : 'SAÍDA', map.exit.x + 5, map.exit.y + 30);
     }
-    
-    // Projéteis (apenas visíveis)
+}
+
+function renderProjectiles(visibleArea) {
     projectiles.forEach(stone => {
         if (stone.x > visibleArea.left && stone.x < visibleArea.right &&
             stone.y > visibleArea.top && stone.y < visibleArea.bottom) {
@@ -1123,8 +1060,9 @@ function draw() {
             ctx.fillRect(stone.x - 5, stone.y - 5, stone.width, stone.height);
         }
     });
-    
-    // Inimigos (apenas visíveis)
+}
+
+function renderEnemies(visibleArea) {
     enemies.forEach(enemy => {
         if (enemy.x + enemy.width > visibleArea.left && 
             enemy.x < visibleArea.right &&
@@ -1181,8 +1119,9 @@ function draw() {
             }
         }
     });
-    
-    // Player (sempre visível pois câmera segue ele)
+}
+
+function renderPlayer() {
     if (madmaxLoaded >= 16) {
         const sprite = getPlayerSprite();
         if (sprite) {
@@ -1196,11 +1135,9 @@ function draw() {
         ctx.fillRect(player.x, player.y, player.width, player.height);
         ctx.globalAlpha = 1;
     }
-    
-    // Restaurar contexto (remove zoom e translação)
-    ctx.restore();
-    
-    // UI (desenhada sem zoom, sempre na mesma posição)
+}
+
+function renderUI(map) {
     // Nome do mapa
     ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#ff0';
     ctx.font = 'bold 48px Arial';
@@ -1210,31 +1147,30 @@ function draw() {
     ctx.fillText(map.subtitle, canvas.width/2, 120);
     ctx.textAlign = 'left';
     
-    // UI inferior
+    // Info
     ctx.fillStyle = '#fff';
     ctx.font = '28px Arial';
-    ctx.fillText(`Mapa: ${gameState.currentMap + 1}/6 | Fase: ${gameState.phase === 'escape' ? 'FUGA!' : 'Infiltração'}`, 20, canvas.height - 80);
+    ctx.fillText(`Mapa: ${gameState.currentMap + 1}/6`, 20, canvas.height - 80);
     ctx.fillText(`Inimigos: ${enemies.filter(e => !e.isDead).length}`, 20, canvas.height - 40);
     
     // Vidas
     ctx.fillText('Vidas: ', 20, 50);
     for (let i = 0; i < 5; i++) {
         ctx.font = '40px Arial';
-        if (i < gameState.deaths) {
-            // Vidas perdidas - não desenha nada
-        } else {
-            // Vidas restantes - mostra caveira
+        if (i >= gameState.deaths) {
             ctx.fillStyle = '#f00';
             ctx.fillText('💀', 120 + i * 60, 50);
         }
     }
     ctx.font = '28px Arial';
     
+    // Status
     if (player.inShadow) {
         ctx.fillStyle = '#0f0';
         ctx.fillText('NA SOMBRA - Invisível!', 20, 170);
     }
     
+    // Avisos
     if (map.orelhao && !gameState.dashUnlocked) {
         ctx.fillStyle = '#ff0';
         ctx.fillText('Chegue no TELEFONE azul!', 20, 210);
@@ -1258,7 +1194,7 @@ function draw() {
     ctx.font = '20px Arial';
     ctx.fillText('v1.5.1 - Sistema de Câmera', canvas.width - 300, canvas.height - 10);
     
-    // Mensagem de morte
+    // Morte
     if (player.isDead) {
         ctx.fillStyle = '#f00';
         ctx.font = '64px Arial';
@@ -1269,6 +1205,7 @@ function draw() {
     }
 }
 
+// Game loop
 function gameLoop() {
     update();
     draw();
@@ -1300,48 +1237,28 @@ for (let i = 0; i <= 15; i++) {
 for (let i = 0; i <= 15; i++) {
     const img = new Image();
     img.src = `assets/sprites/morcego${String(i).padStart(3, '0')}.png`;
-    img.onload = () => {
-        morcegoLoaded++;
-        if (morcegoLoaded === 1) console.log('Morcego sprites carregando...');
-        if (morcegoLoaded === 16) console.log('Todos sprites Morcego carregados!');
-    };
-    img.onerror = () => console.error(`Erro ao carregar morcego${String(i).padStart(3, '0')}.png`);
+    img.onload = () => morcegoLoaded++;
     morcegoSprites[i] = img;
 }
 
 for (let i = 0; i <= 15; i++) {
     const img = new Image();
     img.src = `assets/sprites/caveirinha${String(i).padStart(3, '0')}.png`;
-    img.onload = () => {
-        caveirinhaLoaded++;
-        if (caveirinhaLoaded === 1) console.log('Caveirinha sprites carregando...');
-        if (caveirinhaLoaded === 16) console.log('Todos sprites Caveirinha carregados!');
-    };
-    img.onerror = () => console.error(`Erro ao carregar caveirinha${String(i).padStart(3, '0')}.png`);
+    img.onload = () => caveirinhaLoaded++;
     caveirinhaSprites[i] = img;
 }
 
 for (let i = 0; i <= 15; i++) {
     const img = new Image();
     img.src = `assets/sprites/janis${String(i).padStart(3, '0')}.png`;
-    img.onload = () => {
-        janisLoaded++;
-        if (janisLoaded === 1) console.log('Janis sprites carregando...');
-        if (janisLoaded === 16) console.log('Todos sprites Janis carregados!');
-    };
-    img.onerror = () => console.error(`Erro ao carregar janis${String(i).padStart(3, '0')}.png`);
+    img.onload = () => janisLoaded++;
     janisSprites[i] = img;
 }
 
 for (let i = 0; i <= 15; i++) {
     const img = new Image();
     img.src = `assets/sprites/chacal${String(i).padStart(3, '0')}.png`;
-    img.onload = () => {
-        chacalLoaded++;
-        if (chacalLoaded === 1) console.log('Chacal sprites carregando...');
-        if (chacalLoaded === 16) console.log('Todos sprites Chacal carregados!');
-    };
-    img.onerror = () => console.error(`Erro ao carregar chacal${String(i).padStart(3, '0')}.png`);
+    img.onload = () => chacalLoaded++;
     chacalSprites[i] = img;
 }
 
@@ -1352,10 +1269,6 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 console.log('🎮 Mad Night v1.5.1 - Sistema de Câmera! 🎮');
-console.log('📹 Câmera implementada:');
-console.log('  - Viewport: 960x540 (metade do HD)');
-console.log('  - Zoom: 2x (tudo aparece maior)');
-console.log('  - Câmera segue o player');
-console.log('  - UI aumentada proporcionalmente');
-console.log('🎯 Sensação mais próxima do Hotline Miami');
-console.log('✅ Performance otimizada - só desenha o que está visível');
+console.log('📹 Viewport: 960x540 com zoom 2x');
+console.log('🎯 Câmera segue o player automaticamente');
+console.log('✅ Performance otimizada - renderiza apenas o visível');
