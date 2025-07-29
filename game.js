@@ -1,4 +1,4 @@
-console.log('Mad Night v1.7.3 - Night Filter Correct');
+console.log('Mad Night v1.7.4 - Speed Adjustment');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -40,7 +40,7 @@ const player = {
     y: 300,
     width: 56,
     height: 56,
-    speed: 4,
+    speed: 3.6,  // Reduzido de 4 para 3.6
     direction: 'right',
     frame: 0,
     sprites: [],
@@ -1419,7 +1419,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.7.3 - Night Filter Correct', canvas.width - 350, canvas.height - 10);
+    ctx.fillText('v1.7.4 - Speed Adjustment', canvas.width - 350, canvas.height - 10);
     
     // Morte
     if (player.isDead) {
@@ -1535,8 +1535,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.7.3 - Night Filter Correct! 🎮');
-console.log('🌙 Filtro noturno a 40% de opacidade');
-console.log('💡 Sistema de iluminação corrigido');
-console.log('🌳 Todas as features anteriores funcionando');
-console.log('✅ Código limpo e organizado!');
+console.log('🎮 Mad Night v1.7.4 - Speed Adjustment! 🎮');
+console.log('🚴 MadMax agora com velocidade 3.6 (era 4)');
+console.log('🌙 Filtro noturno funcionando a 40%');
+console.log('🌳 14 árvores com sistema de camadas');
+console.log('✅ Gameplay mais controlado!');
