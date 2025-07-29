@@ -1,4 +1,4 @@
-console.log('Mad Night v1.5.4 - Campo de Futebol Update');
+console.log('Mad Night v1.5.5 - Campo Fix Update');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -10,7 +10,10 @@ campoImage.src = 'assets/buildings/campo_de_futebol.png';
 let campoLoaded = false;
 campoImage.onload = () => {
     campoLoaded = true;
-    console.log('Campo de futebol carregado!');
+    console.log('Campo de futebol carregado com sucesso!');
+};
+campoImage.onerror = () => {
+    console.error('Erro ao carregar campo de futebol!');
 };
 
 // Configurações de câmera
@@ -74,10 +77,12 @@ const maps = [
         height: 1080,
         enemies: [],
         walls: [
-            {x: 600, y: 300, w: 720, h: 20},
-            {x: 600, y: 760, w: 720, h: 20},
-            {x: 600, y: 320, w: 20, h: 440},
-            {x: 1300, y: 320, w: 20, h: 440},
+            // Paredes externas apenas
+            {x: 0, y: 0, w: 1920, h: 20},      // topo
+            {x: 0, y: 1060, w: 1920, h: 20},   // fundo
+            {x: 0, y: 20, w: 20, h: 1040},     // esquerda
+            {x: 1900, y: 20, w: 20, h: 1040},  // direita
+            // Alguns obstáculos nos cantos
             {x: 200, y: 200, w: 80, h: 80},
             {x: 1600, y: 150, w: 80, h: 80},
             {x: 300, y: 800, w: 80, h: 80},
@@ -999,9 +1004,19 @@ function renderCampo(map) {
     // Renderizar campo apenas no Maconhão
     if (gameState.currentMap === 0 && campoLoaded) {
         // Posicionar o campo no centro do mapa
-        const campoX = 660; // Centralizado horizontalmente
-        const campoY = 340; // Centralizado verticalmente
+        const campoX = (map.width - 600) / 2; // Assumindo que o campo tem 600px de largura
+        const campoY = (map.height - 400) / 2; // Assumindo altura proporcional
+        
         ctx.drawImage(campoImage, campoX, campoY);
+        
+        // Debug - desenhar retângulo onde o campo deveria estar
+        if (!campoLoaded) {
+            ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
+            ctx.fillRect(campoX, campoY, 600, 400);
+            ctx.fillStyle = '#fff';
+            ctx.font = '20px Arial';
+            ctx.fillText('CAMPO AQUI', campoX + 250, campoY + 200);
+        }
     }
 }
 
@@ -1217,7 +1232,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.5.4 - Campo de Futebol Update', canvas.width - 400, canvas.height - 10); // MUDANÇA: versão atualizada
+    ctx.fillText('v1.5.5 - Campo Fix Update', canvas.width - 350, canvas.height - 10); // MUDANÇA: versão atualizada
     
     // Morte
     if (player.isDead) {
@@ -1293,7 +1308,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.5.4 - Campo de Futebol Update! 🎮');
-console.log('⚽ Campo de futebol adicionado ao Maconhão');
-console.log('📏 Posicionado no centro do mapa');
-console.log('✅ Renderizado como camada base');
+console.log('🎮 Mad Night v1.5.5 - Campo Fix Update! 🎮');
+console.log('⚽ Campo centralizado dinamicamente');
+console.log('🧱 Removidas paredes do meio do Maconhão');
+console.log('🐛 Debug: retângulo verde se campo não carregar');
