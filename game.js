@@ -1,4 +1,4 @@
-console.log('Mad Night v1.6.0 - Trees System Update');
+console.log('Mad Night v1.6.1 - Tree Layers Update');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -1054,8 +1054,8 @@ function draw() {
     };
     
     // Renderizar elementos do mapa
-    renderCampo(map); // NOVO: renderizar campo antes de tudo
-    renderTrees(map, visibleArea); // NOVO: renderizar árvores
+    renderCampo(map);
+    renderTrees(map, visibleArea, 'bottom'); // Troncos (abaixo do player)
     renderLights(map, visibleArea);
     renderShadows(map, visibleArea);
     renderWalls(map, visibleArea);
@@ -1063,6 +1063,7 @@ function draw() {
     renderProjectiles(visibleArea);
     renderEnemies(visibleArea);
     renderPlayer();
+    renderTrees(map, visibleArea, 'top'); // Copas (acima do player)
     
     ctx.restore();
     
@@ -1082,7 +1083,7 @@ function renderCampo(map) {
     }
 }
 
-function renderTrees(map, visibleArea) {
+function renderTrees(map, visibleArea, layer = 'bottom') {
     if (!map.trees) return;
     
     map.trees.forEach(tree => {
@@ -1094,17 +1095,34 @@ function renderTrees(map, visibleArea) {
                 tree.y + treeAsset.height > visibleArea.top && 
                 tree.y < visibleArea.bottom) {
                 
-                ctx.drawImage(treeAsset.img, tree.x, tree.y);
-                
-                // Debug: mostrar área de colisão do tronco
-                if (false) { // Mude para true para ver as colisões
-                    ctx.strokeStyle = 'red';
-                    ctx.strokeRect(
-                        tree.x + treeAsset.width * 0.35,
-                        tree.y + treeAsset.height * 0.75,
-                        treeAsset.width * 0.3,
-                        treeAsset.height * 0.2
-                    );
+                if (layer === 'bottom') {
+                    // Renderizar apenas o tronco (parte inferior)
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(tree.x, tree.y + treeAsset.height * 0.7, treeAsset.width, treeAsset.height * 0.3);
+                    ctx.clip();
+                    ctx.drawImage(treeAsset.img, tree.x, tree.y);
+                    ctx.restore();
+                } else if (layer === 'top') {
+                    // Renderizar apenas a copa (parte superior)
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(tree.x, tree.y, treeAsset.width, treeAsset.height * 0.75);
+                    ctx.clip();
+                    
+                    // Verificar se o player está sob a copa
+                    const playerUnderTree = player.x + player.width > tree.x &&
+                                          player.x < tree.x + treeAsset.width &&
+                                          player.y + player.height > tree.y &&
+                                          player.y < tree.y + treeAsset.height * 0.75;
+                    
+                    // Se o player estiver sob a copa, aplicar transparência
+                    if (playerUnderTree) {
+                        ctx.globalAlpha = 0.7; // 70% opacidade (30% transparência)
+                    }
+                    
+                    ctx.drawImage(treeAsset.img, tree.x, tree.y);
+                    ctx.restore();
                 }
             }
         }
@@ -1323,7 +1341,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.6.0 - Trees System Update', canvas.width - 350, canvas.height - 10); // MUDANÇA: versão atualizada
+    ctx.fillText('v1.6.1 - Tree Layers Update', canvas.width - 350, canvas.height - 10); // MUDANÇA: versão atualizada
     
     // Morte
     if (player.isDead) {
@@ -1399,8 +1417,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.6.0 - Trees System Update! 🎮');
-console.log('🌳 9 árvores espalhadas pelo Maconhão');
-console.log('🚴 MadMax começa em Y=300 (mais acima)');
-console.log('🪵 Colisão apenas nos troncos das árvores');
-console.log('✅ Sistema de assets organizado');
+console.log('🎮 Mad Night v1.6.1 - Tree Layers Update! 🎮');
+console.log('🌳 Sistema de camadas: troncos embaixo, copas em cima');
+console.log('👻 Copas ficam 30% transparentes quando player passa por baixo');
+console.log('🎨 Efeito de profundidade implementado');
+console.log('✅ MadMax pode ser encoberto pelas árvores!');
