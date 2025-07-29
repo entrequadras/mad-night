@@ -1,4 +1,4 @@
-console.log('Mad Night v1.7.9 - Screen Blend Mode');
+console.log('Mad Night v1.8.1 - Sistema de Rotação de Postes');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -40,7 +40,7 @@ const player = {
     y: 300,
     width: 56,
     height: 56,
-    speed: 3.6,  // Reduzido de 4 para 3.6
+    speed: 3.6,
     direction: 'right',
     frame: 0,
     sprites: [],
@@ -56,14 +56,15 @@ const player = {
     inShadow: false
 };
 
-// Sistema de assets
+// Sistema de assets (incluindo poste)
 const assets = {
     campo: { img: new Image(), loaded: false },
     arvore001: { img: new Image(), loaded: false, width: 180, height: 194 },
     arvore002: { img: new Image(), loaded: false, width: 194, height: 200 },
     arvore003: { img: new Image(), loaded: false, width: 162, height: 200 },
     arvore004: { img: new Image(), loaded: false, width: 150, height: 190 },
-    arvorebloco001: { img: new Image(), loaded: false, width: 354, height: 186 }
+    arvorebloco001: { img: new Image(), loaded: false, width: 354, height: 186 },
+    poste000: { img: new Image(), loaded: false, width: 40, height: 120 }  // NOVO POSTE
 };
 
 // Carregar assets
@@ -104,6 +105,13 @@ assets.arvorebloco001.img.onload = () => {
     console.log('Árvore bloco carregada!');
 };
 
+// CARREGAR POSTE
+assets.poste000.img.src = 'assets/scenary/poste000.png';
+assets.poste000.img.onload = () => {
+    assets.poste000.loaded = true;
+    console.log('Poste 000 carregado!');
+};
+
 // Sistema de Mapas
 const maps = [
     {
@@ -132,6 +140,13 @@ const maps = [
             {type: 'arvore004', x: 1480, y: 830},
             {type: 'arvore001', x: 1550, y: 850}
         ],
+        // NOVO SISTEMA DE POSTES COM ROTAÇÃO
+        streetLights: [
+            {type: 'poste000', x: 400, y: 300, rotation: 0, lightRadius: 180},     // Norte (padrão)
+            {type: 'poste000', x: 800, y: 300, rotation: 90, lightRadius: 180},    // Leste
+            {type: 'poste000', x: 1200, y: 300, rotation: 180, lightRadius: 180},  // Sul
+            {type: 'poste000', x: 1600, y: 300, rotation: 270, lightRadius: 180}   // Oeste
+        ],
         walls: [
             // Paredes externas apenas
             {x: 0, y: 0, w: 1920, h: 20},      // topo
@@ -145,8 +160,11 @@ const maps = [
             {x: 1620, y: 300, radius: 150},
             {x: 300, y: 780, radius: 150},
             {x: 1620, y: 780, radius: 150},
-            // NOVO POSTE: ao lado esquerdo do campo
-            {x: 460, y: 540, radius: 180}  // Teste de poste mais próximo do campo
+            // Luzes dos postes (serão renderizadas automaticamente)
+            {x: 400, y: 300, radius: 180},  // Poste Norte
+            {x: 800, y: 300, radius: 180},  // Poste Leste
+            {x: 1200, y: 300, radius: 180}, // Poste Sul
+            {x: 1600, y: 300, radius: 180}  // Poste Oeste
         ],
         shadows: [
             {x: 240, y: 240, radius: 100},
@@ -154,7 +172,7 @@ const maps = [
             {x: 340, y: 840, radius: 100},
             {x: 1540, y: 890, radius: 100}
         ],
-        playerStart: {x: 200, y: 300},  // Movido mais para cima
+        playerStart: {x: 200, y: 300},
         playerStartEscape: {x: 1700, y: 540},
         exit: {x: 1800, y: 490, w: 80, h: 100},
         direction: 'right'
@@ -166,6 +184,7 @@ const maps = [
         height: 600,
         enemies: [],
         trees: [],
+        streetLights: [], // Sem postes neste mapa
         walls: [
             {x: 0, y: 0, w: 800, h: 100},
             {x: 0, y: 500, w: 800, h: 100},
@@ -211,6 +230,7 @@ const maps = [
             {x: 600, y: 400, type: 'caveirinha'}
         ],
         trees: [],
+        streetLights: [], // Sem postes neste mapa ainda
         walls: [
             {x: 150, y: 100, w: 120, h: 150},
             {x: 350, y: 350, w: 120, h: 150},
@@ -247,6 +267,7 @@ const maps = [
             {x: 300, y: 600, type: 'faquinha'}
         ],
         trees: [],
+        streetLights: [], // Sem postes neste mapa ainda
         walls: [
             {x: 80, y: 150, w: 120, h: 60},
             {x: 400, y: 150, w: 120, h: 60},
@@ -289,6 +310,7 @@ const maps = [
             {x: 400, y: 350, type: 'caveirinha'}
         ],
         trees: [],
+        streetLights: [], // Sem postes neste mapa ainda
         walls: [
             {x: 80, y: 120, w: 160, h: 160},
             {x: 360, y: 120, w: 160, h: 160},
@@ -323,6 +345,7 @@ const maps = [
             {x: 300, y: 500, type: 'janis'}
         ],
         trees: [],
+        streetLights: [], // Sem postes neste mapa ainda
         walls: [
             {x: 120, y: 200, w: 140, h: 80},
             {x: 340, y: 200, w: 140, h: 80},
@@ -446,6 +469,26 @@ function checkWallCollision(entity, newX, newY) {
         }
     }
     
+    // Checar colisão com postes
+    if (map.streetLights) {
+        for (let light of map.streetLights) {
+            const lightAsset = assets[light.type];
+            if (lightAsset && lightAsset.loaded) {
+                // Área de colisão do poste (base menor)
+                const postCollision = {
+                    x: light.x + lightAsset.width * 0.25,  // 25% da largura
+                    y: light.y + lightAsset.height * 0.8,  // 80% da altura (base)
+                    w: lightAsset.width * 0.5,             // 50% de largura
+                    h: lightAsset.height * 0.2             // 20% de altura
+                };
+                
+                if (checkRectCollision(testEntity, postCollision)) {
+                    return true;
+                }
+            }
+        }
+    }
+    
     return false;
 }
 
@@ -481,6 +524,38 @@ function findValidSpawnPosition(x, y, width, height) {
     }
     
     return {x, y};
+}
+
+// NOVA FUNÇÃO: Renderizar objetos com rotação
+function renderRotatedObject(obj, assetKey, visibleArea) {
+    const asset = assets[assetKey];
+    if (!asset || !asset.loaded) return;
+    
+    // Verificar se está na área visível
+    if (obj.x + asset.width < visibleArea.left || 
+        obj.x > visibleArea.right ||
+        obj.y + asset.height < visibleArea.top || 
+        obj.y > visibleArea.bottom) return;
+    
+    ctx.save();
+    
+    // Ponto de rotação no centro do objeto
+    const centerX = obj.x + asset.width / 2;
+    const centerY = obj.y + asset.height / 2;
+    
+    ctx.translate(centerX, centerY);
+    ctx.rotate((obj.rotation || 0) * Math.PI / 180);
+    
+    // Desenha centralizado
+    ctx.drawImage(
+        asset.img,
+        -asset.width / 2,
+        -asset.height / 2,
+        asset.width,
+        asset.height
+    );
+    
+    ctx.restore();
 }
 
 // Classe Enemy
@@ -1114,6 +1189,15 @@ function renderTrees(map, visibleArea, layer = 'bottom') {
     });
 }
 
+// NOVA FUNÇÃO: Renderizar postes com rotação
+function renderStreetLights(map, visibleArea) {
+    if (!map.streetLights) return;
+    
+    map.streetLights.forEach(light => {
+        renderRotatedObject(light, light.type, visibleArea);
+    });
+}
+
 function renderLights(map, visibleArea) {
     map.lights.forEach(light => {
         if (light.x + light.radius > visibleArea.left && 
@@ -1341,7 +1425,7 @@ function renderNightFilter(map, visibleArea) {
     
     // Adicionar um toque amarelado nas áreas iluminadas
     ctx.save();
-    ctx.globalCompositeOperation = 'screen';  // Testando com screen
+    ctx.globalCompositeOperation = 'screen';
     
     map.lights.forEach(light => {
         if (light.x + light.radius > visibleArea.left && 
@@ -1353,7 +1437,7 @@ function renderNightFilter(map, visibleArea) {
                 light.x, light.y, 0,
                 light.x, light.y, light.radius * 0.8
             );
-            gradient.addColorStop(0, 'rgba(255, 255, 200, 0.2)');  // Mantendo 0.2
+            gradient.addColorStop(0, 'rgba(255, 255, 200, 0.2)');
             gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
             
             ctx.fillStyle = gradient;
@@ -1418,10 +1502,17 @@ function renderUI(map) {
         ctx.fillText('█', 240 + i * 24, 130);
     }
     
+    // NOVO: Status dos postes no Maconhão
+    if (gameState.currentMap === 0) {
+        ctx.fillStyle = '#ff0';
+        ctx.font = '20px Arial';
+        ctx.fillText('TESTE POSTES: Norte(0°) Leste(90°) Sul(180°) Oeste(270°)', 20, 250);
+    }
+    
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.7.9 - Screen Blend Mode', canvas.width - 340, canvas.height - 10);
+    ctx.fillText('v1.8.1 - Sistema de Rotação de Postes', canvas.width - 440, canvas.height - 10);
     
     // Morte
     if (player.isDead) {
@@ -1457,11 +1548,11 @@ function draw() {
     
     // Renderizar elementos do mapa
     renderCampo(map);
-    // renderLights comentado - o filtro noturno cria as luzes
     renderShadows(map, visibleArea);
     renderTrees(map, visibleArea, 'bottom');
     renderWalls(map, visibleArea);
     renderSpecialObjects(map);
+    renderStreetLights(map, visibleArea); // NOVO: Renderizar postes
     renderProjectiles(visibleArea);
     renderEnemies(visibleArea);
     renderPlayer();
@@ -1537,8 +1628,12 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.7.9 - Screen Blend Mode! 🎮');
-console.log('💡 Testando blend mode "screen"');
-console.log('✨ Screen é mais suave que lighter');
-console.log('🔦 Deve criar um brilho mais natural');
-console.log('✅ Vamos ver como fica!');
+console.log('🎮 Mad Night v1.8.1 - Sistema de Rotação de Postes! 🎮');
+console.log('🔦 4 postes no Maconhão para testar rotação:');
+console.log('   • Norte (0°) - posição padrão');
+console.log('   • Leste (90°) - virado para direita'); 
+console.log('   • Sul (180°) - virado para baixo');
+console.log('   • Oeste (270°) - virado para esquerda');
+console.log('💡 Asset: assets/scenary/poste000.png (40x120)');
+console.log('⚙️ Sistema de rotação matemática funcionando!');
+console.log('🚧 Colisão dos postes também implementada!');
