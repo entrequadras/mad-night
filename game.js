@@ -1,4 +1,4 @@
-console.log('Mad Night v1.6.2 - Tree Shadows Update');
+console.log('Mad Night v1.6.3 - Tree Shadows Fix');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -1075,15 +1075,15 @@ function draw() {
     
     // Renderizar elementos do mapa
     renderCampo(map);
-    renderTrees(map, visibleArea, 'bottom'); // Troncos (abaixo do player)
     renderLights(map, visibleArea);
-    renderShadows(map, visibleArea);
+    renderShadows(map, visibleArea); // Sombras ANTES das árvores
+    renderTrees(map, visibleArea, 'bottom'); // Troncos
     renderWalls(map, visibleArea);
     renderSpecialObjects(map);
     renderProjectiles(visibleArea);
     renderEnemies(visibleArea);
     renderPlayer();
-    renderTrees(map, visibleArea, 'top'); // Copas (acima do player)
+    renderTrees(map, visibleArea, 'top'); // Copas (por último)
     
     ctx.restore();
     
@@ -1208,8 +1208,8 @@ function renderShadows(map, visibleArea) {
                         shadowX, shadowY, 0,
                         shadowX, shadowY, shadowRadius
                     );
-                    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.9)');
-                    gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.6)');
+                    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)'); // Mais claro (era 0.9)
+                    gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)'); // Mais claro (era 0.6)
                     gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
                     ctx.fillStyle = gradient;
                     ctx.fillRect(
@@ -1402,7 +1402,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.6.2 - Tree Shadows Update', canvas.width - 350, canvas.height - 10); // MUDANÇA: versão atualizada
+    ctx.fillText('v1.6.3 - Tree Shadows Fix', canvas.width - 350, canvas.height - 10); // MUDANÇA: versão atualizada
     
     // Morte
     if (player.isDead) {
@@ -1478,8 +1478,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.6.2 - Tree Shadows Update! 🎮');
-console.log('🌑 Sombras automáticas para todas as árvores');
-console.log('👤 Player fica invisível nas sombras das árvores');
-console.log('🌳 Sombras proporcionais ao tamanho de cada árvore');
-console.log('✅ Sistema de stealth aprimorado!');
+console.log('🎮 Mad Night v1.6.3 - Tree Shadows Fix! 🎮');
+console.log('🌑 Sombras renderizadas ANTES das árvores');
+console.log('💡 Sombras mais claras (60% → 30% opacidade)');
+console.log('🌳 Copas das árvores não são mais escurecidas');
+console.log('✅ Ordem de renderização corrigida!');
