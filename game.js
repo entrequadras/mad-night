@@ -580,6 +580,8 @@ class Enemy {
     
     getSprite() {
         if (this.isDead) return this.sprites[this.deathFrame];
+        
+        // Mapeamento unificado para todos os personagens
         const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
         const base = dirMap[this.direction];
         const offset = (this.state === 'chase' || this.state === 'attack') ? 8 : this.frame * 4;
@@ -794,8 +796,11 @@ canvas.addEventListener('click', () => {
 // Função para obter sprite do player
 function getPlayerSprite() {
     if (player.isDead) return player.sprites[player.deathFrame];
+    
+    // Mapeamento unificado: baixo, direita, esquerda, cima
     const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
     const base = dirMap[player.direction];
+    
     if (player.isDashing) return player.sprites[8 + base];
     return player.sprites[base + player.frame * 4];
 }
@@ -1272,3 +1277,4 @@ console.log('🎮 Mad Night v1.5.1 - Sistema de Câmera! 🎮');
 console.log('📹 Viewport: 960x540 com zoom 2x');
 console.log('🎯 Câmera segue o player automaticamente');
 console.log('✅ Performance otimizada - renderiza apenas o visível');
+console.log('🎨 Sprites padronizados: baixo(0), direita(1), esquerda(2), cima(3)');
