@@ -1,4 +1,4 @@
-console.log('Mad Night v1.7.4 - Speed Adjustment');
+console.log('Mad Night v1.7.5 - Light Fix');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -1419,7 +1419,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.7.4 - Speed Adjustment', canvas.width - 350, canvas.height - 10);
+    ctx.fillText('v1.7.5 - Light Fix', canvas.width - 300, canvas.height - 10);
     
     // Morte
     if (player.isDead) {
@@ -1455,7 +1455,7 @@ function draw() {
     
     // Renderizar elementos do mapa
     renderCampo(map);
-    renderLights(map, visibleArea);
+    // renderLights comentado - o filtro noturno cria as luzes
     renderShadows(map, visibleArea);
     renderTrees(map, visibleArea, 'bottom');
     renderWalls(map, visibleArea);
@@ -1535,8 +1535,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.7.4 - Speed Adjustment! 🎮');
-console.log('🚴 MadMax agora com velocidade 3.6 (era 4)');
-console.log('🌙 Filtro noturno funcionando a 40%');
-console.log('🌳 14 árvores com sistema de camadas');
-console.log('✅ Gameplay mais controlado!');
+console.log('🎮 Mad Night v1.7.5 - Light Fix! 🎮');
+console.log('💡 Luzes dos postes não são mais escurecidas');
+console.log('🌙 Filtro noturno cria iluminação limpa');
+console.log('✨ Áreas iluminadas mais visíveis');
+console.log('✅ Sistema de iluminação unificado!');
