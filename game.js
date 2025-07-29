@@ -301,6 +301,50 @@ function checkWallCollision(entity, newX, newY) {
     return false;
 }
 
+// Função para encontrar posição válida para spawn - MOVIDA PARA CÁ
+function findValidSpawnPosition(x, y, width, height) {
+    // Primeiro tenta a posição original
+    if (!checkWallCollision({x, y, width, height}, x, y)) {
+        return {x, y};
+    }
+    
+    console.log(`Posição original (${x},${y}) está bloqueada, procurando alternativa...`);
+    
+    // Se não for válida, procura em espiral ao redor
+    const maxDistance = 200;
+    const step = 20;
+    
+    for (let dist = step; dist <= maxDistance; dist += step) {
+        // Tenta 8 direções
+        const positions = [
+            {x: x + dist, y: y},           // direita
+            {x: x - dist, y: y},           // esquerda
+            {x: x, y: y + dist},           // baixo
+            {x: x, y: y - dist},           // cima
+            {x: x + dist, y: y + dist},    // diagonal baixo-direita
+            {x: x - dist, y: y - dist},    // diagonal cima-esquerda
+            {x: x + dist, y: y - dist},    // diagonal cima-direita
+            {x: x - dist, y: y + dist}     // diagonal baixo-esquerda
+        ];
+        
+        for (let pos of positions) {
+            // Verifica se está dentro dos limites do mapa
+            const map = maps[gameState.currentMap];
+            if (pos.x >= 0 && pos.x + width <= map.width && 
+                pos.y >= 0 && pos.y + height <= map.height) {
+                if (!checkWallCollision({x: pos.x, y: pos.y, width, height}, pos.x, pos.y)) {
+                    console.log(`Spawn ajustado de (${x},${y}) para (${pos.x},${pos.y})`);
+                    return pos;
+                }
+            }
+        }
+    }
+    
+    // Se não encontrar posição válida, retorna a original (último recurso)
+    console.warn(`AVISO: Não foi possível encontrar posição válida, usando posição original (${x},${y})`);
+    return {x, y};
+}
+
 // Classe Enemy melhorada
 class Enemy {
     constructor(x, y, type = 'faquinha') {
@@ -1142,4 +1186,4 @@ console.log('🏴‍☠️ Caveirinha: 25% mais rápido');
 console.log('👧 Janis: Ataca com pedras à distância');
 console.log('🐺 Chacal: Boss com 3 vidas (agora 56x56 pixels)');
 console.log('✅ Sistema de spawn seguro implementado');
-console.log('✅ Variedade visual nos inimigos básicos');
+console.log('⚠️ NOTA: Se os sprites do Morcego não carregarem, o jogo usará placeholders coloridos');
