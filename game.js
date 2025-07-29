@@ -1,4 +1,4 @@
-console.log('Mad Night v1.7.1 - Night Adjust & Trees Update');
+console.log('Mad Night v1.7.2 - Light System Fix');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -1142,7 +1142,7 @@ function draw() {
     
     // Renderizar elementos do mapa
     renderCampo(map);
-    renderLights(map, visibleArea);
+    // renderLights removido - o filtro noturno já cria as luzes
     renderShadows(map, visibleArea);
     renderTrees(map, visibleArea, 'bottom');
     renderWalls(map, visibleArea);
@@ -1151,7 +1151,7 @@ function draw() {
     renderEnemies(visibleArea);
     renderPlayer();
     renderTrees(map, visibleArea, 'top');
-    renderNightFilter(map, visibleArea); // Filtro noturno por último!
+    renderNightFilter(map, visibleArea); // Filtro noturno cria as luzes!
     
     ctx.restore();
     
@@ -1470,7 +1470,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.7.1 - Night Adjust & Trees Update', canvas.width - 400, canvas.height - 10); // MUDANÇA: versão atualizada
+    ctx.fillText('v1.7.2 - Light System Fix', canvas.width - 350, canvas.height - 10); // MUDANÇA: versão atualizada
     
     // Morte
     if (player.isDead) {
@@ -1546,8 +1546,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.7.1 - Night Adjust & Trees Update! 🎮');
-console.log('🌙 Filtro noturno reduzido para 35% (metade da intensidade)');
-console.log('🌳 Blocos sólidos substituídos por árvores');
-console.log('🌲 14 árvores no total (2 juntas no canto inferior direito)');
-console.log('✅ Visual mais sutil e natural!');
+console.log('🎮 Mad Night v1.7.2 - Light System Fix! 🎮');
+console.log('💡 Removida renderização dupla de luzes');
+console.log('🌙 Filtro noturno agora controla toda iluminação');
+console.log('✨ Luzes não são mais escurecidas pelo filtro');
+console.log('🎯 Sistema de iluminação unificado!');
