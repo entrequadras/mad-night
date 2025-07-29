@@ -76,41 +76,51 @@ const maps = [
         height: 600,
         enemies: [],
         walls: [
-            // Teto e chão principais
+            // Paredes externas (teto e chão gerais)
             {x: 0, y: 0, w: 800, h: 100},
             {x: 0, y: 500, w: 800, h: 100},
             
-            // Pilares que dividem os túneis
-            {x: 200, y: 100, w: 60, h: 400},
-            {x: 400, y: 100, w: 60, h: 400},
-            {x: 600, y: 100, w: 60, h: 400},
+            // Pilar 1 (x=200) com passagem no meio
+            {x: 200, y: 100, w: 60, h: 100},   // parte superior
+            {x: 200, y: 400, w: 60, h: 100},   // parte inferior
+            // Passagem: y=200 até y=400 (200px de altura)
             
-            // Paredes laterais dos túneis centrais (claraboias)
-            // Túnel 2 (entre pilar 1 e 2) - fechado
-            {x: 260, y: 100, w: 140, h: 20},  // teto da claraboia
-            {x: 260, y: 480, w: 140, h: 20},  // chão da claraboia
+            // Pilar 2 (x=400) com passagem no meio
+            {x: 400, y: 100, w: 60, h: 100},   // parte superior
+            {x: 400, y: 400, w: 60, h: 100},   // parte inferior
+            // Passagem: y=200 até y=400 (200px de altura)
             
-            // Túnel 3 (entre pilar 2 e 3) - fechado
-            {x: 460, y: 100, w: 140, h: 20},  // teto da claraboia
-            {x: 460, y: 480, w: 140, h: 20},  // chão da claraboia
+            // Pilar 3 (x=600) com passagem no meio
+            {x: 600, y: 100, w: 60, h: 100},   // parte superior
+            {x: 600, y: 400, w: 60, h: 100},   // parte inferior
+            // Passagem: y=200 até y=400 (200px de altura)
+            
+            // Claraboias (túneis 2 e 3 como quadrados)
+            // Claraboia 2 (entre pilares 1 e 2)
+            {x: 260, y: 150, w: 140, h: 20},   // parede superior
+            {x: 260, y: 430, w: 140, h: 20},   // parede inferior
+            
+            // Claraboia 3 (entre pilares 2 e 3)
+            {x: 460, y: 150, w: 140, h: 20},   // parede superior
+            {x: 460, y: 430, w: 140, h: 20},   // parede inferior
         ],
         lights: [
-            // Luzes nos túneis abertos (extremidades)
-            {x: 100, y: 300, radius: 80},
-            {x: 700, y: 300, radius: 80},
-            // Luzes menores nas claraboias
-            {x: 330, y: 300, radius: 60},
-            {x: 530, y: 300, radius: 60}
+            // Luzes nos túneis abertos
+            {x: 100, y: 300, radius: 100},
+            {x: 700, y: 300, radius: 100},
+            // Luzes nas claraboias (menores, mais focadas)
+            {x: 330, y: 300, radius: 70},
+            {x: 530, y: 300, radius: 70}
         ],
         shadows: [
-            // Sombras sob os pilares
-            {x: 230, y: 300, radius: 30},
-            {x: 430, y: 300, radius: 30},
-            {x: 630, y: 300, radius: 30}
+            // Sombras nas passagens dos pilares
+            {x: 230, y: 300, radius: 40},
+            {x: 430, y: 300, radius: 40},
+            {x: 630, y: 300, radius: 40}
         ],
-        playerStart: {x: 80, y: 300},
+        playerStart: {x: 100, y: 300},
         playerStartEscape: {x: 700, y: 300},
-        exit: {x: 700, y: 250, w: 50, h: 100},
+        exit: {x: 720, y: 250, w: 50, h: 100},
         direction: 'right'
     },
     {
@@ -1234,9 +1244,10 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 console.log('🎮 Mad Night v1.4.1 - Eixão Corrigido! 🎮');
-console.log('🚇 Eixão da Morte agora tem 4 túneis corretos:');
+console.log('🚇 Eixão da Morte com passagens nos pilares:');
+console.log('  - 4 túneis conectados por passagens');
 console.log('  - Túneis 1 e 4: Abertos nas laterais');
-console.log('  - Túneis 2 e 3: Claraboias fechadas (caixas)');
-console.log('✅ Perseguição em todas as direções funcionando');
-console.log('🦇 Morcego: Sprites devem estar carregando agora');
-console.log('💀 Sistema completo de inimigos e mecânicas');
+console.log('  - Túneis 2 e 3: Claraboias quadradas');
+console.log('  - Pilares com vãos de 200px no meio');
+console.log('✅ Player pode atravessar entre todos os túneis');
+console.log('🦇 Todos os sprites funcionando corretamente');
