@@ -48,25 +48,47 @@ const maps = [
     {
         name: "Maconhão",
         subtitle: "Tutorial de movimento",
-        width: 800,
-        height: 600,
+        width: 1920,
+        height: 1080,
         enemies: [],
         walls: [
-            {x: 200, y: 150, w: 400, h: 20},
-            {x: 200, y: 430, w: 400, h: 20},
+            // Campo de futebol central
+            {x: 600, y: 300, w: 720, h: 20},   // linha superior
+            {x: 600, y: 760, w: 720, h: 20},   // linha inferior
+            {x: 600, y: 320, w: 20, h: 440},   // trave esquerda
+            {x: 1300, y: 320, w: 20, h: 440},  // trave direita
+            
+            // Algumas árvores espalhadas
+            {x: 200, y: 200, w: 80, h: 80},
+            {x: 1600, y: 150, w: 80, h: 80},
+            {x: 300, y: 800, w: 80, h: 80},
+            {x: 1500, y: 850, w: 80, h: 80},
+            {x: 900, y: 100, w: 60, h: 60},
+            {x: 1000, y: 900, w: 60, h: 60}
         ],
         lights: [
-            {x: 400, y: 300, radius: 200}
+            {x: 960, y: 540, radius: 300},      // luz central grande
+            {x: 300, y: 300, radius: 150},      // luz canto superior esquerdo
+            {x: 1620, y: 300, radius: 150},     // luz canto superior direito
+            {x: 300, y: 780, radius: 150},      // luz canto inferior esquerdo
+            {x: 1620, y: 780, radius: 150}      // luz canto inferior direito
         ],
         shadows: [
-            {x: 100, y: 100, radius: 80},
-            {x: 700, y: 500, radius: 80},
-            {x: 150, y: 450, radius: 100},
-            {x: 650, y: 150, radius: 100}
+            // Sombras das árvores
+            {x: 240, y: 240, radius: 100},
+            {x: 1640, y: 190, radius: 100},
+            {x: 340, y: 840, radius: 100},
+            {x: 1540, y: 890, radius: 100},
+            {x: 930, y: 130, radius: 80},
+            {x: 1030, y: 930, radius: 80},
+            
+            // Sombras extras para atmosfera
+            {x: 150, y: 540, radius: 120},
+            {x: 1770, y: 540, radius: 120}
         ],
-        playerStart: {x: 100, y: 300},
-        playerStartEscape: {x: 700, y: 300},
-        exit: {x: 700, y: 250, w: 50, h: 100},
+        playerStart: {x: 200, y: 540},
+        playerStartEscape: {x: 1700, y: 540},
+        exit: {x: 1800, y: 490, w: 80, h: 100},
         direction: 'right'
     },
     {
@@ -599,7 +621,9 @@ class Enemy {
     
     getSprite() {
         if (this.isDead) return this.sprites[this.deathFrame];
-        const dirMap = {'right': 0, 'down': 1, 'left': 2, 'up': 3};
+        
+        // Mapeamento correto conforme os arquivos de sprite
+        const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
         const base = dirMap[this.direction];
         const offset = (this.state === 'chase' || this.state === 'attack') ? 8 : this.frame * 4;
         return this.sprites[base + offset];
@@ -958,8 +982,11 @@ function update() {
 
 function getPlayerSprite() {
     if (player.isDead) return player.sprites[player.deathFrame];
-    const dirMap = {'right': 0, 'down': 1, 'left': 2, 'up': 3};
+    
+    // Mapeamento correto conforme os arquivos de sprite
+    const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
     const base = dirMap[player.direction];
+    
     if (player.isDashing) return player.sprites[8 + base];
     return player.sprites[base + player.frame * 4];
 }
@@ -1149,7 +1176,7 @@ function draw() {
     
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.4.2 - Sprites Alinhados', canvas.width - 160, canvas.height - 5);
+    ctx.fillText('v1.5.0 - Mapas Expandidos', canvas.width - 160, canvas.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
