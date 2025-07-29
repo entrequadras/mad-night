@@ -1,4 +1,4 @@
-console.log('Mad Night v1.6.1 - Tree Layers Update');
+console.log('Mad Night v1.6.2 - Tree Shadows Update');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -366,10 +366,30 @@ function isInLight(x, y) {
 
 function isInShadow(x, y) {
     const map = maps[gameState.currentMap];
+    
+    // Checar sombras manuais
     for (let shadow of map.shadows) {
         const dist = Math.sqrt(Math.pow(x - shadow.x, 2) + Math.pow(y - shadow.y, 2));
         if (dist < shadow.radius) return true;
     }
+    
+    // Checar sombras das árvores
+    if (map.trees) {
+        for (let tree of map.trees) {
+            const treeAsset = assets[tree.type];
+            if (treeAsset && treeAsset.loaded) {
+                let shadowRadius = tree.type === 'arvorebloco001' ? 
+                    treeAsset.width * 0.25 : treeAsset.width * 0.35;
+                
+                const shadowX = tree.x + treeAsset.width * 0.5;
+                const shadowY = tree.y + treeAsset.height * 0.85;
+                
+                const dist = Math.sqrt(Math.pow(x - shadowX, 2) + Math.pow(y - shadowY, 2));
+                if (dist < shadowRadius) return true;
+            }
+        }
+    }
+    
     return false;
 }
 
@@ -1147,6 +1167,7 @@ function renderLights(map, visibleArea) {
 }
 
 function renderShadows(map, visibleArea) {
+    // Sombras manuais do mapa
     map.shadows.forEach(shadow => {
         if (shadow.x + shadow.radius > visibleArea.left && 
             shadow.x - shadow.radius < visibleArea.right &&
@@ -1161,6 +1182,46 @@ function renderShadows(map, visibleArea) {
             ctx.fillRect(shadow.x - shadow.radius, shadow.y - shadow.radius, shadow.radius * 2, shadow.radius * 2);
         }
     });
+    
+    // Sombras das árvores
+    if (map.trees) {
+        map.trees.forEach(tree => {
+            const treeAsset = assets[tree.type];
+            if (treeAsset && treeAsset.loaded) {
+                // Calcular posição e tamanho da sombra baseado no tipo de árvore
+                let shadowRadius;
+                if (tree.type === 'arvorebloco001') {
+                    shadowRadius = treeAsset.width * 0.25; // Bloco tem sombra mais larga
+                } else {
+                    shadowRadius = treeAsset.width * 0.35; // Árvores individuais
+                }
+                
+                const shadowX = tree.x + treeAsset.width * 0.5;
+                const shadowY = tree.y + treeAsset.height * 0.85;
+                
+                if (shadowX + shadowRadius > visibleArea.left && 
+                    shadowX - shadowRadius < visibleArea.right &&
+                    shadowY + shadowRadius > visibleArea.top && 
+                    shadowY - shadowRadius < visibleArea.bottom) {
+                    
+                    const gradient = ctx.createRadialGradient(
+                        shadowX, shadowY, 0,
+                        shadowX, shadowY, shadowRadius
+                    );
+                    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.9)');
+                    gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.6)');
+                    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(
+                        shadowX - shadowRadius,
+                        shadowY - shadowRadius,
+                        shadowRadius * 2,
+                        shadowRadius * 2
+                    );
+                }
+            }
+        });
+    }
 }
 
 function renderWalls(map, visibleArea) {
@@ -1341,7 +1402,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.6.1 - Tree Layers Update', canvas.width - 350, canvas.height - 10); // MUDANÇA: versão atualizada
+    ctx.fillText('v1.6.2 - Tree Shadows Update', canvas.width - 350, canvas.height - 10); // MUDANÇA: versão atualizada
     
     // Morte
     if (player.isDead) {
@@ -1417,8 +1478,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.6.1 - Tree Layers Update! 🎮');
-console.log('🌳 Sistema de camadas: troncos embaixo, copas em cima');
-console.log('👻 Copas ficam 30% transparentes quando player passa por baixo');
-console.log('🎨 Efeito de profundidade implementado');
-console.log('✅ MadMax pode ser encoberto pelas árvores!');
+console.log('🎮 Mad Night v1.6.2 - Tree Shadows Update! 🎮');
+console.log('🌑 Sombras automáticas para todas as árvores');
+console.log('👤 Player fica invisível nas sombras das árvores');
+console.log('🌳 Sombras proporcionais ao tamanho de cada árvore');
+console.log('✅ Sistema de stealth aprimorado!');
