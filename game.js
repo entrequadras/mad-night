@@ -1,4 +1,4 @@
-console.log('Mad Night v1.3.8 - Novos Inimigos + Correções');
+console.log('Mad Night v1.3.7 - Novos Inimigos: Caveirinha, Janis e Chacal');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -177,7 +177,7 @@ const maps = [
         height: 800,
         enemies: [
             {x: 150, y: 400, type: 'faquinha'},
-            {x: 450, y: 400, type: 'janis'} // Janis também aqui
+            {x: 450, y: 400, type: 'faquinha'}
         ],
         escapeEnemies: [
             {x: 300, y: 200, type: 'janis'},
@@ -215,7 +215,7 @@ const maps = [
         enemies: [
             {x: 200, y: 300, type: 'faquinha'},
             {x: 400, y: 300, type: 'faquinha'},
-            {x: 300, y: 500, type: 'faquinha'} // CORRIGIDO: Removido Janis da entrada
+            {x: 300, y: 500, type: 'janis'}
         ],
         walls: [
             {x: 120, y: 200, w: 140, h: 80},
@@ -256,27 +256,6 @@ const audio = {
     fuga: null,
     creditos: null
 };
-
-// Função auxiliar para desenhar placeholder de inimigos
-function drawEnemyPlaceholder(enemy) {
-    if (enemy.isDead) return;
-    
-    // Cores específicas por tipo
-    const colors = {
-        'faquinha': '#808',
-        'caveirinha': '#c0c',
-        'janis': '#0cc',
-        'chacal': '#f80'
-    };
-    
-    ctx.fillStyle = enemy.state === 'chase' ? '#f0f' : colors[enemy.type];
-    ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-    
-    // Desenhar nome do tipo para debug
-    ctx.fillStyle = '#fff';
-    ctx.font = '10px Arial';
-    ctx.fillText(enemy.type.substring(0, 3).toUpperCase(), enemy.x + 5, enemy.y + 15);
-}
 
 // Funções auxiliares
 function isInLight(x, y) {
@@ -930,7 +909,7 @@ function draw() {
         ctx.fillRect(stone.x - 5, stone.y - 5, stone.width, stone.height);
     });
     
-    // Desenhar inimigos com fallback aprimorado
+    // Desenhar inimigos
     enemies.forEach(enemy => {
         const loadedCheck = {
             'faquinha': faquinhaLoaded >= 16,
@@ -941,7 +920,7 @@ function draw() {
         
         if (loadedCheck[enemy.type]) {
             const sprite = enemy.getSprite();
-            if (sprite && sprite.complete && sprite.naturalWidth > 0) {
+            if (sprite) {
                 if (isInShadow(enemy.x + enemy.width/2, enemy.y + enemy.height/2)) {
                     ctx.globalAlpha = 0.5;
                 }
@@ -961,13 +940,19 @@ function draw() {
                 
                 ctx.drawImage(sprite, enemy.x, enemy.y, enemy.width, enemy.height);
                 ctx.globalAlpha = 1;
-            } else {
-                // Fallback se sprite não carregou corretamente
-                drawEnemyPlaceholder(enemy);
             }
         } else {
-            // Placeholder enquanto carrega
-            drawEnemyPlaceholder(enemy);
+            // Placeholder colorido por tipo
+            if (!enemy.isDead) {
+                const colors = {
+                    'faquinha': '#808',
+                    'caveirinha': '#c0c',
+                    'janis': '#0cc',
+                    'chacal': '#f80'
+                };
+                ctx.fillStyle = enemy.state === 'chase' ? '#f0f' : colors[enemy.type];
+                ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+            }
         }
         
         if (!enemy.isDead && gameState.phase === 'escape') {
@@ -976,7 +961,6 @@ function draw() {
             ctx.fillText('!', enemy.x + 25, enemy.y - 5);
         }
     });
-}
     
     if (madmaxLoaded >= 16) {
         const sprite = getPlayerSprite();
@@ -1005,18 +989,15 @@ function draw() {
     ctx.fillText(`Mapa: ${gameState.currentMap + 1}/6 | Fase: ${gameState.phase === 'escape' ? 'FUGA!' : 'Infiltração'}`, 10, canvas.height - 40);
     ctx.fillText(`Inimigos: ${enemies.filter(e => !e.isDead).length}`, 10, canvas.height - 20);
     
-    // CORRIGIDO: Sistema de vida com caveiras
     ctx.fillStyle = '#fff';
     ctx.fillText('Vidas: ', 10, 25);
     for (let i = 0; i < 5; i++) {
         ctx.font = '20px Arial';
         if (i < gameState.deaths) {
-            // Caveiras vermelhas indicam mortes já sofridas
-            ctx.fillStyle = '#f00';
-            ctx.fillText('💀', 60 + i * 30, 25);
+            // Vidas perdidas - não desenha nada (vazio)
         } else {
-            // Caveiras cinzas indicam vidas restantes
-            ctx.fillStyle = '#666';
+            // Vidas restantes - mostra caveira
+            ctx.fillStyle = '#f00';
             ctx.fillText('💀', 60 + i * 30, 25);
         }
     }
@@ -1046,7 +1027,7 @@ function draw() {
     
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.3.9.1 - Bug Fix', canvas.width - 120, canvas.height - 5);
+    ctx.fillText('v1.3.7 - Novos Inimigos', canvas.width - 140, canvas.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
@@ -1064,7 +1045,7 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-// Carregar sprites com debug
+// Carregar sprites
 let madmaxLoaded = 0;
 let faquinhaLoaded = 0;
 let caveirinhaLoaded = 0;
@@ -1090,14 +1071,10 @@ for (let i = 0; i <= 15; i++) {
     img.src = `assets/sprites/caveirinha${String(i).padStart(3, '0')}.png`;
     img.onload = () => {
         caveirinhaLoaded++;
-        console.log(`✅ Caveirinha sprite ${i} carregado (${caveirinhaLoaded}/16)`);
+        if (caveirinhaLoaded === 1) console.log('Caveirinha sprites carregando...');
+        if (caveirinhaLoaded === 16) console.log('Todos sprites Caveirinha carregados!');
     };
-    img.onerror = () => {
-        console.log(`❌ ERRO: Caveirinha sprite ${i} não encontrado em: assets/sprites/caveirinha${String(i).padStart(3, '0')}.png`);
-        // Fallback para sprite de faquinha
-        caveirinhaSprites[i] = faquinhaSprites[i];
-        caveirinhaLoaded++;
-    };
+    img.onerror = () => console.error(`Erro ao carregar caveirinha${String(i).padStart(3, '0')}.png`);
     caveirinhaSprites[i] = img;
 }
 
@@ -1106,21 +1083,22 @@ for (let i = 0; i <= 15; i++) {
     img.src = `assets/sprites/janis${String(i).padStart(3, '0')}.png`;
     img.onload = () => {
         janisLoaded++;
-        console.log(`✅ Janis sprite ${i} carregado (${janisLoaded}/16)`);
+        if (janisLoaded === 1) console.log('Janis sprites carregando...');
+        if (janisLoaded === 16) console.log('Todos sprites Janis carregados!');
     };
-    img.onerror = () => {
-        console.log(`❌ ERRO: Janis sprite ${i} não encontrado em: assets/sprites/janis${String(i).padStart(3, '0')}.png`);
-        // Fallback para sprite de faquinha
-        janisSprites[i] = faquinhaSprites[i];
-        janisLoaded++;
-    };
+    img.onerror = () => console.error(`Erro ao carregar janis${String(i).padStart(3, '0')}.png`);
     janisSprites[i] = img;
 }
 
 for (let i = 0; i <= 15; i++) {
     const img = new Image();
     img.src = `assets/sprites/chacal${String(i).padStart(3, '0')}.png`;
-    img.onload = () => chacalLoaded++;
+    img.onload = () => {
+        chacalLoaded++;
+        if (chacalLoaded === 1) console.log('Chacal sprites carregando...');
+        if (chacalLoaded === 16) console.log('Todos sprites Chacal carregados!');
+    };
+    img.onerror = () => console.error(`Erro ao carregar chacal${String(i).padStart(3, '0')}.png`);
     chacalSprites[i] = img;
 }
 
@@ -1130,9 +1108,12 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.3.9 - SISTEMA DE FALLBACK PARA SPRITES! 🎮');
-console.log('🔍 Debug aprimorado: Mostra erros de carregamento no console');
-console.log('🎯 Fallback: Se Caveirinha/Janis não carregarem, usa sprites de Faquinha');
-console.log('📊 Placeholder: Mostra nome do inimigo se sprite falhar');
-console.log('✅ Sistema robusto: Jogo funciona mesmo sem sprites específicos');
-console.log('🔧 Verifique se você tem os arquivos: caveirinha000.png até caveirinha015.png e janis000.png até janis015.png');
+console.log('🎮 Mad Night v1.3.7 - Novos Inimigos Implementados! 🎮');
+console.log('💀 Sistema de vidas: caveiras somem conforme morre');
+console.log('🏴‍☠️ Caveirinha: 25% mais rápido que Faquinha');
+console.log('👧 Janis: Ataca com pedras à distância (200px)');
+console.log('🐺 Chacal: Boss com 3 vidas, aparece na fuga do mapa 3');
+console.log('⚠️ Verificar nomes dos arquivos:');
+console.log('- caveirinha000.png até caveirinha015.png');
+console.log('- janis000.png até janis015.png');
+console.log('- chacal000.png até chacal015.png');
