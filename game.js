@@ -1,4 +1,4 @@
-console.log('Mad Night v1.5.5 - Campo Fix Update');
+console.log('Mad Night v1.5.6 - Campo 800px Update');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -1004,19 +1004,10 @@ function renderCampo(map) {
     // Renderizar campo apenas no Maconhão
     if (gameState.currentMap === 0 && campoLoaded) {
         // Posicionar o campo no centro do mapa
-        const campoX = (map.width - 600) / 2; // Assumindo que o campo tem 600px de largura
-        const campoY = (map.height - 400) / 2; // Assumindo altura proporcional
+        const campoX = (map.width - 800) / 2; // Campo de 800px de largura
+        const campoY = (map.height - 533) / 2; // Assumindo proporção 3:2 (800x533)
         
         ctx.drawImage(campoImage, campoX, campoY);
-        
-        // Debug - desenhar retângulo onde o campo deveria estar
-        if (!campoLoaded) {
-            ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
-            ctx.fillRect(campoX, campoY, 600, 400);
-            ctx.fillStyle = '#fff';
-            ctx.font = '20px Arial';
-            ctx.fillText('CAMPO AQUI', campoX + 250, campoY + 200);
-        }
     }
 }
 
@@ -1232,7 +1223,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.5.5 - Campo Fix Update', canvas.width - 350, canvas.height - 10); // MUDANÇA: versão atualizada
+    ctx.fillText('v1.5.6 - Campo 800px Update', canvas.width - 350, canvas.height - 10); // MUDANÇA: versão atualizada
     
     // Morte
     if (player.isDead) {
@@ -1308,7 +1299,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.5.5 - Campo Fix Update! 🎮');
-console.log('⚽ Campo centralizado dinamicamente');
-console.log('🧱 Removidas paredes do meio do Maconhão');
-console.log('🐛 Debug: retângulo verde se campo não carregar');
+console.log('🎮 Mad Night v1.5.6 - Campo 800px Update! 🎮');
+console.log('⚽ Campo ajustado para 800px de largura');
+console.log('📏 Centralizado no Maconhão');
+console.log('✅ Pronto para adicionar árvores ao redor!');
