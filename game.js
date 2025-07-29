@@ -168,6 +168,7 @@ const maps = [
         width: 800,
         height: 600,
         enemies: [],
+        trees: [],
         walls: [
             {x: 0, y: 0, w: 800, h: 100},
             {x: 0, y: 500, w: 800, h: 100},
@@ -212,6 +213,7 @@ const maps = [
             {x: 200, y: 200, type: 'caveirinha'},
             {x: 600, y: 400, type: 'caveirinha'}
         ],
+        trees: [],
         walls: [
             {x: 150, y: 100, w: 120, h: 150},
             {x: 350, y: 350, w: 120, h: 150},
@@ -247,6 +249,7 @@ const maps = [
             {x: 450, y: 250, type: 'caveirinha'},
             {x: 300, y: 600, type: 'faquinha'}
         ],
+        trees: [],
         walls: [
             {x: 80, y: 150, w: 120, h: 60},
             {x: 400, y: 150, w: 120, h: 60},
@@ -288,6 +291,7 @@ const maps = [
             {x: 200, y: 600, type: 'caveirinha'},
             {x: 400, y: 350, type: 'caveirinha'}
         ],
+        trees: [],
         walls: [
             {x: 80, y: 120, w: 160, h: 160},
             {x: 360, y: 120, w: 160, h: 160},
@@ -321,6 +325,7 @@ const maps = [
             {x: 400, y: 300, type: 'faquinha'},
             {x: 300, y: 500, type: 'janis'}
         ],
+        trees: [],
         walls: [
             {x: 120, y: 200, w: 140, h: 80},
             {x: 340, y: 200, w: 140, h: 80},
