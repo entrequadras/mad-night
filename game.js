@@ -1,4 +1,4 @@
-console.log('Mad Night v1.3.7 - Novos Inimigos: Caveirinha, Janis e Chacal');
+console.log('Mad Night v1.3.9 - Morcego e Ajustes 2');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -101,7 +101,7 @@ const maps = [
         height: 600,
         enemies: [
             {x: 400, y: 200, type: 'faquinha'},
-            {x: 500, y: 400, type: 'janis'} // Menina que joga pedra
+            {x: 500, y: 400, type: 'morcego'} // Alternando com morcego
         ],
         escapeEnemies: [
             {x: 400, y: 300, type: 'chacal'}, // Boss aparece na fuga!
@@ -301,7 +301,7 @@ function checkWallCollision(entity, newX, newY) {
     return false;
 }
 
-// Função para encontrar posição válida para spawn - MOVIDA PARA CÁ
+// Função para encontrar posição válida para spawn
 function findValidSpawnPosition(x, y, width, height) {
     // Primeiro tenta a posição original
     if (!checkWallCollision({x, y, width, height}, x, y)) {
@@ -595,11 +595,26 @@ function spawnEscapeEnemy() {
     const corner = corners[gameState.spawnCorner % 4];
     gameState.spawnCorner++;
     
-    const types = ['faquinha', 'caveirinha', 'caveirinha']; // Mais caveirinhas na fuga
+    const types = ['faquinha', 'morcego', 'caveirinha', 'caveirinha']; // Variedade de inimigos
     const randomType = types[Math.floor(Math.random() * types.length)];
     
-    const enemy = new Enemy(corner.x, corner.y, randomType);
-    enemy.sprites = randomType === 'caveirinha' ? caveirinhaSprites : faquinhaSprites;
+    // Encontra posição válida para spawn
+    const validPos = findValidSpawnPosition(corner.x, corner.y, 56, 56);
+    
+    const enemy = new Enemy(validPos.x, validPos.y, randomType);
+    
+    // Atribui sprites corretos
+    switch(randomType) {
+        case 'faquinha':
+            enemy.sprites = faquinhaSprites;
+            break;
+        case 'morcego':
+            enemy.sprites = morcegoSprites;
+            break;
+        case 'caveirinha':
+            enemy.sprites = caveirinhaSprites;
+            break;
+    }
     enemy.state = 'chase';
     enemy.alertVisionRange = 400;
     
@@ -1085,7 +1100,7 @@ function draw() {
     
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.3.8 - Morcego e Ajustes', canvas.width - 160, canvas.height - 5);
+    ctx.fillText('v1.3.9 - Morcego e Ajustes 2', canvas.width - 170, canvas.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
@@ -1179,7 +1194,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.3.8 - Morcego e Ajustes! 🎮');
+console.log('🎮 Mad Night v1.3.9 - Morcego e Ajustes 2! 🎮');
 console.log('🦇 Morcego: Novo inimigo básico (igual ao Faquinha)');
 console.log('💀 Sistema de vidas: caveiras somem conforme morre');
 console.log('🏴‍☠️ Caveirinha: 25% mais rápido');
