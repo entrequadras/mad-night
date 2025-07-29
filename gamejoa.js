@@ -1,4 +1,4 @@
-console.log('Mad Night v1.5.1 - Sistema de Câmera');
+console.log('Mad Night v1.5.2 - Ajuste de Proporções');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -1273,8 +1273,9 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.5.1 - Sistema de Câmera! 🎮');
+console.log('🎮 Mad Night v1.5.2 - Ajuste de Proporções! 🎮');
 console.log('📹 Viewport: 960x540 com zoom 2x');
 console.log('🎯 Câmera segue o player automaticamente');
 console.log('✅ Performance otimizada - renderiza apenas o visível');
 console.log('🎨 Sprites padronizados: baixo(0), direita(1), esquerda(2), cima(3)');
+console.log('📏 Inimigos ajustados para 50x50 pixels (10% menores)');
