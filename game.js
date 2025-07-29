@@ -158,6 +158,10 @@ const maps = [
         exit: {x: 1800, y: 490, w: 80, h: 100},
         direction: 'right'
     },
+        playerStartEscape: {x: 1700, y: 540},
+        exit: {x: 1800, y: 490, w: 80, h: 100},
+        direction: 'right'
+    },
     {
         name: "Eixão da Morte",
         subtitle: "Túnel sob as pistas",
