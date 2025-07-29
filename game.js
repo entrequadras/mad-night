@@ -1,19 +1,55 @@
-console.log('Mad Night v1.5.7 - Campo Dimensions Update');
+console.log('Mad Night v1.6.0 - Trees System Update');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
-// Carregar campo de futebol
-const campoImage = new Image();
-campoImage.src = 'assets/buildings/campo_de_futebol.png';
-let campoLoaded = false;
-campoImage.onload = () => {
-    campoLoaded = true;
-    console.log('Campo de futebol carregado com sucesso!');
+// Sistema de assets
+const assets = {
+    campo: { img: new Image(), loaded: false },
+    arvore001: { img: new Image(), loaded: false, width: 180, height: 194 },
+    arvore002: { img: new Image(), loaded: false, width: 194, height: 200 },
+    arvore003: { img: new Image(), loaded: false, width: 162, height: 200 },
+    arvore004: { img: new Image(), loaded: false, width: 150, height: 190 },
+    arvorebloco001: { img: new Image(), loaded: false, width: 354, height: 186 }
 };
-campoImage.onerror = () => {
-    console.error('Erro ao carregar campo de futebol!');
+
+// Carregar assets
+assets.campo.img.src = 'assets/buildings/campo_de_futebol.png';
+assets.campo.img.onload = () => {
+    assets.campo.loaded = true;
+    console.log('Campo de futebol carregado!');
+};
+
+// Carregar árvores
+assets.arvore001.img.src = 'assets/scenary/arvore001.png';
+assets.arvore001.img.onload = () => {
+    assets.arvore001.loaded = true;
+    console.log('Árvore 001 carregada!');
+};
+
+assets.arvore002.img.src = 'assets/scenary/arvore002.png';
+assets.arvore002.img.onload = () => {
+    assets.arvore002.loaded = true;
+    console.log('Árvore 002 carregada!');
+};
+
+assets.arvore003.img.src = 'assets/scenary/arvore003.png';
+assets.arvore003.img.onload = () => {
+    assets.arvore003.loaded = true;
+    console.log('Árvore 003 carregada!');
+};
+
+assets.arvore004.img.src = 'assets/scenary/arvore004.png';
+assets.arvore004.img.onload = () => {
+    assets.arvore004.loaded = true;
+    console.log('Árvore 004 carregada!');
+};
+
+assets.arvorebloco001.img.src = 'assets/scenary/arvorebloco001.png';
+assets.arvorebloco001.img.onload = () => {
+    assets.arvorebloco001.loaded = true;
+    console.log('Árvore bloco carregada!');
 };
 
 // Configurações de câmera
@@ -76,6 +112,18 @@ const maps = [
         width: 1920,
         height: 1080,
         enemies: [],
+        // Árvores espalhadas pelo mapa
+        trees: [
+            {type: 'arvore001', x: 300, y: 150},
+            {type: 'arvore002', x: 1400, y: 120},
+            {type: 'arvore003', x: 150, y: 700},
+            {type: 'arvore004', x: 1600, y: 750},
+            {type: 'arvorebloco001', x: 700, y: 50},
+            {type: 'arvore002', x: 450, y: 850},
+            {type: 'arvore001', x: 1200, y: 880},
+            {type: 'arvore003', x: 950, y: 100},
+            {type: 'arvore004', x: 100, y: 400}
+        ],
         walls: [
             // Paredes externas apenas
             {x: 0, y: 0, w: 1920, h: 20},      // topo
@@ -101,7 +149,7 @@ const maps = [
             {x: 340, y: 840, radius: 100},
             {x: 1540, y: 890, radius: 100}
         ],
-        playerStart: {x: 200, y: 540},
+        playerStart: {x: 200, y: 300},  // Movido mais para cima
         playerStartEscape: {x: 1700, y: 540},
         exit: {x: 1800, y: 490, w: 80, h: 100},
         direction: 'right'
@@ -341,11 +389,33 @@ function checkWallCollision(entity, newX, newY) {
         height: entity.height
     };
     
+    // Checar paredes
     for (let wall of map.walls) {
         if (checkRectCollision(testEntity, wall)) {
             return true;
         }
     }
+    
+    // Checar colisão com troncos das árvores
+    if (map.trees) {
+        for (let tree of map.trees) {
+            const treeAsset = assets[tree.type];
+            if (treeAsset && treeAsset.loaded) {
+                // Área de colisão do tronco (parte inferior central da árvore)
+                const trunkCollision = {
+                    x: tree.x + treeAsset.width * 0.35,  // 35% da largura
+                    y: tree.y + treeAsset.height * 0.75, // 75% da altura
+                    w: treeAsset.width * 0.3,             // 30% de largura
+                    h: treeAsset.height * 0.2             // 20% de altura
+                };
+                
+                if (checkRectCollision(testEntity, trunkCollision)) {
+                    return true;
+                }
+            }
+        }
+    }
+    
     return false;
 }
 
@@ -985,6 +1055,7 @@ function draw() {
     
     // Renderizar elementos do mapa
     renderCampo(map); // NOVO: renderizar campo antes de tudo
+    renderTrees(map, visibleArea); // NOVO: renderizar árvores
     renderLights(map, visibleArea);
     renderShadows(map, visibleArea);
     renderWalls(map, visibleArea);
@@ -1002,13 +1073,42 @@ function draw() {
 // Funções de renderização
 function renderCampo(map) {
     // Renderizar campo apenas no Maconhão
-    if (gameState.currentMap === 0 && campoLoaded) {
+    if (gameState.currentMap === 0 && assets.campo.loaded) {
         // Posicionar o campo no centro do mapa
         const campoX = (map.width - 800) / 2; // Campo de 800px de largura
         const campoY = (map.height - 462) / 2; // Campo de 462px de altura (dimensão real)
         
-        ctx.drawImage(campoImage, campoX, campoY);
+        ctx.drawImage(assets.campo.img, campoX, campoY);
     }
+}
+
+function renderTrees(map, visibleArea) {
+    if (!map.trees) return;
+    
+    map.trees.forEach(tree => {
+        const treeAsset = assets[tree.type];
+        if (treeAsset && treeAsset.loaded) {
+            // Só renderizar se estiver na área visível
+            if (tree.x + treeAsset.width > visibleArea.left && 
+                tree.x < visibleArea.right &&
+                tree.y + treeAsset.height > visibleArea.top && 
+                tree.y < visibleArea.bottom) {
+                
+                ctx.drawImage(treeAsset.img, tree.x, tree.y);
+                
+                // Debug: mostrar área de colisão do tronco
+                if (false) { // Mude para true para ver as colisões
+                    ctx.strokeStyle = 'red';
+                    ctx.strokeRect(
+                        tree.x + treeAsset.width * 0.35,
+                        tree.y + treeAsset.height * 0.75,
+                        treeAsset.width * 0.3,
+                        treeAsset.height * 0.2
+                    );
+                }
+            }
+        }
+    });
 }
 
 function renderLights(map, visibleArea) {
@@ -1223,7 +1323,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.5.7 - Campo Dimensions Update', canvas.width - 380, canvas.height - 10); // MUDANÇA: versão atualizada
+    ctx.fillText('v1.6.0 - Trees System Update', canvas.width - 350, canvas.height - 10); // MUDANÇA: versão atualizada
     
     // Morte
     if (player.isDead) {
@@ -1299,7 +1399,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.5.7 - Campo Dimensions Update! 🎮');
-console.log('⚽ Campo com dimensões exatas: 800x462 pixels');
-console.log('📏 Posição: X=' + ((1920-800)/2) + ', Y=' + ((1080-462)/2));
-console.log('✅ Centralizado perfeitamente no Maconhão!');
+console.log('🎮 Mad Night v1.6.0 - Trees System Update! 🎮');
+console.log('🌳 9 árvores espalhadas pelo Maconhão');
+console.log('🚴 MadMax começa em Y=300 (mais acima)');
+console.log('🪵 Colisão apenas nos troncos das árvores');
+console.log('✅ Sistema de assets organizado');
