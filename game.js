@@ -1142,7 +1142,7 @@ function draw() {
     
     // Renderizar elementos do mapa
     renderCampo(map);
-    // renderLights removido - o filtro noturno já cria as luzes
+    renderLights(map, visibleArea); // Voltando com as luzes
     renderShadows(map, visibleArea);
     renderTrees(map, visibleArea, 'bottom');
     renderWalls(map, visibleArea);
@@ -1151,7 +1151,7 @@ function draw() {
     renderEnemies(visibleArea);
     renderPlayer();
     renderTrees(map, visibleArea, 'top');
-    renderNightFilter(map, visibleArea); // Filtro noturno cria as luzes!
+    renderNightFilter(map, visibleArea);
     
     ctx.restore();
     
