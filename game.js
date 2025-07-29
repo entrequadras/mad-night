@@ -1,108 +1,4 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAD NIGHT - Tree System Update v2.0</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: 'Courier New', monospace;
-            image-rendering: pixelated;
-            overflow: hidden;
-        }
-        
-        #gameContainer {
-            position: relative;
-            background-color: #111;
-            border: 2px solid #333;
-        }
-        
-        #gameCanvas {
-            display: block;
-            image-rendering: pixelated;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: crisp-edges;
-        }
-        
-        #ui {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: #ff0066;
-            font-size: 14px;
-            text-shadow: 2px 2px 0px #000;
-            z-index: 10;
-        }
-        
-        #deathScreen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            color: #ff0066;
-            font-size: 48px;
-            text-shadow: 4px 4px 0px #000;
-            z-index: 20;
-        }
-        
-        #loadingScreen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #ff0066;
-            font-size: 24px;
-            z-index: 30;
-        }
-        
-        .loading-bar {
-            width: 300px;
-            height: 20px;
-            border: 2px solid #ff0066;
-            margin-top: 20px;
-        }
-        
-        .loading-progress {
-            height: 100%;
-            background-color: #ff0066;
-            width: 0%;
-            transition: width 0.3s;
-        }
-    </style>
-</head>
-<body>
-    <div id="gameContainer">
-        <canvas id="gameCanvas"></canvas>
-        <div id="loadingScreen">
-            <div>MAD NIGHT</div>
-            <div style="font-size: 16px;">Tree System Update v2.0</div>
-            <div class="loading-bar">
-                <div class="loading-progress" id="loadingProgress"></div>
-            </div>
-            <div style="font-size: 14px; margin-top: 10px;">Carregando assets...</div>
-        </div>
-    </div>
-
-    <script>
-console.log('Mad Night - Tree System Update v2.0');
+console.log('Mad Night v1.6 - Enemy Size Update');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -135,8 +31,7 @@ const gameState = {
     bombPlaced: false,
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
-    spawnCorner: 0,
-    assetsLoaded: false
+    spawnCorner: 0
 };
 
 // Player
@@ -161,182 +56,48 @@ const player = {
     inShadow: false
 };
 
-// Sistema de Assets de Cenário
-const sceneryAssets = {};
-const buildingAssets = {};
-let totalAssetsToLoad = 0;
-let assetsLoaded = 0;
-
-// Lista de assets para carregar
-const sceneryList = [
-    'arvore001.png', 'arvore002.png', 'arvore003.png', 'arvore004.png',
-    'arvorebloco001.png',
-    'carro001-lateral.png', 'carro001-frente.png', 'carro001-fundos.png',
-    'carro002-lateral.png', 'carro002-frente.png', 'carro002-fundos.png',
-    'carro003-lateral.png', 'carro003-frente.png', 'carro003-fundos.png',
-    'carro004-lateral.png', 'carro004-frente.png', 'carro004-fundos.png'
-];
-
-const buildingList = ['campo_de_futebol.png'];
-
-// Função para carregar assets
-function loadSceneryAsset(filename) {
-    totalAssetsToLoad++;
-    const img = new Image();
-    img.src = `assets/scenary/${filename}`;
-    
-    img.onload = () => {
-        sceneryAssets[filename] = {
-            image: img,
-            width: img.width,
-            height: img.height,
-            collision: getDefaultCollision(filename, img.width, img.height)
-        };
-        assetsLoaded++;
-        updateLoadingProgress();
-    };
-    
-    img.onerror = () => {
-        console.warn(`Erro ao carregar ${filename}`);
-        assetsLoaded++;
-        updateLoadingProgress();
-    };
-}
-
-function loadBuildingAsset(filename) {
-    totalAssetsToLoad++;
-    const img = new Image();
-    img.src = `assets/buildings/${filename}`;
-    
-    img.onload = () => {
-        buildingAssets[filename] = {
-            image: img,
-            width: img.width,
-            height: img.height
-        };
-        assetsLoaded++;
-        updateLoadingProgress();
-    };
-    
-    img.onerror = () => {
-        console.warn(`Erro ao carregar ${filename}`);
-        assetsLoaded++;
-        updateLoadingProgress();
-    };
-}
-
-function updateLoadingProgress() {
-    const progress = (assetsLoaded / totalAssetsToLoad) * 100;
-    document.getElementById('loadingProgress').style.width = progress + '%';
-    
-    if (assetsLoaded >= totalAssetsToLoad) {
-        setTimeout(() => {
-            document.getElementById('loadingScreen').style.display = 'none';
-            gameState.assetsLoaded = true;
-            loadMap(0);
-            setTimeout(() => playMusic('inicio'), 1000);
-        }, 500);
-    }
-}
-
-// Função para definir colisões padrão baseadas no tipo
-function getDefaultCollision(filename, width, height) {
-    if (filename.includes('arvorebloco')) {
-        // Blocos têm múltiplas colisões
-        return [
-            {x: width * 0.15, y: height * 0.7, w: width * 0.15, h: height * 0.25},
-            {x: width * 0.45, y: height * 0.75, w: width * 0.1, h: height * 0.2},
-            {x: width * 0.7, y: height * 0.7, w: width * 0.15, h: height * 0.25}
-        ];
-    } else if (filename.includes('arvore')) {
-        // Árvore individual - tronco no centro inferior
-        return [{
-            x: width * 0.35,
-            y: height * 0.75,
-            w: width * 0.3,
-            h: height * 0.2
-        }];
-    } else if (filename.includes('-lateral')) {
-        // Carro lateral
-        return [{x: 10, y: 15, w: width - 20, h: height - 25}];
-    } else if (filename.includes('-frente') || filename.includes('-fundos')) {
-        // Carro frente/fundos
-        return [{x: 5, y: 5, w: width - 10, h: height - 10}];
-    }
-    return [{x: 0, y: 0, w: width, h: height}];
-}
-
-// Sistema de Mapas EXPANDIDO
+// Sistema de Mapas
 const maps = [
     {
         name: "Maconhão",
         subtitle: "Tutorial de movimento",
-        width: 2400,  // Expandido!
-        height: 1600, // Expandido!
+        width: 1920,
+        height: 1080,
         enemies: [],
-        // Campo de futebol central
-        buildings: [
-            {
-                sprite: 'campo_de_futebol.png',
-                x: 900,  // Centralizado
-                y: 600,
-                layer: 'ground'
-            }
-        ],
-        // Árvores ao redor do campo
-        scenery: [
-            // Árvores no topo
-            {sprite: 'arvore001.png', x: 700, y: 400},
-            {sprite: 'arvore002.png', x: 900, y: 350},
-            {sprite: 'arvore003.png', x: 1100, y: 380},
-            {sprite: 'arvore004.png', x: 1300, y: 400},
-            {sprite: 'arvorebloco001.png', x: 1500, y: 420},
-            
-            // Árvores na lateral esquerda
-            {sprite: 'arvore002.png', x: 600, y: 600},
-            {sprite: 'arvore001.png', x: 580, y: 800},
-            {sprite: 'arvore003.png', x: 620, y: 1000},
-            
-            // Árvores na lateral direita
-            {sprite: 'arvore004.png', x: 1600, y: 650},
-            {sprite: 'arvore001.png', x: 1650, y: 850},
-            {sprite: 'arvore002.png', x: 1620, y: 1050},
-            
-            // Árvores embaixo
-            {sprite: 'arvorebloco001.png', x: 700, y: 1200},
-            {sprite: 'arvore003.png', x: 1000, y: 1250},
-            {sprite: 'arvore004.png', x: 1200, y: 1230},
-            {sprite: 'arvore001.png', x: 1400, y: 1200}
-        ],
         walls: [
-            // Limites do mapa
-            {x: 0, y: 0, w: 2400, h: 20},
-            {x: 0, y: 1580, w: 2400, h: 20},
-            {x: 0, y: 20, w: 20, h: 1560},
-            {x: 2380, y: 20, w: 20, h: 1560}
+            {x: 600, y: 300, w: 720, h: 20},
+            {x: 600, y: 760, w: 720, h: 20},
+            {x: 600, y: 320, w: 20, h: 440},
+            {x: 1300, y: 320, w: 20, h: 440},
+            {x: 200, y: 200, w: 80, h: 80},
+            {x: 1600, y: 150, w: 80, h: 80},
+            {x: 300, y: 800, w: 80, h: 80},
+            {x: 1500, y: 850, w: 80, h: 80}
         ],
         lights: [
-            {x: 800, y: 500, radius: 200},
-            {x: 1600, y: 500, radius: 200},
-            {x: 800, y: 1100, radius: 200},
-            {x: 1600, y: 1100, radius: 200},
-            {x: 1200, y: 800, radius: 150}
+            {x: 960, y: 540, radius: 300},
+            {x: 300, y: 300, radius: 150},
+            {x: 1620, y: 300, radius: 150},
+            {x: 300, y: 780, radius: 150},
+            {x: 1620, y: 780, radius: 150}
         ],
-        shadows: [], // Serão geradas automaticamente pelas árvores
-        playerStart: {x: 200, y: 800},
-        playerStartEscape: {x: 2200, y: 800},
-        exit: {x: 2300, y: 750, w: 80, h: 100},
+        shadows: [
+            {x: 240, y: 240, radius: 100},
+            {x: 1640, y: 190, radius: 100},
+            {x: 340, y: 840, radius: 100},
+            {x: 1540, y: 890, radius: 100}
+        ],
+        playerStart: {x: 200, y: 540},
+        playerStartEscape: {x: 1700, y: 540},
+        exit: {x: 1800, y: 490, w: 80, h: 100},
         direction: 'right'
     },
-    // Outros mapas mantidos como estavam...
     {
         name: "Eixão da Morte",
         subtitle: "Túnel sob as pistas",
         width: 800,
         height: 600,
         enemies: [],
-        buildings: [],
-        scenery: [],
         walls: [
             {x: 0, y: 0, w: 800, h: 100},
             {x: 0, y: 500, w: 800, h: 100},
@@ -381,8 +142,6 @@ const maps = [
             {x: 200, y: 200, type: 'caveirinha'},
             {x: 600, y: 400, type: 'caveirinha'}
         ],
-        buildings: [],
-        scenery: [],
         walls: [
             {x: 150, y: 100, w: 120, h: 150},
             {x: 350, y: 350, w: 120, h: 150},
@@ -418,8 +177,6 @@ const maps = [
             {x: 450, y: 250, type: 'caveirinha'},
             {x: 300, y: 600, type: 'faquinha'}
         ],
-        buildings: [],
-        scenery: [],
         walls: [
             {x: 80, y: 150, w: 120, h: 60},
             {x: 400, y: 150, w: 120, h: 60},
@@ -461,8 +218,6 @@ const maps = [
             {x: 200, y: 600, type: 'caveirinha'},
             {x: 400, y: 350, type: 'caveirinha'}
         ],
-        buildings: [],
-        scenery: [],
         walls: [
             {x: 80, y: 120, w: 160, h: 160},
             {x: 360, y: 120, w: 160, h: 160},
@@ -496,8 +251,6 @@ const maps = [
             {x: 400, y: 300, type: 'faquinha'},
             {x: 300, y: 500, type: 'janis'}
         ],
-        buildings: [],
-        scenery: [],
         walls: [
             {x: 120, y: 200, w: 140, h: 80},
             {x: 340, y: 200, w: 140, h: 80},
@@ -551,31 +304,10 @@ function isInLight(x, y) {
 
 function isInShadow(x, y) {
     const map = maps[gameState.currentMap];
-    
-    // Checar sombras manuais do mapa
     for (let shadow of map.shadows) {
         const dist = Math.sqrt(Math.pow(x - shadow.x, 2) + Math.pow(y - shadow.y, 2));
         if (dist < shadow.radius) return true;
     }
-    
-    // Checar sombras das árvores
-    if (map.scenery) {
-        for (let obj of map.scenery) {
-            if (obj.sprite && obj.sprite.includes('arvore')) {
-                const asset = sceneryAssets[obj.sprite];
-                if (asset) {
-                    // Sombra na base da árvore
-                    const shadowX = obj.x + asset.width * 0.5;
-                    const shadowY = obj.y + asset.height * 0.8;
-                    const shadowRadius = asset.width * 0.4;
-                    
-                    const dist = Math.sqrt(Math.pow(x - shadowX, 2) + Math.pow(y - shadowY, 2));
-                    if (dist < shadowRadius) return true;
-                }
-            }
-        }
-    }
-    
     return false;
 }
 
@@ -595,33 +327,11 @@ function checkWallCollision(entity, newX, newY) {
         height: entity.height
     };
     
-    // Checar paredes
     for (let wall of map.walls) {
         if (checkRectCollision(testEntity, wall)) {
             return true;
         }
     }
-    
-    // Checar colisões com cenário
-    if (map.scenery) {
-        for (let obj of map.scenery) {
-            const asset = sceneryAssets[obj.sprite];
-            if (asset && asset.collision) {
-                for (let col of asset.collision) {
-                    const worldCol = {
-                        x: obj.x + col.x,
-                        y: obj.y + col.y,
-                        w: col.w,
-                        h: col.h
-                    };
-                    if (checkRectCollision(testEntity, worldCol)) {
-                        return true;
-                    }
-                }
-            }
-        }
-    }
-    
     return false;
 }
 
@@ -667,8 +377,8 @@ class Enemy {
         this.originX = x;
         this.originY = y;
         this.type = type;
-        this.width = 46;  // Ajustado de 50 para 46
-        this.height = 46; // Ajustado de 50 para 46
+        this.width = 46;  // Ajustado de 50 para 46 (v1.6)
+        this.height = 46; // Ajustado de 50 para 46 (v1.6)
         this.speed = type === 'caveirinha' ? 2.5 : 2;
         this.patrolSpeed = 1;
         this.direction = 'down';
@@ -871,6 +581,7 @@ class Enemy {
     getSprite() {
         if (this.isDead) return this.sprites[this.deathFrame];
         
+        // Mapeamento unificado para todos os personagens
         const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
         const base = dirMap[this.direction];
         const offset = (this.state === 'chase' || this.state === 'attack') ? 8 : this.frame * 4;
@@ -919,7 +630,7 @@ function spawnEscapeEnemy() {
     const types = ['faquinha', 'morcego', 'caveirinha', 'caveirinha'];
     const randomType = types[Math.floor(Math.random() * types.length)];
     
-    const validPos = findValidSpawnPosition(corner.x, corner.y, 46, 46);
+    const validPos = findValidSpawnPosition(corner.x, corner.y, 46, 46); // v1.6 - ajustado tamanho
     
     const enemy = new Enemy(validPos.x, validPos.y, randomType);
     
@@ -967,7 +678,7 @@ function loadMap(mapIndex, isEscape = false) {
     const enemyList = (isEscape && map.escapeEnemies) ? map.escapeEnemies : map.enemies;
     
     enemyList.forEach(enemyData => {
-        const validPos = findValidSpawnPosition(enemyData.x, enemyData.y, 46, 46);
+        const validPos = findValidSpawnPosition(enemyData.x, enemyData.y, 46, 46); // v1.6 - ajustado tamanho
         const enemy = new Enemy(validPos.x, validPos.y, enemyData.type || 'faquinha');
         
         switch(enemy.type) {
@@ -1086,6 +797,7 @@ canvas.addEventListener('click', () => {
 function getPlayerSprite() {
     if (player.isDead) return player.sprites[player.deathFrame];
     
+    // Mapeamento unificado: baixo, direita, esquerda, cima
     const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
     const base = dirMap[player.direction];
     
@@ -1096,8 +808,6 @@ function getPlayerSprite() {
 // Update principal
 let lastFrameTime = 0;
 function update() {
-    if (!gameState.assetsLoaded) return;
-    
     const map = maps[gameState.currentMap];
     
     enemies.forEach(enemy => enemy.update());
@@ -1240,8 +950,6 @@ function update() {
 
 // Função de desenho principal
 function draw() {
-    if (!gameState.assetsLoaded) return;
-    
     const map = maps[gameState.currentMap];
     
     ctx.fillStyle = '#000';
@@ -1251,8 +959,7 @@ function draw() {
     ctx.scale(camera.zoom, camera.zoom);
     ctx.translate(-camera.x, -camera.y);
     
-    // Background base
-    ctx.fillStyle = '#0a0a0a';
+    ctx.fillStyle = '#1a1a1a';
     ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
     
     const visibleArea = {
@@ -1262,152 +969,22 @@ function draw() {
         bottom: camera.y + camera.height + 100
     };
     
-    // CAMADA 1: Elementos de chão (campo de futebol)
-    renderBuildings(map, visibleArea, 'ground');
-    
-    // CAMADA 2: Luzes base (antes do filtro noturno)
+    // Renderizar elementos do mapa
     renderLights(map, visibleArea);
-    
-    // CAMADA 3: Elementos baixos (partes inferiores de árvores, carros)
-    renderSceneryBottom(map, visibleArea);
-    
-    // CAMADA 4: Sombras
     renderShadows(map, visibleArea);
-    
-    // CAMADA 5: Paredes
     renderWalls(map, visibleArea);
-    
-    // CAMADA 6: Objetos especiais
     renderSpecialObjects(map);
-    
-    // CAMADA 7: Projéteis
     renderProjectiles(visibleArea);
-    
-    // CAMADA 8: Inimigos
     renderEnemies(visibleArea);
-    
-    // CAMADA 9: Player
     renderPlayer();
-    
-    // CAMADA 10: Copas das árvores (renderizadas DEPOIS do player)
-    renderSceneryTop(map, visibleArea);
-    
-    // CAMADA 11: Filtro noturno com buracos de luz
-    renderNightFilter(map, visibleArea);
     
     ctx.restore();
     
-    // CAMADA 12: UI (sempre por cima)
+    // Renderizar UI
     renderUI(map);
 }
 
-// Novas funções de renderização
-function renderBuildings(map, visibleArea, layer) {
-    if (!map.buildings) return;
-    
-    map.buildings.forEach(building => {
-        if (building.layer !== layer) return;
-        
-        const asset = buildingAssets[building.sprite];
-        if (asset && asset.image) {
-            ctx.drawImage(asset.image, building.x, building.y);
-        }
-    });
-}
-
-function renderSceneryBottom(map, visibleArea) {
-    if (!map.scenery) return;
-    
-    map.scenery.forEach(obj => {
-        const asset = sceneryAssets[obj.sprite];
-        if (!asset || !asset.image) return;
-        
-        if (obj.x + asset.width > visibleArea.left && 
-            obj.x < visibleArea.right &&
-            obj.y + asset.height > visibleArea.top && 
-            obj.y < visibleArea.bottom) {
-            
-            // Para árvores, renderizar apenas a parte inferior (tronco)
-            if (obj.sprite.includes('arvore')) {
-                ctx.save();
-                ctx.beginPath();
-                ctx.rect(obj.x, obj.y + asset.height * 0.7, asset.width, asset.height * 0.3);
-                ctx.clip();
-                ctx.drawImage(asset.image, obj.x, obj.y);
-                ctx.restore();
-            } else {
-                // Outros objetos (carros) são renderizados completos
-                ctx.drawImage(asset.image, obj.x, obj.y);
-            }
-        }
-    });
-}
-
-function renderSceneryTop(map, visibleArea) {
-    if (!map.scenery) return;
-    
-    map.scenery.forEach(obj => {
-        const asset = sceneryAssets[obj.sprite];
-        if (!asset || !asset.image) return;
-        
-        // Apenas árvores têm copa
-        if (obj.sprite.includes('arvore')) {
-            if (obj.x + asset.width > visibleArea.left && 
-                obj.x < visibleArea.right &&
-                obj.y + asset.height > visibleArea.top && 
-                obj.y < visibleArea.bottom) {
-                
-                // Renderizar apenas a copa (parte superior)
-                ctx.save();
-                ctx.beginPath();
-                ctx.rect(obj.x, obj.y, asset.width, asset.height * 0.75);
-                ctx.clip();
-                ctx.drawImage(asset.image, obj.x, obj.y);
-                ctx.restore();
-            }
-        }
-    });
-}
-
-function renderNightFilter(map, visibleArea) {
-    // Criar um canvas temporário para o filtro noturno
-    ctx.save();
-    
-    // Aplicar filtro azul escuro sobre toda a cena
-    ctx.fillStyle = 'rgba(0, 0, 40, 0.7)';
-    ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
-    
-    // "Furar" o filtro onde tem luz
-    ctx.globalCompositeOperation = 'destination-out';
-    
-    map.lights.forEach(light => {
-        if (light.x + light.radius > visibleArea.left && 
-            light.x - light.radius < visibleArea.right &&
-            light.y + light.radius > visibleArea.top && 
-            light.y - light.radius < visibleArea.bottom) {
-            
-            const gradient = ctx.createRadialGradient(
-                light.x, light.y, 0,
-                light.x, light.y, light.radius
-            );
-            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-            gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.4)');
-            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            
-            ctx.fillStyle = gradient;
-            ctx.fillRect(
-                light.x - light.radius,
-                light.y - light.radius,
-                light.radius * 2,
-                light.radius * 2
-            );
-        }
-    });
-    
-    ctx.restore();
-}
-
-// Funções de renderização originais (mantidas)
+// Funções de renderização
 function renderLights(map, visibleArea) {
     map.lights.forEach(light => {
         if (light.x + light.radius > visibleArea.left && 
@@ -1426,7 +1003,6 @@ function renderLights(map, visibleArea) {
 }
 
 function renderShadows(map, visibleArea) {
-    // Sombras manuais do mapa
     map.shadows.forEach(shadow => {
         if (shadow.x + shadow.radius > visibleArea.left && 
             shadow.x - shadow.radius < visibleArea.right &&
@@ -1441,41 +1017,6 @@ function renderShadows(map, visibleArea) {
             ctx.fillRect(shadow.x - shadow.radius, shadow.y - shadow.radius, shadow.radius * 2, shadow.radius * 2);
         }
     });
-    
-    // Sombras das árvores
-    if (map.scenery) {
-        map.scenery.forEach(obj => {
-            if (obj.sprite && obj.sprite.includes('arvore')) {
-                const asset = sceneryAssets[obj.sprite];
-                if (asset) {
-                    const shadowX = obj.x + asset.width * 0.5;
-                    const shadowY = obj.y + asset.height * 0.8;
-                    const shadowRadius = asset.width * 0.4;
-                    
-                    if (shadowX + shadowRadius > visibleArea.left && 
-                        shadowX - shadowRadius < visibleArea.right &&
-                        shadowY + shadowRadius > visibleArea.top && 
-                        shadowY - shadowRadius < visibleArea.bottom) {
-                        
-                        const gradient = ctx.createRadialGradient(
-                            shadowX, shadowY, 0,
-                            shadowX, shadowY, shadowRadius
-                        );
-                        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.9)');
-                        gradient.addColorStop(0.7, 'rgba(0, 0, 0, 0.6)');
-                        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-                        ctx.fillStyle = gradient;
-                        ctx.fillRect(
-                            shadowX - shadowRadius,
-                            shadowY - shadowRadius,
-                            shadowRadius * 2,
-                            shadowRadius * 2
-                        );
-                    }
-                }
-            }
-        });
-    }
 }
 
 function renderWalls(map, visibleArea) {
@@ -1579,7 +1120,7 @@ function renderEnemies(visibleArea) {
             if (!enemy.isDead && gameState.phase === 'escape') {
                 ctx.fillStyle = '#f00';
                 ctx.font = '10px Arial';
-                ctx.fillText('!', enemy.x + 23, enemy.y - 5);
+                ctx.fillText('!', enemy.x + 23, enemy.y - 5); // v1.6 - ajustado posição
             }
         }
     });
@@ -1656,7 +1197,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('Tree System Update v2.0', canvas.width - 320, canvas.height - 10);
+    ctx.fillText('v1.6 - Enemy Size Update', canvas.width - 320, canvas.height - 10);
     
     // Morte
     if (player.isDead) {
@@ -1727,20 +1268,12 @@ for (let i = 0; i <= 15; i++) {
 }
 
 // Inicializar
-// Carregar assets de cenário
-sceneryList.forEach(filename => loadSceneryAsset(filename));
-buildingList.forEach(filename => loadBuildingAsset(filename));
-
 loadAudio();
+loadMap(0);
+setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night - Tree System Update v2.0! 🎮');
-console.log('🌳 Sistema de camadas implementado - passe por baixo das árvores!');
-console.log('🌙 Filtro noturno atmosférico com áreas iluminadas');
-console.log('🚗 Assets de cenário carregados automaticamente');
+console.log('🎮 Mad Night v1.6 - Enemy Size Update! 🎮');
 console.log('📏 Inimigos ajustados para 46x46 pixels');
-console.log('🏟️ Maconhão expandido com campo de futebol central!');
-console.log('✨ Sombras dinâmicas das árvores para stealth');
-    </script>
-</body>
-</html>
+console.log('✅ Mudança simples e incremental');
+console.log('🎯 Próximo passo: expandir o Maconhão');
