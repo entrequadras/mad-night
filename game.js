@@ -1,8 +1,17 @@
-console.log('Mad Night v1.5.3 - Ajuste de Tamanho dos Inimigos');
+console.log('Mad Night v1.5.4 - Campo de Futebol Update');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
+
+// Carregar campo de futebol
+const campoImage = new Image();
+campoImage.src = 'assets/buildings/campo_de_futebol.png';
+let campoLoaded = false;
+campoImage.onload = () => {
+    campoLoaded = true;
+    console.log('Campo de futebol carregado!');
+};
 
 // Configurações de câmera
 const camera = {
@@ -970,6 +979,7 @@ function draw() {
     };
     
     // Renderizar elementos do mapa
+    renderCampo(map); // NOVO: renderizar campo antes de tudo
     renderLights(map, visibleArea);
     renderShadows(map, visibleArea);
     renderWalls(map, visibleArea);
@@ -985,6 +995,16 @@ function draw() {
 }
 
 // Funções de renderização
+function renderCampo(map) {
+    // Renderizar campo apenas no Maconhão
+    if (gameState.currentMap === 0 && campoLoaded) {
+        // Posicionar o campo no centro do mapa
+        const campoX = 660; // Centralizado horizontalmente
+        const campoY = 340; // Centralizado verticalmente
+        ctx.drawImage(campoImage, campoX, campoY);
+    }
+}
+
 function renderLights(map, visibleArea) {
     map.lights.forEach(light => {
         if (light.x + light.radius > visibleArea.left && 
@@ -1197,7 +1217,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.5.3 - Ajuste de Tamanho dos Inimigos', canvas.width - 400, canvas.height - 10); // MUDANÇA: versão atualizada
+    ctx.fillText('v1.5.4 - Campo de Futebol Update', canvas.width - 400, canvas.height - 10); // MUDANÇA: versão atualizada
     
     // Morte
     if (player.isDead) {
@@ -1273,7 +1293,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.5.3 - Ajuste de Tamanho dos Inimigos! 🎮');
-console.log('📏 Inimigos ajustados para 46x46 pixels (de 50x50)');
-console.log('✅ Única mudança: tamanho dos inimigos');
-console.log('🎯 Próximo passo: expandir o Maconhão com assets');
+console.log('🎮 Mad Night v1.5.4 - Campo de Futebol Update! 🎮');
+console.log('⚽ Campo de futebol adicionado ao Maconhão');
+console.log('📏 Posicionado no centro do mapa');
+console.log('✅ Renderizado como camada base');
