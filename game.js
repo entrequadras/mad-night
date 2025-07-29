@@ -377,8 +377,8 @@ class Enemy {
         this.originX = x;
         this.originY = y;
         this.type = type;
-        this.width = 56;
-        this.height = 56;
+        this.width = 50;  // Reduzido de 56 para 50 (aproximadamente 10% menor)
+        this.height = 50; // Reduzido de 56 para 50
         this.speed = type === 'caveirinha' ? 2.5 : 2;
         this.patrolSpeed = 1;
         this.direction = 'down';
@@ -630,7 +630,7 @@ function spawnEscapeEnemy() {
     const types = ['faquinha', 'morcego', 'caveirinha', 'caveirinha'];
     const randomType = types[Math.floor(Math.random() * types.length)];
     
-    const validPos = findValidSpawnPosition(corner.x, corner.y, 56, 56);
+    const validPos = findValidSpawnPosition(corner.x, corner.y, 50, 50);
     
     const enemy = new Enemy(validPos.x, validPos.y, randomType);
     
@@ -678,7 +678,7 @@ function loadMap(mapIndex, isEscape = false) {
     const enemyList = (isEscape && map.escapeEnemies) ? map.escapeEnemies : map.enemies;
     
     enemyList.forEach(enemyData => {
-        const validPos = findValidSpawnPosition(enemyData.x, enemyData.y, 56, 56);
+        const validPos = findValidSpawnPosition(enemyData.x, enemyData.y, 50, 50);
         const enemy = new Enemy(validPos.x, validPos.y, enemyData.type || 'faquinha');
         
         switch(enemy.type) {
@@ -1197,7 +1197,7 @@ function renderUI(map) {
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.5.1 - Sistema de Câmera', canvas.width - 300, canvas.height - 10);
+    ctx.fillText('v1.5.2 - Ajuste de Proporções', canvas.width - 320, canvas.height - 10);
     
     // Morte
     if (player.isDead) {
