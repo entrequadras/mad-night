@@ -140,12 +140,12 @@ const maps = [
             {type: 'arvore004', x: 1480, y: 830},
             {type: 'arvore001', x: 1550, y: 850}
         ],
-        // NOVO SISTEMA DE POSTES COM ROTAÇÃO
+        // NOVO SISTEMA DE POSTES COM ROTAÇÃO (dentro do campo)
         streetLights: [
-            {type: 'poste000', x: 400, y: 300, rotation: 0, lightRadius: 180},     // Norte (padrão)
-            {type: 'poste000', x: 800, y: 300, rotation: 90, lightRadius: 180},    // Leste
-            {type: 'poste000', x: 1200, y: 300, rotation: 180, lightRadius: 180},  // Sul
-            {type: 'poste000', x: 1600, y: 300, rotation: 270, lightRadius: 180}   // Oeste
+            {type: 'poste000', x: 960, y: 350, rotation: 0, lightRadius: 180},     // Norte (aponta para cima)
+            {type: 'poste000', x: 1100, y: 540, rotation: 90, lightRadius: 180},   // Leste (aponta para direita)
+            {type: 'poste000', x: 960, y: 730, rotation: 0, lightRadius: 180},     // Sul (também aponta para cima - não invertido!)
+            {type: 'poste000', x: 820, y: 540, rotation: 270, lightRadius: 180}    // Oeste (aponta para esquerda)
         ],
         walls: [
             // Paredes externas apenas
@@ -160,11 +160,11 @@ const maps = [
             {x: 1620, y: 300, radius: 150},
             {x: 300, y: 780, radius: 150},
             {x: 1620, y: 780, radius: 150},
-            // Luzes dos postes (serão renderizadas automaticamente)
-            {x: 400, y: 300, radius: 180},  // Poste Norte
-            {x: 800, y: 300, radius: 180},  // Poste Leste
-            {x: 1200, y: 300, radius: 180}, // Poste Sul
-            {x: 1600, y: 300, radius: 180}  // Poste Oeste
+            // Luzes dos postes (dentro do campo)
+            {x: 960, y: 350, radius: 180},  // Poste Norte
+            {x: 1100, y: 540, radius: 180}, // Poste Leste
+            {x: 960, y: 730, radius: 180},  // Poste Sul
+            {x: 820, y: 540, radius: 180}   // Poste Oeste
         ],
         shadows: [
             {x: 240, y: 240, radius: 100},
@@ -1506,7 +1506,8 @@ function renderUI(map) {
     if (gameState.currentMap === 0) {
         ctx.fillStyle = '#ff0';
         ctx.font = '20px Arial';
-        ctx.fillText('TESTE POSTES: Norte(0°) Leste(90°) Sul(180°) Oeste(270°)', 20, 250);
+        ctx.fillText('POSTES NO CAMPO: Norte↑ Leste→ Sul↑ Oeste←', 20, 250);
+        ctx.fillText('(Nunca de cabeça pra baixo!)', 20, 275);
     }
     
     // Versão
@@ -1629,11 +1630,10 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 console.log('🎮 Mad Night v1.8.1 - Sistema de Rotação de Postes! 🎮');
-console.log('🔦 4 postes no Maconhão para testar rotação:');
-console.log('   • Norte (0°) - posição padrão');
-console.log('   • Leste (90°) - virado para direita'); 
-console.log('   • Sul (180°) - virado para baixo');
-console.log('   • Oeste (270°) - virado para esquerda');
-console.log('💡 Asset: assets/scenary/poste000.png (40x120)');
-console.log('⚙️ Sistema de rotação matemática funcionando!');
-console.log('🚧 Colisão dos postes também implementada!');
+console.log('🔦 4 postes DENTRO DO CAMPO para testar rotação:');
+console.log('   • Norte ↑ (0°) - topo do campo');
+console.log('   • Leste → (90°) - direita do campo'); 
+console.log('   • Sul ↑ (0°) - base do campo (não invertido!)');
+console.log('   • Oeste ← (270°) - esquerda do campo');
+console.log('💡 Posicionados como postes de estádio!');
+console.log('⚙️ Nunca de cabeça pra baixo - fica feio! 😂');
