@@ -257,6 +257,27 @@ const audio = {
     creditos: null
 };
 
+// Função auxiliar para desenhar placeholder de inimigos
+function drawEnemyPlaceholder(enemy) {
+    if (enemy.isDead) return;
+    
+    // Cores específicas por tipo
+    const colors = {
+        'faquinha': '#808',
+        'caveirinha': '#c0c',
+        'janis': '#0cc',
+        'chacal': '#f80'
+    };
+    
+    ctx.fillStyle = enemy.state === 'chase' ? '#f0f' : colors[enemy.type];
+    ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+    
+    // Desenhar nome do tipo para debug
+    ctx.fillStyle = '#fff';
+    ctx.font = '10px Arial';
+    ctx.fillText(enemy.type.substring(0, 3).toUpperCase(), enemy.x + 5, enemy.y + 15);
+}
+
 // Funções auxiliares
 function isInLight(x, y) {
     const map = maps[gameState.currentMap];
@@ -1025,7 +1046,7 @@ function draw() {
     
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
-    ctx.fillText('v1.3.9 - Sprite Fallback System', canvas.width - 170, canvas.height - 5);
+    ctx.fillText('v1.3.9.1 - Bug Fix', canvas.width - 120, canvas.height - 5);
     
     if (player.isDead) {
         ctx.fillStyle = '#f00';
