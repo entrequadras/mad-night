@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.8.9 - Sombras 100% limpas'
+    version: 'v1.9.1 - Postes com área iluminada'
 };
 
 // Player
@@ -338,11 +338,8 @@ const audio = {
 
 // Funções auxiliares
 function isInLight(x, y) {
-    const map = maps[gameState.currentMap];
-    for (let light of map.lights) {
-        const dist = Math.sqrt(Math.pow(x - light.x, 2) + Math.pow(y - light.y, 2));
-        if (dist < light.radius) return true;
-    }
+    // Função mantida para compatibilidade, mas sem funcionalidade
+    // Apenas postes de luz criam iluminação agora
     return false;
 }
 
@@ -1295,36 +1292,39 @@ function renderNightFilter(map, visibleArea) {
     ctx.fillStyle = 'rgba(0, 0, 40, 0.4)';
     ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
     
-    // "Furar" o filtro onde tem luz
-    ctx.save();
-    ctx.globalCompositeOperation = 'destination-out';
+    // Furar o filtro ao redor dos postes (área iluminada)
+    if (map.streetLights) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-out';
+        
+        map.streetLights.forEach(light => {
+            if (light.x + 140 > visibleArea.left && 
+                light.x - 140 < visibleArea.right &&
+                light.y + 140 > visibleArea.top && 
+                light.y - 140 < visibleArea.bottom) {
+                
+                // Furo maior que a luz âmbar, com feather suave
+                const gradient = ctx.createRadialGradient(
+                    light.x + 20, light.y + 45, 0,        // Centro da luz
+                    light.x + 20, light.y + 45, 130       // Raio maior que a luz (130px vs 100px)
+                );
+                gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');     // Centro bem claro
+                gradient.addColorStop(0.4, 'rgba(255, 255, 255, 0.7)');   // Área principal
+                gradient.addColorStop(0.7, 'rgba(255, 255, 255, 0.4)');   // Transição
+                gradient.addColorStop(0.85, 'rgba(255, 255, 255, 0.1)');  // Feather suave
+                gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');       // Borda suave
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(light.x + 20, light.y + 45, 130, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        });
+        
+        ctx.restore();
+    }
     
-    // Luzes normais
-    map.lights.forEach(light => {
-        if (light.x + light.radius > visibleArea.left && 
-            light.x - light.radius < visibleArea.right &&
-            light.y + light.radius > visibleArea.top && 
-            light.y - light.radius < visibleArea.bottom) {
-            
-            const gradient = ctx.createRadialGradient(
-                light.x, light.y, 0,
-                light.x, light.y, light.radius
-            );
-            gradient.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
-            gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.8)');
-            gradient.addColorStop(0.7, 'rgba(255, 255, 255, 0.4)');
-            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            
-            ctx.fillStyle = gradient;
-            ctx.beginPath();
-            ctx.arc(light.x, light.y, light.radius, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    });
-    
-    ctx.restore();
-    
-    // Luz decorativa dos postes - LUZ ÂMBAR AMPLIADA
+    // Luz decorativa dos postes - LUZ ÂMBAR por cima
     if (map.streetLights) {
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
@@ -1335,10 +1335,10 @@ function renderNightFilter(map, visibleArea) {
                 light.y + 120 > visibleArea.top && 
                 light.y - 120 < visibleArea.bottom) {
                 
-                // Luz âmbar (255, 160, 0) posicionada mais abaixo e maior
+                // Luz âmbar (255, 160, 0) - menor que o furo
                 const gradient = ctx.createRadialGradient(
-                    light.x + 20, light.y + 45, 0,      // Movida para y+45
-                    light.x + 20, light.y + 45, 100     // Raio aumentado para 100px
+                    light.x + 20, light.y + 45, 0,      // Centro
+                    light.x + 20, light.y + 45, 100     // Raio da luz âmbar
                 );
                 gradient.addColorStop(0, 'rgba(255, 160, 0, 0.3)');      // Âmbar forte no centro
                 gradient.addColorStop(0.3, 'rgba(255, 160, 0, 0.2)');    // Transição
@@ -1529,9 +1529,9 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.8.9 - Sombras 100% limpas 🎮');
-console.log('🚫 TODAS as bolas de sombra artificiais removidas');
-console.log('🌳 APENAS sombras naturais das árvores permanecem');
-console.log('✨ Sistema de sombras completamente limpo');
-console.log('🔍 Verificação dupla: sem mais shadows[] em mapas');
-console.log('🌃 Pronto para design estratégico de novas sombras');
+console.log('🎮 Mad Night v1.9.1 - Postes com área iluminada 🎮');
+console.log('🔦 Postes agora criam furos no filtro noturno');
+console.log('💡 Área iluminada (130px) > luz âmbar (100px)');
+console.log('✨ Feather suave para transição natural');
+console.log('🌃 Sistema de iluminação realista e estratégico');
+console.log('🎯 Pronto para posicionar postes em locais estratégicos');
