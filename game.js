@@ -1,4 +1,32 @@
-console.log('Mad Night v1.9.8 - Árvores sem filtro');
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAD NIGHT - v1.9.8</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        #gameCanvas {
+            border: 2px solid #333;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+console.log('Mad Night v1.9.8 - Mais Postes no Maconhão');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +60,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.8 - Árvores sem filtro'
+    version: 'v1.9.8 - Mais Postes no Maconhão'
 };
 
 // Player
@@ -158,7 +186,25 @@ const maps = [
             {type: 'arvore001', x: 1550, y: 850}
         ],
         streetLights: [
-            {type: 'poste000', x: 500, y: 200, rotation: 0, lightRadius: 40}
+            // Postes ao redor do campo de futebol (centro do mapa)
+            {type: 'poste000', x: 460, y: 200, rotation: 0, lightRadius: 40},  // Superior esquerdo
+            {type: 'poste000', x: 760, y: 200, rotation: 0, lightRadius: 40},  // Superior centro
+            {type: 'poste000', x: 1060, y: 200, rotation: 0, lightRadius: 40}, // Superior direito
+            {type: 'poste000', x: 1360, y: 200, rotation: 0, lightRadius: 40}, // Superior direito extra
+            
+            {type: 'poste000', x: 460, y: 550, rotation: 0, lightRadius: 40},  // Inferior esquerdo
+            {type: 'poste000', x: 760, y: 550, rotation: 0, lightRadius: 40},  // Inferior centro
+            {type: 'poste000', x: 1060, y: 550, rotation: 0, lightRadius: 40}, // Inferior direito
+            {type: 'poste000', x: 1360, y: 550, rotation: 0, lightRadius: 40}, // Inferior direito extra
+            
+            // Postes nas entradas/cantos do mapa
+            {type: 'poste000', x: 80, y: 80, rotation: 0, lightRadius: 40},    // Canto superior esquerdo
+            {type: 'poste000', x: 1800, y: 80, rotation: 0, lightRadius: 40},  // Canto superior direito
+            {type: 'poste000', x: 80, y: 900, rotation: 0, lightRadius: 40},   // Canto inferior esquerdo
+            {type: 'poste000', x: 1800, y: 900, rotation: 0, lightRadius: 40}, // Canto inferior direito
+            
+            // Poste na saída (importante para gameplay)
+            {type: 'poste000', x: 1700, y: 450, rotation: 0, lightRadius: 40}  // Próximo à saída
         ],
         walls: [
             {x: 0, y: 0, w: 1920, h: 20},
@@ -1374,15 +1420,17 @@ function renderNightFilter(map, visibleArea) {
     tempCtx.fillStyle = 'rgba(0, 0, 40, 0.4)';
     tempCtx.fillRect(0, 0, camera.width, camera.height);
     
-    // 2. Criar "buracos" no filtro onde tem luz de poste
+    // 2. Criar "buracos" no filtro onde tem luz de poste (sem usar destination-out)
     if (map.streetLights) {
         map.streetLights.forEach(light => {
             const lightX = light.x + 20 - camera.x;
             const lightY = light.y + 45 - camera.y;
             
+            // Só processar se estiver visível
             if (lightX + 70 > 0 && lightX - 70 < camera.width &&
                 lightY + 70 > 0 && lightY - 70 < camera.height) {
                 
+                // Usar globalCompositeOperation para criar o buraco
                 tempCtx.save();
                 tempCtx.globalCompositeOperation = 'destination-out';
                 
@@ -1405,49 +1453,10 @@ function renderNightFilter(map, visibleArea) {
         });
     }
     
-    // 3. NOVO: Criar buracos onde tem árvores (para não ficarem azuladas)
-    if (map.trees) {
-        tempCtx.save();
-        tempCtx.globalCompositeOperation = 'destination-out';
-        
-        map.trees.forEach(tree => {
-            const treeAsset = assets[tree.type];
-            if (treeAsset && treeAsset.loaded) {
-                const treeX = tree.x - camera.x;
-                const treeY = tree.y - camera.y;
-                
-                // Só processar se a árvore estiver visível
-                if (treeX + treeAsset.width > 0 && treeX < camera.width &&
-                    treeY + treeAsset.height > 0 && treeY < camera.height) {
-                    
-                    // Criar buraco suave ao redor da árvore
-                    const centerX = treeX + treeAsset.width / 2;
-                    const centerY = treeY + treeAsset.height / 2;
-                    const radius = Math.max(treeAsset.width, treeAsset.height) * 0.7;
-                    
-                    const gradient = tempCtx.createRadialGradient(
-                        centerX, centerY, radius * 0.3,
-                        centerX, centerY, radius
-                    );
-                    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');  // Centro quase sem filtro
-                    gradient.addColorStop(0.6, 'rgba(255, 255, 255, 0.4)'); // Meio termo
-                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');     // Borda com filtro normal
-                    
-                    tempCtx.fillStyle = gradient;
-                    tempCtx.beginPath();
-                    tempCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-                    tempCtx.fill();
-                }
-            }
-        });
-        
-        tempCtx.restore();
-    }
-    
-    // 4. Aplicar o filtro com máscara no canvas principal
+    // 3. Aplicar o filtro com máscara no canvas principal
     ctx.drawImage(tempCanvas, camera.x, camera.y);
     
-    // 5. Adicionar luz âmbar decorativa dos postes
+    // 4. Adicionar luz âmbar decorativa dos postes
     if (map.streetLights) {
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
@@ -1652,8 +1661,12 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.8 - Árvores sem filtro 🎮');
-console.log('🌳 Árvores excluídas do filtro azul noturno');
-console.log('✨ Gradiente suave ao redor de cada árvore');
-console.log('🎨 Cores naturais preservadas nas árvores');
-console.log('🌃 Mantém atmosfera noturna no resto do cenário');
+console.log('🎮 Mad Night v1.9.8 - Mais Postes no Maconhão 🎮');
+console.log('💡 13 postes estratégicos adicionados:');
+console.log('⚽ 8 postes ao redor do campo de futebol');
+console.log('🚪 4 postes nos cantos do mapa');
+console.log('🎯 1 poste próximo à saída');
+console.log('✨ Criando áreas de luz e sombra para stealth gameplay');
+    </script>
+</body>
+</html>
