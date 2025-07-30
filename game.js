@@ -1391,10 +1391,11 @@ function renderNightFilter(map, visibleArea) {
     ctx.fillStyle = 'rgba(0, 0, 40, 0.4)';
     ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
     
-    // "Furar" o filtro onde tem luz
+    // "Furar" o filtro onde tem luz (INCLUINDO POSTES)
     ctx.save();
     ctx.globalCompositeOperation = 'destination-out';
     
+    // Luzes normais + luzes dos postes
     map.lights.forEach(light => {
         if (light.x + light.radius > visibleArea.left && 
             light.x - light.radius < visibleArea.right &&
@@ -1405,9 +1406,10 @@ function renderNightFilter(map, visibleArea) {
                 light.x, light.y, 0,
                 light.x, light.y, light.radius
             );
-            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-            gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.4)');
-            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1.0)');      // Centro: fura 100%
+            gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.8)');   // Meio: fura 80%
+            gradient.addColorStop(0.7, 'rgba(255, 255, 255, 0.4)');   // Borda: fura 40%
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');       // Extremo: não fura
             
             ctx.fillStyle = gradient;
             ctx.beginPath();
@@ -1416,12 +1418,37 @@ function renderNightFilter(map, visibleArea) {
         }
     });
     
+    // EXTRA: Furar especificamente onde há postes (mais forte)
+    if (map.streetLights) {
+        map.streetLights.forEach(light => {
+            if (light.x + light.lightRadius > visibleArea.left && 
+                light.x - light.lightRadius < visibleArea.right &&
+                light.y + light.lightRadius > visibleArea.top && 
+                light.y < visibleArea.bottom) {
+                
+                const gradient = ctx.createRadialGradient(
+                    light.x + 20, light.y + 60, 0,        // Centro do poste (aproximado)
+                    light.x + 20, light.y + 60, light.lightRadius
+                );
+                gradient.addColorStop(0, 'rgba(255, 255, 255, 1.0)');    // Fura completamente
+                gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.6)'); 
+                gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(light.x + 20, light.y + 60, light.lightRadius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        });
+    }
+    
     ctx.restore();
     
-    // Adicionar um toque amarelado nas áreas iluminadas
+    // Adicionar um toque amarelado FORTE nas áreas dos postes
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
     
+    // Luz amarelada normal
     map.lights.forEach(light => {
         if (light.x + light.radius > visibleArea.left && 
             light.x - light.radius < visibleArea.right &&
@@ -1441,6 +1468,30 @@ function renderNightFilter(map, visibleArea) {
             ctx.fill();
         }
     });
+    
+    // Luz EXTRA FORTE dos postes (mais amarela e intensa)
+    if (map.streetLights) {
+        map.streetLights.forEach(light => {
+            if (light.x + light.lightRadius > visibleArea.left && 
+                light.x - light.lightRadius < visibleArea.right &&
+                light.y + light.lightRadius > visibleArea.top && 
+                light.y < visibleArea.bottom) {
+                
+                const gradient = ctx.createRadialGradient(
+                    light.x + 20, light.y + 60, 0,
+                    light.x + 20, light.y + 60, light.lightRadius * 0.9
+                );
+                gradient.addColorStop(0, 'rgba(255, 255, 100, 0.5)');   // Mais amarelo e forte
+                gradient.addColorStop(0.6, 'rgba(255, 255, 150, 0.2)'); 
+                gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(light.x + 20, light.y + 60, light.lightRadius * 0.9, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        });
+    }
     
     ctx.restore();
 }
@@ -1501,14 +1552,14 @@ function renderUI(map) {
     if (gameState.currentMap === 0) {
         ctx.fillStyle = '#ff0';
         ctx.font = '20px Arial';
-        ctx.fillText('1 POSTE: x:500, y:200 + LUZ acima (buraco no filtro)', 20, 250);
-        ctx.fillText('Teste: ande até o poste e veja a iluminação!', 20, 275);
+        ctx.fillText('POSTE: x:500, y:200 + LUZ REFORÇADA (fura filtro 100%)', 20, 250);
+        ctx.fillText('Personagem deve ficar BEM VISÍVEL sob o poste!', 20, 275);
     }
     
     // Versão
     ctx.fillStyle = '#666';
     ctx.font = '20px Arial';
-    ctx.fillText('v1.8.1 - Sistema de Rotação de Postes', canvas.width - 440, canvas.height - 10);
+    ctx.fillText('v1.8.2 - Luz do Poste REFORÇADA', canvas.width - 380, canvas.height - 10);
     
     // Morte
     if (player.isDead) {
@@ -1624,9 +1675,9 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.8.1 - 1 Poste + Buraco no Filtro! 🎮');
-console.log('🔦 Apenas 1 poste: x:500, y:200 (fora do campo)');
-console.log('💡 Luz do poste: "buraco" no filtro noturno acima dele');
-console.log('✅ Zero risco de bug - usa sistema já testado');
-console.log('🎯 Poste longe das árvores para não conflitar');
-console.log('📍 Posição: norte do mapa, área livre');
+console.log('🎮 Mad Night v1.8.2 - Luz do Poste REFORÇADA! 🎮');
+console.log('🔦 Poste: x:500, y:200 (fora do campo)');
+console.log('💡 CORREÇÃO: Luz do poste fura filtro em 100%');
+console.log('✨ Efeito duplo: destination-out + screen blend');
+console.log('👤 Personagem deve ficar BEM VISÍVEL sob o poste');
+console.log('🌟 Luz amarelada mais intensa na área do poste');
