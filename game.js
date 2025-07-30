@@ -1,4 +1,4 @@
-console.log('Mad Night v1.8.2 - Clean Light');
+console.log('Mad Night v1.8.3 - Minimal Light');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -134,7 +134,7 @@ const maps = [
         ],
         // Sistema de postes - apenas 1 poste
         streetLights: [
-            {type: 'poste000', x: 500, y: 200, rotation: 0, lightRadius: 180}
+            {type: 'poste000', x: 500, y: 200, rotation: 0, lightRadius: 40}  // Raio reduzido
         ],
         walls: [
             // Paredes externas apenas
@@ -144,7 +144,7 @@ const maps = [
             {x: 1900, y: 20, w: 20, h: 1040}   // direita
         ],
         lights: [
-            {x: 500, y: 200, radius: 180},      // Luz do poste
+            // Removida a luz grande do poste - agora só tem luz decorativa pequena
             {x: 960, y: 540, radius: 300},
             {x: 300, y: 300, radius: 150},
             {x: 1620, y: 300, radius: 150},
@@ -1376,7 +1376,7 @@ function renderNightFilter(map, visibleArea) {
     ctx.save();
     ctx.globalCompositeOperation = 'destination-out';
     
-    // Luzes normais + luzes dos postes
+    // Luzes normais
     map.lights.forEach(light => {
         if (light.x + light.radius > visibleArea.left && 
             light.x - light.radius < visibleArea.right &&
@@ -1401,9 +1401,9 @@ function renderNightFilter(map, visibleArea) {
     
     ctx.restore();
     
-    // Adicionar luz amarelada aditiva (similar ao AdditiveBlending)
+    // Adicionar luz amarelada suave usando screen
     ctx.save();
-    ctx.globalCompositeOperation = 'lighter'; // Efeito aditivo!
+    ctx.globalCompositeOperation = 'screen';
     
     // Luz amarelada normal
     map.lights.forEach(light => {
@@ -1416,8 +1416,8 @@ function renderNightFilter(map, visibleArea) {
                 light.x, light.y, 0,
                 light.x, light.y, light.radius * 0.8
             );
-            gradient.addColorStop(0, 'rgba(255, 255, 150, 0.15)');
-            gradient.addColorStop(0.5, 'rgba(255, 255, 180, 0.08)');
+            gradient.addColorStop(0, 'rgba(255, 255, 200, 0.2)');
+            gradient.addColorStop(0.5, 'rgba(255, 255, 200, 0.1)');
             gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
             
             ctx.fillStyle = gradient;
@@ -1427,39 +1427,26 @@ function renderNightFilter(map, visibleArea) {
         }
     });
     
-    // Luz EXTRA dos postes com efeito aditivo mais forte
+    // Luz decorativa pequena dos postes (apenas visual, sem gameplay)
     if (map.streetLights) {
         map.streetLights.forEach(light => {
-            if (light.x + light.lightRadius > visibleArea.left && 
-                light.x - light.lightRadius < visibleArea.right &&
-                light.y + light.lightRadius > visibleArea.top && 
+            if (light.x + 40 > visibleArea.left && 
+                light.x < visibleArea.right &&
+                light.y + 40 > visibleArea.top && 
                 light.y < visibleArea.bottom) {
                 
-                // Primeiro halo de luz mais intenso
-                let gradient = ctx.createRadialGradient(
-                    light.x + 20, light.y + 60, 0,
-                    light.x + 20, light.y + 60, light.lightRadius * 0.6
+                // Pequeno brilho amarelo no topo do poste
+                const gradient = ctx.createRadialGradient(
+                    light.x + 20, light.y + 10, 0,
+                    light.x + 20, light.y + 10, 30
                 );
-                gradient.addColorStop(0, 'rgba(255, 255, 100, 0.4)');
-                gradient.addColorStop(0.5, 'rgba(255, 255, 150, 0.2)');
+                gradient.addColorStop(0, 'rgba(255, 255, 150, 0.4)');
+                gradient.addColorStop(0.7, 'rgba(255, 255, 180, 0.2)');
                 gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
                 
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
-                ctx.arc(light.x + 20, light.y + 60, light.lightRadius * 0.6, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Segundo halo ainda mais intenso no centro
-                gradient = ctx.createRadialGradient(
-                    light.x + 20, light.y + 60, 0,
-                    light.x + 20, light.y + 60, light.lightRadius * 0.3
-                );
-                gradient.addColorStop(0, 'rgba(255, 255, 200, 0.6)');
-                gradient.addColorStop(1, 'rgba(255, 255, 150, 0)');
-                
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(light.x + 20, light.y + 60, light.lightRadius * 0.3, 0, Math.PI * 2);
+                ctx.arc(light.x + 20, light.y + 10, 30, 0, Math.PI * 2);
                 ctx.fill();
             }
         });
