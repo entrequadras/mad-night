@@ -1,4 +1,4 @@
-console.log('Mad Night v1.8.3 - Minimal Light');
+console.log('Mad Night v1.8.3 - Fixed');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -114,7 +114,6 @@ const maps = [
         height: 1080,
         enemies: [],
         trees: [
-            // Árvores originais
             {type: 'arvore001', x: 300, y: 150},
             {type: 'arvore002', x: 1400, y: 120},
             {type: 'arvore003', x: 150, y: 700},
@@ -124,27 +123,22 @@ const maps = [
             {type: 'arvore001', x: 1200, y: 880},
             {type: 'arvore003', x: 950, y: 100},
             {type: 'arvore004', x: 100, y: 400},
-            // Novas árvores no lugar dos blocos sólidos
             {type: 'arvore001', x: 200, y: 180},
             {type: 'arvore002', x: 1580, y: 130},
             {type: 'arvore003', x: 280, y: 780},
-            // Duas árvores juntas no canto inferior direito
             {type: 'arvore004', x: 1480, y: 830},
             {type: 'arvore001', x: 1550, y: 850}
         ],
-        // Sistema de postes - apenas 1 poste
         streetLights: [
-            {type: 'poste000', x: 500, y: 200, rotation: 0, lightRadius: 40}  // Raio reduzido
+            {type: 'poste000', x: 500, y: 200, rotation: 0, lightRadius: 40}
         ],
         walls: [
-            // Paredes externas apenas
-            {x: 0, y: 0, w: 1920, h: 20},      // topo
-            {x: 0, y: 1060, w: 1920, h: 20},   // fundo
-            {x: 0, y: 20, w: 20, h: 1040},     // esquerda
-            {x: 1900, y: 20, w: 20, h: 1040}   // direita
+            {x: 0, y: 0, w: 1920, h: 20},
+            {x: 0, y: 1060, w: 1920, h: 20},
+            {x: 0, y: 20, w: 20, h: 1040},
+            {x: 1900, y: 20, w: 20, h: 1040}
         ],
         lights: [
-            // Removida a luz grande do poste - agora só tem luz decorativa pequena
             {x: 960, y: 540, radius: 300},
             {x: 300, y: 300, radius: 150},
             {x: 1620, y: 300, radius: 150},
@@ -385,13 +379,11 @@ function isInLight(x, y) {
 function isInShadow(x, y) {
     const map = maps[gameState.currentMap];
     
-    // Checar sombras manuais
     for (let shadow of map.shadows) {
         const dist = Math.sqrt(Math.pow(x - shadow.x, 2) + Math.pow(y - shadow.y, 2));
         if (dist < shadow.radius) return true;
     }
     
-    // Checar sombras das árvores
     if (map.trees) {
         for (let tree of map.trees) {
             const treeAsset = assets[tree.type];
@@ -427,14 +419,12 @@ function checkWallCollision(entity, newX, newY) {
         height: entity.height
     };
     
-    // Checar paredes
     for (let wall of map.walls) {
         if (checkRectCollision(testEntity, wall)) {
             return true;
         }
     }
     
-    // Checar colisão com troncos das árvores
     if (map.trees) {
         for (let tree of map.trees) {
             const treeAsset = assets[tree.type];
@@ -453,7 +443,6 @@ function checkWallCollision(entity, newX, newY) {
         }
     }
     
-    // Checar colisão com postes
     if (map.streetLights) {
         for (let light of map.streetLights) {
             const lightAsset = assets[light.type];
@@ -509,7 +498,6 @@ function findValidSpawnPosition(x, y, width, height) {
     return {x, y};
 }
 
-// Renderizar objetos com rotação
 function renderRotatedObject(obj, assetKey, visibleArea) {
     const asset = assets[assetKey];
     if (!asset || !asset.loaded) return;
@@ -1134,7 +1122,6 @@ function renderTrees(map, visibleArea, layer = 'bottom') {
                 tree.y < visibleArea.bottom) {
                 
                 if (layer === 'bottom') {
-                    // Renderizar apenas o tronco
                     ctx.save();
                     ctx.beginPath();
                     ctx.rect(tree.x, tree.y + treeAsset.height * 0.7, treeAsset.width, treeAsset.height * 0.3);
@@ -1142,7 +1129,6 @@ function renderTrees(map, visibleArea, layer = 'bottom') {
                     ctx.drawImage(treeAsset.img, tree.x, tree.y);
                     ctx.restore();
                 } else if (layer === 'top') {
-                    // Renderizar apenas a copa
                     ctx.save();
                     ctx.beginPath();
                     ctx.rect(tree.x, tree.y, treeAsset.width, treeAsset.height * 0.75);
@@ -1165,7 +1151,6 @@ function renderTrees(map, visibleArea, layer = 'bottom') {
     });
 }
 
-// Renderizar postes com rotação
 function renderStreetLights(map, visibleArea) {
     if (!map.streetLights) return;
     
@@ -1192,7 +1177,6 @@ function renderLights(map, visibleArea) {
 }
 
 function renderShadows(map, visibleArea) {
-    // Sombras manuais do mapa
     map.shadows.forEach(shadow => {
         if (shadow.x + shadow.radius > visibleArea.left && 
             shadow.x - shadow.radius < visibleArea.right &&
@@ -1208,7 +1192,6 @@ function renderShadows(map, visibleArea) {
         }
     });
     
-    // Sombras das árvores
     if (map.trees) {
         map.trees.forEach(tree => {
             const treeAsset = assets[tree.type];
@@ -1401,7 +1384,7 @@ function renderNightFilter(map, visibleArea) {
     
     ctx.restore();
     
-    // Adicionar luz amarelada suave usando screen
+    // Adicionar luz amarelada suave
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
     
@@ -1427,7 +1410,7 @@ function renderNightFilter(map, visibleArea) {
         }
     });
     
-    // Luz decorativa pequena dos postes (apenas visual, sem gameplay)
+    // Luz decorativa pequena dos postes
     if (map.streetLights) {
         map.streetLights.forEach(light => {
             if (light.x + 40 > visibleArea.left && 
@@ -1435,7 +1418,6 @@ function renderNightFilter(map, visibleArea) {
                 light.y + 40 > visibleArea.top && 
                 light.y < visibleArea.bottom) {
                 
-                // Pequeno brilho amarelo no topo do poste
                 const gradient = ctx.createRadialGradient(
                     light.x + 20, light.y + 10, 0,
                     light.x + 20, light.y + 10, 30
@@ -1454,3 +1436,179 @@ function renderNightFilter(map, visibleArea) {
     
     ctx.restore();
 }
+
+function renderUI(map) {
+    // Nome do mapa
+    ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#ff0';
+    ctx.font = 'bold 48px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(map.name, canvas.width/2, 80);
+    ctx.font = '32px Arial';
+    ctx.fillText(map.subtitle, canvas.width/2, 120);
+    ctx.textAlign = 'left';
+    
+    // Info
+    ctx.fillStyle = '#fff';
+    ctx.font = '28px Arial';
+    ctx.fillText(`Mapa: ${gameState.currentMap + 1}/6`, 20, canvas.height - 80);
+    ctx.fillText(`Inimigos: ${enemies.filter(e => !e.isDead).length}`, 20, canvas.height - 40);
+    
+    // Vidas
+    ctx.fillText('Vidas: ', 20, 50);
+    for (let i = 0; i < 5; i++) {
+        ctx.font = '40px Arial';
+        if (i >= gameState.deaths) {
+            ctx.fillStyle = '#f00';
+            ctx.fillText('💀', 120 + i * 60, 50);
+        }
+    }
+    ctx.font = '28px Arial';
+    
+    // Status
+    if (player.inShadow) {
+        ctx.fillStyle = '#0f0';
+        ctx.fillText('NA SOMBRA - Invisível!', 20, 170);
+    }
+    
+    // Avisos
+    if (map.orelhao && !gameState.dashUnlocked) {
+        ctx.fillStyle = '#ff0';
+        ctx.fillText('Atenda o orelhão!', 20, 210);
+    }
+    
+    if (map.lixeira && !gameState.bombPlaced) {
+        ctx.fillStyle = '#ff0';
+        ctx.fillText('Elimine todos e plante o explosivo!', 20, 210);
+    }
+    
+    // Força de Pedal
+    ctx.fillStyle = '#fff';
+    ctx.fillText('Força de Pedal: ', 20, 130);
+    for (let i = 0; i < gameState.maxPedalPower; i++) {
+        ctx.fillStyle = i < gameState.pedalPower ? '#0f0' : '#333';
+        ctx.fillText('█', 240 + i * 24, 130);
+    }
+    
+    // Versão
+    ctx.fillStyle = '#666';
+    ctx.font = '20px Arial';
+    ctx.fillText('v1.8.3', canvas.width - 80, canvas.height - 10);
+    
+    // Morte
+    if (player.isDead) {
+        ctx.fillStyle = '#f00';
+        ctx.font = '64px Arial';
+        ctx.textAlign = 'center';
+        const msg = gameState.deaths < 5 ? "ah véi, se liga carái" : "sifudêu";
+        ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
+        ctx.textAlign = 'left';
+    }
+}
+
+// Função de desenho principal
+function draw() {
+    const map = maps[gameState.currentMap];
+    
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.save();
+    ctx.scale(camera.zoom, camera.zoom);
+    ctx.translate(-camera.x, -camera.y);
+    
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
+    
+    const visibleArea = {
+        left: camera.x - 100,
+        right: camera.x + camera.width + 100,
+        top: camera.y - 100,
+        bottom: camera.y + camera.height + 100
+    };
+    
+    // Renderizar elementos do mapa
+    renderCampo(map);
+    renderShadows(map, visibleArea);
+    renderTrees(map, visibleArea, 'bottom');
+    renderWalls(map, visibleArea);
+    renderSpecialObjects(map);
+    renderStreetLights(map, visibleArea);
+    renderProjectiles(visibleArea);
+    renderEnemies(visibleArea);
+    renderPlayer();
+    renderTrees(map, visibleArea, 'top');
+    renderNightFilter(map, visibleArea);
+    
+    ctx.restore();
+    
+    // Renderizar UI
+    renderUI(map);
+}
+
+// Game loop
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+// Carregar sprites
+let madmaxLoaded = 0;
+let faquinhaLoaded = 0;
+let morcegoLoaded = 0;
+let caveirinhaLoaded = 0;
+let janisLoaded = 0;
+let chacalLoaded = 0;
+
+for (let i = 0; i <= 15; i++) {
+    const img = new Image();
+    img.src = `assets/sprites/madmax${String(i).padStart(3, '0')}.png`;
+    img.onload = () => madmaxLoaded++;
+    player.sprites[i] = img;
+}
+
+for (let i = 0; i <= 15; i++) {
+    const img = new Image();
+    img.src = `assets/sprites/faquinha${String(i).padStart(3, '0')}.png`;
+    img.onload = () => faquinhaLoaded++;
+    faquinhaSprites[i] = img;
+}
+
+for (let i = 0; i <= 15; i++) {
+    const img = new Image();
+    img.src = `assets/sprites/morcego${String(i).padStart(3, '0')}.png`;
+    img.onload = () => morcegoLoaded++;
+    morcegoSprites[i] = img;
+}
+
+for (let i = 0; i <= 15; i++) {
+    const img = new Image();
+    img.src = `assets/sprites/caveirinha${String(i).padStart(3, '0')}.png`;
+    img.onload = () => caveirinhaLoaded++;
+    caveirinhaSprites[i] = img;
+}
+
+for (let i = 0; i <= 15; i++) {
+    const img = new Image();
+    img.src = `assets/sprites/janis${String(i).padStart(3, '0')}.png`;
+    img.onload = () => janisLoaded++;
+    janisSprites[i] = img;
+}
+
+for (let i = 0; i <= 15; i++) {
+    const img = new Image();
+    img.src = `assets/sprites/chacal${String(i).padStart(3, '0')}.png`;
+    img.onload = () => chacalLoaded++;
+    chacalSprites[i] = img;
+}
+
+// Inicializar
+loadAudio();
+loadMap(0);
+setTimeout(() => playMusic('inicio'), 1000);
+gameLoop();
+
+console.log('🎮 Mad Night v1.8.3 - Fixed 🎮');
+console.log('✅ Tela preta corrigida - renderização completa');
+console.log('💡 Luz do poste decorativa (30px no topo)');
+console.log('🎯 Sem interferência no gameplay');
