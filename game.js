@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.4 - Tiles de grama'
+    version: 'v1.9.5 - Tiles alinhados'
 };
 
 // Player
@@ -368,19 +368,16 @@ function generateGrassTiles(mapWidth, mapHeight, tileSize) {
     const tiles = [];
     const types = ['grama_tile000', 'grama_tile001', 'grama_tile002', 'grama_tile003'];
     
-    // Preencher toda a área com tiles
+    // Preencher toda a área com tiles perfeitamente alinhados
     for (let y = 0; y < mapHeight; y += tileSize) {
         for (let x = 0; x < mapWidth; x += tileSize) {
             // Escolher tipo aleatório
             const randomType = types[Math.floor(Math.random() * types.length)];
-            // Adicionar variação aleatória pequena na posição para parecer mais natural
-            const offsetX = Math.random() * 20 - 10;
-            const offsetY = Math.random() * 20 - 10;
             
             tiles.push({
                 type: randomType,
-                x: x + offsetX,
-                y: y + offsetY
+                x: x,  // Posição exata, sem offset
+                y: y   // Posição exata, sem offset
             });
         }
     }
@@ -1609,8 +1606,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.4 - Tiles de grama 🎮');
-console.log('🌿 Sistema de tiles implementado');
-console.log('🎲 Tiles de grama distribuídos aleatoriamente');
-console.log('📏 Tiles de 240x240 pixels com pequena variação');
-console.log('🖼️ 4 tipos diferentes: grama_tile000 a grama_tile003');
+console.log('🎮 Mad Night v1.9.5 - Tiles alinhados 🎮');
+console.log('🌿 Tiles de grama perfeitamente encaixados');
+console.log('📐 Grid perfeito de 240x240 sem espaços');
+console.log('🎲 Distribuição aleatória dos 4 tipos');
+console.log('✨ Visual uniforme sem gaps entre tiles');
