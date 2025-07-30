@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.5 - Tiles alinhados'
+    version: 'v1.9.6 - Tiles 120x120'
 };
 
 // Player
@@ -66,10 +66,10 @@ const assets = {
     arvore004: { img: new Image(), loaded: false, width: 150, height: 190 },
     arvorebloco001: { img: new Image(), loaded: false, width: 354, height: 186 },
     poste000: { img: new Image(), loaded: false, width: 40, height: 120 },
-    grama_tile000: { img: new Image(), loaded: false, width: 240, height: 240 },
-    grama_tile001: { img: new Image(), loaded: false, width: 240, height: 240 },
-    grama_tile002: { img: new Image(), loaded: false, width: 240, height: 240 },
-    grama_tile003: { img: new Image(), loaded: false, width: 240, height: 240 }
+    grama000: { img: new Image(), loaded: false, width: 120, height: 120 },
+    grama001: { img: new Image(), loaded: false, width: 120, height: 120 },
+    grama002: { img: new Image(), loaded: false, width: 120, height: 120 },
+    grama003: { img: new Image(), loaded: false, width: 120, height: 120 }
 };
 
 // Carregar assets
@@ -111,24 +111,24 @@ assets.poste000.img.onload = () => {
 };
 
 // Carregar tiles de grama
-assets.grama_tile000.img.src = 'assets/tiles/grama_tile000.png';
-assets.grama_tile000.img.onload = () => {
-    assets.grama_tile000.loaded = true;
+assets.grama000.img.src = 'assets/tiles/grama000.png';
+assets.grama000.img.onload = () => {
+    assets.grama000.loaded = true;
 };
 
-assets.grama_tile001.img.src = 'assets/tiles/grama_tile001.png';
-assets.grama_tile001.img.onload = () => {
-    assets.grama_tile001.loaded = true;
+assets.grama001.img.src = 'assets/tiles/grama001.png';
+assets.grama001.img.onload = () => {
+    assets.grama001.loaded = true;
 };
 
-assets.grama_tile002.img.src = 'assets/tiles/grama_tile002.png';
-assets.grama_tile002.img.onload = () => {
-    assets.grama_tile002.loaded = true;
+assets.grama002.img.src = 'assets/tiles/grama002.png';
+assets.grama002.img.onload = () => {
+    assets.grama002.loaded = true;
 };
 
-assets.grama_tile003.img.src = 'assets/tiles/grama_tile003.png';
-assets.grama_tile003.img.onload = () => {
-    assets.grama_tile003.loaded = true;
+assets.grama003.img.src = 'assets/tiles/grama003.png';
+assets.grama003.img.onload = () => {
+    assets.grama003.loaded = true;
 };
 
 // Sistema de Mapas
@@ -140,7 +140,7 @@ const maps = [
         height: 1080,
         enemies: [],
         // Sistema de tiles de grama - gerado aleatoriamente
-        tiles: generateGrassTiles(1920, 1080, 240),
+        tiles: generateGrassTiles(1920, 1080, 120),
         trees: [
             {type: 'arvore001', x: 300, y: 150},
             {type: 'arvore002', x: 1400, y: 120},
@@ -366,7 +366,7 @@ const audio = {
 // Função para gerar tiles de grama aleatoriamente
 function generateGrassTiles(mapWidth, mapHeight, tileSize) {
     const tiles = [];
-    const types = ['grama_tile000', 'grama_tile001', 'grama_tile002', 'grama_tile003'];
+    const types = ['grama000', 'grama001', 'grama002', 'grama003'];
     
     // Preencher toda a área com tiles perfeitamente alinhados
     for (let y = 0; y < mapHeight; y += tileSize) {
@@ -1606,8 +1606,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.5 - Tiles alinhados 🎮');
-console.log('🌿 Tiles de grama perfeitamente encaixados');
-console.log('📐 Grid perfeito de 240x240 sem espaços');
-console.log('🎲 Distribuição aleatória dos 4 tipos');
-console.log('✨ Visual uniforme sem gaps entre tiles');
+console.log('🎮 Mad Night v1.9.6 - Tiles 120x120 🎮');
+console.log('🌿 Tiles reduzidos para 120x120 pixels');
+console.log('📐 Melhor resolução sem degradação');
+console.log('🎲 Novo padrão de nome: grama000 a grama003');
+console.log('✨ 4x mais tiles mas com qualidade superior');
