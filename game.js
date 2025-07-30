@@ -1,4 +1,4 @@
-console.log('Mad Night v1.8.3 - Fixed');
+console.log('Mad Night v1.8.4 - Poste com luz suave');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -31,7 +31,8 @@ const gameState = {
     bombPlaced: false,
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
-    spawnCorner: 0
+    spawnCorner: 0,
+    version: 'v1.8.4 - Poste com luz suave' // Nova propriedade para versão
 };
 
 // Player
@@ -1410,25 +1411,28 @@ function renderNightFilter(map, visibleArea) {
         }
     });
     
-    // Luz decorativa pequena dos postes
+    // Luz decorativa dos postes - ANTES do poste (atrás)
     if (map.streetLights) {
         map.streetLights.forEach(light => {
-            if (light.x + 40 > visibleArea.left && 
-                light.x < visibleArea.right &&
-                light.y + 40 > visibleArea.top && 
-                light.y < visibleArea.bottom) {
+            if (light.x + 100 > visibleArea.left && 
+                light.x - 100 < visibleArea.right &&
+                light.y + 100 > visibleArea.top && 
+                light.y - 100 < visibleArea.bottom) {
                 
+                // Luz maior e mais suave
                 const gradient = ctx.createRadialGradient(
-                    light.x + 20, light.y + 10, 0,
-                    light.x + 20, light.y + 10, 30
+                    light.x + 20, light.y + 20, 0,
+                    light.x + 20, light.y + 20, 80  // Raio aumentado para 80
                 );
-                gradient.addColorStop(0, 'rgba(255, 255, 150, 0.4)');
-                gradient.addColorStop(0.7, 'rgba(255, 255, 180, 0.2)');
-                gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
+                gradient.addColorStop(0, 'rgba(255, 255, 180, 0.25)');     // Centro mais suave
+                gradient.addColorStop(0.3, 'rgba(255, 255, 190, 0.15)');   // Transição suave
+                gradient.addColorStop(0.6, 'rgba(255, 255, 200, 0.08)');   // Feather maior
+                gradient.addColorStop(0.85, 'rgba(255, 255, 210, 0.03)');  // Borda bem suave
+                gradient.addColorStop(1, 'rgba(255, 255, 220, 0)');        // Fade completo
                 
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
-                ctx.arc(light.x + 20, light.y + 10, 30, 0, Math.PI * 2);
+                ctx.arc(light.x + 20, light.y + 20, 80, 0, Math.PI * 2);
                 ctx.fill();
             }
         });
@@ -1438,13 +1442,19 @@ function renderNightFilter(map, visibleArea) {
 }
 
 function renderUI(map) {
-    // Nome do mapa
+    // Nome do mapa com versão no canto superior direito
     ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#ff0';
     ctx.font = 'bold 48px Arial';
     ctx.textAlign = 'center';
     ctx.fillText(map.name, canvas.width/2, 80);
     ctx.font = '32px Arial';
     ctx.fillText(map.subtitle, canvas.width/2, 120);
+    
+    // Versão no alto direito
+    ctx.fillStyle = '#666';
+    ctx.font = '24px Arial';
+    ctx.textAlign = 'right';
+    ctx.fillText(gameState.version, canvas.width - 20, 40);
     ctx.textAlign = 'left';
     
     // Info
@@ -1489,11 +1499,6 @@ function renderUI(map) {
         ctx.fillText('█', 240 + i * 24, 130);
     }
     
-    // Versão
-    ctx.fillStyle = '#666';
-    ctx.font = '20px Arial';
-    ctx.fillText('v1.8.3', canvas.width - 80, canvas.height - 10);
-    
     // Morte
     if (player.isDead) {
         ctx.fillStyle = '#f00';
@@ -1532,10 +1537,10 @@ function draw() {
     renderTrees(map, visibleArea, 'bottom');
     renderWalls(map, visibleArea);
     renderSpecialObjects(map);
-    renderStreetLights(map, visibleArea);
     renderProjectiles(visibleArea);
     renderEnemies(visibleArea);
     renderPlayer();
+    renderStreetLights(map, visibleArea); // Movido para DEPOIS do player
     renderTrees(map, visibleArea, 'top');
     renderNightFilter(map, visibleArea);
     
@@ -1608,7 +1613,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.8.3 - Fixed 🎮');
-console.log('✅ Tela preta corrigida - renderização completa');
-console.log('💡 Luz do poste decorativa (30px no topo)');
-console.log('🎯 Sem interferência no gameplay');
+console.log('🎮 Mad Night v1.8.4 - Poste com luz suave 🎮');
+console.log('💡 Luz do poste: 80px de raio, feather suave e gradual');
+console.log('📍 Versão agora aparece no canto superior direito');
+console.log('✨ Luz renderizada atrás do poste para efeito mais natural');
