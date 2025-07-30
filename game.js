@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.6 - Tiles 120x120');
+console.log('Mad Night v1.9.7 - Tiles sem gaps');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.6 - Tiles 120x120'
+    version: 'v1.9.7 - Tiles sem gaps'
 };
 
 // Player
@@ -1126,7 +1126,16 @@ function renderTiles(map, visibleArea) {
                 tile.y + tileAsset.height > visibleArea.top && 
                 tile.y < visibleArea.bottom) {
                 
-                ctx.drawImage(tileAsset.img, tile.x, tile.y);
+                // Arredondar posições para evitar sub-pixels
+                const x = Math.floor(tile.x);
+                const y = Math.floor(tile.y);
+                
+                // Desenhar tile com 1 pixel extra de largura e altura para evitar gaps
+                ctx.drawImage(
+                    tileAsset.img, 
+                    0, 0, 120, 120,  // source
+                    x, y, 121, 121   // destination (1 pixel maior)
+                );
             }
         }
     });
@@ -1606,8 +1615,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.6 - Tiles 120x120 🎮');
-console.log('🌿 Tiles reduzidos para 120x120 pixels');
-console.log('📐 Melhor resolução sem degradação');
-console.log('🎲 Novo padrão de nome: grama000 a grama003');
-console.log('✨ 4x mais tiles mas com qualidade superior');
+console.log('🎮 Mad Night v1.9.7 - Tiles sem gaps 🎮');
+console.log('🌿 Correção das linhas pretas entre tiles');
+console.log('📐 Arredondamento de posições com Math.floor');
+console.log('➕ Tiles renderizados com 1 pixel extra (121x121)');
+console.log('✨ Elimina gaps causados por anti-aliasing');
