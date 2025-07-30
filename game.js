@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.3 - Filtro com máscara');
+console.log('Mad Night v1.9.4 - Tiles de grama');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.3 - Filtro com máscara'
+    version: 'v1.9.4 - Tiles de grama'
 };
 
 // Player
@@ -57,7 +57,7 @@ const player = {
     inShadow: false
 };
 
-// Sistema de assets (incluindo poste)
+// Sistema de assets (incluindo poste e tiles de grama)
 const assets = {
     campo: { img: new Image(), loaded: false },
     arvore001: { img: new Image(), loaded: false, width: 180, height: 194 },
@@ -65,7 +65,11 @@ const assets = {
     arvore003: { img: new Image(), loaded: false, width: 162, height: 200 },
     arvore004: { img: new Image(), loaded: false, width: 150, height: 190 },
     arvorebloco001: { img: new Image(), loaded: false, width: 354, height: 186 },
-    poste000: { img: new Image(), loaded: false, width: 40, height: 120 }
+    poste000: { img: new Image(), loaded: false, width: 40, height: 120 },
+    grama_tile000: { img: new Image(), loaded: false, width: 240, height: 240 },
+    grama_tile001: { img: new Image(), loaded: false, width: 240, height: 240 },
+    grama_tile002: { img: new Image(), loaded: false, width: 240, height: 240 },
+    grama_tile003: { img: new Image(), loaded: false, width: 240, height: 240 }
 };
 
 // Carregar assets
@@ -106,6 +110,27 @@ assets.poste000.img.onload = () => {
     assets.poste000.loaded = true;
 };
 
+// Carregar tiles de grama
+assets.grama_tile000.img.src = 'assets/tiles/grama_tile000.png';
+assets.grama_tile000.img.onload = () => {
+    assets.grama_tile000.loaded = true;
+};
+
+assets.grama_tile001.img.src = 'assets/tiles/grama_tile001.png';
+assets.grama_tile001.img.onload = () => {
+    assets.grama_tile001.loaded = true;
+};
+
+assets.grama_tile002.img.src = 'assets/tiles/grama_tile002.png';
+assets.grama_tile002.img.onload = () => {
+    assets.grama_tile002.loaded = true;
+};
+
+assets.grama_tile003.img.src = 'assets/tiles/grama_tile003.png';
+assets.grama_tile003.img.onload = () => {
+    assets.grama_tile003.loaded = true;
+};
+
 // Sistema de Mapas
 const maps = [
     {
@@ -114,6 +139,8 @@ const maps = [
         width: 1920,
         height: 1080,
         enemies: [],
+        // Sistema de tiles de grama - gerado aleatoriamente
+        tiles: generateGrassTiles(1920, 1080, 240),
         trees: [
             {type: 'arvore001', x: 300, y: 150},
             {type: 'arvore002', x: 1400, y: 120},
@@ -335,6 +362,31 @@ const audio = {
     fuga: null,
     creditos: null
 };
+
+// Função para gerar tiles de grama aleatoriamente
+function generateGrassTiles(mapWidth, mapHeight, tileSize) {
+    const tiles = [];
+    const types = ['grama_tile000', 'grama_tile001', 'grama_tile002', 'grama_tile003'];
+    
+    // Preencher toda a área com tiles
+    for (let y = 0; y < mapHeight; y += tileSize) {
+        for (let x = 0; x < mapWidth; x += tileSize) {
+            // Escolher tipo aleatório
+            const randomType = types[Math.floor(Math.random() * types.length)];
+            // Adicionar variação aleatória pequena na posição para parecer mais natural
+            const offsetX = Math.random() * 20 - 10;
+            const offsetY = Math.random() * 20 - 10;
+            
+            tiles.push({
+                type: randomType,
+                x: x + offsetX,
+                y: y + offsetY
+            });
+        }
+    }
+    
+    return tiles;
+}
 
 // Funções auxiliares
 function isInLight(x, y) {
@@ -1065,6 +1117,24 @@ function update() {
 }
 
 // Funções de renderização
+function renderTiles(map, visibleArea) {
+    if (!map.tiles) return;
+    
+    map.tiles.forEach(tile => {
+        const tileAsset = assets[tile.type];
+        if (tileAsset && tileAsset.loaded) {
+            // Só renderizar tiles visíveis
+            if (tile.x + tileAsset.width > visibleArea.left && 
+                tile.x < visibleArea.right &&
+                tile.y + tileAsset.height > visibleArea.top && 
+                tile.y < visibleArea.bottom) {
+                
+                ctx.drawImage(tileAsset.img, tile.x, tile.y);
+            }
+        }
+    });
+}
+
 function renderCampo(map) {
     if (gameState.currentMap === 0 && assets.campo.loaded) {
         const campoX = (map.width - 800) / 2;
@@ -1457,6 +1527,7 @@ function draw() {
     };
     
     // Renderizar elementos do mapa
+    renderTiles(map, visibleArea); // Renderizar grama primeiro (fundo)
     renderCampo(map);
     renderShadows(map, visibleArea);
     renderTrees(map, visibleArea, 'bottom');
@@ -1538,8 +1609,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.3 - Filtro com máscara 🎮');
-console.log('🔦 Nova abordagem: Canvas temporário para criar máscara');
-console.log('✨ Evita buraco escuro - mantém fundo cinza');
-console.log('💡 Área do poste fica mais clara sem remover tudo');
-console.log('🎯 Solução mais elegante e performática');
+console.log('🎮 Mad Night v1.9.4 - Tiles de grama 🎮');
+console.log('🌿 Sistema de tiles implementado');
+console.log('🎲 Tiles de grama distribuídos aleatoriamente');
+console.log('📏 Tiles de 240x240 pixels com pequena variação');
+console.log('🖼️ 4 tipos diferentes: grama_tile000 a grama_tile003');
