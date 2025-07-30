@@ -1,4 +1,4 @@
-console.log('Mad Night v1.8.8 - Sem carros e sombras');
+console.log('Mad Night v1.8.9 - Sombras limpas');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.8.8 - Sem carros e sombras'
+    version: 'v1.8.9 - Sombras limpas'
 };
 
 // Player
@@ -146,12 +146,7 @@ const maps = [
             {x: 300, y: 780, radius: 150},
             {x: 1620, y: 780, radius: 150}
         ],
-        shadows: [
-            {x: 240, y: 240, radius: 100},
-            {x: 1640, y: 190, radius: 100},
-            {x: 340, y: 840, radius: 100},
-            {x: 1540, y: 890, radius: 100}
-        ],
+        shadows: [],
         playerStart: {x: 200, y: 300},
         playerStartEscape: {x: 1700, y: 540},
         exit: {x: 1800, y: 490, w: 80, h: 100},
@@ -185,11 +180,7 @@ const maps = [
             {x: 330, y: 300, radius: 70},
             {x: 530, y: 300, radius: 70}
         ],
-        shadows: [
-            {x: 230, y: 300, radius: 40},
-            {x: 430, y: 300, radius: 40},
-            {x: 630, y: 300, radius: 40}
-        ],
+        shadows: [],
         playerStart: {x: 100, y: 300},
         playerStartEscape: {x: 700, y: 300},
         exit: {x: 720, y: 250, w: 50, h: 100},
@@ -221,11 +212,7 @@ const maps = [
             {x: 400, y: 300, radius: 150},
             {x: 700, y: 500, radius: 100}
         ],
-        shadows: [
-            {x: 210, y: 175, radius: 100},
-            {x: 410, y: 425, radius: 100},
-            {x: 610, y: 200, radius: 80}
-        ],
+        shadows: [],
         playerStart: {x: 80, y: 300},
         playerStartEscape: {x: 700, y: 300},
         exit: {x: 600, y: 480, w: 60, h: 60},
@@ -262,14 +249,7 @@ const maps = [
             {x: 300, y: 500, radius: 100},
             {x: 300, y: 700, radius: 100}
         ],
-        shadows: [
-            {x: 140, y: 180, radius: 50},
-            {x: 460, y: 180, radius: 50},
-            {x: 140, y: 330, radius: 50},
-            {x: 460, y: 330, radius: 50},
-            {x: 140, y: 480, radius: 50},
-            {x: 460, y: 480, radius: 50}
-        ],
+        shadows: [],
         playerStart: {x: 300, y: 650},
         playerStartEscape: {x: 300, y: 50},
         exit: {x: 250, y: 10, w: 100, h: 30},
@@ -302,13 +282,7 @@ const maps = [
             {x: 300, y: 400, radius: 120},
             {x: 300, y: 720, radius: 80}
         ],
-        shadows: [
-            {x: 160, y: 200, radius: 100},
-            {x: 440, y: 200, radius: 100},
-            {x: 160, y: 580, radius: 100},
-            {x: 440, y: 580, radius: 100},
-            {x: 300, y: 400, radius: 120}
-        ],
+        shadows: [],
         playerStart: {x: 300, y: 650},
         playerStartEscape: {x: 300, y: 50},
         exit: {x: 250, y: 10, w: 100, h: 30},
@@ -337,12 +311,7 @@ const maps = [
             {x: 450, y: 100, radius: 100},
             {x: 300, y: 650, radius: 150}
         ],
-        shadows: [
-            {x: 190, y: 240, radius: 60},
-            {x: 410, y: 240, radius: 60},
-            {x: 190, y: 440, radius: 60},
-            {x: 410, y: 440, radius: 60}
-        ],
+        shadows: [],
         playerStart: {x: 300, y: 650},
         playerStartEscape: {x: 300, y: 50},
         exit: {x: 200, y: 750, w: 150, h: 40},
@@ -380,11 +349,7 @@ function isInLight(x, y) {
 function isInShadow(x, y) {
     const map = maps[gameState.currentMap];
     
-    for (let shadow of map.shadows) {
-        const dist = Math.sqrt(Math.pow(x - shadow.x, 2) + Math.pow(y - shadow.y, 2));
-        if (dist < shadow.radius) return true;
-    }
-    
+    // Sombras das árvores apenas
     if (map.trees) {
         for (let tree of map.trees) {
             const treeAsset = assets[tree.type];
@@ -1166,21 +1131,7 @@ function renderLights(map, visibleArea) {
 }
 
 function renderShadows(map, visibleArea) {
-    map.shadows.forEach(shadow => {
-        if (shadow.x + shadow.radius > visibleArea.left && 
-            shadow.x - shadow.radius < visibleArea.right &&
-            shadow.y + shadow.radius > visibleArea.top && 
-            shadow.y - shadow.radius < visibleArea.bottom) {
-            
-            const gradient = ctx.createRadialGradient(shadow.x, shadow.y, 0, shadow.x, shadow.y, shadow.radius);
-            gradient.addColorStop(0, 'rgba(0, 0, 0, 0.8)');
-            gradient.addColorStop(0.7, 'rgba(0, 0, 0, 0.5)');
-            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(shadow.x - shadow.radius, shadow.y - shadow.radius, shadow.radius * 2, shadow.radius * 2);
-        }
-    });
-    
+    // Apenas sombras das árvores - removidas todas as sombras artificiais
     if (map.trees) {
         map.trees.forEach(tree => {
             const treeAsset = assets[tree.type];
@@ -1371,7 +1322,6 @@ function renderNightFilter(map, visibleArea) {
         }
     });
     
-    // Remover completamente as luzes amarelas do filtro noturno
     ctx.restore();
     
     // Luz decorativa dos postes - LUZ ÂMBAR AMPLIADA
@@ -1579,8 +1529,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.8.8 - Sem carros e sombras 🎮');
-console.log('🚗 Carros de teste removidos');
-console.log('💡 Sistema de iluminação limpo - apenas luz do poste');
-console.log('🔶 Luz âmbar em Y+45 com raio de 100px');
-console.log('🌃 Pronto para definir novas áreas de sombra');
+console.log('🎮 Mad Night v1.8.9 - Sombras limpas 🎮');
+console.log('🚫 Todas as bolas de sombra artificiais removidas');
+console.log('🌳 Mantidas apenas sombras naturais das árvores');
+console.log('✨ Sistema de sombras limpo e calculado');
+console.log('🌃 Pronto para adicionar novas áreas estratégicas de sombra');
