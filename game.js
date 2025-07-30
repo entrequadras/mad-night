@@ -1,4 +1,4 @@
-console.log('Mad Night v1.8.7 - Luz ampliada');
+console.log('Mad Night v1.8.8 - Sem carros e sombras');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.8.7 - Luz ampliada'
+    version: 'v1.8.8 - Sem carros e sombras'
 };
 
 // Player
@@ -132,19 +132,6 @@ const maps = [
         ],
         streetLights: [
             {type: 'poste000', x: 500, y: 200, rotation: 0, lightRadius: 40}
-        ],
-        // TESTE DE CARROS - FÁCIL DE REMOVER
-        cars: [
-            // Carro 001 (frente: 118×140)
-            {type: 'carro001_frente', x: 800, y: 400, width: 118, height: 140},
-            // Carro 002 (lateral: 160×106)
-            {type: 'carro002_lateral', x: 1000, y: 400, width: 160, height: 106},
-            // Carro 003 (fundos: 150×110)
-            {type: 'carro003_fundos', x: 800, y: 600, width: 150, height: 110},
-            // Carro 004 (lateral: 102×130)
-            {type: 'carro004_lateral', x: 1000, y: 600, width: 102, height: 130},
-            // MadMax para comparação visual (56×56)
-            {type: 'madmax_ref', x: 900, y: 500, width: 56, height: 56}
         ],
         walls: [
             {x: 0, y: 0, w: 1920, h: 20},
@@ -1241,45 +1228,6 @@ function renderWalls(map, visibleArea) {
     });
 }
 
-// Função para renderizar carros temporários (TESTE)
-function renderCars(map, visibleArea) {
-    if (!map.cars) return;
-    
-    map.cars.forEach(car => {
-        if (car.x + car.width > visibleArea.left && 
-            car.x < visibleArea.right &&
-            car.y + car.height > visibleArea.top && 
-            car.y < visibleArea.bottom) {
-            
-            // Desenhar retângulo representando o carro
-            ctx.fillStyle = '#444';
-            ctx.fillRect(car.x, car.y, car.width, car.height);
-            
-            // Borda para melhor visualização
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(car.x, car.y, car.width, car.height);
-            
-            // Label do tipo
-            ctx.fillStyle = '#fff';
-            ctx.font = '14px Arial';
-            ctx.fillText(car.type, car.x + 5, car.y + 20);
-            
-            // Tamanho
-            ctx.font = '12px Arial';
-            ctx.fillText(`${car.width}x${car.height}`, car.x + 5, car.y + 35);
-            
-            // Se for o MadMax de referência, desenhar em vermelho
-            if (car.type === 'madmax_ref') {
-                ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
-                ctx.fillRect(car.x, car.y, car.width, car.height);
-                ctx.fillStyle = '#fff';
-                ctx.fillText('MADMAX', car.x + 5, car.y + 50);
-            }
-        }
-    });
-}
-
 function renderSpecialObjects(map) {
     if (map.orelhao) {
         ctx.fillStyle = '#00f';
@@ -1554,7 +1502,6 @@ function draw() {
     renderShadows(map, visibleArea);
     renderTrees(map, visibleArea, 'bottom');
     renderWalls(map, visibleArea);
-    renderCars(map, visibleArea); // TESTE DE CARROS
     renderSpecialObjects(map);
     renderProjectiles(visibleArea);
     renderEnemies(visibleArea);
@@ -1632,8 +1579,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.8.7 - Luz ampliada 🎮');
-console.log('💡 Luz do poste movida para Y+45');
-console.log('🔶 Raio ampliado de 80px para 100px');
-console.log('🚗 Carros ainda visíveis para teste de escala');
-console.log('✨ Luz âmbar mais espalhada e abaixo do poste');
+console.log('🎮 Mad Night v1.8.8 - Sem carros e sombras 🎮');
+console.log('🚗 Carros de teste removidos');
+console.log('💡 Sistema de iluminação limpo - apenas luz do poste');
+console.log('🔶 Luz âmbar em Y+45 com raio de 100px');
+console.log('🌃 Pronto para definir novas áreas de sombra');
