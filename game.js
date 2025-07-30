@@ -1,4 +1,4 @@
-console.log('Mad Night v1.8.5 - Luz âmbar sem bolas');
+console.log('Mad Night v1.8.7 - Luz ampliada');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.8.5 - Luz âmbar sem bolas'
+    version: 'v1.8.7 - Luz ampliada'
 };
 
 // Player
@@ -132,6 +132,19 @@ const maps = [
         ],
         streetLights: [
             {type: 'poste000', x: 500, y: 200, rotation: 0, lightRadius: 40}
+        ],
+        // TESTE DE CARROS - FÁCIL DE REMOVER
+        cars: [
+            // Carro 001 (frente: 118×140)
+            {type: 'carro001_frente', x: 800, y: 400, width: 118, height: 140},
+            // Carro 002 (lateral: 160×106)
+            {type: 'carro002_lateral', x: 1000, y: 400, width: 160, height: 106},
+            // Carro 003 (fundos: 150×110)
+            {type: 'carro003_fundos', x: 800, y: 600, width: 150, height: 110},
+            // Carro 004 (lateral: 102×130)
+            {type: 'carro004_lateral', x: 1000, y: 600, width: 102, height: 130},
+            // MadMax para comparação visual (56×56)
+            {type: 'madmax_ref', x: 900, y: 500, width: 56, height: 56}
         ],
         walls: [
             {x: 0, y: 0, w: 1920, h: 20},
@@ -1228,6 +1241,45 @@ function renderWalls(map, visibleArea) {
     });
 }
 
+// Função para renderizar carros temporários (TESTE)
+function renderCars(map, visibleArea) {
+    if (!map.cars) return;
+    
+    map.cars.forEach(car => {
+        if (car.x + car.width > visibleArea.left && 
+            car.x < visibleArea.right &&
+            car.y + car.height > visibleArea.top && 
+            car.y < visibleArea.bottom) {
+            
+            // Desenhar retângulo representando o carro
+            ctx.fillStyle = '#444';
+            ctx.fillRect(car.x, car.y, car.width, car.height);
+            
+            // Borda para melhor visualização
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(car.x, car.y, car.width, car.height);
+            
+            // Label do tipo
+            ctx.fillStyle = '#fff';
+            ctx.font = '14px Arial';
+            ctx.fillText(car.type, car.x + 5, car.y + 20);
+            
+            // Tamanho
+            ctx.font = '12px Arial';
+            ctx.fillText(`${car.width}x${car.height}`, car.x + 5, car.y + 35);
+            
+            // Se for o MadMax de referência, desenhar em vermelho
+            if (car.type === 'madmax_ref') {
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                ctx.fillRect(car.x, car.y, car.width, car.height);
+                ctx.fillStyle = '#fff';
+                ctx.fillText('MADMAX', car.x + 5, car.y + 50);
+            }
+        }
+    });
+}
+
 function renderSpecialObjects(map) {
     if (map.orelhao) {
         ctx.fillStyle = '#00f';
@@ -1374,21 +1426,21 @@ function renderNightFilter(map, visibleArea) {
     // Remover completamente as luzes amarelas do filtro noturno
     ctx.restore();
     
-    // Luz decorativa dos postes - LUZ ÂMBAR
+    // Luz decorativa dos postes - LUZ ÂMBAR AMPLIADA
     if (map.streetLights) {
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
         
         map.streetLights.forEach(light => {
-            if (light.x + 100 > visibleArea.left && 
-                light.x - 100 < visibleArea.right &&
-                light.y + 100 > visibleArea.top && 
-                light.y - 100 < visibleArea.bottom) {
+            if (light.x + 120 > visibleArea.left && 
+                light.x - 120 < visibleArea.right &&
+                light.y + 120 > visibleArea.top && 
+                light.y - 120 < visibleArea.bottom) {
                 
-                // Luz âmbar (255, 160, 0) posicionada mais abaixo
+                // Luz âmbar (255, 160, 0) posicionada mais abaixo e maior
                 const gradient = ctx.createRadialGradient(
-                    light.x + 20, light.y + 40, 0,      // Movida mais para baixo (y+40)
-                    light.x + 20, light.y + 40, 80
+                    light.x + 20, light.y + 45, 0,      // Movida para y+45
+                    light.x + 20, light.y + 45, 100     // Raio aumentado para 100px
                 );
                 gradient.addColorStop(0, 'rgba(255, 160, 0, 0.3)');      // Âmbar forte no centro
                 gradient.addColorStop(0.3, 'rgba(255, 160, 0, 0.2)');    // Transição
@@ -1398,7 +1450,7 @@ function renderNightFilter(map, visibleArea) {
                 
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
-                ctx.arc(light.x + 20, light.y + 40, 80, 0, Math.PI * 2);
+                ctx.arc(light.x + 20, light.y + 45, 100, 0, Math.PI * 2);
                 ctx.fill();
             }
         });
@@ -1502,11 +1554,12 @@ function draw() {
     renderShadows(map, visibleArea);
     renderTrees(map, visibleArea, 'bottom');
     renderWalls(map, visibleArea);
+    renderCars(map, visibleArea); // TESTE DE CARROS
     renderSpecialObjects(map);
     renderProjectiles(visibleArea);
     renderEnemies(visibleArea);
     renderPlayer();
-    renderStreetLights(map, visibleArea); // Movido para DEPOIS do player
+    renderStreetLights(map, visibleArea);
     renderTrees(map, visibleArea, 'top');
     renderNightFilter(map, visibleArea);
     
@@ -1579,8 +1632,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.8.5 - Luz âmbar sem bolas 🎮');
-console.log('🔶 Luz do poste agora é âmbar (255, 160, 0)');
-console.log('📍 Versão centralizada no topo da tela');
-console.log('🚫 Removidas todas as bolas amarelas de luz');
-console.log('⬇️ Luz do poste posicionada mais abaixo (y+40)');
+console.log('🎮 Mad Night v1.8.7 - Luz ampliada 🎮');
+console.log('💡 Luz do poste movida para Y+45');
+console.log('🔶 Raio ampliado de 80px para 100px');
+console.log('🚗 Carros ainda visíveis para teste de escala');
+console.log('✨ Luz âmbar mais espalhada e abaixo do poste');
