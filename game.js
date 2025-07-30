@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAD NIGHT - v1.9.8</title>
+    <title>MAD NIGHT - v1.9.9</title>
     <style>
         body {
             margin: 0;
@@ -26,7 +26,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <script>
-console.log('Mad Night v1.9.8 - Mais Postes no Maconhão');
+console.log('Mad Night v1.9.9 - Correção dos Postes com Direção');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -60,7 +60,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.8 - Mais Postes no Maconhão'
+    version: 'v1.9.9 - Correção dos Postes'
 };
 
 // Player
@@ -94,6 +94,7 @@ const assets = {
     arvore004: { img: new Image(), loaded: false, width: 150, height: 190 },
     arvorebloco001: { img: new Image(), loaded: false, width: 354, height: 186 },
     poste000: { img: new Image(), loaded: false, width: 40, height: 120 },
+    poste001: { img: new Image(), loaded: false, width: 40, height: 120 },
     grama000: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama001: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama002: { img: new Image(), loaded: false, width: 120, height: 120 },
@@ -132,10 +133,15 @@ assets.arvorebloco001.img.onload = () => {
     assets.arvorebloco001.loaded = true;
 };
 
-// Carregar poste
+// Carregar postes
 assets.poste000.img.src = 'assets/scenary/poste000.png';
 assets.poste000.img.onload = () => {
     assets.poste000.loaded = true;
+};
+
+assets.poste001.img.src = 'assets/scenary/poste001.png';
+assets.poste001.img.onload = () => {
+    assets.poste001.loaded = true;
 };
 
 // Carregar tiles de grama
@@ -186,25 +192,28 @@ const maps = [
             {type: 'arvore001', x: 1550, y: 850}
         ],
         streetLights: [
-            // Postes ao redor do campo de futebol (centro do mapa)
-            {type: 'poste000', x: 460, y: 200, rotation: 0, lightRadius: 40},  // Superior esquerdo
-            {type: 'poste000', x: 760, y: 200, rotation: 0, lightRadius: 40},  // Superior centro
-            {type: 'poste000', x: 1060, y: 200, rotation: 0, lightRadius: 40}, // Superior direito
-            {type: 'poste000', x: 1360, y: 200, rotation: 0, lightRadius: 40}, // Superior direito extra
+            // Postes ao redor do campo de futebol - lado esquerdo (poste001 - luz para esquerda)
+            {type: 'poste001', x: 460, y: 200, rotation: 0, lightRadius: 40},  // Superior esquerdo
+            {type: 'poste001', x: 460, y: 550, rotation: 0, lightRadius: 40},  // Inferior esquerdo
             
-            {type: 'poste000', x: 460, y: 550, rotation: 0, lightRadius: 40},  // Inferior esquerdo
+            // Postes ao redor do campo - centro superior e inferior (poste000 e poste001 alternados)
+            {type: 'poste000', x: 760, y: 200, rotation: 0, lightRadius: 40},  // Superior centro
+            {type: 'poste001', x: 1060, y: 200, rotation: 0, lightRadius: 40}, // Superior centro-direito
             {type: 'poste000', x: 760, y: 550, rotation: 0, lightRadius: 40},  // Inferior centro
-            {type: 'poste000', x: 1060, y: 550, rotation: 0, lightRadius: 40}, // Inferior direito
-            {type: 'poste000', x: 1360, y: 550, rotation: 0, lightRadius: 40}, // Inferior direito extra
+            {type: 'poste001', x: 1060, y: 550, rotation: 0, lightRadius: 40}, // Inferior centro-direito
+            
+            // Postes ao redor do campo - lado direito (poste000 - luz para direita)
+            {type: 'poste000', x: 1360, y: 200, rotation: 0, lightRadius: 40}, // Superior direito
+            {type: 'poste000', x: 1360, y: 550, rotation: 0, lightRadius: 40}, // Inferior direito
             
             // Postes nas entradas/cantos do mapa
             {type: 'poste000', x: 80, y: 80, rotation: 0, lightRadius: 40},    // Canto superior esquerdo
-            {type: 'poste000', x: 1800, y: 80, rotation: 0, lightRadius: 40},  // Canto superior direito
+            {type: 'poste001', x: 1800, y: 80, rotation: 0, lightRadius: 40},  // Canto superior direito
             {type: 'poste000', x: 80, y: 900, rotation: 0, lightRadius: 40},   // Canto inferior esquerdo
-            {type: 'poste000', x: 1800, y: 900, rotation: 0, lightRadius: 40}, // Canto inferior direito
+            {type: 'poste001', x: 1800, y: 900, rotation: 0, lightRadius: 40}, // Canto inferior direito
             
-            // Poste na saída (importante para gameplay)
-            {type: 'poste000', x: 1700, y: 450, rotation: 0, lightRadius: 40}  // Próximo à saída
+            // Poste na saída (poste001 - iluminando para esquerda/centro)
+            {type: 'poste001', x: 1700, y: 450, rotation: 0, lightRadius: 40}  // Próximo à saída
         ],
         walls: [
             {x: 0, y: 0, w: 1920, h: 20},
@@ -1420,7 +1429,7 @@ function renderNightFilter(map, visibleArea) {
     tempCtx.fillStyle = 'rgba(0, 0, 40, 0.4)';
     tempCtx.fillRect(0, 0, camera.width, camera.height);
     
-    // 2. Criar "buracos" no filtro onde tem luz de poste (sem usar destination-out)
+    // 2. Criar "buracos" no filtro onde tem luz de poste
     if (map.streetLights) {
         map.streetLights.forEach(light => {
             const lightX = light.x + 20 - camera.x;
@@ -1661,12 +1670,14 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.8 - Mais Postes no Maconhão 🎮');
-console.log('💡 13 postes estratégicos adicionados:');
-console.log('⚽ 8 postes ao redor do campo de futebol');
-console.log('🚪 4 postes nos cantos do mapa');
-console.log('🎯 1 poste próximo à saída');
-console.log('✨ Criando áreas de luz e sombra para stealth gameplay');
+console.log('🎮 Mad Night v1.9.9 - Correção dos Postes com Direção 🎮');
+console.log('💡 Carregando poste000 (luz direita) e poste001 (luz esquerda)');
+console.log('⚽ Postes ao redor do campo com orientação lógica:');
+console.log('   - Postes esquerdos: poste001 (luz para esquerda)');
+console.log('   - Postes direitos: poste000 (luz para direita)');
+console.log('   - Postes centrais: alternados');
+console.log('🚪 Postes nos cantos com orientação para o centro');
+console.log('✨ Correção completa do código');
     </script>
 </body>
 </html>
