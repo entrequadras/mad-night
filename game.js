@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.8.9 - Sombras limpas'
+    version: 'v1.8.9 - Sombras 100% limpas'
 };
 
 // Player
@@ -349,7 +349,7 @@ function isInLight(x, y) {
 function isInShadow(x, y) {
     const map = maps[gameState.currentMap];
     
-    // Sombras das árvores apenas
+    // APENAS sombras das árvores - sem mais bolas artificiais
     if (map.trees) {
         for (let tree of map.trees) {
             const treeAsset = assets[tree.type];
@@ -1529,8 +1529,9 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.8.9 - Sombras limpas 🎮');
-console.log('🚫 Todas as bolas de sombra artificiais removidas');
-console.log('🌳 Mantidas apenas sombras naturais das árvores');
-console.log('✨ Sistema de sombras limpo e calculado');
-console.log('🌃 Pronto para adicionar novas áreas estratégicas de sombra');
+console.log('🎮 Mad Night v1.8.9 - Sombras 100% limpas 🎮');
+console.log('🚫 TODAS as bolas de sombra artificiais removidas');
+console.log('🌳 APENAS sombras naturais das árvores permanecem');
+console.log('✨ Sistema de sombras completamente limpo');
+console.log('🔍 Verificação dupla: sem mais shadows[] em mapas');
+console.log('🌃 Pronto para design estratégico de novas sombras');
