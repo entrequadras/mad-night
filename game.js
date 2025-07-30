@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.1 - Postes com área iluminada'
+    version: 'v1.9.2 - Iluminação sutil'
 };
 
 // Player
@@ -1292,31 +1292,30 @@ function renderNightFilter(map, visibleArea) {
     ctx.fillStyle = 'rgba(0, 0, 40, 0.4)';
     ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
     
-    // Furar o filtro ao redor dos postes (área iluminada)
+    // Furar o filtro ao redor dos postes de forma MUITO sutil
     if (map.streetLights) {
         ctx.save();
         ctx.globalCompositeOperation = 'destination-out';
         
         map.streetLights.forEach(light => {
-            if (light.x + 140 > visibleArea.left && 
-                light.x - 140 < visibleArea.right &&
-                light.y + 140 > visibleArea.top && 
-                light.y - 140 < visibleArea.bottom) {
+            if (light.x + 80 > visibleArea.left && 
+                light.x - 80 < visibleArea.right &&
+                light.y + 80 > visibleArea.top && 
+                light.y - 80 < visibleArea.bottom) {
                 
-                // Furo maior que a luz âmbar, com feather suave
+                // Furo bem sutil, só um pouquinho maior que a luz
                 const gradient = ctx.createRadialGradient(
                     light.x + 20, light.y + 45, 0,        // Centro da luz
-                    light.x + 20, light.y + 45, 130       // Raio maior que a luz (130px vs 100px)
+                    light.x + 20, light.y + 45, 70        // Raio bem menor (70px)
                 );
-                gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');     // Centro bem claro
-                gradient.addColorStop(0.4, 'rgba(255, 255, 255, 0.7)');   // Área principal
-                gradient.addColorStop(0.7, 'rgba(255, 255, 255, 0.4)');   // Transição
-                gradient.addColorStop(0.85, 'rgba(255, 255, 255, 0.1)');  // Feather suave
-                gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');       // Borda suave
+                gradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');     // Centro bem suave
+                gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)');  // Meio muito sutil
+                gradient.addColorStop(0.8, 'rgba(255, 255, 255, 0.05)');  // Quase nada
+                gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');       // Zero na borda
                 
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
-                ctx.arc(light.x + 20, light.y + 45, 130, 0, Math.PI * 2);
+                ctx.arc(light.x + 20, light.y + 45, 70, 0, Math.PI * 2);
                 ctx.fill();
             }
         });
@@ -1324,7 +1323,7 @@ function renderNightFilter(map, visibleArea) {
         ctx.restore();
     }
     
-    // Luz decorativa dos postes - LUZ ÂMBAR por cima
+    // Luz decorativa dos postes - LUZ ÂMBAR
     if (map.streetLights) {
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
@@ -1335,7 +1334,7 @@ function renderNightFilter(map, visibleArea) {
                 light.y + 120 > visibleArea.top && 
                 light.y - 120 < visibleArea.bottom) {
                 
-                // Luz âmbar (255, 160, 0) - menor que o furo
+                // Luz âmbar bonita
                 const gradient = ctx.createRadialGradient(
                     light.x + 20, light.y + 45, 0,      // Centro
                     light.x + 20, light.y + 45, 100     // Raio da luz âmbar
@@ -1529,9 +1528,9 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.1 - Postes com área iluminada 🎮');
-console.log('🔦 Postes agora criam furos no filtro noturno');
-console.log('💡 Área iluminada (130px) > luz âmbar (100px)');
-console.log('✨ Feather suave para transição natural');
-console.log('🌃 Sistema de iluminação realista e estratégico');
-console.log('🎯 Pronto para posicionar postes em locais estratégicos');
+console.log('🎮 Mad Night v1.9.2 - Iluminação sutil 🎮');
+console.log('💡 Efeito de iluminação bem mais sutil');
+console.log('🔦 Furo pequeno (70px) e transparência baixa');
+console.log('✨ Transição suave sem círculo tosco');
+console.log('🌃 Mantém atmosfera noturna natural');
+console.log('👌 Efeito discreto mas funcional');
