@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.4 - Tiles de grama');
+console.log('Mad Night v1.9.6 - Tiles 120x120');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
