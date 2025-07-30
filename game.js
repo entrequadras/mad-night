@@ -1,4 +1,4 @@
-console.log('Mad Night v1.8.1 - Sistema de Rotação de Postes');
+console.log('Mad Night v1.8.2 - Clean Light');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -64,52 +64,45 @@ const assets = {
     arvore003: { img: new Image(), loaded: false, width: 162, height: 200 },
     arvore004: { img: new Image(), loaded: false, width: 150, height: 190 },
     arvorebloco001: { img: new Image(), loaded: false, width: 354, height: 186 },
-    poste000: { img: new Image(), loaded: false, width: 40, height: 120 }  // NOVO POSTE
+    poste000: { img: new Image(), loaded: false, width: 40, height: 120 }
 };
 
 // Carregar assets
 assets.campo.img.src = 'assets/buildings/campo_de_futebol.png';
 assets.campo.img.onload = () => {
     assets.campo.loaded = true;
-    console.log('Campo de futebol carregado!');
 };
 
 // Carregar árvores
 assets.arvore001.img.src = 'assets/scenary/arvore001.png';
 assets.arvore001.img.onload = () => {
     assets.arvore001.loaded = true;
-    console.log('Árvore 001 carregada!');
 };
 
 assets.arvore002.img.src = 'assets/scenary/arvore002.png';
 assets.arvore002.img.onload = () => {
     assets.arvore002.loaded = true;
-    console.log('Árvore 002 carregada!');
 };
 
 assets.arvore003.img.src = 'assets/scenary/arvore003.png';
 assets.arvore003.img.onload = () => {
     assets.arvore003.loaded = true;
-    console.log('Árvore 003 carregada!');
 };
 
 assets.arvore004.img.src = 'assets/scenary/arvore004.png';
 assets.arvore004.img.onload = () => {
     assets.arvore004.loaded = true;
-    console.log('Árvore 004 carregada!');
 };
 
 assets.arvorebloco001.img.src = 'assets/scenary/arvorebloco001.png';
 assets.arvorebloco001.img.onload = () => {
     assets.arvorebloco001.loaded = true;
-    console.log('Árvore bloco carregada!');
 };
 
-// CARREGAR POSTE
+// Carregar poste
 assets.poste000.img.src = 'assets/scenary/poste000.png';
 assets.poste000.img.onload = () => {
     assets.poste000.loaded = true;
-    console.log('Poste 000 carregado!');
 };
 
 // Sistema de Mapas
@@ -120,7 +113,6 @@ const maps = [
         width: 1920,
         height: 1080,
         enemies: [],
-        // Árvores espalhadas pelo mapa
         trees: [
             // Árvores originais
             {type: 'arvore001', x: 300, y: 150},
@@ -133,16 +125,16 @@ const maps = [
             {type: 'arvore003', x: 950, y: 100},
             {type: 'arvore004', x: 100, y: 400},
             // Novas árvores no lugar dos blocos sólidos
-            {type: 'arvore001', x: 200, y: 180},    // Canto superior esquerdo
-            {type: 'arvore002', x: 1580, y: 130},   // Canto superior direito
-            {type: 'arvore003', x: 280, y: 780},    // Canto inferior esquerdo
+            {type: 'arvore001', x: 200, y: 180},
+            {type: 'arvore002', x: 1580, y: 130},
+            {type: 'arvore003', x: 280, y: 780},
             // Duas árvores juntas no canto inferior direito
             {type: 'arvore004', x: 1480, y: 830},
             {type: 'arvore001', x: 1550, y: 850}
         ],
-        // SISTEMA DE POSTES - APENAS 1 POSTE (fora do campo)
+        // Sistema de postes - apenas 1 poste
         streetLights: [
-            {type: 'poste000', x: 500, y: 200, rotation: 0, lightRadius: 180}     // Norte do mapa, longe das árvores
+            {type: 'poste000', x: 500, y: 200, rotation: 0, lightRadius: 180}
         ],
         walls: [
             // Paredes externas apenas
@@ -152,9 +144,7 @@ const maps = [
             {x: 1900, y: 20, w: 20, h: 1040}   // direita
         ],
         lights: [
-            // NOVA LUZ: "Buraco" no filtro acima do poste
-            {x: 500, y: 200, radius: 180},      // Luz do poste único
-            // Luzes originais
+            {x: 500, y: 200, radius: 180},      // Luz do poste
             {x: 960, y: 540, radius: 300},
             {x: 300, y: 300, radius: 150},
             {x: 1620, y: 300, radius: 150},
@@ -179,7 +169,7 @@ const maps = [
         height: 600,
         enemies: [],
         trees: [],
-        streetLights: [], // Sem postes neste mapa
+        streetLights: [],
         walls: [
             {x: 0, y: 0, w: 800, h: 100},
             {x: 0, y: 500, w: 800, h: 100},
@@ -225,7 +215,7 @@ const maps = [
             {x: 600, y: 400, type: 'caveirinha'}
         ],
         trees: [],
-        streetLights: [], // Sem postes neste mapa ainda
+        streetLights: [],
         walls: [
             {x: 150, y: 100, w: 120, h: 150},
             {x: 350, y: 350, w: 120, h: 150},
@@ -262,7 +252,7 @@ const maps = [
             {x: 300, y: 600, type: 'faquinha'}
         ],
         trees: [],
-        streetLights: [], // Sem postes neste mapa ainda
+        streetLights: [],
         walls: [
             {x: 80, y: 150, w: 120, h: 60},
             {x: 400, y: 150, w: 120, h: 60},
@@ -305,7 +295,7 @@ const maps = [
             {x: 400, y: 350, type: 'caveirinha'}
         ],
         trees: [],
-        streetLights: [], // Sem postes neste mapa ainda
+        streetLights: [],
         walls: [
             {x: 80, y: 120, w: 160, h: 160},
             {x: 360, y: 120, w: 160, h: 160},
@@ -340,7 +330,7 @@ const maps = [
             {x: 300, y: 500, type: 'janis'}
         ],
         trees: [],
-        streetLights: [], // Sem postes neste mapa ainda
+        streetLights: [],
         walls: [
             {x: 120, y: 200, w: 140, h: 80},
             {x: 340, y: 200, w: 140, h: 80},
@@ -449,12 +439,11 @@ function checkWallCollision(entity, newX, newY) {
         for (let tree of map.trees) {
             const treeAsset = assets[tree.type];
             if (treeAsset && treeAsset.loaded) {
-                // Área de colisão do tronco (parte inferior central da árvore)
                 const trunkCollision = {
-                    x: tree.x + treeAsset.width * 0.35,  // 35% da largura
-                    y: tree.y + treeAsset.height * 0.75, // 75% da altura
-                    w: treeAsset.width * 0.3,             // 30% de largura
-                    h: treeAsset.height * 0.2             // 20% de altura
+                    x: tree.x + treeAsset.width * 0.35,
+                    y: tree.y + treeAsset.height * 0.75,
+                    w: treeAsset.width * 0.3,
+                    h: treeAsset.height * 0.2
                 };
                 
                 if (checkRectCollision(testEntity, trunkCollision)) {
@@ -469,12 +458,11 @@ function checkWallCollision(entity, newX, newY) {
         for (let light of map.streetLights) {
             const lightAsset = assets[light.type];
             if (lightAsset && lightAsset.loaded) {
-                // Área de colisão do poste (base menor)
                 const postCollision = {
-                    x: light.x + lightAsset.width * 0.25,  // 25% da largura
-                    y: light.y + lightAsset.height * 0.8,  // 80% da altura (base)
-                    w: lightAsset.width * 0.5,             // 50% de largura
-                    h: lightAsset.height * 0.2             // 20% de altura
+                    x: light.x + lightAsset.width * 0.25,
+                    y: light.y + lightAsset.height * 0.8,
+                    w: lightAsset.width * 0.5,
+                    h: lightAsset.height * 0.2
                 };
                 
                 if (checkRectCollision(testEntity, postCollision)) {
@@ -521,12 +509,11 @@ function findValidSpawnPosition(x, y, width, height) {
     return {x, y};
 }
 
-// NOVA FUNÇÃO: Renderizar objetos com rotação
+// Renderizar objetos com rotação
 function renderRotatedObject(obj, assetKey, visibleArea) {
     const asset = assets[assetKey];
     if (!asset || !asset.loaded) return;
     
-    // Verificar se está na área visível
     if (obj.x + asset.width < visibleArea.left || 
         obj.x > visibleArea.right ||
         obj.y + asset.height < visibleArea.top || 
@@ -534,14 +521,12 @@ function renderRotatedObject(obj, assetKey, visibleArea) {
     
     ctx.save();
     
-    // Ponto de rotação no centro do objeto
     const centerX = obj.x + asset.width / 2;
     const centerY = obj.y + asset.height / 2;
     
     ctx.translate(centerX, centerY);
     ctx.rotate((obj.rotation || 0) * Math.PI / 180);
     
-    // Desenha centralizado
     ctx.drawImage(
         asset.img,
         -asset.width / 2,
@@ -561,8 +546,8 @@ class Enemy {
         this.originX = x;
         this.originY = y;
         this.type = type;
-        this.width = 46;  // Ajustado de 50 para 46
-        this.height = 46; // Ajustado de 50 para 46
+        this.width = 46;
+        this.height = 46;
         this.speed = type === 'caveirinha' ? 2.5 : 2;
         this.patrolSpeed = 1;
         this.direction = 'down';
@@ -1079,7 +1064,6 @@ function update() {
     if (map.orelhao && checkRectCollision(player, map.orelhao)) {
         if (!gameState.dashUnlocked) {
             gameState.dashUnlocked = true;
-            console.log('CUTSCENE: Dash desbloqueado!');
         }
     }
     
@@ -1089,7 +1073,6 @@ function update() {
             gameState.phase = 'escape';
             gameState.lastEnemySpawn = Date.now();
             playMusic('fuga');
-            console.log('BOMBA PLANTADA! FUJA!');
         }
     }
     
@@ -1102,7 +1085,7 @@ function update() {
                 gameState.currentMap--;
                 loadMap(gameState.currentMap, true);
             } else if (gameState.currentMap === 0) {
-                console.log('BOSS do Chacal virá aqui!');
+                // TODO: Implementar boss fight
             }
         } else if (gameState.phase === 'infiltration') {
             if (gameState.currentMap < maps.length - 1) {
@@ -1132,7 +1115,6 @@ function update() {
 
 // Funções de renderização
 function renderCampo(map) {
-    // Renderizar campo apenas no Maconhão
     if (gameState.currentMap === 0 && assets.campo.loaded) {
         const campoX = (map.width - 800) / 2;
         const campoY = (map.height - 462) / 2;
@@ -1152,7 +1134,7 @@ function renderTrees(map, visibleArea, layer = 'bottom') {
                 tree.y < visibleArea.bottom) {
                 
                 if (layer === 'bottom') {
-                    // Renderizar apenas o tronco (parte inferior)
+                    // Renderizar apenas o tronco
                     ctx.save();
                     ctx.beginPath();
                     ctx.rect(tree.x, tree.y + treeAsset.height * 0.7, treeAsset.width, treeAsset.height * 0.3);
@@ -1160,13 +1142,12 @@ function renderTrees(map, visibleArea, layer = 'bottom') {
                     ctx.drawImage(treeAsset.img, tree.x, tree.y);
                     ctx.restore();
                 } else if (layer === 'top') {
-                    // Renderizar apenas a copa (parte superior)
+                    // Renderizar apenas a copa
                     ctx.save();
                     ctx.beginPath();
                     ctx.rect(tree.x, tree.y, treeAsset.width, treeAsset.height * 0.75);
                     ctx.clip();
                     
-                    // Verificar se o player está sob a copa
                     const playerUnderTree = player.x + player.width > tree.x &&
                                           player.x < tree.x + treeAsset.width &&
                                           player.y + player.height > tree.y &&
@@ -1184,7 +1165,7 @@ function renderTrees(map, visibleArea, layer = 'bottom') {
     });
 }
 
-// NOVA FUNÇÃO: Renderizar postes com rotação
+// Renderizar postes com rotação
 function renderStreetLights(map, visibleArea) {
     if (!map.streetLights) return;
     
@@ -1387,11 +1368,11 @@ function renderPlayer() {
 }
 
 function renderNightFilter(map, visibleArea) {
-    // Aplicar filtro azul escuro sobre toda a cena (40% opacidade)
+    // Aplicar filtro azul escuro sobre toda a cena
     ctx.fillStyle = 'rgba(0, 0, 40, 0.4)';
     ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
     
-    // "Furar" o filtro onde tem luz (INCLUINDO POSTES)
+    // "Furar" o filtro onde tem luz
     ctx.save();
     ctx.globalCompositeOperation = 'destination-out';
     
@@ -1406,10 +1387,10 @@ function renderNightFilter(map, visibleArea) {
                 light.x, light.y, 0,
                 light.x, light.y, light.radius
             );
-            gradient.addColorStop(0, 'rgba(255, 255, 255, 1.0)');      // Centro: fura 100%
-            gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.8)');   // Meio: fura 80%
-            gradient.addColorStop(0.7, 'rgba(255, 255, 255, 0.4)');   // Borda: fura 40%
-            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');       // Extremo: não fura
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
+            gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.8)');
+            gradient.addColorStop(0.7, 'rgba(255, 255, 255, 0.4)');
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
             
             ctx.fillStyle = gradient;
             ctx.beginPath();
@@ -1418,35 +1399,11 @@ function renderNightFilter(map, visibleArea) {
         }
     });
     
-    // EXTRA: Furar especificamente onde há postes (mais forte)
-    if (map.streetLights) {
-        map.streetLights.forEach(light => {
-            if (light.x + light.lightRadius > visibleArea.left && 
-                light.x - light.lightRadius < visibleArea.right &&
-                light.y + light.lightRadius > visibleArea.top && 
-                light.y < visibleArea.bottom) {
-                
-                const gradient = ctx.createRadialGradient(
-                    light.x + 20, light.y + 60, 0,        // Centro do poste (aproximado)
-                    light.x + 20, light.y + 60, light.lightRadius
-                );
-                gradient.addColorStop(0, 'rgba(255, 255, 255, 1.0)');    // Fura completamente
-                gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.6)'); 
-                gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(light.x + 20, light.y + 60, light.lightRadius, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        });
-    }
-    
     ctx.restore();
     
-    // Adicionar um toque amarelado FORTE nas áreas dos postes
+    // Adicionar luz amarelada aditiva (similar ao AdditiveBlending)
     ctx.save();
-    ctx.globalCompositeOperation = 'screen';
+    ctx.globalCompositeOperation = 'lighter'; // Efeito aditivo!
     
     // Luz amarelada normal
     map.lights.forEach(light => {
@@ -1459,7 +1416,8 @@ function renderNightFilter(map, visibleArea) {
                 light.x, light.y, 0,
                 light.x, light.y, light.radius * 0.8
             );
-            gradient.addColorStop(0, 'rgba(255, 255, 200, 0.2)');
+            gradient.addColorStop(0, 'rgba(255, 255, 150, 0.15)');
+            gradient.addColorStop(0.5, 'rgba(255, 255, 180, 0.08)');
             gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
             
             ctx.fillStyle = gradient;
@@ -1469,7 +1427,7 @@ function renderNightFilter(map, visibleArea) {
         }
     });
     
-    // Luz EXTRA FORTE dos postes (mais amarela e intensa)
+    // Luz EXTRA dos postes com efeito aditivo mais forte
     if (map.streetLights) {
         map.streetLights.forEach(light => {
             if (light.x + light.lightRadius > visibleArea.left && 
@@ -1477,17 +1435,31 @@ function renderNightFilter(map, visibleArea) {
                 light.y + light.lightRadius > visibleArea.top && 
                 light.y < visibleArea.bottom) {
                 
-                const gradient = ctx.createRadialGradient(
+                // Primeiro halo de luz mais intenso
+                let gradient = ctx.createRadialGradient(
                     light.x + 20, light.y + 60, 0,
-                    light.x + 20, light.y + 60, light.lightRadius * 0.9
+                    light.x + 20, light.y + 60, light.lightRadius * 0.6
                 );
-                gradient.addColorStop(0, 'rgba(255, 255, 100, 0.5)');   // Mais amarelo e forte
-                gradient.addColorStop(0.6, 'rgba(255, 255, 150, 0.2)'); 
+                gradient.addColorStop(0, 'rgba(255, 255, 100, 0.4)');
+                gradient.addColorStop(0.5, 'rgba(255, 255, 150, 0.2)');
                 gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
                 
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
-                ctx.arc(light.x + 20, light.y + 60, light.lightRadius * 0.9, 0, Math.PI * 2);
+                ctx.arc(light.x + 20, light.y + 60, light.lightRadius * 0.6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Segundo halo ainda mais intenso no centro
+                gradient = ctx.createRadialGradient(
+                    light.x + 20, light.y + 60, 0,
+                    light.x + 20, light.y + 60, light.lightRadius * 0.3
+                );
+                gradient.addColorStop(0, 'rgba(255, 255, 200, 0.6)');
+                gradient.addColorStop(1, 'rgba(255, 255, 150, 0)');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(light.x + 20, light.y + 60, light.lightRadius * 0.3, 0, Math.PI * 2);
                 ctx.fill();
             }
         });
@@ -1495,189 +1467,3 @@ function renderNightFilter(map, visibleArea) {
     
     ctx.restore();
 }
-
-function renderUI(map) {
-    // Nome do mapa
-    ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#ff0';
-    ctx.font = 'bold 48px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(map.name, canvas.width/2, 80);
-    ctx.font = '32px Arial';
-    ctx.fillText(map.subtitle, canvas.width/2, 120);
-    ctx.textAlign = 'left';
-    
-    // Info
-    ctx.fillStyle = '#fff';
-    ctx.font = '28px Arial';
-    ctx.fillText(`Mapa: ${gameState.currentMap + 1}/6`, 20, canvas.height - 80);
-    ctx.fillText(`Inimigos: ${enemies.filter(e => !e.isDead).length}`, 20, canvas.height - 40);
-    
-    // Vidas
-    ctx.fillText('Vidas: ', 20, 50);
-    for (let i = 0; i < 5; i++) {
-        ctx.font = '40px Arial';
-        if (i >= gameState.deaths) {
-            ctx.fillStyle = '#f00';
-            ctx.fillText('💀', 120 + i * 60, 50);
-        }
-    }
-    ctx.font = '28px Arial';
-    
-    // Status
-    if (player.inShadow) {
-        ctx.fillStyle = '#0f0';
-        ctx.fillText('NA SOMBRA - Invisível!', 20, 170);
-    }
-    
-    // Avisos
-    if (map.orelhao && !gameState.dashUnlocked) {
-        ctx.fillStyle = '#ff0';
-        ctx.fillText('Chegue no TELEFONE azul!', 20, 210);
-    }
-    
-    if (map.lixeira && !gameState.bombPlaced) {
-        ctx.fillStyle = '#ff0';
-        ctx.fillText('Mate todos e coloque a BOMBA!', 20, 210);
-    }
-    
-    // Força de Pedal
-    ctx.fillStyle = '#fff';
-    ctx.fillText('Força de Pedal: ', 20, 130);
-    for (let i = 0; i < gameState.maxPedalPower; i++) {
-        ctx.fillStyle = i < gameState.pedalPower ? '#0f0' : '#333';
-        ctx.fillText('█', 240 + i * 24, 130);
-    }
-    
-    // Status do poste único
-    if (gameState.currentMap === 0) {
-        ctx.fillStyle = '#ff0';
-        ctx.font = '20px Arial';
-        ctx.fillText('POSTE: x:500, y:200 + LUZ REFORÇADA (fura filtro 100%)', 20, 250);
-        ctx.fillText('Personagem deve ficar BEM VISÍVEL sob o poste!', 20, 275);
-    }
-    
-    // Versão
-    ctx.fillStyle = '#666';
-    ctx.font = '20px Arial';
-    ctx.fillText('v1.8.2 - Luz do Poste REFORÇADA', canvas.width - 380, canvas.height - 10);
-    
-    // Morte
-    if (player.isDead) {
-        ctx.fillStyle = '#f00';
-        ctx.font = '64px Arial';
-        ctx.textAlign = 'center';
-        const msg = gameState.deaths < 5 ? "ah véi, se liga carái" : "sifudêu";
-        ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
-        ctx.textAlign = 'left';
-    }
-}
-
-// Função de desenho principal
-function draw() {
-    const map = maps[gameState.currentMap];
-    
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.save();
-    ctx.scale(camera.zoom, camera.zoom);
-    ctx.translate(-camera.x, -camera.y);
-    
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
-    
-    const visibleArea = {
-        left: camera.x - 100,
-        right: camera.x + camera.width + 100,
-        top: camera.y - 100,
-        bottom: camera.y + camera.height + 100
-    };
-    
-    // Renderizar elementos do mapa
-    renderCampo(map);
-    renderShadows(map, visibleArea);
-    renderTrees(map, visibleArea, 'bottom');
-    renderWalls(map, visibleArea);
-    renderSpecialObjects(map);
-    renderStreetLights(map, visibleArea); // NOVO: Renderizar postes
-    renderProjectiles(visibleArea);
-    renderEnemies(visibleArea);
-    renderPlayer();
-    renderTrees(map, visibleArea, 'top');
-    renderNightFilter(map, visibleArea);
-    
-    ctx.restore();
-    
-    // Renderizar UI
-    renderUI(map);
-}
-
-// Game loop
-function gameLoop() {
-    update();
-    draw();
-    requestAnimationFrame(gameLoop);
-}
-
-// Carregar sprites
-let madmaxLoaded = 0;
-let faquinhaLoaded = 0;
-let morcegoLoaded = 0;
-let caveirinhaLoaded = 0;
-let janisLoaded = 0;
-let chacalLoaded = 0;
-
-for (let i = 0; i <= 15; i++) {
-    const img = new Image();
-    img.src = `assets/sprites/madmax${String(i).padStart(3, '0')}.png`;
-    img.onload = () => madmaxLoaded++;
-    player.sprites[i] = img;
-}
-
-for (let i = 0; i <= 15; i++) {
-    const img = new Image();
-    img.src = `assets/sprites/faquinha${String(i).padStart(3, '0')}.png`;
-    img.onload = () => faquinhaLoaded++;
-    faquinhaSprites[i] = img;
-}
-
-for (let i = 0; i <= 15; i++) {
-    const img = new Image();
-    img.src = `assets/sprites/morcego${String(i).padStart(3, '0')}.png`;
-    img.onload = () => morcegoLoaded++;
-    morcegoSprites[i] = img;
-}
-
-for (let i = 0; i <= 15; i++) {
-    const img = new Image();
-    img.src = `assets/sprites/caveirinha${String(i).padStart(3, '0')}.png`;
-    img.onload = () => caveirinhaLoaded++;
-    caveirinhaSprites[i] = img;
-}
-
-for (let i = 0; i <= 15; i++) {
-    const img = new Image();
-    img.src = `assets/sprites/janis${String(i).padStart(3, '0')}.png`;
-    img.onload = () => janisLoaded++;
-    janisSprites[i] = img;
-}
-
-for (let i = 0; i <= 15; i++) {
-    const img = new Image();
-    img.src = `assets/sprites/chacal${String(i).padStart(3, '0')}.png`;
-    img.onload = () => chacalLoaded++;
-    chacalSprites[i] = img;
-}
-
-// Inicializar
-loadAudio();
-loadMap(0);
-setTimeout(() => playMusic('inicio'), 1000);
-gameLoop();
-
-console.log('🎮 Mad Night v1.8.2 - Luz do Poste REFORÇADA! 🎮');
-console.log('🔦 Poste: x:500, y:200 (fora do campo)');
-console.log('💡 CORREÇÃO: Luz do poste fura filtro em 100%');
-console.log('✨ Efeito duplo: destination-out + screen blend');
-console.log('👤 Personagem deve ficar BEM VISÍVEL sob o poste');
-console.log('🌟 Luz amarelada mais intensa na área do poste');
