@@ -1,4 +1,4 @@
-console.log('Mad Night v1.8.4 - Poste com luz suave');
+console.log('Mad Night v1.8.5 - Luz âmbar sem bolas');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.8.4 - Poste com luz suave' // Nova propriedade para versão
+    version: 'v1.8.5 - Luz âmbar sem bolas'
 };
 
 // Player
@@ -1161,20 +1161,8 @@ function renderStreetLights(map, visibleArea) {
 }
 
 function renderLights(map, visibleArea) {
-    map.lights.forEach(light => {
-        if (light.x + light.radius > visibleArea.left && 
-            light.x - light.radius < visibleArea.right &&
-            light.y + light.radius > visibleArea.top && 
-            light.y - light.radius < visibleArea.bottom) {
-            
-            const gradient = ctx.createRadialGradient(light.x, light.y, 0, light.x, light.y, light.radius);
-            gradient.addColorStop(0, 'rgba(255, 255, 200, 0.3)');
-            gradient.addColorStop(0.5, 'rgba(255, 255, 200, 0.1)');
-            gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(light.x - light.radius, light.y - light.radius, light.radius * 2, light.radius * 2);
-        }
-    });
+    // Função vazia - removendo todas as luzes amarelas
+    // Agora apenas os postes terão luz
 }
 
 function renderShadows(map, visibleArea) {
@@ -1383,66 +1371,44 @@ function renderNightFilter(map, visibleArea) {
         }
     });
     
+    // Remover completamente as luzes amarelas do filtro noturno
     ctx.restore();
     
-    // Adicionar luz amarelada suave
-    ctx.save();
-    ctx.globalCompositeOperation = 'screen';
-    
-    // Luz amarelada normal
-    map.lights.forEach(light => {
-        if (light.x + light.radius > visibleArea.left && 
-            light.x - light.radius < visibleArea.right &&
-            light.y + light.radius > visibleArea.top && 
-            light.y - light.radius < visibleArea.bottom) {
-            
-            const gradient = ctx.createRadialGradient(
-                light.x, light.y, 0,
-                light.x, light.y, light.radius * 0.8
-            );
-            gradient.addColorStop(0, 'rgba(255, 255, 200, 0.2)');
-            gradient.addColorStop(0.5, 'rgba(255, 255, 200, 0.1)');
-            gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
-            
-            ctx.fillStyle = gradient;
-            ctx.beginPath();
-            ctx.arc(light.x, light.y, light.radius * 0.8, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    });
-    
-    // Luz decorativa dos postes - ANTES do poste (atrás)
+    // Luz decorativa dos postes - LUZ ÂMBAR
     if (map.streetLights) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        
         map.streetLights.forEach(light => {
             if (light.x + 100 > visibleArea.left && 
                 light.x - 100 < visibleArea.right &&
                 light.y + 100 > visibleArea.top && 
                 light.y - 100 < visibleArea.bottom) {
                 
-                // Luz maior e mais suave
+                // Luz âmbar (255, 160, 0) posicionada mais abaixo
                 const gradient = ctx.createRadialGradient(
-                    light.x + 20, light.y + 20, 0,
-                    light.x + 20, light.y + 20, 80  // Raio aumentado para 80
+                    light.x + 20, light.y + 40, 0,      // Movida mais para baixo (y+40)
+                    light.x + 20, light.y + 40, 80
                 );
-                gradient.addColorStop(0, 'rgba(255, 255, 180, 0.25)');     // Centro mais suave
-                gradient.addColorStop(0.3, 'rgba(255, 255, 190, 0.15)');   // Transição suave
-                gradient.addColorStop(0.6, 'rgba(255, 255, 200, 0.08)');   // Feather maior
-                gradient.addColorStop(0.85, 'rgba(255, 255, 210, 0.03)');  // Borda bem suave
-                gradient.addColorStop(1, 'rgba(255, 255, 220, 0)');        // Fade completo
+                gradient.addColorStop(0, 'rgba(255, 160, 0, 0.3)');      // Âmbar forte no centro
+                gradient.addColorStop(0.3, 'rgba(255, 160, 0, 0.2)');    // Transição
+                gradient.addColorStop(0.6, 'rgba(255, 160, 0, 0.1)');    // Feather
+                gradient.addColorStop(0.85, 'rgba(255, 160, 0, 0.04)');  // Borda suave
+                gradient.addColorStop(1, 'rgba(255, 160, 0, 0)');        // Fade completo
                 
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
-                ctx.arc(light.x + 20, light.y + 20, 80, 0, Math.PI * 2);
+                ctx.arc(light.x + 20, light.y + 40, 80, 0, Math.PI * 2);
                 ctx.fill();
             }
         });
+        
+        ctx.restore();
     }
-    
-    ctx.restore();
 }
 
 function renderUI(map) {
-    // Nome do mapa com versão no canto superior direito
+    // Nome do mapa
     ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#ff0';
     ctx.font = 'bold 48px Arial';
     ctx.textAlign = 'center';
@@ -1450,11 +1416,11 @@ function renderUI(map) {
     ctx.font = '32px Arial';
     ctx.fillText(map.subtitle, canvas.width/2, 120);
     
-    // Versão no alto direito
+    // Versão centralizada no topo
     ctx.fillStyle = '#666';
     ctx.font = '24px Arial';
-    ctx.textAlign = 'right';
-    ctx.fillText(gameState.version, canvas.width - 20, 40);
+    ctx.textAlign = 'center';
+    ctx.fillText(gameState.version, canvas.width/2, 160);
     ctx.textAlign = 'left';
     
     // Info
@@ -1477,18 +1443,18 @@ function renderUI(map) {
     // Status
     if (player.inShadow) {
         ctx.fillStyle = '#0f0';
-        ctx.fillText('NA SOMBRA - Invisível!', 20, 170);
+        ctx.fillText('NA SOMBRA - Invisível!', 20, 210);
     }
     
     // Avisos
     if (map.orelhao && !gameState.dashUnlocked) {
         ctx.fillStyle = '#ff0';
-        ctx.fillText('Atenda o orelhão!', 20, 210);
+        ctx.fillText('Atenda o orelhão!', 20, 250);
     }
     
     if (map.lixeira && !gameState.bombPlaced) {
         ctx.fillStyle = '#ff0';
-        ctx.fillText('Elimine todos e plante o explosivo!', 20, 210);
+        ctx.fillText('Elimine todos e plante o explosivo!', 20, 250);
     }
     
     // Força de Pedal
@@ -1613,7 +1579,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.8.4 - Poste com luz suave 🎮');
-console.log('💡 Luz do poste: 80px de raio, feather suave e gradual');
-console.log('📍 Versão agora aparece no canto superior direito');
-console.log('✨ Luz renderizada atrás do poste para efeito mais natural');
+console.log('🎮 Mad Night v1.8.5 - Luz âmbar sem bolas 🎮');
+console.log('🔶 Luz do poste agora é âmbar (255, 160, 0)');
+console.log('📍 Versão centralizada no topo da tela');
+console.log('🚫 Removidas todas as bolas amarelas de luz');
+console.log('⬇️ Luz do poste posicionada mais abaixo (y+40)');
