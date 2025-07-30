@@ -1,4 +1,4 @@
-console.log('Mad Night v1.8.9 - Sombras limpas');
+console.log('Mad Night v1.9.3 - Filtro com máscara');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.2 - Iluminação sutil'
+    version: 'v1.9.3 - Filtro com máscara'
 };
 
 // Player
@@ -1288,42 +1288,53 @@ function renderPlayer() {
 }
 
 function renderNightFilter(map, visibleArea) {
-    // Aplicar filtro azul escuro sobre toda a cena
-    ctx.fillStyle = 'rgba(0, 0, 40, 0.4)';
-    ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
+    // NOVA ABORDAGEM: Criar filtro com máscara usando Canvas temporário
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = camera.width;
+    tempCanvas.height = camera.height;
+    const tempCtx = tempCanvas.getContext('2d');
     
-    // Furar o filtro ao redor dos postes de forma MUITO sutil
+    // 1. Preencher todo o canvas temporário com filtro azul
+    tempCtx.fillStyle = 'rgba(0, 0, 40, 0.4)';
+    tempCtx.fillRect(0, 0, camera.width, camera.height);
+    
+    // 2. Criar "buracos" no filtro onde tem luz de poste (sem usar destination-out)
     if (map.streetLights) {
-        ctx.save();
-        ctx.globalCompositeOperation = 'destination-out';
-        
         map.streetLights.forEach(light => {
-            if (light.x + 80 > visibleArea.left && 
-                light.x - 80 < visibleArea.right &&
-                light.y + 80 > visibleArea.top && 
-                light.y - 80 < visibleArea.bottom) {
+            const lightX = light.x + 20 - camera.x;
+            const lightY = light.y + 45 - camera.y;
+            
+            // Só processar se estiver visível
+            if (lightX + 70 > 0 && lightX - 70 < camera.width &&
+                lightY + 70 > 0 && lightY - 70 < camera.height) {
                 
-                // Furo bem sutil, só um pouquinho maior que a luz
-                const gradient = ctx.createRadialGradient(
-                    light.x + 20, light.y + 45, 0,        // Centro da luz
-                    light.x + 20, light.y + 45, 70        // Raio bem menor (70px)
+                // Usar globalCompositeOperation para criar o buraco
+                tempCtx.save();
+                tempCtx.globalCompositeOperation = 'destination-out';
+                
+                const gradient = tempCtx.createRadialGradient(
+                    lightX, lightY, 0,
+                    lightX, lightY, 70
                 );
-                gradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');     // Centro bem suave
-                gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)');  // Meio muito sutil
-                gradient.addColorStop(0.8, 'rgba(255, 255, 255, 0.05)');  // Quase nada
-                gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');       // Zero na borda
+                gradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+                gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)');
+                gradient.addColorStop(0.8, 'rgba(255, 255, 255, 0.05)');
+                gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
                 
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(light.x + 20, light.y + 45, 70, 0, Math.PI * 2);
-                ctx.fill();
+                tempCtx.fillStyle = gradient;
+                tempCtx.beginPath();
+                tempCtx.arc(lightX, lightY, 70, 0, Math.PI * 2);
+                tempCtx.fill();
+                
+                tempCtx.restore();
             }
         });
-        
-        ctx.restore();
     }
     
-    // Luz decorativa dos postes - LUZ ÂMBAR
+    // 3. Aplicar o filtro com máscara no canvas principal
+    ctx.drawImage(tempCanvas, camera.x, camera.y);
+    
+    // 4. Adicionar luz âmbar decorativa dos postes
     if (map.streetLights) {
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
@@ -1334,16 +1345,15 @@ function renderNightFilter(map, visibleArea) {
                 light.y + 120 > visibleArea.top && 
                 light.y - 120 < visibleArea.bottom) {
                 
-                // Luz âmbar bonita
                 const gradient = ctx.createRadialGradient(
-                    light.x + 20, light.y + 45, 0,      // Centro
-                    light.x + 20, light.y + 45, 100     // Raio da luz âmbar
+                    light.x + 20, light.y + 45, 0,
+                    light.x + 20, light.y + 45, 100
                 );
-                gradient.addColorStop(0, 'rgba(255, 160, 0, 0.3)');      // Âmbar forte no centro
-                gradient.addColorStop(0.3, 'rgba(255, 160, 0, 0.2)');    // Transição
-                gradient.addColorStop(0.6, 'rgba(255, 160, 0, 0.1)');    // Feather
-                gradient.addColorStop(0.85, 'rgba(255, 160, 0, 0.04)');  // Borda suave
-                gradient.addColorStop(1, 'rgba(255, 160, 0, 0)');        // Fade completo
+                gradient.addColorStop(0, 'rgba(255, 160, 0, 0.3)');
+                gradient.addColorStop(0.3, 'rgba(255, 160, 0, 0.2)');
+                gradient.addColorStop(0.6, 'rgba(255, 160, 0, 0.1)');
+                gradient.addColorStop(0.85, 'rgba(255, 160, 0, 0.04)');
+                gradient.addColorStop(1, 'rgba(255, 160, 0, 0)');
                 
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
@@ -1528,9 +1538,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.2 - Iluminação sutil 🎮');
-console.log('💡 Efeito de iluminação bem mais sutil');
-console.log('🔦 Furo pequeno (70px) e transparência baixa');
-console.log('✨ Transição suave sem círculo tosco');
-console.log('🌃 Mantém atmosfera noturna natural');
-console.log('👌 Efeito discreto mas funcional');
+console.log('🎮 Mad Night v1.9.3 - Filtro com máscara 🎮');
+console.log('🔦 Nova abordagem: Canvas temporário para criar máscara');
+console.log('✨ Evita buraco escuro - mantém fundo cinza');
+console.log('💡 Área do poste fica mais clara sem remover tudo');
+console.log('🎯 Solução mais elegante e performática');
