@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.7 - Tiles sem gaps');
+console.log('Mad Night v1.9.8 - Árvores sem filtro');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.7 - Tiles sem gaps'
+    version: 'v1.9.8 - Árvores sem filtro'
 };
 
 // Player
@@ -1374,17 +1374,15 @@ function renderNightFilter(map, visibleArea) {
     tempCtx.fillStyle = 'rgba(0, 0, 40, 0.4)';
     tempCtx.fillRect(0, 0, camera.width, camera.height);
     
-    // 2. Criar "buracos" no filtro onde tem luz de poste (sem usar destination-out)
+    // 2. Criar "buracos" no filtro onde tem luz de poste
     if (map.streetLights) {
         map.streetLights.forEach(light => {
             const lightX = light.x + 20 - camera.x;
             const lightY = light.y + 45 - camera.y;
             
-            // Só processar se estiver visível
             if (lightX + 70 > 0 && lightX - 70 < camera.width &&
                 lightY + 70 > 0 && lightY - 70 < camera.height) {
                 
-                // Usar globalCompositeOperation para criar o buraco
                 tempCtx.save();
                 tempCtx.globalCompositeOperation = 'destination-out';
                 
@@ -1407,10 +1405,49 @@ function renderNightFilter(map, visibleArea) {
         });
     }
     
-    // 3. Aplicar o filtro com máscara no canvas principal
+    // 3. NOVO: Criar buracos onde tem árvores (para não ficarem azuladas)
+    if (map.trees) {
+        tempCtx.save();
+        tempCtx.globalCompositeOperation = 'destination-out';
+        
+        map.trees.forEach(tree => {
+            const treeAsset = assets[tree.type];
+            if (treeAsset && treeAsset.loaded) {
+                const treeX = tree.x - camera.x;
+                const treeY = tree.y - camera.y;
+                
+                // Só processar se a árvore estiver visível
+                if (treeX + treeAsset.width > 0 && treeX < camera.width &&
+                    treeY + treeAsset.height > 0 && treeY < camera.height) {
+                    
+                    // Criar buraco suave ao redor da árvore
+                    const centerX = treeX + treeAsset.width / 2;
+                    const centerY = treeY + treeAsset.height / 2;
+                    const radius = Math.max(treeAsset.width, treeAsset.height) * 0.7;
+                    
+                    const gradient = tempCtx.createRadialGradient(
+                        centerX, centerY, radius * 0.3,
+                        centerX, centerY, radius
+                    );
+                    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');  // Centro quase sem filtro
+                    gradient.addColorStop(0.6, 'rgba(255, 255, 255, 0.4)'); // Meio termo
+                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');     // Borda com filtro normal
+                    
+                    tempCtx.fillStyle = gradient;
+                    tempCtx.beginPath();
+                    tempCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                    tempCtx.fill();
+                }
+            }
+        });
+        
+        tempCtx.restore();
+    }
+    
+    // 4. Aplicar o filtro com máscara no canvas principal
     ctx.drawImage(tempCanvas, camera.x, camera.y);
     
-    // 4. Adicionar luz âmbar decorativa dos postes
+    // 5. Adicionar luz âmbar decorativa dos postes
     if (map.streetLights) {
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
@@ -1615,8 +1652,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.7 - Tiles sem gaps 🎮');
-console.log('🌿 Correção das linhas pretas entre tiles');
-console.log('📐 Arredondamento de posições com Math.floor');
-console.log('➕ Tiles renderizados com 1 pixel extra (121x121)');
-console.log('✨ Elimina gaps causados por anti-aliasing');
+console.log('🎮 Mad Night v1.9.8 - Árvores sem filtro 🎮');
+console.log('🌳 Árvores excluídas do filtro azul noturno');
+console.log('✨ Gradiente suave ao redor de cada árvore');
+console.log('🎨 Cores naturais preservadas nas árvores');
+console.log('🌃 Mantém atmosfera noturna no resto do cenário');
