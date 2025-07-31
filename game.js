@@ -29,7 +29,7 @@ const assetManager = {
         0: { // Maconhão
             tiles: ['grama000', 'grama001', 'grama002', 'grama003', 'grama004'],
             trees: ['arvore001', 'arvore002', 'arvore003', 'arvore004', 'arvorebloco001'],
-            objects: ['caixadeluz'],
+            objects: ['caixadeluz', 'moitinha'],
             buildings: ['campo', 'campoTraves'],
             lights: ['poste000', 'poste001']
         },
@@ -235,7 +235,8 @@ const assets = {
     grama004: { img: new Image(), loaded: false, width: 120, height: 120 },
     banco01: { img: new Image(), loaded: false, width: 45, height: 45 },
     banco02: { img: new Image(), loaded: false, width: 45, height: 45 },
-    caixadeluz: { img: new Image(), loaded: false, width: 45, height: 45 }
+    caixadeluz: { img: new Image(), loaded: false, width: 45, height: 45 },
+    moitinha: { img: new Image(), loaded: false, width: 27, height: 30 }
 }; false, width: 150, height: 190 },
     arvorebloco001: { img: new Image(), loaded: false, width: 354, height: 186 },
     poste000: { img: new Image(), loaded: false, width: 40, height: 120 },
@@ -303,6 +304,9 @@ assets.banco02.img.onload = () => { assets.banco02.loaded = true; };
 
 assets.caixadeluz.img.src = 'assets/objects/caixadeluz.png';
 assets.caixadeluz.img.onload = () => { assets.caixadeluz.loaded = true; };
+
+assets.moitinha.img.src = 'assets/objects/moitinha.png';
+assets.moitinha.img.onload = () => { assets.moitinha.loaded = true; };
 
 assets.moitinha.img.src = 'assets/objects/moitinha.png';
 assets.moitinha.img.onload = () => { assets.moitinha.loaded = true; };
