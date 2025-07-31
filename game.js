@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.15 - Código Completo');
+console.log('Mad Night v1.9.16 - Flicker Realista');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.15 - Código Completo'
+    version: 'v1.9.16 - Flicker Realista'
 };
 
 // Player
@@ -110,39 +110,51 @@ assets.grama002.img.onload = () => { assets.grama002.loaded = true; };
 assets.grama003.img.src = 'assets/tiles/grama003.png';
 assets.grama003.img.onload = () => { assets.grama003.loaded = true; };
 
-// Sistema de flicker para postes
+// Sistema de flicker realista para postes (3 componentes)
 const flickerSystem = {
     lights: {},
     
     update: function(lightId) {
         if (!this.lights[lightId]) {
             this.lights[lightId] = {
+                baseIntensity: 1.0,
                 intensity: 1.0,
-                targetIntensity: 1.0,
-                flickering: false,
-                flickerTime: 0,
-                nextFlicker: Date.now() + Math.random() * 5000 + 3000
+                // Offset único para cada poste (dessincronizado)
+                timeOffset: Math.random() * 10000,
+                // Chance de piscada forte
+                lastFlicker: Date.now(),
+                flickerCooldown: Math.random() * 8000 + 4000
             };
         }
         
         const light = this.lights[lightId];
-        const now = Date.now();
+        const now = Date.now() + light.timeOffset;
         
-        if (!light.flickering && now > light.nextFlicker) {
-            light.flickering = true;
-            light.flickerTime = now + Math.random() * 500 + 200;
-            light.targetIntensity = 0.3 + Math.random() * 0.5;
-        }
+        // Componente 1: Oscilação suave principal (respiração da luz)
+        const primaryWave = Math.sin(now * 0.0008) * 0.08;
         
-        if (light.flickering) {
-            if (now < light.flickerTime) {
-                light.intensity = light.targetIntensity + Math.sin(now * 0.05) * 0.2;
-            } else {
-                light.flickering = false;
-                light.intensity = 1.0;
-                light.nextFlicker = now + Math.random() * 8000 + 4000;
+        // Componente 2: Oscilação secundária mais rápida (tremulação)
+        const secondaryWave = Math.sin(now * 0.003) * 0.04;
+        
+        // Componente 3: Piscadas ocasionais (falha elétrica)
+        let flicker = 0;
+        if (Date.now() - light.lastFlicker > light.flickerCooldown) {
+            if (Math.random() < 0.02) { // 2% de chance por frame
+                flicker = -0.3 - Math.random() * 0.2; // Reduz 30-50% da luz
+                light.lastFlicker = Date.now();
+                light.flickerCooldown = Math.random() * 8000 + 4000;
             }
         }
+        
+        // Durante uma piscada, adicionar tremulação extra
+        if (flicker < 0) {
+            flicker += Math.sin(now * 0.1) * 0.1;
+        }
+        
+        // Combinar todos os componentes
+        light.intensity = Math.max(0.3, Math.min(1.0, 
+            light.baseIntensity + primaryWave + secondaryWave + flicker
+        ));
         
         return light.intensity;
     }
@@ -1558,11 +1570,12 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.15 - Código Completo 🎮');
-console.log('🐛 Arquivo completo sem cortes');
-console.log('🔍 Versão sempre visível no topo');
-console.log('🌃 Filtro noturno funcionando');
-console.log('💡 4 postes com flicker no Maconhão');
+console.log('🎮 Mad Night v1.9.16 - Flicker Realista 🎮');
+console.log('💡 Sistema de flicker com 3 componentes:');
+console.log('   ✨ Oscilação suave principal (respiração)');
+console.log('   ✨ Oscilação secundária rápida (tremulação)');
+console.log('   ✨ Piscadas aleatórias ocasionais (falhas)');
+console.log('🔀 Cada poste com offset único (dessincronizado)');
 console.log('✅ Jogo inicializado com sucesso!');
 
 // FIM DO ARQUIVO
