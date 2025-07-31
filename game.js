@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.32 - Eixão com Túnel');
+console.log('Mad Night v1.9.33 - Túnel Liberado');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.32 - Eixão com Túnel'
+    version: 'v1.9.33 - Túnel Liberado'
 };
 
 // Player
@@ -270,22 +270,32 @@ const maps = [
         objects: [],
         walls: [
             // Parede superior
-            {x: 0, y: 0, w: 3000, h: 90, invisible: true},
+            {x: 0, y: 0, w: 3000, h: 80, invisible: true},
             
-            // Paredes do túnel - entrada lado esquerdo
-            {x: 0, y: 90, w: 345, h: 330, invisible: true},
-            {x: 415, y: 90, w: 585, h: 330, invisible: true},
+            // Parede esquerda antes da entrada
+            {x: 0, y: 80, w: 190, h: 340, invisible: true},
             
-            // Paredes laterais do túnel
-            {x: 0, y: 420, w: 288, h: 300, invisible: true},
-            {x: 288, y: 537, w: 2625, h: 193, invisible: true},
+            // Parede entre entrada e caminho principal
+            {x: 190, y: 80, w: 155, h: 110, invisible: true},
+            {x: 415, y: 80, w: 585, h: 110, invisible: true},
+            
+            // Parede inferior antes da entrada
+            {x: 190, y: 420, w: 810, h: 448, invisible: true},
+            
+            // Paredes do túnel - lado esquerdo
+            {x: 0, y: 420, w: 190, h: 448, invisible: true},
+            
+            // Parede inferior do túnel
+            {x: 288, y: 730, w: 2625, h: 138, invisible: true},
+            
+            // Parede superior dentro do túnel
+            {x: 288, y: 190, w: 2557, h: 230, invisible: true},
             
             // Paredes do túnel - saída lado direito
-            {x: 2000, y: 90, w: 845, h: 330, invisible: true},
-            {x: 2913, y: 420, w: 87, h: 300, invisible: true},
+            {x: 2913, y: 420, w: 87, h: 448, invisible: true},
             
-            // Parede após saída
-            {x: 2950, y: 80, w: 50, h: 340, invisible: true}
+            // Parede superior após saída
+            {x: 2845, y: 80, w: 155, h: 110, invisible: true}
         ],
         lights: [],
         shadows: [],
@@ -1796,13 +1806,11 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.32 - Eixão com Túnel 🎮');
-console.log('🚇 Sistema de duas camadas implementado');
-console.log('🛣️ Mapa do Eixão: 3000x868 pixels');
-console.log('🎨 Camada 1: Piso (abaixo do player)');
-console.log('🎨 Camada 2: Túnel (acima do player)');
-console.log('🚗 Caminho do túnel configurado com colisões');
-console.log('✅ Player some embaixo do túnel!');
-console.log('🎯 PRONTO PARA TESTAR O TÚNEL!');
+console.log('🎮 Mad Night v1.9.33 - Túnel Liberado 🎮');
+console.log('🚇 Corrigido problema de colisão no início');
+console.log('🛣️ Player agora pode se mover livremente');
+console.log('🎨 Sistema de camadas funcionando');
+console.log('✅ Caminho do túnel desbloqueado!');
+console.log('🎯 TESTE AGORA!');
 
 // FIM DO ARQUIVO
