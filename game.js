@@ -1,4 +1,4 @@
-console.log('Mad Night v2.0.0 - Postes Corrigidos com Flicker');
+console.log('Mad Night v1.9.9 - Maconhão Iluminado');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v2.0.0 - Postes com Flicker'
+    version: 'v1.9.9 - Maconhão Iluminado'
 };
 
 // Player
@@ -137,6 +137,48 @@ assets.grama003.img.onload = () => {
     assets.grama003.loaded = true;
 };
 
+// Sistema de flicker para postes
+const flickerSystem = {
+    lights: {},
+    
+    update: function(lightId) {
+        if (!this.lights[lightId]) {
+            this.lights[lightId] = {
+                intensity: 1.0,
+                targetIntensity: 1.0,
+                flickering: false,
+                flickerTime: 0,
+                nextFlicker: Date.now() + Math.random() * 5000 + 3000
+            };
+        }
+        
+        const light = this.lights[lightId];
+        const now = Date.now();
+        
+        // Verificar se deve começar a piscar
+        if (!light.flickering && now > light.nextFlicker) {
+            light.flickering = true;
+            light.flickerTime = now + Math.random() * 500 + 200; // Duração do flicker
+            light.targetIntensity = 0.3 + Math.random() * 0.5; // Intensidade entre 30% e 80%
+        }
+        
+        // Durante o flicker
+        if (light.flickering) {
+            if (now < light.flickerTime) {
+                // Oscilação rápida
+                light.intensity = light.targetIntensity + Math.sin(now * 0.05) * 0.2;
+            } else {
+                // Fim do flicker
+                light.flickering = false;
+                light.intensity = 1.0;
+                light.nextFlicker = now + Math.random() * 8000 + 4000; // Próximo flicker em 4-12 segundos
+            }
+        }
+        
+        return light.intensity;
+    }
+};
+
 // Sistema de Mapas
 const maps = [
     {
@@ -164,20 +206,10 @@ const maps = [
             {type: 'arvore001', x: 1550, y: 850}
         ],
         streetLights: [
-            // 4 POSTES NOS CANTOS DO CAMPO DE FUTEBOL (campo está centralizado em 960x540)
-            {type: 'poste001', x: 560, y: 240, rotation: 0, lightRadius: 40, flickerOffset: 0},     // Superior esquerdo
-            {type: 'poste000', x: 1200, y: 240, rotation: 0, lightRadius: 40, flickerOffset: 500},  // Superior direito
-            {type: 'poste001', x: 560, y: 640, rotation: 0, lightRadius: 40, flickerOffset: 1000},  // Inferior esquerdo
-            {type: 'poste000', x: 1200, y: 640, rotation: 0, lightRadius: 40, flickerOffset: 1500}, // Inferior direito
-            
-            // Postes nas entradas/cantos do mapa
-            {type: 'poste000', x: 80, y: 80, rotation: 0, lightRadius: 40, flickerOffset: 2000},    // Canto superior esquerdo
-            {type: 'poste001', x: 1800, y: 80, rotation: 0, lightRadius: 40, flickerOffset: 2500},  // Canto superior direito
-            {type: 'poste000', x: 80, y: 900, rotation: 0, lightRadius: 40, flickerOffset: 3000},   // Canto inferior esquerdo
-            {type: 'poste001', x: 1800, y: 900, rotation: 0, lightRadius: 40, flickerOffset: 3500}, // Canto inferior direito
-            
-            // Poste na saída
-            {type: 'poste001', x: 1700, y: 450, rotation: 0, lightRadius: 40, flickerOffset: 4000}  // Próximo à saída
+            {type: 'poste000', x: 500, y: 200, rotation: 0, lightRadius: 100, id: 'post1'},
+            {type: 'poste001', x: 960, y: 300, rotation: 0, lightRadius: 100, id: 'post2'},
+            {type: 'poste000', x: 960, y: 780, rotation: 0, lightRadius: 100, id: 'post3'},
+            {type: 'poste001', x: 1400, y: 540, rotation: 0, lightRadius: 100, id: 'post4'}
         ],
         walls: [
             {x: 0, y: 0, w: 1920, h: 20},
@@ -404,15 +436,6 @@ function generateGrassTiles(mapWidth, mapHeight, tileSize) {
     return tiles;
 }
 
-// Função para calcular intensidade do flicker
-function getFlickerIntensity(offset) {
-    const time = Date.now() + offset;
-    const flicker1 = Math.sin(time * 0.007) * 0.1;
-    const flicker2 = Math.sin(time * 0.013) * 0.05;
-    const flicker3 = Math.random() < 0.02 ? -0.1 : 0; // Piscada ocasional
-    return Math.max(0.7, Math.min(1, 1 + flicker1 + flicker2 + flicker3));
-}
-
 // Funções auxiliares
 function isInLight(x, y) {
     // Função mantida para compatibilidade, mas sem funcionalidade
@@ -428,8 +451,9 @@ function isInShadow(x, y) {
         for (let tree of map.trees) {
             const treeAsset = assets[tree.type];
             if (treeAsset && treeAsset.loaded) {
+                // ÁREA DE SOMBRA AUMENTADA PARA 50%
                 let shadowRadius = tree.type === 'arvorebloco001' ? 
-                    treeAsset.width * 0.25 : treeAsset.width * 0.35;
+                    treeAsset.width * 0.35 : treeAsset.width * 0.5;
                 
                 const shadowX = tree.x + treeAsset.width * 0.5;
                 const shadowY = tree.y + treeAsset.height * 0.85;
@@ -1237,8 +1261,9 @@ function renderShadows(map, visibleArea) {
         map.trees.forEach(tree => {
             const treeAsset = assets[tree.type];
             if (treeAsset && treeAsset.loaded) {
+                // ÁREA DE SOMBRA AUMENTADA PARA 50%
                 let shadowRadius = tree.type === 'arvorebloco001' ? 
-                    treeAsset.width * 0.25 : treeAsset.width * 0.35;
+                    treeAsset.width * 0.35 : treeAsset.width * 0.5;
                 
                 const shadowX = tree.x + treeAsset.width * 0.5;
                 const shadowY = tree.y + treeAsset.height * 0.85;
@@ -1392,7 +1417,9 @@ function renderPlayer() {
 }
 
 function renderNightFilter(map, visibleArea) {
-    // NOVA ABORDAGEM: Criar filtro com máscara usando Canvas temporário
+    // REMOVIDO: Não excluir mais as árvores do filtro
+    // Aplicar filtro azul em toda a tela, incluindo árvores
+    
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = camera.width;
     tempCanvas.height = camera.height;
@@ -1402,259 +1429,72 @@ function renderNightFilter(map, visibleArea) {
     tempCtx.fillStyle = 'rgba(0, 0, 40, 0.4)';
     tempCtx.fillRect(0, 0, camera.width, camera.height);
     
-    // 2. Criar "buracos" no filtro onde tem luz de poste com flicker
+    // 2. Criar "buracos" no filtro onde tem luz de poste
     if (map.streetLights) {
         map.streetLights.forEach(light => {
             const lightX = light.x + 20 - camera.x;
             const lightY = light.y + 45 - camera.y;
             
-            // Calcular intensidade do flicker para este poste
-            const intensity = getFlickerIntensity(light.flickerOffset || 0);
-            const radius = 70 * intensity;
-            
-            // Só processar se estiver visível
-            if (lightX + radius > 0 && lightX - radius < camera.width &&
-                lightY + radius > 0 && lightY - radius < camera.height) {
+            if (lightX + 70 > 0 && lightX - 70 < camera.width &&
+                lightY + 70 > 0 && lightY - 70 < camera.height) {
                 
-                // Usar globalCompositeOperation para criar o buraco
                 tempCtx.save();
                 tempCtx.globalCompositeOperation = 'destination-out';
                 
+                // Aplicar flicker na intensidade da luz
+                const intensity = flickerSystem.update(light.id || 'default');
+                
                 const gradient = tempCtx.createRadialGradient(
                     lightX, lightY, 0,
-                    lightX, lightY, radius
+                    lightX, lightY, 70
                 );
                 gradient.addColorStop(0, `rgba(255, 255, 255, ${0.3 * intensity})`);
-                gradient.addColorStop(0.5, `rgba(255, 255, 255, ${0.15 * intensity})`
-gradient.addColorStop(0.8, `rgba(255, 255, 255, ${0.05 * intensity})`);
-               gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-               
-               tempCtx.fillStyle = gradient;
-               tempCtx.beginPath();
-               tempCtx.arc(lightX, lightY, radius, 0, Math.PI * 2);
-               tempCtx.fill();
-               
-               tempCtx.restore();
-           }
-       });
-   }
-   
-   // 3. Aplicar o filtro com máscara no canvas principal
-   ctx.drawImage(tempCanvas, camera.x, camera.y);
-   
-   // 4. Adicionar luz âmbar decorativa dos postes com flicker
-   if (map.streetLights) {
-       ctx.save();
-       ctx.globalCompositeOperation = 'screen';
-       
-       map.streetLights.forEach(light => {
-           if (light.x + 120 > visibleArea.left && 
-               light.x - 120 < visibleArea.right &&
-               light.y + 120 > visibleArea.top && 
-               light.y - 120 < visibleArea.bottom) {
-               
-               const intensity = getFlickerIntensity(light.flickerOffset || 0);
-               const radius = 100 * intensity;
-               
-               const gradient = ctx.createRadialGradient(
-                   light.x + 20, light.y + 45, 0,
-                   light.x + 20, light.y + 45, radius
-               );
-               gradient.addColorStop(0, `rgba(255, 160, 0, ${0.3 * intensity})`);
-               gradient.addColorStop(0.3, `rgba(255, 160, 0, ${0.2 * intensity})`);
-               gradient.addColorStop(0.6, `rgba(255, 160, 0, ${0.1 * intensity})`);
-               gradient.addColorStop(0.85, `rgba(255, 160, 0, ${0.04 * intensity})`);
-               gradient.addColorStop(1, 'rgba(255, 160, 0, 0)');
-               
-               ctx.fillStyle = gradient;
-               ctx.beginPath();
-               ctx.arc(light.x + 20, light.y + 45, radius, 0, Math.PI * 2);
-               ctx.fill();
-           }
-       });
-       
-       ctx.restore();
-   }
-}
-
-function renderUI(map) {
-   // Nome do mapa
-   ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#ff0';
-   ctx.font = 'bold 48px Arial';
-   ctx.textAlign = 'center';
-   ctx.fillText(map.name, canvas.width/2, 80);
-   ctx.font = '32px Arial';
-   ctx.fillText(map.subtitle, canvas.width/2, 120);
-   
-   // Versão centralizada no topo
-   ctx.fillStyle = '#666';
-   ctx.font = '24px Arial';
-   ctx.textAlign = 'center';
-   ctx.fillText(gameState.version, canvas.width/2, 160);
-   ctx.textAlign = 'left';
-   
-   // Info
-   ctx.fillStyle = '#fff';
-   ctx.font = '28px Arial';
-   ctx.fillText(`Mapa: ${gameState.currentMap + 1}/6`, 20, canvas.height - 80);
-   ctx.fillText(`Inimigos: ${enemies.filter(e => !e.isDead).length}`, 20, canvas.height - 40);
-   
-   // Vidas
-   ctx.fillText('Vidas: ', 20, 50);
-   for (let i = 0; i < 5; i++) {
-       ctx.font = '40px Arial';
-       if (i >= gameState.deaths) {
-           ctx.fillStyle = '#f00';
-           ctx.fillText('💀', 120 + i * 60, 50);
-       }
-   }
-   ctx.font = '28px Arial';
-   
-   // Status
-   if (player.inShadow) {
-       ctx.fillStyle = '#0f0';
-       ctx.fillText('NA SOMBRA - Invisível!', 20, 210);
-   }
-   
-   // Avisos
-   if (map.orelhao && !gameState.dashUnlocked) {
-       ctx.fillStyle = '#ff0';
-       ctx.fillText('Atenda o orelhão!', 20, 250);
-   }
-   
-   if (map.lixeira && !gameState.bombPlaced) {
-       ctx.fillStyle = '#ff0';
-       ctx.fillText('Elimine todos e plante o explosivo!', 20, 250);
-   }
-   
-   // Força de Pedal
-   ctx.fillStyle = '#fff';
-   ctx.fillText('Força de Pedal: ', 20, 130);
-   for (let i = 0; i < gameState.maxPedalPower; i++) {
-       ctx.fillStyle = i < gameState.pedalPower ? '#0f0' : '#333';
-       ctx.fillText('█', 240 + i * 24, 130);
-   }
-   
-   // Morte
-   if (player.isDead) {
-       ctx.fillStyle = '#f00';
-       ctx.font = '64px Arial';
-       ctx.textAlign = 'center';
-       const msg = gameState.deaths < 5 ? "ah véi, se liga carái" : "sifudêu";
-       ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
-       ctx.textAlign = 'left';
-   }
-}
-
-// Função de desenho principal
-function draw() {
-   const map = maps[gameState.currentMap];
-   
-   ctx.fillStyle = '#000';
-   ctx.fillRect(0, 0, canvas.width, canvas.height);
-   
-   ctx.save();
-   ctx.scale(camera.zoom, camera.zoom);
-   ctx.translate(-camera.x, -camera.y);
-   
-   ctx.fillStyle = '#1a1a1a';
-   ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
-   
-   const visibleArea = {
-       left: camera.x - 100,
-       right: camera.x + camera.width + 100,
-       top: camera.y - 100,
-       bottom: camera.y + camera.height + 100
-   };
-   
-   // Renderizar elementos do mapa
-   renderTiles(map, visibleArea); // Renderizar grama primeiro (fundo)
-   renderCampo(map);
-   renderShadows(map, visibleArea);
-   renderTrees(map, visibleArea, 'bottom');
-   renderWalls(map, visibleArea);
-   renderSpecialObjects(map);
-   renderProjectiles(visibleArea);
-   renderEnemies(visibleArea);
-   renderPlayer();
-   renderStreetLights(map, visibleArea);
-   renderTrees(map, visibleArea, 'top');
-   renderNightFilter(map, visibleArea); // FILTRO AZUL POR ÚLTIMO (cobre tudo incluindo árvores)
-   
-   ctx.restore();
-   
-   // Renderizar UI
-   renderUI(map);
-}
-
-// Game loop
-function gameLoop() {
-   update();
-   draw();
-   requestAnimationFrame(gameLoop);
-}
-
-// Carregar sprites
-let madmaxLoaded = 0;
-let faquinhaLoaded = 0;
-let morcegoLoaded = 0;
-let caveirinhaLoaded = 0;
-let janisLoaded = 0;
-let chacalLoaded = 0;
-
-for (let i = 0; i <= 15; i++) {
-   const img = new Image();
-   img.src = `assets/sprites/madmax${String(i).padStart(3, '0')}.png`;
-   img.onload = () => madmaxLoaded++;
-   player.sprites[i] = img;
-}
-
-for (let i = 0; i <= 15; i++) {
-   const img = new Image();
-   img.src = `assets/sprites/faquinha${String(i).padStart(3, '0')}.png`;
-   img.onload = () => faquinhaLoaded++;
-   faquinhaSprites[i] = img;
-}
-
-for (let i = 0; i <= 15; i++) {
-   const img = new Image();
-   img.src = `assets/sprites/morcego${String(i).padStart(3, '0')}.png`;
-   img.onload = () => morcegoLoaded++;
-   morcegoSprites[i] = img;
-}
-
-for (let i = 0; i <= 15; i++) {
-   const img = new Image();
-   img.src = `assets/sprites/caveirinha${String(i).padStart(3, '0')}.png`;
-   img.onload = () => caveirinhaLoaded++;
-   caveirinhaSprites[i] = img;
-}
-
-for (let i = 0; i <= 15; i++) {
-   const img = new Image();
-   img.src = `assets/sprites/janis${String(i).padStart(3, '0')}.png`;
-   img.onload = () => janisLoaded++;
-   janisSprites[i] = img;
-}
-
-for (let i = 0; i <= 15; i++) {
-   const img = new Image();
-   img.src = `assets/sprites/chacal${String(i).padStart(3, '0')}.png`;
-   img.onload = () => chacalLoaded++;
-   chacalSprites[i] = img;
-}
-
-// Inicializar
-loadAudio();
-loadMap(0);
-setTimeout(() => playMusic('inicio'), 1000);
-gameLoop();
-
-console.log('🎮 Mad Night v2.0.0 - Postes Corrigidos com Flicker 🎮');
-console.log('⚽ 4 postes nos cantos do campo de futebol');
-console.log('💡 Efeito flicker realista com 3 componentes:');
-console.log('   - Oscilação suave principal');
-console.log('   - Oscilação secundária');
-console.log('   - Piscadas aleatórias ocasionais');
-console.log('🌳 Árvores agora ficam sob o filtro azul noturno');
-console.log('✨ Cada poste tem offset único para flicker dessincronizado');
+                gradient.addColorStop(0.5, `rgba(255, 255, 255, ${0.15 * intensity})`);
+                gradient.addColorStop(0.8, `rgba(255, 255, 255, ${0.05 * intensity})`);
+                gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                
+                tempCtx.fillStyle = gradient;
+                tempCtx.beginPath();
+                tempCtx.arc(lightX, lightY, 70, 0, Math.PI * 2);
+                tempCtx.fill();
+                
+                tempCtx.restore();
+            }
+        });
+    }
+    
+    // 3. Aplicar o filtro com máscara no canvas principal
+    ctx.drawImage(tempCanvas, camera.x, camera.y);
+    
+    // 4. Adicionar luz âmbar decorativa dos postes com flicker
+    if (map.streetLights) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        
+        map.streetLights.forEach(light => {
+            if (light.x + 120 > visibleArea.left && 
+                light.x - 120 < visibleArea.right &&
+                light.y + 120 > visibleArea.top && 
+                light.y - 120 < visibleArea.bottom) {
+                
+                const intensity = flickerSystem.update(light.id || 'default');
+                
+                const gradient = ctx.createRadialGradient(
+                    light.x + 20, light.y + 45, 0,
+                    light.x + 20, light.y + 45, 100
+                );
+                gradient.addColorStop(0, `rgba(255, 160, 0, ${0.3 * intensity})`);
+                gradient.addColorStop(0.3, `rgba(255, 160, 0, ${0.2 * intensity})`);
+                gradient.addColorStop(0.6, `rgba(255, 160, 0, ${0.1 * intensity})`);
+                gradient.addColorStop(0.85, `rgba(255, 160, 0, ${0.04 * intensity})`);
+                gradient.addColorStop(1, 'rgba(255, 160, 0, 0)');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(light.x + 20, light.y + 45, 100, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        });
+        
+        ctx.restore();
+    }
