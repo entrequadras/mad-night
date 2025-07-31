@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.21 - Ajustes Finais Maconhão');
+console.log('Mad Night v1.9.22 - Caixa de Luz e Sombra');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.21 - Ajustes Finais Maconhão'
+    version: 'v1.9.22 - Caixa de Luz e Sombra'
 };
 
 // Player
@@ -237,9 +237,7 @@ const maps = [
             {type: 'poste001', x: 1400, y: 540, rotation: 0, lightRadius: 100, id: 'post4'}
         ],
         objects: [
-            {type: 'banco01', x: 800, y: 400, rotation: 0},
-            {type: 'banco02', x: 1100, y: 600, rotation: 0},
-            {type: 'caixadeluz', x: 600, y: 700, rotation: 0}
+            {type: 'caixadeluz', x: 1750, y: 560, rotation: 0}
         ],
         walls: [
             {x: 0, y: 0, w: 1920, h: 20},
@@ -1267,6 +1265,33 @@ function renderObjects(map, visibleArea) {
 }
 
 function renderShadows(map, visibleArea) {
+    // Sombra especial no campo de futebol (apenas no Maconhão)
+    if (gameState.currentMap === 0) {
+        const campoX = (map.width - 800) / 2;
+        const campoY = (map.height - 462) / 2;
+        const centerX = campoX + 400;
+        const centerY = campoY + 231;
+        
+        // Criar gradiente radial grande para sombra suave
+        const gradient = ctx.createRadialGradient(
+            centerX, centerY, 0,
+            centerX, centerY, 300
+        );
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.5)');    // Centro 50% opacidade
+        gradient.addColorStop(0.3, 'rgba(0, 0, 0, 0.4)');  
+        gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.2)');  
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');      // Borda transparente
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(
+            centerX - 300,
+            centerY - 300,
+            600,
+            600
+        );
+    }
+    
+    // Sombras das árvores
     if (map.trees) {
         map.trees.forEach(tree => {
             const treeAsset = assets[tree.type];
@@ -1651,11 +1676,11 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.21 - Ajustes Finais Maconhão 🎮');
-console.log('🌿 Novo tile grama004 adicionado');
-console.log('📏 Objetos em 45x45 (80% do original)');
-console.log('🚫 Removido poste do meio do campo');
-console.log('💡 3 postes restantes com flicker');
-console.log('✅ Maconhão 100% finalizado!');
+console.log('🎮 Mad Night v1.9.22 - Caixa de Luz e Sombra 🎮');
+console.log('⚡ Apenas caixa de luz próxima à saída (1750, 560)');
+console.log('🌑 Sombra grande no centro do campo de futebol');
+console.log('🎨 Gradiente suave com 50% opacidade no centro');
+console.log('🌿 5 tipos de tile de grama');
+console.log('✅ Maconhão atmosférico e finalizado!');
 
 // FIM DO ARQUIVO
