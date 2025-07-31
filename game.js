@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.14 - Correção Completa');
+console.log('Mad Night v1.9.15 - Código Completo');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.14 - Correção Completa'
+    version: 'v1.9.15 - Código Completo'
 };
 
 // Player
@@ -57,7 +57,7 @@ const player = {
     inShadow: false
 };
 
-// Sistema de assets (incluindo poste e tiles de grama)
+// Sistema de assets
 const assets = {
     campo: { img: new Image(), loaded: false },
     arvore001: { img: new Image(), loaded: false, width: 180, height: 194 },
@@ -75,67 +75,40 @@ const assets = {
 
 // Carregar assets
 assets.campo.img.src = 'assets/buildings/campo_de_futebol.png';
-assets.campo.img.onload = () => {
-    assets.campo.loaded = true;
-};
+assets.campo.img.onload = () => { assets.campo.loaded = true; };
 
-// Carregar árvores
 assets.arvore001.img.src = 'assets/scenary/arvore001.png';
-assets.arvore001.img.onload = () => {
-    assets.arvore001.loaded = true;
-};
+assets.arvore001.img.onload = () => { assets.arvore001.loaded = true; };
 
 assets.arvore002.img.src = 'assets/scenary/arvore002.png';
-assets.arvore002.img.onload = () => {
-    assets.arvore002.loaded = true;
-};
+assets.arvore002.img.onload = () => { assets.arvore002.loaded = true; };
 
 assets.arvore003.img.src = 'assets/scenary/arvore003.png';
-assets.arvore003.img.onload = () => {
-    assets.arvore003.loaded = true;
-};
+assets.arvore003.img.onload = () => { assets.arvore003.loaded = true; };
 
 assets.arvore004.img.src = 'assets/scenary/arvore004.png';
-assets.arvore004.img.onload = () => {
-    assets.arvore004.loaded = true;
-};
+assets.arvore004.img.onload = () => { assets.arvore004.loaded = true; };
 
 assets.arvorebloco001.img.src = 'assets/scenary/arvorebloco001.png';
-assets.arvorebloco001.img.onload = () => {
-    assets.arvorebloco001.loaded = true;
-};
+assets.arvorebloco001.img.onload = () => { assets.arvorebloco001.loaded = true; };
 
-// Carregar postes
 assets.poste000.img.src = 'assets/scenary/poste000.png';
-assets.poste000.img.onload = () => {
-    assets.poste000.loaded = true;
-};
+assets.poste000.img.onload = () => { assets.poste000.loaded = true; };
 
 assets.poste001.img.src = 'assets/scenary/poste001.png';
-assets.poste001.img.onload = () => {
-    assets.poste001.loaded = true;
-};
+assets.poste001.img.onload = () => { assets.poste001.loaded = true; };
 
-// Carregar tiles de grama
 assets.grama000.img.src = 'assets/tiles/grama000.png';
-assets.grama000.img.onload = () => {
-    assets.grama000.loaded = true;
-};
+assets.grama000.img.onload = () => { assets.grama000.loaded = true; };
 
 assets.grama001.img.src = 'assets/tiles/grama001.png';
-assets.grama001.img.onload = () => {
-    assets.grama001.loaded = true;
-};
+assets.grama001.img.onload = () => { assets.grama001.loaded = true; };
 
 assets.grama002.img.src = 'assets/tiles/grama002.png';
-assets.grama002.img.onload = () => {
-    assets.grama002.loaded = true;
-};
+assets.grama002.img.onload = () => { assets.grama002.loaded = true; };
 
 assets.grama003.img.src = 'assets/tiles/grama003.png';
-assets.grama003.img.onload = () => {
-    assets.grama003.loaded = true;
-};
+assets.grama003.img.onload = () => { assets.grama003.loaded = true; };
 
 // Sistema de flicker para postes
 const flickerSystem = {
@@ -155,29 +128,44 @@ const flickerSystem = {
         const light = this.lights[lightId];
         const now = Date.now();
         
-        // Verificar se deve começar a piscar
         if (!light.flickering && now > light.nextFlicker) {
             light.flickering = true;
-            light.flickerTime = now + Math.random() * 500 + 200; // Duração do flicker
-            light.targetIntensity = 0.3 + Math.random() * 0.5; // Intensidade entre 30% e 80%
+            light.flickerTime = now + Math.random() * 500 + 200;
+            light.targetIntensity = 0.3 + Math.random() * 0.5;
         }
         
-        // Durante o flicker
         if (light.flickering) {
             if (now < light.flickerTime) {
-                // Oscilação rápida
                 light.intensity = light.targetIntensity + Math.sin(now * 0.05) * 0.2;
             } else {
-                // Fim do flicker
                 light.flickering = false;
                 light.intensity = 1.0;
-                light.nextFlicker = now + Math.random() * 8000 + 4000; // Próximo flicker em 4-12 segundos
+                light.nextFlicker = now + Math.random() * 8000 + 4000;
             }
         }
         
         return light.intensity;
     }
 };
+
+// Função para gerar tiles de grama
+function generateGrassTiles(mapWidth, mapHeight, tileSize) {
+    const tiles = [];
+    const types = ['grama000', 'grama001', 'grama002', 'grama003'];
+    
+    for (let y = 0; y < mapHeight; y += tileSize) {
+        for (let x = 0; x < mapWidth; x += tileSize) {
+            const randomType = types[Math.floor(Math.random() * types.length)];
+            tiles.push({
+                type: randomType,
+                x: x,
+                y: y
+            });
+        }
+    }
+    
+    return tiles;
+}
 
 // Sistema de Mapas
 const maps = [
@@ -187,7 +175,6 @@ const maps = [
         width: 1920,
         height: 1080,
         enemies: [],
-        // Sistema de tiles de grama - gerado aleatoriamente
         tiles: generateGrassTiles(1920, 1080, 120),
         trees: [
             {type: 'arvore001', x: 300, y: 150},
@@ -217,13 +204,7 @@ const maps = [
             {x: 0, y: 20, w: 20, h: 1040},
             {x: 1900, y: 20, w: 20, h: 1040}
         ],
-        lights: [
-            {x: 960, y: 540, radius: 300},
-            {x: 300, y: 300, radius: 150},
-            {x: 1620, y: 300, radius: 150},
-            {x: 300, y: 780, radius: 150},
-            {x: 1620, y: 780, radius: 150}
-        ],
+        lights: [],
         shadows: [],
         playerStart: {x: 200, y: 300},
         playerStartEscape: {x: 1700, y: 540},
@@ -252,12 +233,7 @@ const maps = [
             {x: 460, y: 150, w: 140, h: 20},
             {x: 460, y: 430, w: 140, h: 20}
         ],
-        lights: [
-            {x: 100, y: 300, radius: 100},
-            {x: 700, y: 300, radius: 100},
-            {x: 330, y: 300, radius: 70},
-            {x: 530, y: 300, radius: 70}
-        ],
+        lights: [],
         shadows: [],
         playerStart: {x: 100, y: 300},
         playerStartEscape: {x: 700, y: 300},
@@ -285,11 +261,7 @@ const maps = [
             {x: 350, y: 350, w: 120, h: 150},
             {x: 550, y: 150, w: 120, h: 100}
         ],
-        lights: [
-            {x: 100, y: 100, radius: 100},
-            {x: 400, y: 300, radius: 150},
-            {x: 700, y: 500, radius: 100}
-        ],
+        lights: [],
         shadows: [],
         playerStart: {x: 80, y: 300},
         playerStartEscape: {x: 700, y: 300},
@@ -321,12 +293,7 @@ const maps = [
             {x: 80, y: 450, w: 120, h: 60},
             {x: 400, y: 450, w: 120, h: 60}
         ],
-        lights: [
-            {x: 300, y: 100, radius: 100},
-            {x: 300, y: 300, radius: 100},
-            {x: 300, y: 500, radius: 100},
-            {x: 300, y: 700, radius: 100}
-        ],
+        lights: [],
         shadows: [],
         playerStart: {x: 300, y: 650},
         playerStartEscape: {x: 300, y: 50},
@@ -355,11 +322,7 @@ const maps = [
             {x: 80, y: 500, w: 160, h: 160},
             {x: 360, y: 500, w: 160, h: 160}
         ],
-        lights: [
-            {x: 300, y: 80, radius: 80},
-            {x: 300, y: 400, radius: 120},
-            {x: 300, y: 720, radius: 80}
-        ],
+        lights: [],
         shadows: [],
         playerStart: {x: 300, y: 650},
         playerStartEscape: {x: 300, y: 50},
@@ -384,11 +347,7 @@ const maps = [
             {x: 120, y: 400, w: 140, h: 80},
             {x: 340, y: 400, w: 140, h: 80}
         ],
-        lights: [
-            {x: 150, y: 100, radius: 100},
-            {x: 450, y: 100, radius: 100},
-            {x: 300, y: 650, radius: 150}
-        ],
+        lights: [],
         shadows: [],
         playerStart: {x: 300, y: 650},
         playerStartEscape: {x: 300, y: 50},
@@ -414,44 +373,18 @@ const audio = {
     creditos: null
 };
 
-// Função para gerar tiles de grama aleatoriamente
-function generateGrassTiles(mapWidth, mapHeight, tileSize) {
-    const tiles = [];
-    const types = ['grama000', 'grama001', 'grama002', 'grama003'];
-    
-    // Preencher toda a área com tiles perfeitamente alinhados
-    for (let y = 0; y < mapHeight; y += tileSize) {
-        for (let x = 0; x < mapWidth; x += tileSize) {
-            // Escolher tipo aleatório
-            const randomType = types[Math.floor(Math.random() * types.length)];
-            
-            tiles.push({
-                type: randomType,
-                x: x,  // Posição exata, sem offset
-                y: y   // Posição exata, sem offset
-            });
-        }
-    }
-    
-    return tiles;
-}
-
 // Funções auxiliares
 function isInLight(x, y) {
-    // Função mantida para compatibilidade, mas sem funcionalidade
-    // Apenas postes de luz criam iluminação agora
     return false;
 }
 
 function isInShadow(x, y) {
     const map = maps[gameState.currentMap];
     
-    // APENAS sombras das árvores - sem mais bolas artificiais
     if (map.trees) {
         for (let tree of map.trees) {
             const treeAsset = assets[tree.type];
             if (treeAsset && treeAsset.loaded) {
-                // ÁREA DE SOMBRA AUMENTADA PARA 50%
                 let shadowRadius = tree.type === 'arvorebloco001' ? 
                     treeAsset.width * 0.35 : treeAsset.width * 0.5;
                 
@@ -1172,21 +1105,18 @@ function renderTiles(map, visibleArea) {
     map.tiles.forEach(tile => {
         const tileAsset = assets[tile.type];
         if (tileAsset && tileAsset.loaded) {
-            // Só renderizar tiles visíveis
             if (tile.x + tileAsset.width > visibleArea.left && 
                 tile.x < visibleArea.right &&
                 tile.y + tileAsset.height > visibleArea.top && 
                 tile.y < visibleArea.bottom) {
                 
-                // Arredondar posições para evitar sub-pixels
                 const x = Math.floor(tile.x);
                 const y = Math.floor(tile.y);
                 
-                // Desenhar tile com 1 pixel extra de largura e altura para evitar gaps
                 ctx.drawImage(
                     tileAsset.img, 
-                    0, 0, 120, 120,  // source
-                    x, y, 121, 121   // destination (1 pixel maior)
+                    0, 0, 120, 120,
+                    x, y, 121, 121
                 );
             }
         }
@@ -1250,18 +1180,11 @@ function renderStreetLights(map, visibleArea) {
     });
 }
 
-function renderLights(map, visibleArea) {
-    // Função vazia - removendo todas as luzes amarelas
-    // Agora apenas os postes terão luz
-}
-
 function renderShadows(map, visibleArea) {
-    // Apenas sombras das árvores - removidas todas as sombras artificiais
     if (map.trees) {
         map.trees.forEach(tree => {
             const treeAsset = assets[tree.type];
             if (treeAsset && treeAsset.loaded) {
-                // ÁREA DE SOMBRA AUMENTADA PARA 50%
                 let shadowRadius = tree.type === 'arvorebloco001' ? 
                     treeAsset.width * 0.35 : treeAsset.width * 0.5;
                 
@@ -1416,85 +1339,230 @@ function renderPlayer() {
     }
 }
 
-function renderNightFilter(map, visibleArea) {
-    // REMOVIDO: Não excluir mais as árvores do filtro
-    // Aplicar filtro azul em toda a tela, incluindo árvores
+function renderUI(map) {
+    // Nome do mapa
+    ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#ff0';
+    ctx.font = 'bold 48px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(map.name, canvas.width/2, 80);
+    ctx.font = '32px Arial';
+    ctx.fillText(map.subtitle, canvas.width/2, 120);
     
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = camera.width;
-    tempCanvas.height = camera.height;
-    const tempCtx = tempCanvas.getContext('2d');
+    // Info
+    ctx.fillStyle = '#fff';
+    ctx.font = '28px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Mapa: ${gameState.currentMap + 1}/6`, 20, canvas.height - 80);
+    ctx.fillText(`Inimigos: ${enemies.filter(e => !e.isDead).length}`, 20, canvas.height - 40);
     
-    // 1. Preencher todo o canvas temporário com filtro azul
-    tempCtx.fillStyle = 'rgba(0, 0, 40, 0.4)';
-    tempCtx.fillRect(0, 0, camera.width, camera.height);
+    // Vidas
+    ctx.fillText('Vidas: ', 20, 50);
+    for (let i = 0; i < 5; i++) {
+        ctx.font = '40px Arial';
+        if (i >= gameState.deaths) {
+            ctx.fillStyle = '#f00';
+            ctx.fillText('💀', 120 + i * 60, 50);
+        }
+    }
+    ctx.font = '28px Arial';
     
-    // 2. Criar "buracos" no filtro onde tem luz de poste
-    if (map.streetLights) {
-        map.streetLights.forEach(light => {
-            const lightX = light.x + 20 - camera.x;
-            const lightY = light.y + 45 - camera.y;
-            
-            if (lightX + 70 > 0 && lightX - 70 < camera.width &&
-                lightY + 70 > 0 && lightY - 70 < camera.height) {
-                
-                tempCtx.save();
-                tempCtx.globalCompositeOperation = 'destination-out';
-                
-                // Aplicar flicker na intensidade da luz
-                const intensity = flickerSystem.update(light.id || 'default');
-                
-                const gradient = tempCtx.createRadialGradient(
-                    lightX, lightY, 0,
-                    lightX, lightY, 70
-                );
-                gradient.addColorStop(0, `rgba(255, 255, 255, ${0.3 * intensity})`);
-                gradient.addColorStop(0.5, `rgba(255, 255, 255, ${0.15 * intensity})`);
-                gradient.addColorStop(0.8, `rgba(255, 255, 255, ${0.05 * intensity})`);
-                gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                
-                tempCtx.fillStyle = gradient;
-                tempCtx.beginPath();
-                tempCtx.arc(lightX, lightY, 70, 0, Math.PI * 2);
-                tempCtx.fill();
-                
-                tempCtx.restore();
-            }
-        });
+    // Status
+    if (player.inShadow) {
+        ctx.fillStyle = '#0f0';
+        ctx.fillText('NA SOMBRA - Invisível!', 20, 210);
     }
     
-    // 3. Aplicar o filtro com máscara no canvas principal
-    ctx.drawImage(tempCanvas, 0, 0);
+    // Avisos
+    if (map.orelhao && !gameState.dashUnlocked) {
+        ctx.fillStyle = '#ff0';
+        ctx.fillText('Atenda o orelhão!', 20, 250);
+    }
     
-    // 4. Adicionar luz âmbar decorativa dos postes com flicker
-    if (map.streetLights) {
-        ctx.save();
-        ctx.globalCompositeOperation = 'screen';
+    if (map.lixeira && !gameState.bombPlaced) {
+        ctx.fillStyle = '#ff0';
+        ctx.fillText('Elimine todos e plante o explosivo!', 20, 250);
+    }
+    
+    // Força de Pedal
+    ctx.fillStyle = '#fff';
+    ctx.fillText('Força de Pedal: ', 20, 130);
+    for (let i = 0; i < gameState.maxPedalPower; i++) {
+        ctx.fillStyle = i < gameState.pedalPower ? '#0f0' : '#333';
+        ctx.fillText('█', 240 + i * 24, 130);
+    }
+    
+    // Morte
+    if (player.isDead) {
+        ctx.fillStyle = '#f00';
+        ctx.font = '64px Arial';
+        ctx.textAlign = 'center';
+        const msg = gameState.deaths < 5 ? "ah véi, se liga carái" : "sifudêu";
+        ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
+        ctx.textAlign = 'left';
+    }
+}
+
+// Função de desenho principal
+function draw() {
+    // PRIMEIRO: Limpar tela e mostrar versão
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Mostrar versão ANTES de qualquer transformação
+    ctx.save();
+    ctx.fillStyle = '#fff';
+    ctx.font = '24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(gameState.version, canvas.width/2, 30);
+    ctx.textAlign = 'left';
+    ctx.restore();
+    
+    // Tentar renderizar o jogo
+    try {
+        const map = maps[gameState.currentMap];
         
-        map.streetLights.forEach(light => {
-            if (light.x + 120 > visibleArea.left && 
-                light.x - 120 < visibleArea.right &&
-                light.y + 120 > visibleArea.top && 
-                light.y - 120 < visibleArea.bottom) {
-                
+        ctx.save();
+        ctx.scale(camera.zoom, camera.zoom);
+        ctx.translate(-camera.x, -camera.y);
+        
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
+        
+        const visibleArea = {
+            left: camera.x - 100,
+            right: camera.x + camera.width + 100,
+            top: camera.y - 100,
+            bottom: camera.y + camera.height + 100
+        };
+        
+        // Renderizar elementos do mapa
+        renderTiles(map, visibleArea);
+        renderCampo(map);
+        renderShadows(map, visibleArea);
+        renderTrees(map, visibleArea, 'bottom');
+        renderWalls(map, visibleArea);
+        renderSpecialObjects(map);
+        renderProjectiles(visibleArea);
+        renderEnemies(visibleArea);
+        renderPlayer();
+        renderStreetLights(map, visibleArea);
+        renderTrees(map, visibleArea, 'top');
+        
+        // Aplicar filtro noturno
+        ctx.fillStyle = 'rgba(0, 0, 40, 0.4)';
+        ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
+        
+        // Luz dos postes
+        if (map.streetLights) {
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            
+            map.streetLights.forEach(light => {
                 const intensity = flickerSystem.update(light.id || 'default');
                 
                 const gradient = ctx.createRadialGradient(
                     light.x + 20, light.y + 45, 0,
                     light.x + 20, light.y + 45, 100
                 );
-                gradient.addColorStop(0, `rgba(255, 160, 0, ${0.3 * intensity})`);
-                gradient.addColorStop(0.3, `rgba(255, 160, 0, ${0.2 * intensity})`);
-                gradient.addColorStop(0.6, `rgba(255, 160, 0, ${0.1 * intensity})`);
-                gradient.addColorStop(0.85, `rgba(255, 160, 0, ${0.04 * intensity})`);
-                gradient.addColorStop(1, 'rgba(255, 160, 0, 0)');
+                gradient.addColorStop(0, `rgba(255, 200, 100, ${0.4 * intensity})`);
+                gradient.addColorStop(0.5, `rgba(255, 180, 80, ${0.2 * intensity})`);
+                gradient.addColorStop(1, 'rgba(255, 160, 60, 0)');
                 
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
                 ctx.arc(light.x + 20, light.y + 45, 100, 0, Math.PI * 2);
                 ctx.fill();
-            }
-        });
+            });
+            
+            ctx.restore();
+        }
         
         ctx.restore();
+        
+        // Renderizar UI
+        renderUI(map);
+        
+    } catch (error) {
+        // Se houver erro, mostrar mensagem
+        ctx.fillStyle = '#f00';
+        ctx.font = '32px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('ERRO NO RENDER', canvas.width/2, canvas.height/2);
+        ctx.font = '20px Arial';
+        ctx.fillText(error.message, canvas.width/2, canvas.height/2 + 40);
+        console.error('Erro no draw:', error);
     }
+}
+
+// Game loop
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+// Carregar sprites
+let madmaxLoaded = 0;
+let faquinhaLoaded = 0;
+let morcegoLoaded = 0;
+let caveirinhaLoaded = 0;
+let janisLoaded = 0;
+let chacalLoaded = 0;
+
+for (let i = 0; i <= 15; i++) {
+    const img = new Image();
+    img.src = `assets/sprites/madmax${String(i).padStart(3, '0')}.png`;
+    img.onload = () => madmaxLoaded++;
+    player.sprites[i] = img;
+}
+
+for (let i = 0; i <= 15; i++) {
+    const img = new Image();
+    img.src = `assets/sprites/faquinha${String(i).padStart(3, '0')}.png`;
+    img.onload = () => faquinhaLoaded++;
+    faquinhaSprites[i] = img;
+}
+
+for (let i = 0; i <= 15; i++) {
+    const img = new Image();
+    img.src = `assets/sprites/morcego${String(i).padStart(3, '0')}.png`;
+    img.onload = () => morcegoLoaded++;
+    morcegoSprites[i] = img;
+}
+
+for (let i = 0; i <= 15; i++) {
+    const img = new Image();
+    img.src = `assets/sprites/caveirinha${String(i).padStart(3, '0')}.png`;
+    img.onload = () => caveirinhaLoaded++;
+    caveirinhaSprites[i] = img;
+}
+
+for (let i = 0; i <= 15; i++) {
+    const img = new Image();
+    img.src = `assets/sprites/janis${String(i).padStart(3, '0')}.png`;
+    img.onload = () => janisLoaded++;
+    janisSprites[i] = img;
+}
+
+for (let i = 0; i <= 15; i++) {
+    const img = new Image();
+    img.src = `assets/sprites/chacal${String(i).padStart(3, '0')}.png`;
+    img.onload = () => chacalLoaded++;
+    chacalSprites[i] = img;
+}
+
+// Inicializar
+loadAudio();
+loadMap(0);
+setTimeout(() => playMusic('inicio'), 1000);
+gameLoop();
+
+// Logs finais
+console.log('🎮 Mad Night v1.9.15 - Código Completo 🎮');
+console.log('🐛 Arquivo completo sem cortes');
+console.log('🔍 Versão sempre visível no topo');
+console.log('🌃 Filtro noturno funcionando');
+console.log('💡 4 postes com flicker no Maconhão');
+console.log('✅ Jogo inicializado com sucesso!');
+
+// FIM DO ARQUIVO
