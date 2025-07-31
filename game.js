@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.18 - Código Corrigido');
+console.log('Mad Night v1.9.19 - Objetos Reduzidos e Barreira');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.18 - Código Corrigido'
+    version: 'v1.9.19 - Objetos Reduzidos e Barreira'
 };
 
 // Player
@@ -71,9 +71,9 @@ const assets = {
     grama001: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama002: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama003: { img: new Image(), loaded: false, width: 120, height: 120 },
-    banco01: { img: new Image(), loaded: false, width: 56, height: 56 },
-    banco02: { img: new Image(), loaded: false, width: 56, height: 56 },
-    caixadeluz: { img: new Image(), loaded: false, width: 56, height: 56 }
+    banco01: { img: new Image(), loaded: false, width: 28, height: 28 },
+    banco02: { img: new Image(), loaded: false, width: 28, height: 28 },
+    caixadeluz: { img: new Image(), loaded: false, width: 28, height: 28 }
 };
 
 // Carregar assets
@@ -207,7 +207,18 @@ const maps = [
             {type: 'arvore002', x: 1580, y: 130},
             {type: 'arvore003', x: 280, y: 780},
             {type: 'arvore004', x: 1480, y: 830},
-            {type: 'arvore001', x: 1550, y: 850}
+            {type: 'arvore001', x: 1550, y: 850},
+            // Barreira de árvores no lado direito
+            {type: 'arvore001', x: 1820, y: -50},
+            {type: 'arvore002', x: 1850, y: 100},
+            {type: 'arvore003', x: 1830, y: 250},
+            {type: 'arvore004', x: 1860, y: 380},
+            {type: 'arvorebloco001', x: 1790, y: 470},
+            // Espaço para passagem (terço inferior)
+            {type: 'arvore001', x: 1840, y: 650},
+            {type: 'arvore002', x: 1810, y: 780},
+            {type: 'arvore003', x: 1870, y: 900},
+            {type: 'arvore004', x: 1820, y: 1020}
         ],
         streetLights: [
             {type: 'poste000', x: 500, y: 200, rotation: 0, lightRadius: 100, id: 'post1'},
@@ -217,7 +228,7 @@ const maps = [
         ],
         objects: [
             {type: 'banco01', x: 800, y: 400, rotation: 0},
-            {type: 'banco02', x: 1100, y: 600, rotation: 90},
+            {type: 'banco02', x: 1100, y: 600, rotation: 0},
             {type: 'caixadeluz', x: 600, y: 700, rotation: 0}
         ],
         walls: [
@@ -558,13 +569,24 @@ function renderRotatedObject(obj, assetKey, visibleArea) {
     ctx.translate(centerX, centerY);
     ctx.rotate((obj.rotation || 0) * Math.PI / 180);
     
-    ctx.drawImage(
-        asset.img,
-        -asset.width / 2,
-        -asset.height / 2,
-        asset.width,
-        asset.height
-    );
+    // Renderizar com tamanho reduzido para objetos
+    if (assetKey === 'banco01' || assetKey === 'banco02' || assetKey === 'caixadeluz') {
+        ctx.drawImage(
+            asset.img,
+            -asset.width / 2,
+            -asset.height / 2,
+            asset.width,
+            asset.height
+        );
+    } else {
+        ctx.drawImage(
+            asset.img,
+            -asset.width / 2,
+            -asset.height / 2,
+            asset.width,
+            asset.height
+        );
+    }
     
     ctx.restore();
 }
@@ -1619,11 +1641,11 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.18 - Código Corrigido 🎮');
-console.log('🐛 Sintaxe completamente verificada');
-console.log('🪑 Objetos: banco01, banco02, caixadeluz');
-console.log('📍 Versão centralizada abaixo do mapa');
-console.log('💡 Flicker realista com 3 componentes');
+console.log('🎮 Mad Night v1.9.19 - Objetos Reduzidos e Barreira 🎮');
+console.log('📏 Objetos reduzidos pela metade (28x28)');
+console.log('🔄 banco02 sem rotação (orientação correta)');
+console.log('🌳 Barreira de árvores no lado direito');
+console.log('🚪 Passagem única no terço inferior');
 console.log('✅ Arquivo completo e funcional!');
 
 // FIM DO ARQUIVO
