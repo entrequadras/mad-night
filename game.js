@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.28 - Moitinhas no Maconhão');
+console.log('Mad Night v1.9.27 - Correção Sintaxe');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.28 - Moitinhas no Maconhão'
+    version: 'v1.9.27 - Correção Sintaxe'
 };
 
 // Player
@@ -75,8 +75,7 @@ const assets = {
     grama004: { img: new Image(), loaded: false, width: 120, height: 120 },
     banco01: { img: new Image(), loaded: false, width: 45, height: 45 },
     banco02: { img: new Image(), loaded: false, width: 45, height: 45 },
-    caixadeluz: { img: new Image(), loaded: false, width: 45, height: 45 },
-    moitinha: { img: new Image(), loaded: false, width: 27, height: 30 }
+    caixadeluz: { img: new Image(), loaded: false, width: 45, height: 45 }
 };
 
 // Carregar assets
@@ -131,9 +130,6 @@ assets.banco02.img.onload = () => { assets.banco02.loaded = true; };
 
 assets.caixadeluz.img.src = 'assets/objects/caixadeluz.png';
 assets.caixadeluz.img.onload = () => { assets.caixadeluz.loaded = true; };
-
-assets.moitinha.img.src = 'assets/objects/moitinha.png';
-assets.moitinha.img.onload = () => { assets.moitinha.loaded = true; };
 
 // Sistema de flicker para postes (versão original mais evidente)
 const flickerSystem = {
@@ -244,16 +240,7 @@ const maps = [
             {type: 'poste001', x: 1400, y: 540, rotation: 0, lightRadius: 100, id: 'post4'}
         ],
         objects: [
-            {type: 'caixadeluz', x: 1750, y: 560, rotation: 0},
-            // Moitinhas espalhadas pelo mapa (sem colisão)
-            {type: 'moitinha', x: 350, y: 250, rotation: 0, noCollision: true},
-            {type: 'moitinha', x: 850, y: 150, rotation: 0, noCollision: true},
-            {type: 'moitinha', x: 1250, y: 350, rotation: 0, noCollision: true},
-            {type: 'moitinha', x: 600, y: 600, rotation: 0, noCollision: true},
-            {type: 'moitinha', x: 1450, y: 700, rotation: 0, noCollision: true},
-            {type: 'moitinha', x: 250, y: 900, rotation: 0, noCollision: true},
-            {type: 'moitinha', x: 1100, y: 950, rotation: 0, noCollision: true},
-            {type: 'moitinha', x: 750, y: 800, rotation: 0, noCollision: true}
+            {type: 'caixadeluz', x: 1750, y: 560, rotation: 0}
         ],
         walls: [
             // Paredes invisíveis para colisão apenas
@@ -524,9 +511,6 @@ function checkWallCollision(entity, newX, newY) {
     // Verificar colisão com objetos
     if (map.objects) {
         for (let obj of map.objects) {
-            // Pular objetos sem colisão
-            if (obj.noCollision) continue;
-            
             const objAsset = assets[obj.type];
             if (objAsset && objAsset.loaded) {
                 const objCollision = {
@@ -1757,11 +1741,11 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.28 - Moitinhas no Maconhão 🎮');
-console.log('🌿 8 moitinhas espalhadas pelo mapa');
-console.log('👻 Sem colisão (player passa por cima)');
-console.log('📏 Tamanho: 27x30 pixels');
-console.log('🎨 Renderizadas junto com outros objetos');
-console.log('✅ MACONHÃO COMPLETO E DECORADO!');
+console.log('🎮 Mad Night v1.9.27 - Correção Sintaxe 🎮');
+console.log('🐛 Corrigido erro de sintaxe das funções');
+console.log('⚽ Traves funcionando corretamente');
+console.log('✅ Código sem erros para GitHub');
+console.log('🏃 Todas as features do Maconhão funcionais');
+console.log('🎯 PRONTO PARA DEPLOY!');
 
 // FIM DO ARQUIVO
