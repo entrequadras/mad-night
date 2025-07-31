@@ -270,16 +270,13 @@ const maps = [
         streetLights: [],
         objects: [],
         walls: [
-            // Bordas do mapa
-            {x: 0, y: 0, w: 3000, h: 20, invisible: true},    // Topo
-            {x: 0, y: 0, w: 20, h: 868, invisible: true},     // Esquerda
-            {x: 2980, y: 0, w: 20, h: 868, invisible: true},  // Direita
-            {x: 0, y: 848, w: 3000, h: 20, invisible: true},  // Fundo
-            
-            // Limitar Y em 420 (exceto onde tem túnel)
-            {x: 20, y: 420, w: 325, h: 428, invisible: true}, // Antes da entrada
-            {x: 415, y: 420, w: 2430, h: 428, invisible: true}, // Entre entrada e saída
-            {x: 2915, y: 420, w: 65, h: 428, invisible: true}  // Depois da saída
+            {x: 0, y: 0, w: 3000, h: 20, invisible: true},
+            {x: 0, y: 0, w: 20, h: 868, invisible: true},
+            {x: 2980, y: 0, w: 20, h: 868, invisible: true},
+            {x: 0, y: 848, w: 3000, h: 20, invisible: true},
+            {x: 20, y: 420, w: 325, h: 428, invisible: true},
+            {x: 415, y: 420, w: 2430, h: 428, invisible: true},
+            {x: 2915, y: 420, w: 65, h: 428, invisible: true}
         ],
         lights: [],
         shadows: [],
