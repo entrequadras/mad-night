@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.19 - Objetos Reduzidos e Barreira');
+console.log('Mad Night v1.9.20 - Barreiras e Flicker Original');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.19 - Objetos Reduzidos e Barreira'
+    version: 'v1.9.20 - Barreiras e Flicker Original'
 };
 
 // Player
@@ -71,9 +71,10 @@ const assets = {
     grama001: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama002: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama003: { img: new Image(), loaded: false, width: 120, height: 120 },
-    banco01: { img: new Image(), loaded: false, width: 28, height: 28 },
-    banco02: { img: new Image(), loaded: false, width: 28, height: 28 },
-    caixadeluz: { img: new Image(), loaded: false, width: 28, height: 28 }
+    grama004: { img: new Image(), loaded: false, width: 120, height: 120 },
+    banco01: { img: new Image(), loaded: false, width: 45, height: 45 },
+    banco02: { img: new Image(), loaded: false, width: 45, height: 45 },
+    caixadeluz: { img: new Image(), loaded: false, width: 45, height: 45 }
 };
 
 // Carregar assets
@@ -123,43 +124,39 @@ assets.banco02.img.onload = () => { assets.banco02.loaded = true; };
 assets.caixadeluz.img.src = 'assets/objects/caixadeluz.png';
 assets.caixadeluz.img.onload = () => { assets.caixadeluz.loaded = true; };
 
-// Sistema de flicker realista para postes (3 componentes)
+// Sistema de flicker para postes (versão original mais evidente)
 const flickerSystem = {
     lights: {},
     
     update: function(lightId) {
         if (!this.lights[lightId]) {
             this.lights[lightId] = {
-                baseIntensity: 1.0,
                 intensity: 1.0,
-                timeOffset: Math.random() * 10000,
-                lastFlicker: Date.now(),
-                flickerCooldown: Math.random() * 8000 + 4000
+                targetIntensity: 1.0,
+                flickering: false,
+                flickerTime: 0,
+                nextFlicker: Date.now() + Math.random() * 5000 + 3000
             };
         }
         
         const light = this.lights[lightId];
-        const now = Date.now() + light.timeOffset;
+        const now = Date.now();
         
-        const primaryWave = Math.sin(now * 0.0008) * 0.08;
-        const secondaryWave = Math.sin(now * 0.003) * 0.04;
+        if (!light.flickering && now > light.nextFlicker) {
+            light.flickering = true;
+            light.flickerTime = now + Math.random() * 500 + 200;
+            light.targetIntensity = 0.3 + Math.random() * 0.5;
+        }
         
-        let flicker = 0;
-        if (Date.now() - light.lastFlicker > light.flickerCooldown) {
-            if (Math.random() < 0.02) {
-                flicker = -0.3 - Math.random() * 0.2;
-                light.lastFlicker = Date.now();
-                light.flickerCooldown = Math.random() * 8000 + 4000;
+        if (light.flickering) {
+            if (now < light.flickerTime) {
+                light.intensity = light.targetIntensity + Math.sin(now * 0.05) * 0.2;
+            } else {
+                light.flickering = false;
+                light.intensity = 1.0;
+                light.nextFlicker = now + Math.random() * 8000 + 4000;
             }
         }
-        
-        if (flicker < 0) {
-            flicker += Math.sin(now * 0.1) * 0.1;
-        }
-        
-        light.intensity = Math.max(0.3, Math.min(1.0, 
-            light.baseIntensity + primaryWave + secondaryWave + flicker
-        ));
         
         return light.intensity;
     }
@@ -194,6 +191,7 @@ const maps = [
         enemies: [],
         tiles: generateGrassTiles(1920, 1080, 120),
         trees: [
+            // Árvores do mapa original
             {type: 'arvore001', x: 300, y: 150},
             {type: 'arvore002', x: 1400, y: 120},
             {type: 'arvore003', x: 150, y: 700},
@@ -208,17 +206,27 @@ const maps = [
             {type: 'arvore003', x: 280, y: 780},
             {type: 'arvore004', x: 1480, y: 830},
             {type: 'arvore001', x: 1550, y: 850},
-            // Barreira de árvores no lado direito
+            
+            // Barreira de árvores no lado esquerdo
+            {type: 'arvore002', x: -80, y: -30},
+            {type: 'arvore001', x: -60, y: 120},
+            {type: 'arvore003', x: -90, y: 270},
+            {type: 'arvore004', x: -70, y: 400},
+            {type: 'arvorebloco001', x: -120, y: 550},
+            {type: 'arvore002', x: -85, y: 730},
+            {type: 'arvore001', x: -65, y: 880},
+            {type: 'arvore003', x: -95, y: 1000},
+            
+            // Barreira de árvores no lado direito (com buraco para passagem)
             {type: 'arvore001', x: 1820, y: -50},
             {type: 'arvore002', x: 1850, y: 100},
             {type: 'arvore003', x: 1830, y: 250},
             {type: 'arvore004', x: 1860, y: 380},
-            {type: 'arvorebloco001', x: 1790, y: 470},
-            // Espaço para passagem (terço inferior)
-            {type: 'arvore001', x: 1840, y: 650},
-            {type: 'arvore002', x: 1810, y: 780},
-            {type: 'arvore003', x: 1870, y: 900},
-            {type: 'arvore004', x: 1820, y: 1020}
+            // BURACO - sem árvores entre Y: 490-650 (160 pixels de espaço)
+            {type: 'arvore001', x: 1840, y: 720},
+            {type: 'arvore002', x: 1810, y: 850},
+            {type: 'arvore003', x: 1870, y: 970},
+            {type: 'arvore004', x: 1820, y: 1090}
         ],
         streetLights: [
             {type: 'poste000', x: 500, y: 200, rotation: 0, lightRadius: 100, id: 'post1'},
@@ -1641,11 +1649,11 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.19 - Objetos Reduzidos e Barreira 🎮');
-console.log('📏 Objetos reduzidos pela metade (28x28)');
-console.log('🔄 banco02 sem rotação (orientação correta)');
-console.log('🌳 Barreira de árvores no lado direito');
-console.log('🚪 Passagem única no terço inferior');
-console.log('✅ Arquivo completo e funcional!');
+console.log('🎮 Mad Night v1.9.20 - Barreiras e Flicker Original 🎮');
+console.log('🌳 Barreira de árvores no lado esquerdo');
+console.log('🚪 Buraco de 230px para passagem (Y: 490-720)');
+console.log('💡 Flicker original restaurado (mais evidente)');
+console.log('📏 Objetos mantidos em 28x28');
+console.log('✅ Maconhão finalizado!');
 
 // FIM DO ARQUIVO
