@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.35 - Paredes Ajustadas');
+console.log('Mad Night v1.9.36 - Lógica Invertida');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.35 - Paredes Ajustadas',
+    version: 'v1.9.36 - Lógica Invertida',
     debugMode: false
 };
 
@@ -270,15 +270,37 @@ const maps = [
         streetLights: [],
         objects: [],
         walls: [
-            // Parede superior (antes do player)
-            {x: 0, y: 0, w: 200, h: 90, invisible: true},
-            {x: 250, y: 0, w: 2750, h: 80, invisible: true},
+            // Borda superior
+            {x: 0, y: 0, w: 3000, h: 80, invisible: true},
             
-            // Parede esquerda
-            {x: 0, y: 90, w: 190, h: 778, invisible: true},
+            // Borda esquerda
+            {x: 0, y: 0, w: 20, h: 868, invisible: true},
             
-            // Bloqueio antes da entrada do túnel
-            {x: 190, y: 90, w: 155, h: 100, invisible: true},
+            // Borda direita
+            {x: 2980, y: 0, w: 20, h: 868, invisible: true},
+            
+            // Borda inferior
+            {x: 0, y: 848, w: 3000, h: 20, invisible: true},
+            
+            // Bloquear área acima de Y=420 (exceto entrada e saída do túnel)
+            {x: 20, y: 420, w: 325, h: 428, invisible: true},  // Antes da entrada
+            {x: 415, y: 420, w: 2430, h: 428, invisible: true}, // Depois da entrada até antes da saída
+            {x: 2915, y: 420, w: 65, h: 428, invisible: true}, // Depois da saída
+            
+            // Criar o túnel (bloquear acima e abaixo do caminho)
+            {x: 345, y: 80, w: 70, h: 110, invisible: true},   // Bloqueia acima da entrada
+            {x: 288, y: 80, w: 57, h: 457, invisible: true},   // Lateral esquerda do túnel
+            {x: 2913, y: 80, w: 67, h: 457, invisible: true},  // Lateral direita do túnel
+            {x: 345, y: 730, w: 2568, h: 118, invisible: true} // Bloqueia abaixo do túnel
+        ],
+        lights: [],
+        shadows: [],
+        playerStart: {x: 220, y: 100},
+        playerStartEscape: {x: 2850, y: 190},
+        exit: {x: 2950, y: 80, w: 50, h: 100},
+        direction: 'right',
+        hasLayers: true
+    }, 100, invisible: true},
             {x: 415, y: 90, w: 585, h: 100, invisible: true},
             
             // Parede inferior (limita Y em 420)
@@ -1837,11 +1859,11 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.35 - Paredes Ajustadas 🎮');
-console.log('✅ Player spawn movido para (220, 100)');
-console.log('✅ Paredes reconfiguradas para liberar caminho');
-console.log('🔍 Mantenha D pressionado para ver debug');
-console.log('🛣️ Caminho: 220,100 → 380,190 → túnel → saída');
-console.log('🎯 TESTE AGORA COM DEBUG ATIVO!');
+console.log('🎮 Mad Night v1.9.36 - Lógica Invertida 🎮');
+console.log('✅ Paredes apenas nas BORDAS e BLOQUEIOS');
+console.log('✅ Caminho do player LIVRE');
+console.log('🛤️ Área jogável: Y entre 80-420 (fora do túnel)');
+console.log('🚇 Entrada túnel: X=345-415, Y=190-537');
+console.log('🎯 TESTE AGORA - CAMINHO DEVE ESTAR LIVRE!');
 
 // FIM DO ARQUIVO
