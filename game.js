@@ -123,8 +123,11 @@ const assetManager = {
                         src = `assets/objects/${assetName}.png`;
                         break;
                     case 'buildings':
-                        src = `assets/buildings/${assetName.replace('campoTraves', 'campo_de_futebol_traves')}.png`;
-                        if (assetName === 'campo') src = 'assets/buildings/campo_de_futebol.png';
+                        if (assetName === 'campoTraves') {
+                            src = 'assets/buildings/campo_de_futebol_traves.png';
+                        } else if (assetName === 'campo') {
+                            src = 'assets/buildings/campo_de_futebol.png';
+                        }
                         break;
                 }
                 
