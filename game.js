@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.22 - Caixa de Luz e Sombra');
+console.log('Mad Night v1.9.23 - Correções Campo e Tile');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.22 - Caixa de Luz e Sombra'
+    version: 'v1.9.23 - Correções Campo e Tile'
 };
 
 // Player
@@ -232,7 +232,6 @@ const maps = [
             {type: 'arvore004', x: 1820, y: 1090}
         ],
         streetLights: [
-            {type: 'poste001', x: 960, y: 300, rotation: 0, lightRadius: 100, id: 'post2'},
             {type: 'poste000', x: 960, y: 780, rotation: 0, lightRadius: 100, id: 'post3'},
             {type: 'poste001', x: 1400, y: 540, rotation: 0, lightRadius: 100, id: 'post4'}
         ],
@@ -1264,34 +1263,38 @@ function renderObjects(map, visibleArea) {
     });
 }
 
-function renderShadows(map, visibleArea) {
-    // Sombra especial no campo de futebol (apenas no Maconhão)
+function renderFieldShadow(map) {
+    // Sombra do campo apenas no Maconhão
     if (gameState.currentMap === 0) {
         const campoX = (map.width - 800) / 2;
         const campoY = (map.height - 462) / 2;
         const centerX = campoX + 400;
         const centerY = campoY + 231;
         
-        // Criar gradiente radial grande para sombra suave
+        // Gradiente maior e mais suave
         const gradient = ctx.createRadialGradient(
             centerX, centerY, 0,
-            centerX, centerY, 300
+            centerX, centerY, 450  // Aumentado de 300 para 450
         );
         gradient.addColorStop(0, 'rgba(0, 0, 0, 0.5)');    // Centro 50% opacidade
-        gradient.addColorStop(0.3, 'rgba(0, 0, 0, 0.4)');  
+        gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.45)');  
+        gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.35)');  
         gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.2)');  
+        gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.1)');  
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');      // Borda transparente
         
         ctx.fillStyle = gradient;
         ctx.fillRect(
-            centerX - 300,
-            centerY - 300,
-            600,
-            600
+            centerX - 450,
+            centerY - 450,
+            900,
+            900
         );
     }
-    
-    // Sombras das árvores
+}
+
+function renderShadows(map, visibleArea) {
+    // Apenas sombras das árvores
     if (map.trees) {
         map.trees.forEach(tree => {
             const treeAsset = assets[tree.type];
@@ -1563,6 +1566,7 @@ function draw() {
         renderProjectiles(visibleArea);
         renderEnemies(visibleArea);
         renderPlayer();
+        renderFieldShadow(map);  // Sombra do campo DEPOIS do player
         renderStreetLights(map, visibleArea);
         renderTrees(map, visibleArea, 'top');
         
@@ -1676,11 +1680,11 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.22 - Caixa de Luz e Sombra 🎮');
-console.log('⚡ Apenas caixa de luz próxima à saída (1750, 560)');
-console.log('🌑 Sombra grande no centro do campo de futebol');
-console.log('🎨 Gradiente suave com 50% opacidade no centro');
-console.log('🌿 5 tipos de tile de grama');
-console.log('✅ Maconhão atmosférico e finalizado!');
+console.log('🎮 Mad Night v1.9.23 - Correções Campo e Tile 🎮');
+console.log('🚫 Removido poste do centro do campo (agora só 2)');
+console.log('🌑 Sombra do campo maior (450px raio)');
+console.log('👤 Sombra renderizada ACIMA do personagem');
+console.log('🌿 Verificar grama004.png em assets/tiles/');
+console.log('✅ Se o tile existir, funcionará corretamente!');
 
 // FIM DO ARQUIVO
