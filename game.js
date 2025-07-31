@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.31 - Limpeza Focada');
+console.log('Mad Night v1.9.32 - Eixão com Túnel');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.31 - Limpeza Focada'
+    version: 'v1.9.32 - Eixão com Túnel'
 };
 
 // Player
@@ -73,7 +73,10 @@ const assets = {
     grama002: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama003: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama004: { img: new Image(), loaded: false, width: 120, height: 120 },
-    caixadeluz: { img: new Image(), loaded: false, width: 45, height: 45 }
+    caixadeluz: { img: new Image(), loaded: false, width: 45, height: 45 },
+    // Assets do Eixão
+    eixaoCamada1: { img: new Image(), loaded: false, width: 3000, height: 868 },
+    eixaoCamada2: { img: new Image(), loaded: false, width: 3000, height: 868 }
 };
 
 // Carregar assets
@@ -123,6 +126,13 @@ assets.grama004.img.onload = () => { assets.grama004.loaded = true; };
 // Carregar objetos
 assets.caixadeluz.img.src = 'assets/objects/caixadeluz.png';
 assets.caixadeluz.img.onload = () => { assets.caixadeluz.loaded = true; };
+
+// Carregar assets do Eixão
+assets.eixaoCamada1.img.src = 'assets/floors/eixao_da_morte_camada1.png';
+assets.eixaoCamada1.img.onload = () => { assets.eixaoCamada1.loaded = true; };
+
+assets.eixaoCamada2.img.src = 'assets/floors/eixao_da_morte_camada2.png';
+assets.eixaoCamada2.img.onload = () => { assets.eixaoCamada2.loaded = true; };
 
 // Sistema de flicker para postes
 const flickerSystem = {
@@ -252,32 +262,38 @@ const maps = [
     {
         name: "Eixão da Morte",
         subtitle: "Túnel sob as pistas",
-        width: 800,
-        height: 600,
+        width: 3000,
+        height: 868,
         enemies: [],
         trees: [],
         streetLights: [],
         objects: [],
         walls: [
-            {x: 0, y: 0, w: 800, h: 100},
-            {x: 0, y: 500, w: 800, h: 100},
-            {x: 200, y: 100, w: 60, h: 100},
-            {x: 200, y: 400, w: 60, h: 100},
-            {x: 400, y: 100, w: 60, h: 100},
-            {x: 400, y: 400, w: 60, h: 100},
-            {x: 600, y: 100, w: 60, h: 100},
-            {x: 600, y: 400, w: 60, h: 100},
-            {x: 260, y: 150, w: 140, h: 20},
-            {x: 260, y: 430, w: 140, h: 20},
-            {x: 460, y: 150, w: 140, h: 20},
-            {x: 460, y: 430, w: 140, h: 20}
+            // Parede superior
+            {x: 0, y: 0, w: 3000, h: 90, invisible: true},
+            
+            // Paredes do túnel - entrada lado esquerdo
+            {x: 0, y: 90, w: 345, h: 330, invisible: true},
+            {x: 415, y: 90, w: 585, h: 330, invisible: true},
+            
+            // Paredes laterais do túnel
+            {x: 0, y: 420, w: 288, h: 300, invisible: true},
+            {x: 288, y: 537, w: 2625, h: 193, invisible: true},
+            
+            // Paredes do túnel - saída lado direito
+            {x: 2000, y: 90, w: 845, h: 330, invisible: true},
+            {x: 2913, y: 420, w: 87, h: 300, invisible: true},
+            
+            // Parede após saída
+            {x: 2950, y: 80, w: 50, h: 340, invisible: true}
         ],
         lights: [],
         shadows: [],
-        playerStart: {x: 100, y: 300},
-        playerStartEscape: {x: 700, y: 300},
-        exit: {x: 720, y: 250, w: 50, h: 100},
-        direction: 'right'
+        playerStart: {x: 200, y: 90},
+        playerStartEscape: {x: 2850, y: 190},
+        exit: {x: 2950, y: 80, w: 50, h: 100},
+        direction: 'right',
+        hasLayers: true
     },
     {
         name: "Fronteira com o Komando Satânico",
@@ -1217,6 +1233,18 @@ function renderTiles(map, visibleArea) {
     });
 }
 
+function renderEixaoLayer1(map, visibleArea) {
+    if (gameState.currentMap === 1 && assets.eixaoCamada1.loaded) {
+        ctx.drawImage(assets.eixaoCamada1.img, 0, 0);
+    }
+}
+
+function renderEixaoLayer2(map, visibleArea) {
+    if (gameState.currentMap === 1 && assets.eixaoCamada2.loaded) {
+        ctx.drawImage(assets.eixaoCamada2.img, 0, 0);
+    }
+}
+
 function renderCampo(map) {
     if (gameState.currentMap === 0 && assets.campo.loaded) {
         const campoX = (map.width - 800) / 2;
@@ -1638,7 +1666,13 @@ function draw() {
         };
         
         // Renderizar elementos do mapa
-        renderTiles(map, visibleArea);
+        if (map.hasLayers && gameState.currentMap === 1) {
+            // Camada 1 - Fundo (piso do Eixão)
+            renderEixaoLayer1(map, visibleArea);
+        } else {
+            renderTiles(map, visibleArea);
+        }
+        
         renderCampo(map);
         renderShadows(map, visibleArea);
         renderTrees(map, visibleArea, 'bottom');
@@ -1648,6 +1682,12 @@ function draw() {
         renderProjectiles(visibleArea);
         renderEnemies(visibleArea);
         renderPlayer();
+        
+        // Camada 2 - Por cima do player (túnel do Eixão)
+        if (map.hasLayers && gameState.currentMap === 1) {
+            renderEixaoLayer2(map, visibleArea);
+        }
+        
         renderCampoTraves();  // Traves DEPOIS do player
         renderFieldShadow(map);
         renderStreetLights(map, visibleArea);
@@ -1756,13 +1796,13 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.31 - Limpeza Focada 🎮');
-console.log('✅ Código limpo e organizado');
-console.log('✅ Removido: banco01, banco02, isInLight');
-console.log('✅ Tiles de grama apenas no mapa 1');
-console.log('✅ Sistema de áudio com melhor tratamento de erro');
-console.log('✅ Variáveis de loading consolidadas');
-console.log('✅ Renderização de tiles otimizada');
-console.log('🎯 PRONTO PARA PRÓXIMAS FEATURES!');
+console.log('🎮 Mad Night v1.9.32 - Eixão com Túnel 🎮');
+console.log('🚇 Sistema de duas camadas implementado');
+console.log('🛣️ Mapa do Eixão: 3000x868 pixels');
+console.log('🎨 Camada 1: Piso (abaixo do player)');
+console.log('🎨 Camada 2: Túnel (acima do player)');
+console.log('🚗 Caminho do túnel configurado com colisões');
+console.log('✅ Player some embaixo do túnel!');
+console.log('🎯 PRONTO PARA TESTAR O TÚNEL!');
 
 // FIM DO ARQUIVO
