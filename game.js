@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.11 - Filtro Simplificado');
+console.log('Mad Night v1.9.12 - Debug Mode');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.11 - Filtro Simplificado'
+    version: 'v1.9.12 - Debug Mode'
 };
 
 // Player
