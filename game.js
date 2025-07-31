@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.23 - Correções Campo e Tile');
+console.log('Mad Night v1.9.26 - Traves do Campo');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.23 - Correções Campo e Tile'
+    version: 'v1.9.26 - Traves do Campo'
 };
 
 // Player
@@ -60,6 +60,7 @@ const player = {
 // Sistema de assets
 const assets = {
     campo: { img: new Image(), loaded: false },
+    campoTraves: { img: new Image(), loaded: false },
     arvore001: { img: new Image(), loaded: false, width: 180, height: 194 },
     arvore002: { img: new Image(), loaded: false, width: 194, height: 200 },
     arvore003: { img: new Image(), loaded: false, width: 162, height: 200 },
@@ -80,6 +81,9 @@ const assets = {
 // Carregar assets
 assets.campo.img.src = 'assets/buildings/campo_de_futebol.png';
 assets.campo.img.onload = () => { assets.campo.loaded = true; };
+
+assets.campoTraves.img.src = 'assets/buildings/campo_de_futebol_traves.png';
+assets.campoTraves.img.onload = () => { assets.campoTraves.loaded = true; };
 
 assets.arvore001.img.src = 'assets/scenary/arvore001.png';
 assets.arvore001.img.onload = () => { assets.arvore001.loaded = true; };
@@ -239,10 +243,11 @@ const maps = [
             {type: 'caixadeluz', x: 1750, y: 560, rotation: 0}
         ],
         walls: [
-            {x: 0, y: 0, w: 1920, h: 20},
-            {x: 0, y: 1060, w: 1920, h: 20},
-            {x: 0, y: 20, w: 20, h: 1040},
-            {x: 1900, y: 20, w: 20, h: 1040}
+            // Paredes invisíveis para colisão apenas
+            {x: 0, y: 0, w: 1920, h: 20, invisible: true},
+            {x: 0, y: 1060, w: 1920, h: 20, invisible: true},
+            {x: 0, y: 20, w: 20, h: 1040, invisible: true},
+            {x: 1900, y: 20, w: 20, h: 1040, invisible: true}
         ],
         lights: [],
         shadows: [],
@@ -1206,6 +1211,14 @@ function renderCampo(map) {
     }
 }
 
+function renderCampoTraves() {
+    if (gameState.currentMap === 0 && assets.campoTraves.loaded) {
+        const campoX = (maps[0].width - 800) / 2;
+        const campoY = (maps[0].height - 462) / 2;
+        ctx.drawImage(assets.campoTraves.img, campoX, campoY);
+    }
+}
+
 function renderTrees(map, visibleArea, layer = 'bottom') {
     if (!map.trees) return;
     
@@ -1274,14 +1287,14 @@ function renderFieldShadow(map) {
         // Gradiente maior e mais suave
         const gradient = ctx.createRadialGradient(
             centerX, centerY, 0,
-            centerX, centerY, 450  // Aumentado de 300 para 450
+            centerX, centerY, 450
         );
-        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.5)');    // Centro 50% opacidade
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
         gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.45)');  
         gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.35)');  
         gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.2)');  
         gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.1)');  
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');      // Borda transparente
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
         
         ctx.fillStyle = gradient;
         ctx.fillRect(
@@ -1290,6 +1303,51 @@ function renderFieldShadow(map) {
             900,
             900
         );
+        
+        // Sombras nas quatro extremidades
+        // Canto superior esquerdo
+        const cornerGradient1 = ctx.createRadialGradient(
+            0, 0, 0,
+            0, 0, 400
+        );
+        cornerGradient1.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+        cornerGradient1.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+        cornerGradient1.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = cornerGradient1;
+        ctx.fillRect(0, 0, 400, 400);
+        
+        // Canto superior direito
+        const cornerGradient2 = ctx.createRadialGradient(
+            map.width, 0, 0,
+            map.width, 0, 400
+        );
+        cornerGradient2.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+        cornerGradient2.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+        cornerGradient2.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = cornerGradient2;
+        ctx.fillRect(map.width - 400, 0, 400, 400);
+        
+        // Canto inferior esquerdo
+        const cornerGradient3 = ctx.createRadialGradient(
+            0, map.height, 0,
+            0, map.height, 400
+        );
+        cornerGradient3.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+        cornerGradient3.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+        cornerGradient3.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = cornerGradient3;
+        ctx.fillRect(0, map.height - 400, 400, 400);
+        
+        // Canto inferior direito
+        const cornerGradient4 = ctx.createRadialGradient(
+            map.width, map.height, 0,
+            map.width, map.height, 400
+        );
+        cornerGradient4.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+        cornerGradient4.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+        cornerGradient4.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = cornerGradient4;
+        ctx.fillRect(map.width - 400, map.height - 400, 400, 400);
     }
 }
 
@@ -1333,7 +1391,9 @@ function renderShadows(map, visibleArea) {
 function renderWalls(map, visibleArea) {
     ctx.fillStyle = '#333';
     map.walls.forEach(wall => {
-        if (wall.x + wall.w > visibleArea.left && 
+        // Só renderizar se não for invisível
+        if (!wall.invisible && 
+            wall.x + wall.w > visibleArea.left && 
             wall.x < visibleArea.right &&
             wall.y + wall.h > visibleArea.top && 
             wall.y < visibleArea.bottom) {
@@ -1566,7 +1626,8 @@ function draw() {
         renderProjectiles(visibleArea);
         renderEnemies(visibleArea);
         renderPlayer();
-        renderFieldShadow(map);  // Sombra do campo DEPOIS do player
+        renderCampoTraves();  // Traves DEPOIS do player
+        renderFieldShadow(map);
         renderStreetLights(map, visibleArea);
         renderTrees(map, visibleArea, 'top');
         
@@ -1680,11 +1741,11 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.23 - Correções Campo e Tile 🎮');
-console.log('🚫 Removido poste do centro do campo (agora só 2)');
-console.log('🌑 Sombra do campo maior (450px raio)');
-console.log('👤 Sombra renderizada ACIMA do personagem');
-console.log('🌿 Verificar grama004.png em assets/tiles/');
-console.log('✅ Se o tile existir, funcionará corretamente!');
+console.log('🎮 Mad Night v1.9.26 - Traves do Campo 🎮');
+console.log('⚽ Traves renderizadas ACIMA do personagem');
+console.log('🏃 Player passa por baixo das traves');
+console.log('🎨 Camadas: campo → player → traves → sombra');
+console.log('🌑 Todas as sombras e atmosfera mantidas');
+console.log('✅ MACONHÃO 100% COMPLETO!');
 
 // FIM DO ARQUIVO
