@@ -111,24 +111,18 @@ const assetManager = {
                 
                 // Definir source baseado na categoria
                 let src = '';
-                switch(category) {
-                    case 'tiles':
-                        src = `assets/tiles/${assetName}.png`;
-                        break;
-                    case 'trees':
-                    case 'lights':
-                        src = `assets/scenary/${assetName}.png`;
-                        break;
-                    case 'objects':
-                        src = `assets/objects/${assetName}.png`;
-                        break;
-                    case 'buildings':
-                        if (assetName === 'campoTraves') {
-                            src = 'assets/buildings/campo_de_futebol_traves.png';
-                        } else if (assetName === 'campo') {
-                            src = 'assets/buildings/campo_de_futebol.png';
-                        }
-                        break;
+                if (category === 'tiles') {
+                    src = 'assets/tiles/' + assetName + '.png';
+                } else if (category === 'trees' || category === 'lights') {
+                    src = 'assets/scenary/' + assetName + '.png';
+                } else if (category === 'objects') {
+                    src = 'assets/objects/' + assetName + '.png';
+                } else if (category === 'buildings') {
+                    if (assetName === 'campoTraves') {
+                        src = 'assets/buildings/campo_de_futebol_traves.png';
+                    } else if (assetName === 'campo') {
+                        src = 'assets/buildings/campo_de_futebol.png';
+                    }
                 }
                 
                 assets[assetName].img.src = src;
