@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.20 - Barreiras e Flicker Original');
+console.log('Mad Night v1.9.21 - Ajustes Finais Maconhão');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.20 - Barreiras e Flicker Original'
+    version: 'v1.9.21 - Ajustes Finais Maconhão'
 };
 
 // Player
@@ -114,6 +114,9 @@ assets.grama002.img.onload = () => { assets.grama002.loaded = true; };
 assets.grama003.img.src = 'assets/tiles/grama003.png';
 assets.grama003.img.onload = () => { assets.grama003.loaded = true; };
 
+assets.grama004.img.src = 'assets/tiles/grama004.png';
+assets.grama004.img.onload = () => { assets.grama004.loaded = true; };
+
 // Carregar objetos
 assets.banco01.img.src = 'assets/objects/banco01.png';
 assets.banco01.img.onload = () => { assets.banco01.loaded = true; };
@@ -165,7 +168,7 @@ const flickerSystem = {
 // Função para gerar tiles de grama
 function generateGrassTiles(mapWidth, mapHeight, tileSize) {
     const tiles = [];
-    const types = ['grama000', 'grama001', 'grama002', 'grama003'];
+    const types = ['grama000', 'grama001', 'grama002', 'grama003', 'grama004'];
     
     for (let y = 0; y < mapHeight; y += tileSize) {
         for (let x = 0; x < mapWidth; x += tileSize) {
@@ -229,7 +232,6 @@ const maps = [
             {type: 'arvore004', x: 1820, y: 1090}
         ],
         streetLights: [
-            {type: 'poste000', x: 500, y: 200, rotation: 0, lightRadius: 100, id: 'post1'},
             {type: 'poste001', x: 960, y: 300, rotation: 0, lightRadius: 100, id: 'post2'},
             {type: 'poste000', x: 960, y: 780, rotation: 0, lightRadius: 100, id: 'post3'},
             {type: 'poste001', x: 1400, y: 540, rotation: 0, lightRadius: 100, id: 'post4'}
@@ -1649,11 +1651,11 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.20 - Barreiras e Flicker Original 🎮');
-console.log('🌳 Barreira de árvores no lado esquerdo');
-console.log('🚪 Buraco de 230px para passagem (Y: 490-720)');
-console.log('💡 Flicker original restaurado (mais evidente)');
-console.log('📏 Objetos mantidos em 28x28');
-console.log('✅ Maconhão finalizado!');
+console.log('🎮 Mad Night v1.9.21 - Ajustes Finais Maconhão 🎮');
+console.log('🌿 Novo tile grama004 adicionado');
+console.log('📏 Objetos em 45x45 (80% do original)');
+console.log('🚫 Removido poste do meio do campo');
+console.log('💡 3 postes restantes com flicker');
+console.log('✅ Maconhão 100% finalizado!');
 
 // FIM DO ARQUIVO
