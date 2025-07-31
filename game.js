@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.34 - Debug Mode');
+console.log('Mad Night v1.9.35 - Paredes Ajustadas');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.34 - Debug Mode',
+    version: 'v1.9.35 - Paredes Ajustadas',
     debugMode: false
 };
 
@@ -270,37 +270,36 @@ const maps = [
         streetLights: [],
         objects: [],
         walls: [
-            // Parede superior
-            {x: 0, y: 0, w: 3000, h: 80, invisible: true},
+            // Parede superior (antes do player)
+            {x: 0, y: 0, w: 200, h: 90, invisible: true},
+            {x: 250, y: 0, w: 2750, h: 80, invisible: true},
             
-            // Parede esquerda antes da entrada
-            {x: 0, y: 80, w: 190, h: 340, invisible: true},
+            // Parede esquerda
+            {x: 0, y: 90, w: 190, h: 778, invisible: true},
             
-            // Parede entre entrada e caminho principal
-            {x: 190, y: 80, w: 155, h: 110, invisible: true},
-            {x: 415, y: 80, w: 585, h: 110, invisible: true},
+            // Bloqueio antes da entrada do túnel
+            {x: 190, y: 90, w: 155, h: 100, invisible: true},
+            {x: 415, y: 90, w: 585, h: 100, invisible: true},
             
-            // Parede inferior antes da entrada
-            {x: 190, y: 420, w: 810, h: 448, invisible: true},
+            // Parede inferior (limita Y em 420)
+            {x: 190, y: 420, w: 155, h: 448, invisible: true},
+            {x: 415, y: 420, w: 2430, h: 448, invisible: true},
             
-            // Paredes do túnel - lado esquerdo
-            {x: 0, y: 420, w: 190, h: 448, invisible: true},
+            // Dentro do túnel - parede superior
+            {x: 345, y: 190, w: 2500, h: 230, invisible: true},
             
-            // Parede inferior do túnel
+            // Dentro do túnel - parede inferior
             {x: 288, y: 730, w: 2625, h: 138, invisible: true},
             
-            // Parede superior dentro do túnel
-            {x: 288, y: 190, w: 2557, h: 230, invisible: true},
+            // Bloqueio na saída
+            {x: 2913, y: 537, w: 87, h: 331, invisible: true},
             
-            // Paredes do túnel - saída lado direito
-            {x: 2913, y: 420, w: 87, h: 448, invisible: true},
-            
-            // Parede superior após saída
-            {x: 2845, y: 80, w: 155, h: 110, invisible: true}
+            // Parede direita
+            {x: 2950, y: 180, w: 50, h: 688, invisible: true}
         ],
         lights: [],
         shadows: [],
-        playerStart: {x: 200, y: 90},
+        playerStart: {x: 220, y: 100},
         playerStartEscape: {x: 2850, y: 190},
         exit: {x: 2950, y: 80, w: 50, h: 100},
         direction: 'right',
@@ -1838,11 +1837,11 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.34 - Debug Mode 🎮');
-console.log('🔍 Pressione D para ativar/desativar DEBUG');
-console.log('🟥 Paredes invisíveis aparecem em vermelho');
-console.log('📍 Posição do player mostrada na tela');
-console.log('📏 Dimensões das paredes visíveis');
-console.log('🎯 USE O DEBUG PARA VER O PROBLEMA!');
+console.log('🎮 Mad Night v1.9.35 - Paredes Ajustadas 🎮');
+console.log('✅ Player spawn movido para (220, 100)');
+console.log('✅ Paredes reconfiguradas para liberar caminho');
+console.log('🔍 Mantenha D pressionado para ver debug');
+console.log('🛣️ Caminho: 220,100 → 380,190 → túnel → saída');
+console.log('🎯 TESTE AGORA COM DEBUG ATIVO!');
 
 // FIM DO ARQUIVO
