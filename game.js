@@ -17,163 +17,6 @@ const camera = {
 canvas.width = camera.width * camera.zoom;
 canvas.height = camera.height * camera.zoom;
 
-// Sistema de gerenciamento de assets
-const assetManager = {
-    loadingProgress: 0,
-    totalAssets: 0,
-    loadedAssets: 0,
-    isLoading: false,
-    
-    // Define quais assets cada mapa usa
-    mapAssets: {
-        0: { // Maconhão
-            tiles: ['grama000', 'grama001', 'grama002', 'grama003', 'grama004'],
-            trees: ['arvore001', 'arvore002', 'arvore003', 'arvore004', 'arvorebloco001'],
-            objects: ['caixadeluz', 'moitinha'],
-            buildings: ['campo', 'campoTraves'],
-            lights: ['poste000', 'poste001']
-        },
-        1: { // Eixão da Morte
-            tiles: [],
-            trees: [],
-            objects: [],
-            buildings: [],
-            lights: []
-        },
-        2: { // Fronteira com KS
-            tiles: [],
-            trees: [],
-            objects: [],
-            buildings: [],
-            lights: []
-        },
-        3: { // Na área da KS
-            tiles: [],
-            trees: [],
-            objects: [],
-            buildings: [],
-            lights: []
-        },
-        4: { // Entre Prédios
-            tiles: [],
-            trees: [],
-            objects: [],
-            buildings: [],
-            lights: []
-        },
-        5: { // Ninho dos Ratos
-            tiles: [],
-            trees: [],
-            objects: [],
-            buildings: [],
-            lights: []
-        }
-    },
-    
-    // Carrega assets específicos do mapa
-    loadMapAssets: function(mapIndex, callback) {
-        this.isLoading = true;
-        this.loadingProgress = 0;
-        this.loadedAssets = 0;
-        
-        const mapConfig = this.mapAssets[mapIndex];
-        if (!mapConfig) {
-            callback();
-            return;
-        }
-        
-        // Contar total de assets
-        this.totalAssets = 0;
-        for (let category in mapConfig) {
-            this.totalAssets += mapConfig[category].length;
-        }
-        
-        // Se não há assets, prosseguir
-        if (this.totalAssets === 0) {
-            this.isLoading = false;
-            callback();
-            return;
-        }
-        
-        // Carregar cada categoria
-        const loadAsset = (assetName, category) => {
-            if (!assets[assetName].loaded) {
-                assets[assetName].img.onload = () => {
-                    assets[assetName].loaded = true;
-                    this.loadedAssets++;
-                    this.loadingProgress = (this.loadedAssets / this.totalAssets) * 100;
-                    
-                    if (this.loadedAssets >= this.totalAssets) {
-                        this.isLoading = false;
-                        callback();
-                    }
-                };
-                
-                // Definir source baseado na categoria
-                let src = '';
-                if (category === 'tiles') {
-                    src = 'assets/tiles/' + assetName + '.png';
-                } else if (category === 'trees' || category === 'lights') {
-                    src = 'assets/scenary/' + assetName + '.png';
-                } else if (category === 'objects') {
-                    src = 'assets/objects/' + assetName + '.png';
-                } else if (category === 'buildings') {
-                    if (assetName === 'campoTraves') {
-                        src = 'assets/buildings/campo_de_futebol_traves.png';
-                    } else if (assetName === 'campo') {
-                        src = 'assets/buildings/campo_de_futebol.png';
-                    }
-                }
-                
-                assets[assetName].img.src = src;
-            } else {
-                this.loadedAssets++;
-                this.loadingProgress = (this.loadedAssets / this.totalAssets) * 100;
-                
-                if (this.loadedAssets >= this.totalAssets) {
-                    this.isLoading = false;
-                    callback();
-                }
-            }
-        };
-        
-        // Carregar todos os assets
-        for (let category in mapConfig) {
-            mapConfig[category].forEach(assetName => {
-                loadAsset(assetName, category);
-            });
-        }
-    },
-    
-    // Descarrega assets não utilizados
-    unloadMapAssets: function(mapIndex) {
-        const mapConfig = this.mapAssets[mapIndex];
-        if (!mapConfig) return;
-        
-        // Verificar quais assets não são mais necessários
-        const currentMapConfig = this.mapAssets[gameState.currentMap];
-        
-        for (let category in mapConfig) {
-            mapConfig[category].forEach(assetName => {
-                // Se o asset não é usado no mapa atual
-                let isUsedInCurrentMap = false;
-                for (let cat in currentMapConfig) {
-                    if (currentMapConfig[cat].includes(assetName)) {
-                        isUsedInCurrentMap = true;
-                        break;
-                    }
-                }
-                
-                // Descarregar se não for mais necessário
-                if (!isUsedInCurrentMap && assets[assetName]) {
-                    assets[assetName].img.src = '';
-                    assets[assetName].loaded = false;
-                }
-            });
-        }
-    }
-};
-
 // Estado do jogo
 const gameState = {
     deaths: 0,
@@ -222,19 +65,6 @@ const assets = {
     arvore002: { img: new Image(), loaded: false, width: 194, height: 200 },
     arvore003: { img: new Image(), loaded: false, width: 162, height: 200 },
     arvore004: { img: new Image(), loaded: false, width: 150, height: 190 },
-    arvorebloco001: { img: new Image(), loaded: false, width: 354, height: 186 },
-    poste000: { img: new Image(), loaded: false, width: 40, height: 120 },
-    poste001: { img: new Image(), loaded: false, width: 40, height: 120 },
-    grama000: { img: new Image(), loaded: false, width: 120, height: 120 },
-    grama001: { img: new Image(), loaded: false, width: 120, height: 120 },
-    grama002: { img: new Image(), loaded: false, width: 120, height: 120 },
-    grama003: { img: new Image(), loaded: false, width: 120, height: 120 },
-    grama004: { img: new Image(), loaded: false, width: 120, height: 120 },
-    banco01: { img: new Image(), loaded: false, width: 45, height: 45 },
-    banco02: { img: new Image(), loaded: false, width: 45, height: 45 },
-    caixadeluz: { img: new Image(), loaded: false, width: 45, height: 45 },
-    moitinha: { img: new Image(), loaded: false, width: 27, height: 30 }
-}; false, width: 150, height: 190 },
     arvorebloco001: { img: new Image(), loaded: false, width: 354, height: 186 },
     poste000: { img: new Image(), loaded: false, width: 40, height: 120 },
     poste001: { img: new Image(), loaded: false, width: 40, height: 120 },
@@ -301,9 +131,6 @@ assets.banco02.img.onload = () => { assets.banco02.loaded = true; };
 
 assets.caixadeluz.img.src = 'assets/objects/caixadeluz.png';
 assets.caixadeluz.img.onload = () => { assets.caixadeluz.loaded = true; };
-
-assets.moitinha.img.src = 'assets/objects/moitinha.png';
-assets.moitinha.img.onload = () => { assets.moitinha.loaded = true; };
 
 assets.moitinha.img.src = 'assets/objects/moitinha.png';
 assets.moitinha.img.onload = () => { assets.moitinha.loaded = true; };
@@ -1080,61 +907,49 @@ function spawnEscapeEnemy() {
 }
 
 function loadMap(mapIndex, isEscape = false) {
-    const previousMap = gameState.currentMap;
-    gameState.currentMap = mapIndex;
+    const map = maps[mapIndex];
+    if (!map) return;
     
-    // Mostrar tela de loading
-    assetManager.loadMapAssets(mapIndex, () => {
-        // Após carregar os assets, continuar com o carregamento normal
-        const map = maps[mapIndex];
-        if (!map) return;
+    enemies.length = 0;
+    projectiles.length = 0;
+    
+    if (isEscape && map.playerStartEscape) {
+        player.x = map.playerStartEscape.x;
+        player.y = map.playerStartEscape.y;
+    } else {
+        player.x = map.playerStart.x;
+        player.y = map.playerStart.y;
+    }
+    
+    player.isDead = false;
+    player.isDashing = false;
+    
+    const enemyList = (isEscape && map.escapeEnemies) ? map.escapeEnemies : map.enemies;
+    
+    enemyList.forEach(enemyData => {
+        const validPos = findValidSpawnPosition(enemyData.x, enemyData.y, 46, 46);
+        const enemy = new Enemy(validPos.x, validPos.y, enemyData.type || 'faquinha');
         
-        enemies.length = 0;
-        projectiles.length = 0;
-        
-        if (isEscape && map.playerStartEscape) {
-            player.x = map.playerStartEscape.x;
-            player.y = map.playerStartEscape.y;
-        } else {
-            player.x = map.playerStart.x;
-            player.y = map.playerStart.y;
+        switch(enemy.type) {
+            case 'faquinha':
+                enemy.sprites = faquinhaSprites;
+                break;
+            case 'morcego':
+                enemy.sprites = morcegoSprites;
+                break;
+            case 'caveirinha':
+                enemy.sprites = caveirinhaSprites;
+                break;
+            case 'janis':
+                enemy.sprites = janisSprites;
+                break;
+            case 'chacal':
+                enemy.sprites = chacalSprites;
+                break;
         }
         
-        player.isDead = false;
-        player.isDashing = false;
-        
-        const enemyList = (isEscape && map.escapeEnemies) ? map.escapeEnemies : map.enemies;
-        
-        enemyList.forEach(enemyData => {
-            const validPos = findValidSpawnPosition(enemyData.x, enemyData.y, 46, 46);
-            const enemy = new Enemy(validPos.x, validPos.y, enemyData.type || 'faquinha');
-            
-            switch(enemy.type) {
-                case 'faquinha':
-                    enemy.sprites = faquinhaSprites;
-                    break;
-                case 'morcego':
-                    enemy.sprites = morcegoSprites;
-                    break;
-                case 'caveirinha':
-                    enemy.sprites = caveirinhaSprites;
-                    break;
-                case 'janis':
-                    enemy.sprites = janisSprites;
-                    break;
-                case 'chacal':
-                    enemy.sprites = chacalSprites;
-                    break;
-            }
-            
-            if (isEscape) enemy.state = 'chase';
-            enemies.push(enemy);
-        });
-        
-        // Descarregar assets do mapa anterior (se diferente)
-        if (previousMap !== mapIndex) {
-            assetManager.unloadMapAssets(previousMap);
-        }
+        if (isEscape) enemy.state = 'chase';
+        enemies.push(enemy);
     });
 }
 
@@ -1620,7 +1435,13 @@ function renderSpecialObjects(map) {
         ctx.fillText(gameState.bombPlaced ? 'BOOM!' : 'LIXO', map.lixeira.x + 2, map.lixeira.y + 25);
     }
     
-    // Removido o indicador visual de saída
+    if (map.exit) {
+        ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#0f0';
+        ctx.fillRect(map.exit.x, map.exit.y, map.exit.w, map.exit.h);
+        ctx.fillStyle = '#fff';
+        ctx.font = '12px Arial';
+        ctx.fillText(gameState.phase === 'escape' ? 'VOLTA' : 'SAÍDA', map.exit.x + 5, map.exit.y + 30);
+    }
 }
 
 function renderProjectiles(visibleArea) {
@@ -1708,45 +1529,6 @@ function renderPlayer() {
     }
 }
 
-function renderLoadingScreen() {
-    // Fundo preto
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Título
-    ctx.fillStyle = '#ff0';
-    ctx.font = 'bold 64px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('MAD NIGHT', canvas.width/2, canvas.height/2 - 100);
-    
-    // Texto de carregando
-    ctx.fillStyle = '#fff';
-    ctx.font = '32px Arial';
-    ctx.fillText('Carregando...', canvas.width/2, canvas.height/2);
-    
-    // Barra de progresso
-    const barWidth = 400;
-    const barHeight = 30;
-    const barX = (canvas.width - barWidth) / 2;
-    const barY = canvas.height/2 + 50;
-    
-    // Borda da barra
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(barX, barY, barWidth, barHeight);
-    
-    // Preenchimento da barra
-    ctx.fillStyle = '#0f0';
-    ctx.fillRect(barX + 2, barY + 2, (barWidth - 4) * (assetManager.loadingProgress / 100), barHeight - 4);
-    
-    // Porcentagem
-    ctx.fillStyle = '#fff';
-    ctx.font = '24px Arial';
-    ctx.fillText(`${Math.floor(assetManager.loadingProgress)}%`, canvas.width/2, barY + barHeight + 40);
-    
-    ctx.textAlign = 'left';
-}
-
 function renderUI(map) {
     // Nome do mapa
     ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#ff0';
@@ -1821,12 +1603,6 @@ function draw() {
     // PRIMEIRO: Limpar tela e mostrar versão
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Se estiver carregando, mostrar tela de loading
-    if (assetManager.isLoading) {
-        renderLoadingScreen();
-        return;
-    }
     
     // Mostrar versão ANTES de qualquer transformação
     ctx.save();
@@ -1974,12 +1750,10 @@ for (let i = 0; i <= 15; i++) {
     chacalSprites[i] = img;
 }
 
-// Inicializar com carregamento do primeiro mapa
+// Inicializar
 loadAudio();
-setTimeout(() => {
-    playMusic('inicio');
-    loadMap(0); // Isso vai carregar os assets do Maconhão
-}, 1000);
+loadMap(0);
+setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
