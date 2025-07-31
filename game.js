@@ -1973,10 +1973,12 @@ for (let i = 0; i <= 15; i++) {
     chacalSprites[i] = img;
 }
 
-// Inicializar
+// Inicializar com carregamento do primeiro mapa
 loadAudio();
-loadMap(0);
-setTimeout(() => playMusic('inicio'), 1000);
+setTimeout(() => {
+    playMusic('inicio');
+    loadMap(0); // Isso vai carregar os assets do Maconhão
+}, 1000);
 gameLoop();
 
 // Logs finais
