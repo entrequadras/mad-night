@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.16 - Flicker Realista');
+console.log('Mad Night v1.9.17 - Objetos e Versão');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.16 - Flicker Realista'
+    version: 'v1.9.17 - Objetos e Versão'
 };
 
 // Player
@@ -70,7 +70,10 @@ const assets = {
     grama000: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama001: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama002: { img: new Image(), loaded: false, width: 120, height: 120 },
-    grama003: { img: new Image(), loaded: false, width: 120, height: 120 }
+    grama003: { img: new Image(), loaded: false, width: 120, height: 120 },
+    banco01: { img: new Image(), loaded: false, width: 56, height: 56 },
+    banco02: { img: new Image(), loaded: false, width: 56, height: 56 },
+    caixadeluz: { img: new Image(), loaded: false, width: 56, height: 56 }
 };
 
 // Carregar assets
@@ -107,8 +110,15 @@ assets.grama001.img.onload = () => { assets.grama001.loaded = true; };
 assets.grama002.img.src = 'assets/tiles/grama002.png';
 assets.grama002.img.onload = () => { assets.grama002.loaded = true; };
 
-assets.grama003.img.src = 'assets/tiles/grama003.png';
-assets.grama003.img.onload = () => { assets.grama003.loaded = true; };
+// Carregar objetos
+assets.banco01.img.src = 'assets/objects/banco01.png';
+assets.banco01.img.onload = () => { assets.banco01.loaded = true; };
+
+assets.banco02.img.src = 'assets/objects/banco02.png';
+assets.banco02.img.onload = () => { assets.banco02.loaded = true; };
+
+assets.caixadeluz.img.src = 'assets/objects/caixadeluz.png';
+assets.caixadeluz.img.onload = () => { assets.caixadeluz.loaded = true; };
 
 // Sistema de flicker realista para postes (3 componentes)
 const flickerSystem = {
@@ -203,6 +213,10 @@ const maps = [
             {type: 'arvore003', x: 280, y: 780},
             {type: 'arvore004', x: 1480, y: 830},
             {type: 'arvore001', x: 1550, y: 850}
+        objects: [
+            {type: 'banco01', x: 800, y: 400, rotation: 0},
+            {type: 'banco02', x: 1100, y: 600, rotation: 90},
+            {type: 'caixadeluz', x: 600, y: 700, rotation: 0}
         ],
         streetLights: [
             {type: 'poste000', x: 500, y: 200, rotation: 0, lightRadius: 100, id: 'post1'},
@@ -387,6 +401,25 @@ const audio = {
 
 // Funções auxiliares
 function isInLight(x, y) {
+    // Verificar colisão com objetos
+    if (map.objects) {
+        for (let obj of map.objects) {
+            const objAsset = assets[obj.type];
+            if (objAsset && objAsset.loaded) {
+                const objCollision = {
+                    x: obj.x,
+                    y: obj.y,
+                    w: objAsset.width,
+                    h: objAsset.height
+                };
+                
+                if (checkRectCollision(testEntity, objCollision)) {
+                    return true;
+                }
+            }
+        }
+    }
+    
     return false;
 }
 
@@ -1228,6 +1261,14 @@ function renderShadows(map, visibleArea) {
     }
 }
 
+function renderObjects(map, visibleArea) {
+    if (!map.objects) return;
+    
+    map.objects.forEach(obj => {
+        renderRotatedObject(obj, obj.type, visibleArea);
+    });
+}
+
 function renderWalls(map, visibleArea) {
     ctx.fillStyle = '#333';
     map.walls.forEach(wall => {
@@ -1360,10 +1401,16 @@ function renderUI(map) {
     ctx.font = '32px Arial';
     ctx.fillText(map.subtitle, canvas.width/2, 120);
     
+    // Versão centralizada abaixo do subtítulo
+    ctx.fillStyle = '#666';
+    ctx.font = '24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(gameState.version, canvas.width/2, 160);
+    ctx.textAlign = 'left';
+    
     // Info
     ctx.fillStyle = '#fff';
     ctx.font = '28px Arial';
-    ctx.textAlign = 'left';
     ctx.fillText(`Mapa: ${gameState.currentMap + 1}/6`, 20, canvas.height - 80);
     ctx.fillText(`Inimigos: ${enemies.filter(e => !e.isDead).length}`, 20, canvas.height - 40);
     
@@ -1452,6 +1499,7 @@ function draw() {
         renderCampo(map);
         renderShadows(map, visibleArea);
         renderTrees(map, visibleArea, 'bottom');
+        renderObjects(map, visibleArea);
         renderWalls(map, visibleArea);
         renderSpecialObjects(map);
         renderProjectiles(visibleArea);
@@ -1570,12 +1618,13 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.16 - Flicker Realista 🎮');
-console.log('💡 Sistema de flicker com 3 componentes:');
-console.log('   ✨ Oscilação suave principal (respiração)');
-console.log('   ✨ Oscilação secundária rápida (tremulação)');
-console.log('   ✨ Piscadas aleatórias ocasionais (falhas)');
-console.log('🔀 Cada poste com offset único (dessincronizado)');
+console.log('🎮 Mad Night v1.9.17 - Objetos e Versão 🎮');
+console.log('🪑 Novos objetos adicionados ao Maconhão:');
+console.log('   - banco01 em (800, 400)');
+console.log('   - banco02 em (1100, 600) rotacionado 90°');
+console.log('   - caixadeluz em (600, 700)');
+console.log('📍 Versão restaurada abaixo do nome do mapa');
+console.log('💡 Mantém flicker realista com 3 componentes');
 console.log('✅ Jogo inicializado com sucesso!');
 
 // FIM DO ARQUIVO
