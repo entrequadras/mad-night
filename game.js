@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.33 - Túnel Liberado');
+console.log('Mad Night v1.9.34 - Debug Mode');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,8 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.33 - Túnel Liberado'
+    version: 'v1.9.34 - Debug Mode',
+    debugMode: false
 };
 
 // Player
@@ -1053,6 +1054,11 @@ window.addEventListener('keydown', (e) => {
         gameState.currentMap = (gameState.currentMap + 1) % maps.length;
         loadMap(gameState.currentMap);
     }
+    
+    if (e.key === 'd' || e.key === 'D') {
+        gameState.debugMode = !gameState.debugMode;
+        console.log('Debug mode:', gameState.debugMode ? 'ON' : 'OFF');
+    }
 });
 
 window.addEventListener('keyup', (e) => {
@@ -1441,15 +1447,32 @@ function renderShadows(map, visibleArea) {
 }
 
 function renderWalls(map, visibleArea) {
-    ctx.fillStyle = '#333';
     map.walls.forEach(wall => {
-        // Só renderizar se não for invisível
-        if (!wall.invisible && 
-            wall.x + wall.w > visibleArea.left && 
+        if (wall.x + wall.w > visibleArea.left && 
             wall.x < visibleArea.right &&
             wall.y + wall.h > visibleArea.top && 
             wall.y < visibleArea.bottom) {
-            ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
+            
+            if (gameState.debugMode) {
+                // Modo debug - mostrar todas as paredes
+                ctx.fillStyle = wall.invisible ? 'rgba(255, 0, 0, 0.3)' : '#333';
+                ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
+                
+                // Mostrar dimensões das paredes invisíveis
+                if (wall.invisible) {
+                    ctx.strokeStyle = '#f00';
+                    ctx.strokeRect(wall.x, wall.y, wall.w, wall.h);
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '10px Arial';
+                    ctx.fillText(`${wall.w}x${wall.h}`, wall.x + 2, wall.y + 12);
+                }
+            } else {
+                // Modo normal - só renderizar paredes visíveis
+                if (!wall.invisible) {
+                    ctx.fillStyle = '#333';
+                    ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
+                }
+            }
         }
     });
 }
@@ -1602,6 +1625,15 @@ function renderUI(map) {
     if (player.inShadow) {
         ctx.fillStyle = '#0f0';
         ctx.fillText('NA SOMBRA - Invisível!', 20, 210);
+    }
+    
+    // Debug info
+    if (gameState.debugMode) {
+        ctx.fillStyle = '#0ff';
+        ctx.font = '20px Arial';
+        ctx.fillText(`DEBUG MODE ON - Player: (${Math.floor(player.x)}, ${Math.floor(player.y)})`, 20, 290);
+        ctx.fillText(`Pressione D para desativar`, 20, 315);
+        ctx.font = '28px Arial';
     }
     
     // Avisos
@@ -1806,11 +1838,11 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.33 - Túnel Liberado 🎮');
-console.log('🚇 Corrigido problema de colisão no início');
-console.log('🛣️ Player agora pode se mover livremente');
-console.log('🎨 Sistema de camadas funcionando');
-console.log('✅ Caminho do túnel desbloqueado!');
-console.log('🎯 TESTE AGORA!');
+console.log('🎮 Mad Night v1.9.34 - Debug Mode 🎮');
+console.log('🔍 Pressione D para ativar/desativar DEBUG');
+console.log('🟥 Paredes invisíveis aparecem em vermelho');
+console.log('📍 Posição do player mostrada na tela');
+console.log('📏 Dimensões das paredes visíveis');
+console.log('🎯 USE O DEBUG PARA VER O PROBLEMA!');
 
 // FIM DO ARQUIVO
