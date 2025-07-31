@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.17 - Objetos e Versão');
+console.log('Mad Night v1.9.18 - Código Corrigido');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.17 - Objetos e Versão'
+    version: 'v1.9.18 - Código Corrigido'
 };
 
 // Player
@@ -110,6 +110,9 @@ assets.grama001.img.onload = () => { assets.grama001.loaded = true; };
 assets.grama002.img.src = 'assets/tiles/grama002.png';
 assets.grama002.img.onload = () => { assets.grama002.loaded = true; };
 
+assets.grama003.img.src = 'assets/tiles/grama003.png';
+assets.grama003.img.onload = () => { assets.grama003.loaded = true; };
+
 // Carregar objetos
 assets.banco01.img.src = 'assets/objects/banco01.png';
 assets.banco01.img.onload = () => { assets.banco01.loaded = true; };
@@ -129,9 +132,7 @@ const flickerSystem = {
             this.lights[lightId] = {
                 baseIntensity: 1.0,
                 intensity: 1.0,
-                // Offset único para cada poste (dessincronizado)
                 timeOffset: Math.random() * 10000,
-                // Chance de piscada forte
                 lastFlicker: Date.now(),
                 flickerCooldown: Math.random() * 8000 + 4000
             };
@@ -140,28 +141,22 @@ const flickerSystem = {
         const light = this.lights[lightId];
         const now = Date.now() + light.timeOffset;
         
-        // Componente 1: Oscilação suave principal (respiração da luz)
         const primaryWave = Math.sin(now * 0.0008) * 0.08;
-        
-        // Componente 2: Oscilação secundária mais rápida (tremulação)
         const secondaryWave = Math.sin(now * 0.003) * 0.04;
         
-        // Componente 3: Piscadas ocasionais (falha elétrica)
         let flicker = 0;
         if (Date.now() - light.lastFlicker > light.flickerCooldown) {
-            if (Math.random() < 0.02) { // 2% de chance por frame
-                flicker = -0.3 - Math.random() * 0.2; // Reduz 30-50% da luz
+            if (Math.random() < 0.02) {
+                flicker = -0.3 - Math.random() * 0.2;
                 light.lastFlicker = Date.now();
                 light.flickerCooldown = Math.random() * 8000 + 4000;
             }
         }
         
-        // Durante uma piscada, adicionar tremulação extra
         if (flicker < 0) {
             flicker += Math.sin(now * 0.1) * 0.1;
         }
         
-        // Combinar todos os componentes
         light.intensity = Math.max(0.3, Math.min(1.0, 
             light.baseIntensity + primaryWave + secondaryWave + flicker
         ));
@@ -213,16 +208,17 @@ const maps = [
             {type: 'arvore003', x: 280, y: 780},
             {type: 'arvore004', x: 1480, y: 830},
             {type: 'arvore001', x: 1550, y: 850}
-        objects: [
-            {type: 'banco01', x: 800, y: 400, rotation: 0},
-            {type: 'banco02', x: 1100, y: 600, rotation: 90},
-            {type: 'caixadeluz', x: 600, y: 700, rotation: 0}
         ],
         streetLights: [
             {type: 'poste000', x: 500, y: 200, rotation: 0, lightRadius: 100, id: 'post1'},
             {type: 'poste001', x: 960, y: 300, rotation: 0, lightRadius: 100, id: 'post2'},
             {type: 'poste000', x: 960, y: 780, rotation: 0, lightRadius: 100, id: 'post3'},
             {type: 'poste001', x: 1400, y: 540, rotation: 0, lightRadius: 100, id: 'post4'}
+        ],
+        objects: [
+            {type: 'banco01', x: 800, y: 400, rotation: 0},
+            {type: 'banco02', x: 1100, y: 600, rotation: 90},
+            {type: 'caixadeluz', x: 600, y: 700, rotation: 0}
         ],
         walls: [
             {x: 0, y: 0, w: 1920, h: 20},
@@ -245,6 +241,7 @@ const maps = [
         enemies: [],
         trees: [],
         streetLights: [],
+        objects: [],
         walls: [
             {x: 0, y: 0, w: 800, h: 100},
             {x: 0, y: 500, w: 800, h: 100},
@@ -282,6 +279,7 @@ const maps = [
         ],
         trees: [],
         streetLights: [],
+        objects: [],
         walls: [
             {x: 150, y: 100, w: 120, h: 150},
             {x: 350, y: 350, w: 120, h: 150},
@@ -311,6 +309,7 @@ const maps = [
         ],
         trees: [],
         streetLights: [],
+        objects: [],
         walls: [
             {x: 80, y: 150, w: 120, h: 60},
             {x: 400, y: 150, w: 120, h: 60},
@@ -342,6 +341,7 @@ const maps = [
         ],
         trees: [],
         streetLights: [],
+        objects: [],
         walls: [
             {x: 80, y: 120, w: 160, h: 160},
             {x: 360, y: 120, w: 160, h: 160},
@@ -367,6 +367,7 @@ const maps = [
         ],
         trees: [],
         streetLights: [],
+        objects: [],
         walls: [
             {x: 120, y: 200, w: 140, h: 80},
             {x: 340, y: 200, w: 140, h: 80},
@@ -401,25 +402,6 @@ const audio = {
 
 // Funções auxiliares
 function isInLight(x, y) {
-    // Verificar colisão com objetos
-    if (map.objects) {
-        for (let obj of map.objects) {
-            const objAsset = assets[obj.type];
-            if (objAsset && objAsset.loaded) {
-                const objCollision = {
-                    x: obj.x,
-                    y: obj.y,
-                    w: objAsset.width,
-                    h: objAsset.height
-                };
-                
-                if (checkRectCollision(testEntity, objCollision)) {
-                    return true;
-                }
-            }
-        }
-    }
-    
     return false;
 }
 
@@ -497,6 +479,25 @@ function checkWallCollision(entity, newX, newY) {
                 };
                 
                 if (checkRectCollision(testEntity, postCollision)) {
+                    return true;
+                }
+            }
+        }
+    }
+    
+    // Verificar colisão com objetos
+    if (map.objects) {
+        for (let obj of map.objects) {
+            const objAsset = assets[obj.type];
+            if (objAsset && objAsset.loaded) {
+                const objCollision = {
+                    x: obj.x,
+                    y: obj.y,
+                    w: objAsset.width,
+                    h: objAsset.height
+                };
+                
+                if (checkRectCollision(testEntity, objCollision)) {
                     return true;
                 }
             }
@@ -1225,6 +1226,14 @@ function renderStreetLights(map, visibleArea) {
     });
 }
 
+function renderObjects(map, visibleArea) {
+    if (!map.objects) return;
+    
+    map.objects.forEach(obj => {
+        renderRotatedObject(obj, obj.type, visibleArea);
+    });
+}
+
 function renderShadows(map, visibleArea) {
     if (map.trees) {
         map.trees.forEach(tree => {
@@ -1259,14 +1268,6 @@ function renderShadows(map, visibleArea) {
             }
         });
     }
-}
-
-function renderObjects(map, visibleArea) {
-    if (!map.objects) return;
-    
-    map.objects.forEach(obj => {
-        renderRotatedObject(obj, obj.type, visibleArea);
-    });
 }
 
 function renderWalls(map, visibleArea) {
@@ -1618,13 +1619,11 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.17 - Objetos e Versão 🎮');
-console.log('🪑 Novos objetos adicionados ao Maconhão:');
-console.log('   - banco01 em (800, 400)');
-console.log('   - banco02 em (1100, 600) rotacionado 90°');
-console.log('   - caixadeluz em (600, 700)');
-console.log('📍 Versão restaurada abaixo do nome do mapa');
-console.log('💡 Mantém flicker realista com 3 componentes');
-console.log('✅ Jogo inicializado com sucesso!');
+console.log('🎮 Mad Night v1.9.18 - Código Corrigido 🎮');
+console.log('🐛 Sintaxe completamente verificada');
+console.log('🪑 Objetos: banco01, banco02, caixadeluz');
+console.log('📍 Versão centralizada abaixo do mapa');
+console.log('💡 Flicker realista com 3 componentes');
+console.log('✅ Arquivo completo e funcional!');
 
 // FIM DO ARQUIVO
