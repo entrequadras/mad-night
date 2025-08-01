@@ -1,4 +1,4 @@
- console.log('Mad Night v1.9.68 - Parede Direita fix');
+console.log('Mad Night v1.9.69 - Export do Maconhão implementado');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.68 - Parede Direita fix'
+    version: 'v1.9.69 - Export do Maconhão implementado'
 };
 
 // Player
@@ -48,7 +48,7 @@ const player = {
     isDead: false,
     deathFrame: 12,
     isDashing: false,
-    dash: 0,
+    dashStart: 0,
     dashDuration: 150,
     dashDistance: 60,
     dashStartX: 0,
@@ -189,6 +189,240 @@ function generateGrassTiles(mapWidth, mapHeight, tileSize) {
     }
     
     return tiles;
+}
+
+// Função para exportar mapa completo do Maconhão
+function exportMapImage() {
+    if (gameState.currentMap !== 0) {
+        console.log('❌ Vá para o Maconhão (Mapa 0) primeiro!');
+        return;
+    }
+    
+    console.log('📸 Exportando Maconhão em resolução nativa...');
+    
+    // Criar canvas temporário com resolução do mapa
+    const exportCanvas = document.createElement('canvas');
+    const exportCtx = exportCanvas.getContext('2d');
+    exportCanvas.width = 1920;
+    exportCanvas.height = 1080;
+    exportCtx.imageSmoothingEnabled = false;
+    
+    const map = maps[0]; // Maconhão
+    
+    // Fundo escuro
+    exportCtx.fillStyle = '#1a1a1a';
+    exportCtx.fillRect(0, 0, 1920, 1080);
+    
+    // Renderizar campo
+    if (assets.campo.loaded) {
+        const campoX = (1920 - 800) / 2;
+        const campoY = (1080 - 462) / 2;
+        exportCtx.drawImage(assets.campo.img, campoX, campoY);
+    }
+    
+    // Renderizar sombras das árvores
+    if (map.trees) {
+        map.trees.forEach(tree => {
+            const treeAsset = assets[tree.type];
+            if (treeAsset && treeAsset.loaded) {
+                let shadowRadius = tree.type === 'arvorebloco001' ? 
+                    treeAsset.width * 0.35 : treeAsset.width * 0.5;
+                
+                const shadowX = tree.x + treeAsset.width * 0.5;
+                const shadowY = tree.y + treeAsset.height * 0.85;
+                
+                const gradient = exportCtx.createRadialGradient(
+                    shadowX, shadowY, 0,
+                    shadowX, shadowY, shadowRadius
+                );
+                gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+                gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                exportCtx.fillStyle = gradient;
+                exportCtx.fillRect(
+                    shadowX - shadowRadius,
+                    shadowY - shadowRadius,
+                    shadowRadius * 2,
+                    shadowRadius * 2
+                );
+            }
+        });
+    }
+    
+    // Renderizar troncos das árvores (parte de baixo)
+    if (map.trees) {
+        map.trees.forEach(tree => {
+            const treeAsset = assets[tree.type];
+            if (treeAsset && treeAsset.loaded) {
+                exportCtx.save();
+                exportCtx.beginPath();
+                exportCtx.rect(tree.x, tree.y + treeAsset.height * 0.7, treeAsset.width, treeAsset.height * 0.3);
+                exportCtx.clip();
+                exportCtx.drawImage(treeAsset.img, tree.x, tree.y);
+                exportCtx.restore();
+            }
+        });
+    }
+    
+    // Renderizar objetos (caixa de luz)
+    if (map.objects) {
+        map.objects.forEach(obj => {
+            const objAsset = assets[obj.type];
+            if (objAsset && objAsset.loaded) {
+                exportCtx.save();
+                const centerX = obj.x + objAsset.width / 2;
+                const centerY = obj.y + objAsset.height / 2;
+                exportCtx.translate(centerX, centerY);
+                exportCtx.rotate((obj.rotation || 0) * Math.PI / 180);
+                exportCtx.drawImage(
+                    objAsset.img,
+                    -objAsset.width / 2,
+                    -objAsset.height / 2,
+                    objAsset.width,
+                    objAsset.height
+                );
+                exportCtx.restore();
+            }
+        });
+    }
+    
+    // Renderizar campo com traves (por cima)
+    if (assets.campoTraves.loaded) {
+        const campoX = (1920 - 800) / 2;
+        const campoY = (1080 - 462) / 2;
+        exportCtx.drawImage(assets.campoTraves.img, campoX, campoY);
+    }
+    
+    // Renderizar sombra do campo
+    const campoX = (1920 - 800) / 2;
+    const campoY = (1080 - 462) / 2;
+    const centerX = campoX + 400;
+    const centerY = campoY + 231;
+    
+    const gradient = exportCtx.createRadialGradient(
+        centerX, centerY, 0,
+        centerX, centerY, 450
+    );
+    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
+    gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.45)');  
+    gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.35)');  
+    gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.2)');  
+    gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.1)');  
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    
+    exportCtx.fillStyle = gradient;
+    exportCtx.fillRect(
+        centerX - 450,
+        centerY - 450,
+        900,
+        900
+    );
+    
+    // Sombras dos cantos
+    const cornerGradient1 = exportCtx.createRadialGradient(0, 0, 0, 0, 0, 400);
+    cornerGradient1.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+    cornerGradient1.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+    cornerGradient1.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    exportCtx.fillStyle = cornerGradient1;
+    exportCtx.fillRect(0, 0, 400, 400);
+    
+    const cornerGradient2 = exportCtx.createRadialGradient(1920, 0, 0, 1920, 0, 400);
+    cornerGradient2.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+    cornerGradient2.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+    cornerGradient2.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    exportCtx.fillStyle = cornerGradient2;
+    exportCtx.fillRect(1920 - 400, 0, 400, 400);
+    
+    const cornerGradient3 = exportCtx.createRadialGradient(0, 1080, 0, 0, 1080, 400);
+    cornerGradient3.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+    cornerGradient3.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+    cornerGradient3.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    exportCtx.fillStyle = cornerGradient3;
+    exportCtx.fillRect(0, 1080 - 400, 400, 400);
+    
+    const cornerGradient4 = exportCtx.createRadialGradient(1920, 1080, 0, 1920, 1080, 400);
+    cornerGradient4.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+    cornerGradient4.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+    cornerGradient4.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    exportCtx.fillStyle = cornerGradient4;
+    exportCtx.fillRect(1920 - 400, 1080 - 400, 400, 400);
+    
+    // Renderizar postes
+    if (map.streetLights) {
+        map.streetLights.forEach(light => {
+            const lightAsset = assets[light.type];
+            if (lightAsset && lightAsset.loaded) {
+                exportCtx.save();
+                const centerX = light.x + lightAsset.width / 2;
+                const centerY = light.y + lightAsset.height / 2;
+                exportCtx.translate(centerX, centerY);
+                exportCtx.rotate((light.rotation || 0) * Math.PI / 180);
+                exportCtx.drawImage(
+                    lightAsset.img,
+                    -lightAsset.width / 2,
+                    -lightAsset.height / 2,
+                    lightAsset.width,
+                    lightAsset.height
+                );
+                exportCtx.restore();
+            }
+        });
+    }
+    
+    // Renderizar copas das árvores (por cima)
+    if (map.trees) {
+        map.trees.forEach(tree => {
+            const treeAsset = assets[tree.type];
+            if (treeAsset && treeAsset.loaded) {
+                exportCtx.save();
+                exportCtx.beginPath();
+                exportCtx.rect(tree.x, tree.y, treeAsset.width, treeAsset.height * 0.75);
+                exportCtx.clip();
+                exportCtx.drawImage(treeAsset.img, tree.x, tree.y);
+                exportCtx.restore();
+            }
+        });
+    }
+    
+    // Filtro noturno
+    exportCtx.fillStyle = 'rgba(0, 0, 40, 0.4)';
+    exportCtx.fillRect(0, 0, 1920, 1080);
+    
+    // Luzes dos postes
+    if (map.streetLights) {
+        exportCtx.save();
+        exportCtx.globalCompositeOperation = 'lighter';
+        
+        map.streetLights.forEach(light => {
+            const gradient = exportCtx.createRadialGradient(
+                light.x + 20, light.y + 45, 0,
+                light.x + 20, light.y + 45, 100
+            );
+            gradient.addColorStop(0, 'rgba(255, 200, 100, 0.4)');
+            gradient.addColorStop(0.5, 'rgba(255, 180, 80, 0.2)');
+            gradient.addColorStop(1, 'rgba(255, 160, 60, 0)');
+            
+            exportCtx.fillStyle = gradient;
+            exportCtx.beginPath();
+            exportCtx.arc(light.x + 20, light.y + 45, 100, 0, Math.PI * 2);
+            exportCtx.fill();
+        });
+        
+        exportCtx.restore();
+    }
+    
+    // Download da imagem
+    exportCanvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'maconhao_completo_1920x1080.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        console.log('✅ Mapa exportado com sucesso!');
+    }, 'image/png');
 }
 
 // Sistema de Mapas
@@ -1768,8 +2002,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.68 - Parede Direita fix');
-console.log('🚇 BASE: Código original v1.9.32 estável');
-console.log('🔧 TÚNEL: Paredes VISÍVEIS em cinza formando U');
-console.log('📍 Player inicia em (200,190)');
-console.log('🎯 Pressione N para Mapa 2 e veja as paredes!');
+console.log('🎮 Mad Night v1.9.69 - Export do Maconhão implementado');
+console.log('🚇 BASE: Túnel simétrico do Eixão funcionando');
+console.log('📸 NOVO: Função exportMapImage() - digite no console!');
+console.log('🎯 Para exportar: vá ao Maconhão (Mapa 0) e digite exportMapImage()');
+console.log('✨ Player posicionado em (150, 300) - melhor no mapa!');
