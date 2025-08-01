@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.35 - Caminho Verde');
+console.log('Mad Night v1.9.36 - Rampa Suave');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.35 - Caminho Verde'
+    version: 'v1.9.36 - Rampa Suave'
 };
 
 // Player
@@ -277,56 +277,40 @@ const maps = [
             
             // ============ GRANDE BLOQUEIO CENTRAL ============
             // Bloqueia TODA a área entre X=380 e X=2845
-            // Player SÓ pode passar pela linha verde exata
             {x: 380, y: 80, w: 2465, h: 708, invisible: true},
             
-            // ============ BURACOS PARA O CAMINHO VERDE ============
-            // Criar "túnel" exato seguindo a linha verde
+            // ============ CAMINHO VERDE SUAVE ============
+            // Rampa descida mais suave: (380,190) → (420,537)
             
-            // RAMPA DESCIDA: (380,190) → (420,537)
-            // Diagonal de 40px largura, 347px altura
-            {x: 380, y: 190, w: 40, h: 20, invisible: false},   // Y: 190-210
-            {x: 385, y: 210, w: 40, h: 20, invisible: false},   // Y: 210-230  
-            {x: 390, y: 230, w: 40, h: 20, invisible: false},   // Y: 230-250
-            {x: 395, y: 250, w: 40, h: 20, invisible: false},   // Y: 250-270
-            {x: 400, y: 270, w: 40, h: 20, invisible: false},   // Y: 270-290
-            {x: 405, y: 290, w: 40, h: 20, invisible: false},   // Y: 290-310
-            {x: 410, y: 310, w: 40, h: 20, invisible: false},   // Y: 310-330
-            {x: 415, y: 330, w: 40, h: 20, invisible: false},   // Y: 330-350
-            {x: 420, y: 350, w: 40, h: 20, invisible: false},   // Y: 350-370
-            {x: 420, y: 370, w: 40, h: 20, invisible: false},   // Y: 370-390
-            {x: 420, y: 390, w: 40, h: 20, invisible: false},   // Y: 390-410
-            {x: 420, y: 410, w: 40, h: 20, invisible: false},   // Y: 410-430
-            {x: 420, y: 430, w: 40, h: 20, invisible: false},   // Y: 430-450
-            {x: 420, y: 450, w: 40, h: 20, invisible: false},   // Y: 450-470
-            {x: 420, y: 470, w: 40, h: 20, invisible: false},   // Y: 470-490
-            {x: 420, y: 490, w: 40, h: 20, invisible: false},   // Y: 490-510
-            {x: 420, y: 510, w: 40, h: 27, invisible: false},   // Y: 510-537
+            // ENTRADA DA RAMPA
+            {x: 380, y: 180, w: 60, h: 40, invisible: false},   // Y: 180-220 (entrada ampla)
             
-            // TÚNEL HORIZONTAL: (420,537) → (2820,537)  
-            // Linha reta horizontal, altura de 60px para o player passar
-            {x: 420, y: 517, w: 2400, h: 60, invisible: false}, // Y: 517-577 (centrado em 537)
+            // DEGRAUS DA DESCIDA (mais suaves)
+            {x: 390, y: 220, w: 60, h: 60, invisible: false},   // Y: 220-280
+            {x: 400, y: 280, w: 60, h: 60, invisible: false},   // Y: 280-340
+            {x: 410, y: 340, w: 60, h: 60, invisible: false},   // Y: 340-400
+            {x: 415, y: 400, w: 60, h: 60, invisible: false},   // Y: 400-460
+            {x: 418, y: 460, w: 60, h: 60, invisible: false},   // Y: 460-520
             
-            // RAMPA SUBIDA: (2820,537) → (2845,190)
-            // Diagonal de 25px largura, 347px altura  
-            {x: 2820, y: 517, w: 25, h: 20, invisible: false},  // Y: 517-537
-            {x: 2820, y: 497, w: 25, h: 20, invisible: false},  // Y: 497-517
-            {x: 2820, y: 477, w: 25, h: 20, invisible: false},  // Y: 477-497
-            {x: 2820, y: 457, w: 25, h: 20, invisible: false},  // Y: 457-477
-            {x: 2820, y: 437, w: 25, h: 20, invisible: false},  // Y: 437-457
-            {x: 2820, y: 417, w: 25, h: 20, invisible: false},  // Y: 417-437
-            {x: 2820, y: 397, w: 25, h: 20, invisible: false},  // Y: 397-417
-            {x: 2820, y: 377, w: 25, h: 20, invisible: false},  // Y: 377-397
-            {x: 2820, y: 357, w: 25, h: 20, invisible: false},  // Y: 357-377
-            {x: 2820, y: 337, w: 25, h: 20, invisible: false},  // Y: 337-357
-            {x: 2820, y: 317, w: 25, h: 20, invisible: false},  // Y: 317-337
-            {x: 2820, y: 297, w: 25, h: 20, invisible: false},  // Y: 297-317
-            {x: 2820, y: 277, w: 25, h: 20, invisible: false},  // Y: 277-297
-            {x: 2820, y: 257, w: 25, h: 20, invisible: false},  // Y: 257-277
-            {x: 2820, y: 237, w: 25, h: 20, invisible: false},  // Y: 237-257
-            {x: 2820, y: 217, w: 25, h: 20, invisible: false},  // Y: 217-237
-            {x: 2820, y: 197, w: 25, h: 20, invisible: false},  // Y: 197-217
-            {x: 2820, y: 190, w: 25, h: 7, invisible: false},   // Y: 190-197
+            // CONEXÃO COM O TÚNEL HORIZONTAL
+            {x: 420, y: 520, w: 60, h: 40, invisible: false},   // Y: 520-560 (conexão ampla)
+            
+            // TÚNEL HORIZONTAL: (420,537) → (2820,537)
+            // Centrado em Y=537, altura generosa para virar
+            {x: 420, y: 530, w: 2400, h: 50, invisible: false}, // Y: 530-580 (altura ampla)
+            
+            // CONEXÃO COM A RAMPA DE SUBIDA  
+            {x: 2800, y: 520, w: 60, h: 40, invisible: false},  // Y: 520-560 (conexão ampla)
+            
+            // DEGRAUS DA SUBIDA (mais suaves): (2820,537) → (2845,190)
+            {x: 2820, y: 460, w: 60, h: 60, invisible: false},  // Y: 460-520
+            {x: 2822, y: 400, w: 60, h: 60, invisible: false},  // Y: 400-460
+            {x: 2825, y: 340, w: 60, h: 60, invisible: false},  // Y: 340-400
+            {x: 2830, y: 280, w: 60, h: 60, invisible: false},  // Y: 280-340
+            {x: 2835, y: 220, w: 60, h: 60, invisible: false},  // Y: 220-280
+            
+            // SAÍDA DA RAMPA
+            {x: 2840, y: 180, w: 60, h: 40, invisible: false},  // Y: 180-220 (saída ampla)
         ],
         lights: [],
         shadows: [],
@@ -1837,12 +1821,12 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.35 - Caminho Verde 🎮');
-console.log('🚇 ABORDAGEM SIMPLES: Grande parede + buraco exato');
-console.log('🛣️ Caminho verde implementado:');
-console.log('   🔒 TUDO bloqueado entre X=380 e X=2845');
-console.log('   🕳️  EXCETO linha verde exata com buracos pequenos');
-console.log('   📍 (380,190) → rampa → (420,537) → horizontal → (2820,537) → rampa → (2845,190)');
-console.log('🎯 TESTE: Só consegue passar pela linha verde!');
+console.log('🎮 Mad Night v1.9.36 - Rampa Suave 🎮');
+console.log('🚇 Correções aplicadas:');
+console.log('   📐 Rampa descida: Degraus maiores e suaves');
+console.log('   ➡️  Túnel horizontal: Y=530-580 (altura ampla)');
+console.log('   📐 Rampa subida: Degraus maiores e suaves');  
+console.log('   🔄 Conexões amplas para virar naturalmente');
+console.log('🎯 TESTE: Player deve conseguir virar à direita no túnel!');
 
 // FIM DO ARQUIVO
