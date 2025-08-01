@@ -254,7 +254,7 @@ const maps = [
         ],
         lights: [],
         shadows: [],
-        playerStart: {x: 200, y: 300},
+        playerStart: {x: 150, y: 300},
         playerStartEscape: {x: 1700, y: 540},
         exit: {x: 1800, y: 490, w: 80, h: 100},
         direction: 'right'
@@ -308,7 +308,7 @@ const maps = [
         ],
         lights: [],
         shadows: [],
-        playerStart: {x: 70, y: 70},
+        playerStart: {x: 100, y: 100},
         playerStartEscape: {x: 2900, y: 190},
         exit: {x: 2950, y: 80, w: 50, h: 100},
         direction: 'right',
