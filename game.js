@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.73 - Correção do corredor horizontal do túnel'
+    version: 'v1.9.74 - Buraco na parede direita para subida'
 };
 
 // Player
@@ -551,8 +551,10 @@ const maps = [
 {x: 445, y: 80, w: 2461, h: 380, invisible: false},   // Parede superior do túnel (w=2461: de X=445 até X=2906)
 {x: 0, y: 530, w: 3000, h: 258, invisible: false},    // Parede inferior do túnel
 
-// PAREDE VERTICAL DIREITA - bloqueia saída lateral do túnel (ESPELHADA)
-{x: 2906, y: 190, w: 94, h: 340, invisible: false}, // Parede direita ajustada (X=2906 até X=3000)
+// PAREDE VERTICAL DIREITA - com BURACO para subida (ESPELHADA da esquerda)
+{x: 2906, y: 190, w: 94, h: 270, invisible: false}, // Parede direita PARTE DE CIMA (Y=190-460)
+{x: 2906, y: 600, w: 94, h: 188, invisible: false}, // Parede direita PARTE DE BAIXO (Y=600-788)
+// BURACO LIVRE: Y=460-600 (140px de altura para subir) - IGUAL AO DA ESQUERDA
 
 // ÁREA 4: Rampa de subida (X: 2906-2950) - ESPELHADA
 // Paredes que forçam subida em diagonal (mesmas dimensões da descida)
@@ -2036,9 +2038,9 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.73 - Correção do corredor horizontal do túnel');
-console.log('🚇 AJUSTE: Corredor horizontal vai até X=2906 agora');
-console.log('🔧 AJUSTE: Rampa de subida começa em X=2906 (mais tarde)');
-console.log('📐 AJUSTE: Parede direita reposicionada para X=2906');
-console.log('🎯 Agora o player percorre mais túnel antes de subir!');
-console.log('✨ Teste no Eixão da Morte (Mapa 1)!');
+console.log('🎮 Mad Night v1.9.74 - Buraco na parede direita para subida');
+console.log('🕳️ CORREÇÃO: Parede direita agora tem BURACO em Y=460-600');
+console.log('⬆️ LIVRE: 140px de altura para player subir (igual lado esquerdo)');
+console.log('🚇 SIMETRIA: Entrada e saída com mesmo espaço livre');
+console.log('🎯 Agora o player consegue subir sem bater na parede!');
+console.log('✨ Teste a subida no Eixão da Morte!');
