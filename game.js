@@ -48,7 +48,7 @@ const player = {
     isDead: false,
     deathFrame: 12,
     isDashing: false,
-    dashStart: 0,
+    dash: 0,
     dashDuration: 150,
     dashDistance: 60,
     dashStartX: 0,
@@ -254,7 +254,7 @@ const maps = [
         ],
         lights: [],
         shadows: [],
-        playerStart: {x: 200, y: 300},
+        playerStart: {x: 150, y: 300},
         playerStartEscape: {x: 1700, y: 540},
         exit: {x: 1800, y: 490, w: 80, h: 100},
         direction: 'right'
