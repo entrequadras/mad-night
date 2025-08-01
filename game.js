@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.70 - Melhoria do Maconhão com novos objetos');
+console.log('Mad Night v1.9.74 - Melhoria do Maconhão com novos objetos');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
