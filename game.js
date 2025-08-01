@@ -277,7 +277,7 @@ const maps = [
             
             // ÁREA 2: Rampa de descida (X: 380-420)
             // Paredes que forçam descida em diagonal
-            {x: 380, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa
+            {x: 420, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa
             {x: 380, y: 600, w: 40, h: 188, invisible: false}, // Parede inferior da rampa
             
             // PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel
