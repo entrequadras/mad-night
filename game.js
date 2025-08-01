@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.38 - Sintaxe Corrigida');
+console.log('Mad Night v1.9.39 - Comentários Removidos');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.38 - Sintaxe Corrigida',
+    version: 'v1.9.39 - Comentários Removidos',
     debugMode: false
 };
 
@@ -202,7 +202,6 @@ const maps = [
         enemies: [],
         tiles: generateGrassTiles(1920, 1080, 120),
         trees: [
-            // Árvores do mapa original
             {type: 'arvore001', x: 300, y: 150},
             {type: 'arvore002', x: 1400, y: 120},
             {type: 'arvore003', x: 150, y: 700},
@@ -218,7 +217,6 @@ const maps = [
             {type: 'arvore004', x: 1480, y: 830},
             {type: 'arvore001', x: 1550, y: 850},
             
-            // Barreira de árvores no lado esquerdo
             {type: 'arvore002', x: -80, y: -30},
             {type: 'arvore001', x: -60, y: 120},
             {type: 'arvore003', x: -90, y: 270},
@@ -228,7 +226,6 @@ const maps = [
             {type: 'arvore001', x: -65, y: 880},
             {type: 'arvore003', x: -95, y: 1000},
             
-            // Barreira de árvores no lado direito (com buraco para passagem)
             {type: 'arvore001', x: 1820, y: -50},
             {type: 'arvore002', x: 1850, y: 100},
             {type: 'arvore003', x: 1830, y: 250},
@@ -246,7 +243,6 @@ const maps = [
             {type: 'caixadeluz', x: 1750, y: 560, rotation: 0}
         ],
         walls: [
-            // Paredes invisíveis para colisão apenas
             {x: 0, y: 0, w: 1920, h: 20, invisible: true},
             {x: 0, y: 1060, w: 1920, h: 20, invisible: true},
             {x: 0, y: 20, w: 20, h: 1040, invisible: true},
@@ -1843,11 +1839,11 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.38 - Sintaxe Corrigida 🎮');
-console.log('✅ Removido comentário com ":" que causava erro');
-console.log('✅ Sintaxe limpa sem comentários problemáticos');
-console.log('🛤️ Mapa do Eixão simplificado');
-console.log('🔍 Debug mode ainda disponível (tecla D)');
-console.log('🎯 DEVE FUNCIONAR AGORA!');
+console.log('🎮 Mad Night v1.9.39 - Comentários Removidos 🎮');
+console.log('✅ Removidos TODOS os comentários problemáticos');
+console.log('✅ Arrays de trees e walls limpos');
+console.log('✅ Código sem comentários dentro de arrays');
+console.log('🔍 Debug mode: tecla D');
+console.log('🎯 AGORA DEVE FUNCIONAR!');
 
 // FIM DO ARQUIVO
