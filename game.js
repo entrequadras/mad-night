@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.39 - Comentários Removidos');
+console.log('Mad Night v1.9.31 - Limpeza Focada');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.39 - Comentários Removidos',
+    version: 'v1.9.31 - Limpeza Focada',
     debugMode: false
 };
 
@@ -74,10 +74,7 @@ const assets = {
     grama002: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama003: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama004: { img: new Image(), loaded: false, width: 120, height: 120 },
-    caixadeluz: { img: new Image(), loaded: false, width: 45, height: 45 },
-    // Assets do Eixão
-    eixaoCamada1: { img: new Image(), loaded: false, width: 3000, height: 868 },
-    eixaoCamada2: { img: new Image(), loaded: false, width: 3000, height: 868 }
+    caixadeluz: { img: new Image(), loaded: false, width: 45, height: 45 }
 };
 
 // Carregar assets
@@ -127,13 +124,6 @@ assets.grama004.img.onload = () => { assets.grama004.loaded = true; };
 // Carregar objetos
 assets.caixadeluz.img.src = 'assets/objects/caixadeluz.png';
 assets.caixadeluz.img.onload = () => { assets.caixadeluz.loaded = true; };
-
-// Carregar assets do Eixão
-assets.eixaoCamada1.img.src = 'assets/floors/eixao_da_morte_camada1.png';
-assets.eixaoCamada1.img.onload = () => { assets.eixaoCamada1.loaded = true; };
-
-assets.eixaoCamada2.img.src = 'assets/floors/eixao_da_morte_camada2.png';
-assets.eixaoCamada2.img.onload = () => { assets.eixaoCamada2.loaded = true; };
 
 // Sistema de flicker para postes
 const flickerSystem = {
@@ -258,28 +248,32 @@ const maps = [
     {
         name: "Eixão da Morte",
         subtitle: "Túnel sob as pistas",
-        width: 3000,
-        height: 868,
+        width: 800,
+        height: 600,
         enemies: [],
         trees: [],
         streetLights: [],
         objects: [],
         walls: [
-            {x: 0, y: 0, w: 3000, h: 20, invisible: true},
-            {x: 0, y: 0, w: 20, h: 868, invisible: true},
-            {x: 2980, y: 0, w: 20, h: 868, invisible: true},
-            {x: 0, y: 848, w: 3000, h: 20, invisible: true},
-            {x: 20, y: 420, w: 325, h: 428, invisible: true},
-            {x: 415, y: 420, w: 2430, h: 428, invisible: true},
-            {x: 2915, y: 420, w: 65, h: 428, invisible: true}
+            {x: 0, y: 0, w: 800, h: 100},
+            {x: 0, y: 500, w: 800, h: 100},
+            {x: 200, y: 100, w: 60, h: 100},
+            {x: 200, y: 400, w: 60, h: 100},
+            {x: 400, y: 100, w: 60, h: 100},
+            {x: 400, y: 400, w: 60, h: 100},
+            {x: 600, y: 100, w: 60, h: 100},
+            {x: 600, y: 400, w: 60, h: 100},
+            {x: 260, y: 150, w: 140, h: 20},
+            {x: 260, y: 430, w: 140, h: 20},
+            {x: 460, y: 150, w: 140, h: 20},
+            {x: 460, y: 430, w: 140, h: 20}
         ],
         lights: [],
         shadows: [],
-        playerStart: {x: 220, y: 100},
-        playerStartEscape: {x: 2850, y: 190},
-        exit: {x: 2950, y: 80, w: 50, h: 100},
-        direction: 'right',
-        hasLayers: true
+        playerStart: {x: 100, y: 300},
+        playerStartEscape: {x: 700, y: 300},
+        exit: {x: 720, y: 250, w: 50, h: 100},
+        direction: 'right'
     }, 100, invisible: true},
             {x: 415, y: 90, w: 585, h: 100, invisible: true},
             
@@ -1055,11 +1049,6 @@ window.addEventListener('keydown', (e) => {
         gameState.currentMap = (gameState.currentMap + 1) % maps.length;
         loadMap(gameState.currentMap);
     }
-    
-    if (e.key === 'd' || e.key === 'D') {
-        gameState.debugMode = !gameState.debugMode;
-        console.log('Debug mode:', gameState.debugMode ? 'ON' : 'OFF');
-    }
 });
 
 window.addEventListener('keyup', (e) => {
@@ -1250,18 +1239,6 @@ function renderTiles(map, visibleArea) {
     });
 }
 
-function renderEixaoLayer1(map, visibleArea) {
-    if (gameState.currentMap === 1 && assets.eixaoCamada1.loaded) {
-        ctx.drawImage(assets.eixaoCamada1.img, 0, 0);
-    }
-}
-
-function renderEixaoLayer2(map, visibleArea) {
-    if (gameState.currentMap === 1 && assets.eixaoCamada2.loaded) {
-        ctx.drawImage(assets.eixaoCamada2.img, 0, 0);
-    }
-}
-
 function renderCampo(map) {
     if (gameState.currentMap === 0 && assets.campo.loaded) {
         const campoX = (map.width - 800) / 2;
@@ -1448,32 +1425,15 @@ function renderShadows(map, visibleArea) {
 }
 
 function renderWalls(map, visibleArea) {
+    ctx.fillStyle = '#333';
     map.walls.forEach(wall => {
-        if (wall.x + wall.w > visibleArea.left && 
+        // Só renderizar se não for invisível
+        if (!wall.invisible && 
+            wall.x + wall.w > visibleArea.left && 
             wall.x < visibleArea.right &&
             wall.y + wall.h > visibleArea.top && 
             wall.y < visibleArea.bottom) {
-            
-            if (gameState.debugMode) {
-                // Modo debug - mostrar todas as paredes
-                ctx.fillStyle = wall.invisible ? 'rgba(255, 0, 0, 0.3)' : '#333';
-                ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
-                
-                // Mostrar dimensões das paredes invisíveis
-                if (wall.invisible) {
-                    ctx.strokeStyle = '#f00';
-                    ctx.strokeRect(wall.x, wall.y, wall.w, wall.h);
-                    ctx.fillStyle = '#fff';
-                    ctx.font = '10px Arial';
-                    ctx.fillText(`${wall.w}x${wall.h}`, wall.x + 2, wall.y + 12);
-                }
-            } else {
-                // Modo normal - só renderizar paredes visíveis
-                if (!wall.invisible) {
-                    ctx.fillStyle = '#333';
-                    ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
-                }
-            }
+            ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
         }
     });
 }
@@ -1628,15 +1588,6 @@ function renderUI(map) {
         ctx.fillText('NA SOMBRA - Invisível!', 20, 210);
     }
     
-    // Debug info
-    if (gameState.debugMode) {
-        ctx.fillStyle = '#0ff';
-        ctx.font = '20px Arial';
-        ctx.fillText(`DEBUG MODE ON - Player: (${Math.floor(player.x)}, ${Math.floor(player.y)})`, 20, 290);
-        ctx.fillText(`Pressione D para desativar`, 20, 315);
-        ctx.font = '28px Arial';
-    }
-    
     // Avisos
     if (map.orelhao && !gameState.dashUnlocked) {
         ctx.fillStyle = '#ff0';
@@ -1709,13 +1660,7 @@ function draw() {
         };
         
         // Renderizar elementos do mapa
-        if (map.hasLayers && gameState.currentMap === 1) {
-            // Camada 1 - Fundo (piso do Eixão)
-            renderEixaoLayer1(map, visibleArea);
-        } else {
-            renderTiles(map, visibleArea);
-        }
-        
+        renderTiles(map, visibleArea);
         renderCampo(map);
         renderShadows(map, visibleArea);
         renderTrees(map, visibleArea, 'bottom');
@@ -1725,12 +1670,6 @@ function draw() {
         renderProjectiles(visibleArea);
         renderEnemies(visibleArea);
         renderPlayer();
-        
-        // Camada 2 - Por cima do player (túnel do Eixão)
-        if (map.hasLayers && gameState.currentMap === 1) {
-            renderEixaoLayer2(map, visibleArea);
-        }
-        
         renderCampoTraves();  // Traves DEPOIS do player
         renderFieldShadow(map);
         renderStreetLights(map, visibleArea);
