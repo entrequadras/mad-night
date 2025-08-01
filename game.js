@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.37 - Paredes Simples');
+console.log('Mad Night v1.9.38 - Sintaxe Corrigida');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.37 - Paredes Simples',
+    version: 'v1.9.38 - Sintaxe Corrigida',
     debugMode: false
 };
 
@@ -233,7 +233,6 @@ const maps = [
             {type: 'arvore002', x: 1850, y: 100},
             {type: 'arvore003', x: 1830, y: 250},
             {type: 'arvore004', x: 1860, y: 380},
-            // BURACO - sem árvores entre Y: 490-650 (160 pixels de espaço)
             {type: 'arvore001', x: 1840, y: 720},
             {type: 'arvore002', x: 1810, y: 850},
             {type: 'arvore003', x: 1870, y: 970},
@@ -1844,11 +1843,11 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.37 - Paredes Simples 🎮');
-console.log('✅ Simplificado - apenas paredes essenciais');
-console.log('✅ Bordas do mapa definidas');
-console.log('✅ Y limitado em 420 (exceto no túnel)');
-console.log('🛤️ Caminho livre para o player');
-console.log('🎯 TESTE AGORA!');
+console.log('🎮 Mad Night v1.9.38 - Sintaxe Corrigida 🎮');
+console.log('✅ Removido comentário com ":" que causava erro');
+console.log('✅ Sintaxe limpa sem comentários problemáticos');
+console.log('🛤️ Mapa do Eixão simplificado');
+console.log('🔍 Debug mode ainda disponível (tecla D)');
+console.log('🎯 DEVE FUNCIONAR AGORA!');
 
 // FIM DO ARQUIVO
