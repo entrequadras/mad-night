@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.69 - Export do Maconhão implementado');
+console.log('Mad Night v1.9.70 - Melhoria do Maconhão com novos objetos');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.69 - Export do Maconhão implementado'
+    version: 'v1.9.70 - Melhoria do Maconhão com novos objetos'
 };
 
 // Player
@@ -74,6 +74,11 @@ const assets = {
     grama003: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama004: { img: new Image(), loaded: false, width: 120, height: 120 },
     caixadeluz: { img: new Image(), loaded: false, width: 45, height: 45 },
+    banco03: { img: new Image(), loaded: false, width: 44, height: 34 },
+    banco04: { img: new Image(), loaded: false, width: 44, height: 36 },
+    garrafaquebrada01: { img: new Image(), loaded: false, width: 40, height: 24 },
+    garrafaquebrada02: { img: new Image(), loaded: false, width: 40, height: 24 },
+    cadeiradepraia01: { img: new Image(), loaded: false, width: 29, height: 40 },
     // Assets do Eixão
     eixaoCamada1: { img: new Image(), loaded: false, width: 3000, height: 868 },
     eixaoCamada2: { img: new Image(), loaded: false, width: 3000, height: 868 }
@@ -126,6 +131,21 @@ assets.grama004.img.onload = () => { assets.grama004.loaded = true; };
 // Carregar objetos
 assets.caixadeluz.img.src = 'assets/objects/caixadeluz.png';
 assets.caixadeluz.img.onload = () => { assets.caixadeluz.loaded = true; };
+
+assets.banco03.img.src = 'assets/objects/banco03.png';
+assets.banco03.img.onload = () => { assets.banco03.loaded = true; };
+
+assets.banco04.img.src = 'assets/objects/banco04.png';
+assets.banco04.img.onload = () => { assets.banco04.loaded = true; };
+
+assets.garrafaquebrada01.img.src = 'assets/objects/garrafaquebrada01.png';
+assets.garrafaquebrada01.img.onload = () => { assets.garrafaquebrada01.loaded = true; };
+
+assets.garrafaquebrada02.img.src = 'assets/objects/garrafaquebrada02.png';
+assets.garrafaquebrada02.img.onload = () => { assets.garrafaquebrada02.loaded = true; };
+
+assets.cadeiradepraia01.img.src = 'assets/objects/cadeiradepraia01.png';
+assets.cadeiradepraia01.img.onload = () => { assets.cadeiradepraia01.loaded = true; };
 
 // Carregar assets do Eixão
 assets.eixaoCamada1.img.src = 'assets/floors/eixao_da_morte_camada1.png';
@@ -235,8 +255,8 @@ function exportMapImage() {
                     shadowX, shadowY, 0,
                     shadowX, shadowY, shadowRadius
                 );
-                gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-                gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+                gradient.addColorStop(0, 'rgba(0, 0, 0, 0.72)');  // Sombras das árvores também +20%
+                gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
                 gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
                 exportCtx.fillStyle = gradient;
                 exportCtx.fillRect(
@@ -303,11 +323,11 @@ function exportMapImage() {
         centerX, centerY, 0,
         centerX, centerY, 450
     );
-    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
-    gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.45)');  
-    gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.35)');  
-    gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.2)');  
-    gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.1)');  
+    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');   // Sombra do campo também +20%
+    gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.54)');
+    gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.42)');
+    gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.24)');
+    gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.12)');  
     gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
     
     exportCtx.fillStyle = gradient;
@@ -318,31 +338,31 @@ function exportMapImage() {
         900
     );
     
-    // Sombras dos cantos
+    // Sombras dos cantos também mais escuras
     const cornerGradient1 = exportCtx.createRadialGradient(0, 0, 0, 0, 0, 400);
-    cornerGradient1.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-    cornerGradient1.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+    cornerGradient1.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
+    cornerGradient1.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
     cornerGradient1.addColorStop(1, 'rgba(0, 0, 0, 0)');
     exportCtx.fillStyle = cornerGradient1;
     exportCtx.fillRect(0, 0, 400, 400);
     
     const cornerGradient2 = exportCtx.createRadialGradient(1920, 0, 0, 1920, 0, 400);
-    cornerGradient2.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-    cornerGradient2.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+    cornerGradient2.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
+    cornerGradient2.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
     cornerGradient2.addColorStop(1, 'rgba(0, 0, 0, 0)');
     exportCtx.fillStyle = cornerGradient2;
     exportCtx.fillRect(1920 - 400, 0, 400, 400);
     
     const cornerGradient3 = exportCtx.createRadialGradient(0, 1080, 0, 0, 1080, 400);
-    cornerGradient3.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-    cornerGradient3.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+    cornerGradient3.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
+    cornerGradient3.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
     cornerGradient3.addColorStop(1, 'rgba(0, 0, 0, 0)');
     exportCtx.fillStyle = cornerGradient3;
     exportCtx.fillRect(0, 1080 - 400, 400, 400);
     
     const cornerGradient4 = exportCtx.createRadialGradient(1920, 1080, 0, 1920, 1080, 400);
-    cornerGradient4.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-    cornerGradient4.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+    cornerGradient4.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
+    cornerGradient4.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
     cornerGradient4.addColorStop(1, 'rgba(0, 0, 0, 0)');
     exportCtx.fillStyle = cornerGradient4;
     exportCtx.fillRect(1920 - 400, 1080 - 400, 400, 400);
@@ -474,10 +494,19 @@ const maps = [
         ],
         streetLights: [
             {type: 'poste000', x: 960, y: 780, rotation: 0, lightRadius: 100, id: 'post3'},
-            {type: 'poste001', x: 1400, y: 540, rotation: 0, lightRadius: 100, id: 'post4'}
+            {type: 'poste001', x: 1400, y: 540, rotation: 0, lightRadius: 100, id: 'post4'},
+            {type: 'poste000', x: 450, y: 60, rotation: 0, lightRadius: 100, id: 'post5'}
         ],
         objects: [
-            {type: 'caixadeluz', x: 1750, y: 560, rotation: 0}
+            {type: 'caixadeluz', x: 1750, y: 560, rotation: 0},
+            // Pracinha embaixo do poste novo
+            {type: 'banco03', x: 430, y: 200, rotation: 0},
+            {type: 'banco04', x: 480, y: 200, rotation: 0},
+            {type: 'garrafaquebrada01', x: 455, y: 240, rotation: 0},
+            // Cadeira de praia
+            {type: 'cadeiradepraia01', x: 210, y: 1000, rotation: 0},
+            // Garrafa quebrada 2
+            {type: 'garrafaquebrada02', x: 1730, y: 70, rotation: 0}
         ],
         walls: [
             // Paredes invisíveis para colisão apenas
@@ -1578,11 +1607,11 @@ function renderFieldShadow(map) {
             centerX, centerY, 0,
             centerX, centerY, 450
         );
-        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
-        gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.45)');  
-        gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.35)');  
-        gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.2)');  
-        gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.1)');  
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');   // Era 0.5, agora 0.6 (+20%)
+        gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.54)'); // Era 0.45, agora 0.54 (+20%)
+        gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.42)'); // Era 0.35, agora 0.42 (+20%)
+        gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.24)'); // Era 0.2, agora 0.24 (+20%)
+        gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.12)'); // Era 0.1, agora 0.12 (+20%)  
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
         
         ctx.fillStyle = gradient;
@@ -1594,29 +1623,29 @@ function renderFieldShadow(map) {
         );
         
         const cornerGradient1 = ctx.createRadialGradient(0, 0, 0, 0, 0, 400);
-        cornerGradient1.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-        cornerGradient1.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+        cornerGradient1.addColorStop(0, 'rgba(0, 0, 0, 0.72)');    // Era 0.6, agora 0.72 (+20%)
+        cornerGradient1.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');  // Era 0.3, agora 0.36 (+20%)
         cornerGradient1.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = cornerGradient1;
         ctx.fillRect(0, 0, 400, 400);
         
         const cornerGradient2 = ctx.createRadialGradient(map.width, 0, 0, map.width, 0, 400);
-        cornerGradient2.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-        cornerGradient2.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+        cornerGradient2.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
+        cornerGradient2.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
         cornerGradient2.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = cornerGradient2;
         ctx.fillRect(map.width - 400, 0, 400, 400);
         
         const cornerGradient3 = ctx.createRadialGradient(0, map.height, 0, 0, map.height, 400);
-        cornerGradient3.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-        cornerGradient3.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+        cornerGradient3.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
+        cornerGradient3.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
         cornerGradient3.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = cornerGradient3;
         ctx.fillRect(0, map.height - 400, 400, 400);
         
         const cornerGradient4 = ctx.createRadialGradient(map.width, map.height, 0, map.width, map.height, 400);
-        cornerGradient4.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-        cornerGradient4.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+        cornerGradient4.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
+        cornerGradient4.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
         cornerGradient4.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = cornerGradient4;
         ctx.fillRect(map.width - 400, map.height - 400, 400, 400);
@@ -1643,8 +1672,8 @@ function renderShadows(map, visibleArea) {
                         shadowX, shadowY, 0,
                         shadowX, shadowY, shadowRadius
                     );
-                    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-                    gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+                    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.72)');  // Era 0.6, agora 0.72 (+20%)
+                    gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)'); // Era 0.3, agora 0.36 (+20%)
                     gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
                     ctx.fillStyle = gradient;
                     ctx.fillRect(
@@ -2002,8 +2031,9 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.69 - Export do Maconhão implementado');
-console.log('🚇 BASE: Túnel simétrico do Eixão funcionando');
-console.log('📸 NOVO: Função exportMapImage() - digite no console!');
-console.log('🎯 Para exportar: vá ao Maconhão (Mapa 0) e digite exportMapImage()');
-console.log('✨ Player posicionado em (150, 300) - melhor no mapa!');
+console.log('🎮 Mad Night v1.9.70 - Melhoria do Maconhão com novos objetos');
+console.log('🏞️ NOVO: Poste em (450,60) com pracinha completa');
+console.log('🪑 NOVO: Bancos, cadeira de praia e garrafas quebradas');
+console.log('🌑 NOVO: Sombras 20% mais escuras em todo o mapa');
+console.log('📸 Para exportar: vá ao Maconhão e digite exportMapImage()');
+console.log('✨ Player posicionado em (150, 300) - explore a pracinha!');
