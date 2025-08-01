@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.51 - Parede Final Eixão');
+console.log('Mad Night v1.9.48 - Player e Parede Direita');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.51 - Parede Final Eixão'
+    version: 'v1.9.48 - Player e Parede Direita'
 };
 
 // Player
@@ -277,7 +277,7 @@ const maps = [
             
             // ÁREA 2: Rampa de descida (X: 380-420)
             // Paredes que forçam descida em diagonal
-            {x: 420, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa (sua correção manual)
+            {x: 415, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa
             {x: 380, y: 600, w: 40, h: 188, invisible: false}, // Parede inferior da rampa
             
             // PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel
@@ -289,11 +289,8 @@ const maps = [
             {x: 0, y: 530, w: 3000, h: 258, invisible: false},    // Parede inferior do túnel (SUBIU 70px: Y=600→530)
             
             // PAREDE VERTICAL DIREITA - bloqueia saída lateral do túnel
-            {x: 2665, y: 190, w: 335, h: 340, invisible: false}, // Parede direita: X=2665 até X=3000 (335px largura)
+            {x: 2855, y: 190, w: 335, h: 340, invisible: false}, // Parede direita: X=2665 até X=3000 (335px largura)
             // CORREDOR LIVRE: Y = 460-600 (140px de altura para passar)
-            
-            // PAREDE FINAL - força player a subir no final do túnel
-            {x: 2855, y: 210, w: 145, h: 578, invisible: false}, // Parede de X=2855 até X=3000, do Y=210 até extremo sul (Y=788)
             
             // ÁREA 4: Rampa de subida (X: 2800-2850) 
             // Paredes que forçam subida em diagonal
@@ -1375,6 +1372,20 @@ function renderFieldShadow(map) {
         cornerGradient2.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
         cornerGradient2.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = cornerGradient2;
+        ctx.fillRect(map.width - 400, 0, 400, 400);
+        
+        const cornerGradient3 = ctx.createRadialGradient(0, map.height, 0, 0, map.height, 400);
+        cornerGradient3.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+        cornerGradient3.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+        cornerGradient3.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = cornerGradient3;
+        ctx.fillRect(0, map.height - 400, 400, 400);
+        
+        const cornerGradient4 = ctx.createRadialGradient(map.width, map.height, 0, map.width, map.height, 400);
+        cornerGradient4.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+        cornerGradient4.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+        cornerGradient4.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = cornerGradient4;
         ctx.fillRect(map.width - 400, map.height - 400, 400, 400);
     }
 }
@@ -1758,22 +1769,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.51 - Parede Final Eixão');
-console.log('🚇 BASE: Código original v1.9.48 estável');
-console.log('🔧 TÚNEL: Paredes cinzas formando U completo');
-console.log('📍 Player spawn corrigido (100,100)');
-console.log('🎯 Nova parede final força subida no fim!');.width - 400, 0, 400, 400);
-        
-        const cornerGradient3 = ctx.createRadialGradient(0, map.height, 0, 0, map.height, 400);
-        cornerGradient3.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-        cornerGradient3.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
-        cornerGradient3.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = cornerGradient3;
-        ctx.fillRect(0, map.height - 400, 400, 400);
-        
-        const cornerGradient4 = ctx.createRadialGradient(map.width, map.height, 0, map.width, map.height, 400);
-        cornerGradient4.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-        cornerGradient4.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
-        cornerGradient4.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = cornerGradient4;
-        ctx.fillRect(map
+console.log('🎮 Mad Night v1.9.48 - Player e Parede Direita');
+console.log('🚇 BASE: Código original v1.9.32 estável');
+console.log('🔧 TÚNEL: Paredes VISÍVEIS em cinza formando U');
+console.log('📍 Player inicia em (200,190)');
+console.log('🎯 Pressione N para Mapa 2 e veja as paredes!');
