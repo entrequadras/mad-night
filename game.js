@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.75 - Melhoria do Maconhão com novos objetos');
+console.log('Mad Night v1.9.76 - Melhoria do Maconhão com novos objetos');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.75 - Correção do corredor horizontal do túnel'
+    version: 'v1.9.76 - Correção do corredor horizontal do túnel'
 };
 
 // Player
@@ -569,29 +569,35 @@ const maps = [
         {x: 2980, y: 0, w: 20, h: 868, invisible: true}
     ],
     lights: [
-        // Grupo 1 - Entrada
-        {x: 448, y: 185, radius: 90, id: 'eixao1'},
-        {x: 690, y: 165, radius: 90, id: 'eixao2'},
-        {x: 605, y: 348, radius: 90, id: 'eixao3'},
-        
-        // Grupo 2 - Meio esquerdo
-        {x: 647, y: 611, radius: 90, id: 'eixao4'},
-        {x: 923, y: 245, radius: 90, id: 'eixao5'},
-        {x: 1118, y: 578, radius: 90, id: 'eixao6'},
-        {x: 1120, y: 245, radius: 90, id: 'eixao7'},
-        
-        // Grupo 3 - Meio direito
-        {x: 2125, y: 584, radius: 90, id: 'eixao8'},
-        {x: 2322, y: 581, radius: 90, id: 'eixao9'},
-        {x: 2114, y: 249, radius: 90, id: 'eixao10'},
-        {x: 2310, y: 245, radius: 90, id: 'eixao11'},
-        
-        // Grupo 4 - Saída
-        {x: 2541, y: 171, radius: 90, id: 'eixao12'},
-        {x: 2793, y: 197, radius: 90, id: 'eixao13'},
-        {x: 2628, y: 350, radius: 90, id: 'eixao14'},
-        {x: 2585, y: 102, radius: 90, id: 'eixao15'}
-    ],
+    // Grupo 1 - Entrada
+    {x: 448, y: 185, radius: 100, id: 'eixao1'},
+    {x: 690, y: 165, radius: 100, id: 'eixao2'},
+    {x: 605, y: 348, radius: 100, id: 'eixao3'},
+    
+    // Grupo 2 - Meio esquerdo
+    {x: 647, y: 611, radius: 100, id: 'eixao4'},
+    {x: 923, y: 245, radius: 100, id: 'eixao5'},
+    {x: 1106, y: 569, radius: 100, id: 'eixao6'},  // Corrigido de 1118,578 para 1106,569
+    {x: 1120, y: 245, radius: 100, id: 'eixao7'},
+    
+    // Grupo 3 - Meio direito
+    {x: 2125, y: 584, radius: 100, id: 'eixao8'},
+    {x: 2322, y: 581, radius: 100, id: 'eixao9'},
+    {x: 2114, y: 249, radius: 100, id: 'eixao10'},
+    {x: 2310, y: 245, radius: 100, id: 'eixao11'},
+    
+    // Grupo 4 - Saída
+    {x: 2541, y: 171, radius: 100, id: 'eixao12'},
+    {x: 2793, y: 197, radius: 100, id: 'eixao13'},
+    {x: 2628, y: 350, radius: 100, id: 'eixao14'},
+    {x: 2585, y: 102, radius: 100, id: 'eixao15'},
+    
+    // Novas luzes adicionadas
+    {x: 2584, y: 605, radius: 100, id: 'eixao16'},  // 2564,560 + offset
+    {x: 2669, y: 828, radius: 100, id: 'eixao17'},  // 2649,783 + offset
+    {x: 910, y: 574, radius: 100, id: 'eixao18'},   // 890,529 + offset
+    {x: 563, y: 834, radius: 100, id: 'eixao19'}    // 543,789 + offset
+],
     shadows: [],
     playerStart: {x: 100, y: 100},
     playerStartEscape: {x: 2900, y: 190},
@@ -1636,8 +1642,9 @@ function renderLightsOnly(map, visibleArea) {
                 light.x, light.y, 0,
                 light.x, light.y, light.radius
             );
-            gradient.addColorStop(0, `rgba(255, 200, 100, ${0.4 * intensity})`);
-            gradient.addColorStop(0.5, `rgba(255, 180, 80, ${0.2 * intensity})`);
+            // Intensidade reduzida em 30% (0.4 * 0.7 = 0.28, 0.2 * 0.7 = 0.14)
+            gradient.addColorStop(0, `rgba(255, 200, 100, ${0.28 * intensity})`);
+            gradient.addColorStop(0.5, `rgba(255, 180, 80, ${0.14 * intensity})`);
             gradient.addColorStop(1, 'rgba(255, 160, 60, 0)');
             
             ctx.fillStyle = gradient;
@@ -2096,7 +2103,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.75 - Correção do corredor horizontal do túnel');
+console.log('🎮 Mad Night v1.9.76 - Correção do corredor horizontal do túnel');
 console.log('🚇 AJUSTE: Corredor horizontal vai até X=2906 agora');
 console.log('🔧 AJUSTE: Rampa de subida começa em X=2906 (mais tarde)');
 console.log('📐 AJUSTE: Parede direita reposicionada para X=2906');
