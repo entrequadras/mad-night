@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.74 - Melhoria do Maconhão com novos objetos');
+console.log('Mad Night v1.9.75 - Melhoria do Maconhão com novos objetos');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.73 - Correção do corredor horizontal do túnel'
+    version: 'v1.9.75 - Correção do corredor horizontal do túnel'
 };
 
 // Player
@@ -531,8 +531,10 @@ const maps = [
         trees: [],
         streetLights: [],
         objects: [],
-        walls: [
-    // ============ TÚNEL EM FORMATO U - CORREDOR ESTENDIDO ============
+        // Substitua apenas a seção walls do mapa 1 (Eixão da Morte) por esta:
+
+walls: [
+    // ============ TÚNEL EM FORMATO U - SAÍDA EM X=2800 ============
     
     // ÁREA 1: Entrada livre (X: 0-380)
     // Player pode andar livre até chegar na entrada do túnel
@@ -545,21 +547,21 @@ const maps = [
     // PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel
     {x: 0, y: 190, w: 335, h: 340, invisible: false},  // Parede esquerda
     
-    // ÁREA 3: Túnel horizontal inferior ESTENDIDO (X: 420-2880)
-    // Corredor horizontal no fundo - agora vai até 2880!
-    {x: 445, y: 80, w: 2435, h: 380, invisible: false},   // Parede superior ESTENDIDA (era 2135, agora 2435)
+    // ÁREA 3: Túnel horizontal inferior (X: 420-2800)
+    // Corredor horizontal no fundo - agora vai até 2800!
+    {x: 445, y: 80, w: 2355, h: 380, invisible: false},   // Parede superior (2355 de largura)
     {x: 0, y: 530, w: 3000, h: 258, invisible: false},    // Parede inferior do túnel
     
-    // PAREDE VERTICAL DIREITA - MOVIDA PARA X=2965
-    {x: 2965, y: 190, w: 35, h: 340, invisible: false},   // Parede direita (movida de 2665 para 2965)
+    // PAREDE VERTICAL DIREITA - AJUSTADA
+    {x: 2885, y: 190, w: 115, h: 340, invisible: false},  // Parede direita (em X=2885)
     
-    // ÁREA 4: Rampa de subida REPOSICIONADA (X: 2880-2920)
+    // ÁREA 4: Rampa de subida (X: 2800-2840)
     // Paredes que forçam subida em diagonal
-    {x: 2845, y: 80, w: 40, h: 150, invisible: false},    // Parede superior da rampa (movida de 2545 para 2845)
-    {x: 2880, y: 600, w: 40, h: 188, invisible: false},   // Parede inferior da rampa (movida de 2580 para 2880)
+    {x: 2765, y: 80, w: 40, h: 150, invisible: false},    // Parede superior da rampa
+    {x: 2800, y: 600, w: 40, h: 188, invisible: false},   // Parede inferior da rampa
     
-    // ÁREA 5: Saída livre (X: 2920-3000)
-    // Player pode andar livre após sair do túnel
+    // ÁREA 5: Saída livre (X: 2840-3000)
+    // Player pode andar livre após sair do túnel (160 pixels de espaço)
     
     // Bordas do mapa
     {x: 0, y: 0, w: 3000, h: 80, invisible: true},
@@ -2035,7 +2037,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.73 - Correção do corredor horizontal do túnel');
+console.log('🎮 Mad Night v1.9.75 - Correção do corredor horizontal do túnel');
 console.log('🚇 AJUSTE: Corredor horizontal vai até X=2906 agora');
 console.log('🔧 AJUSTE: Rampa de subida começa em X=2906 (mais tarde)');
 console.log('📐 AJUSTE: Parede direita reposicionada para X=2906');
