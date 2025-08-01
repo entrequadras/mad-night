@@ -1616,6 +1616,40 @@ function renderStreetLights(map, visibleArea) {
     });
 }
 
+// NOVA FUNÇÃO ADICIONADA AQUI
+function renderLightsOnly(map, visibleArea) {
+    if (!map.lights || map.lights.length === 0) return;
+    
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    
+    map.lights.forEach(light => {
+        // Verifica se a luz está visível
+        if (light.x + light.radius > visibleArea.left && 
+            light.x - light.radius < visibleArea.right &&
+            light.y + light.radius > visibleArea.top && 
+            light.y - light.radius < visibleArea.bottom) {
+            
+            const intensity = flickerSystem.update(light.id || 'default');
+            
+            const gradient = ctx.createRadialGradient(
+                light.x, light.y, 0,
+                light.x, light.y, light.radius
+            );
+            gradient.addColorStop(0, `rgba(255, 200, 100, ${0.4 * intensity})`);
+            gradient.addColorStop(0.5, `rgba(255, 180, 80, ${0.2 * intensity})`);
+            gradient.addColorStop(1, 'rgba(255, 160, 60, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(light.x, light.y, light.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    });
+    
+    ctx.restore();
+}
+
 function renderObjects(map, visibleArea) {
     if (!map.objects) return;
     
@@ -1991,6 +2025,9 @@ function draw() {
             
             ctx.restore();
         }
+        
+        // CHAMADA ADICIONADA AQUI
+        renderLightsOnly(map, visibleArea);
         
         ctx.restore();
         renderUI(map);
