@@ -522,61 +522,83 @@ const maps = [
         exit: {x: 1800, y: 490, w: 80, h: 100},
         direction: 'right'
     },
-    {
-        name: "Eixão da Morte",
-        subtitle: "Túnel sob as pistas",
-        width: 3000,
-        height: 868,
-        enemies: [],
-        trees: [],
-        streetLights: [],
-        objects: [],
-        // Substitua apenas a seção walls do mapa 1 (Eixão da Morte) por esta:
-
-walls: [
-    // ============ TÚNEL EM FORMATO U - SAÍDA EM X=2780 E TÚNEL MAIS BAIXO ============
-    
-    // ÁREA 1: Entrada livre (X: 0-380)
-    // Player pode andar livre até chegar na entrada do túnel
-    
-    // ÁREA 2: Rampa de descida (X: 380-420)
-    // Paredes que forçam descida em diagonal - ESTENDIDAS +42px
-    {x: 415, y: 80, w: 40, h: 192, invisible: false},  // Parede superior da rampa (era 150, agora 192)
-    {x: 380, y: 642, w: 40, h: 188, invisible: false}, // Parede inferior da rampa (Y movido de 600 para 642)
-    
-    // PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel - DESCIDA +42px
-    {x: 0, y: 232, w: 335, h: 340, invisible: false},  // Parede esquerda (Y movido de 190 para 232)
-    
-    // ÁREA 3: Túnel horizontal inferior (X: 420-2780) - DESCIDO +42px
-    // Corredor horizontal no fundo - agora mais baixo e até 2780!
-    {x: 445, y: 80, w: 2335, h: 422, invisible: false},   // Parede superior (altura aumentada de 380 para 422)
-    {x: 0, y: 572, w: 3000, h: 216, invisible: false},    // Parede inferior (Y movido de 530 para 572)
-    
-    // PAREDE VERTICAL DIREITA - AJUSTADA E DESCIDA +42px
-    {x: 2865, y: 232, w: 135, h: 340, invisible: false},  // Parede direita (X=2865, Y=232)
-    
-    // ÁREA 4: Rampa de subida (X: 2780-2820) - AJUSTADA +42px
-    // Paredes que forçam subida em diagonal
-    {x: 2745, y: 80, w: 40, h: 192, invisible: false},    // Parede superior da rampa (altura 192)
-    {x: 2780, y: 642, w: 40, h: 188, invisible: false},   // Parede inferior da rampa (X=2780, Y=642)
-    
-    // ÁREA 5: Saída livre (X: 2820-3000)
-    // Player pode andar livre após sair do túnel (180 pixels de espaço)
-    
-    // Bordas do mapa
-    {x: 0, y: 0, w: 3000, h: 80, invisible: true},
-    {x: 0, y: 788, w: 3000, h: 80, invisible: true},
-    {x: 0, y: 0, w: 20, h: 868, invisible: true},
-    {x: 2980, y: 0, w: 20, h: 868, invisible: true}
-],
-        lights: [],
-        shadows: [],
-        playerStart: {x: 100, y: 100},
-        playerStartEscape: {x: 2900, y: 190},
-        exit: {x: 2950, y: 80, w: 50, h: 100},
-        direction: 'right',
-        hasLayers: true
-    },
+    // Substitua o mapa 1 (Eixão da Morte) no array maps por este:
+{
+    name: "Eixão da Morte",
+    subtitle: "Túnel sob as pistas",
+    width: 3000,
+    height: 868,
+    enemies: [],
+    trees: [],
+    streetLights: [],
+    objects: [],
+    walls: [
+        // ============ TÚNEL EM FORMATO U - SAÍDA EM X=2780 E TÚNEL 32px MAIS BAIXO ============
+        
+        // ÁREA 1: Entrada livre (X: 0-380)
+        // Player pode andar livre até chegar na entrada do túnel
+        
+        // ÁREA 2: Rampa de descida (X: 380-420)
+        // Paredes que forçam descida em diagonal - ESTENDIDAS +32px
+        {x: 415, y: 80, w: 40, h: 182, invisible: false},  // Parede superior da rampa
+        {x: 380, y: 632, w: 40, h: 188, invisible: false}, // Parede inferior da rampa
+        
+        // PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel - DESCIDA +32px
+        {x: 0, y: 222, w: 335, h: 340, invisible: false},  // Parede esquerda
+        
+        // ÁREA 3: Túnel horizontal inferior (X: 420-2780) - DESCIDO +32px
+        // Corredor horizontal no fundo - agora 32px mais baixo e até 2780!
+        {x: 445, y: 80, w: 2335, h: 412, invisible: false},   // Parede superior
+        {x: 0, y: 562, w: 3000, h: 226, invisible: false},    // Parede inferior
+        
+        // PAREDE VERTICAL DIREITA - AJUSTADA E DESCIDA +32px
+        {x: 2865, y: 222, w: 135, h: 340, invisible: false},  // Parede direita
+        
+        // ÁREA 4: Rampa de subida (X: 2780-2820) - AJUSTADA +32px
+        // Paredes que forçam subida em diagonal
+        {x: 2745, y: 80, w: 40, h: 182, invisible: false},    // Parede superior da rampa
+        {x: 2780, y: 632, w: 40, h: 188, invisible: false},   // Parede inferior da rampa
+        
+        // ÁREA 5: Saída livre (X: 2820-3000)
+        // Player pode andar livre após sair do túnel (180 pixels de espaço)
+        
+        // Bordas do mapa
+        {x: 0, y: 0, w: 3000, h: 80, invisible: true},
+        {x: 0, y: 788, w: 3000, h: 80, invisible: true},
+        {x: 0, y: 0, w: 20, h: 868, invisible: true},
+        {x: 2980, y: 0, w: 20, h: 868, invisible: true}
+    ],
+    lights: [
+        // Grupo 1 - Entrada
+        {x: 448, y: 185, radius: 90, id: 'eixao1'},
+        {x: 690, y: 165, radius: 90, id: 'eixao2'},
+        {x: 605, y: 348, radius: 90, id: 'eixao3'},
+        
+        // Grupo 2 - Meio esquerdo
+        {x: 647, y: 611, radius: 90, id: 'eixao4'},
+        {x: 923, y: 245, radius: 90, id: 'eixao5'},
+        {x: 1118, y: 578, radius: 90, id: 'eixao6'},
+        {x: 1120, y: 245, radius: 90, id: 'eixao7'},
+        
+        // Grupo 3 - Meio direito
+        {x: 2125, y: 584, radius: 90, id: 'eixao8'},
+        {x: 2322, y: 581, radius: 90, id: 'eixao9'},
+        {x: 2114, y: 249, radius: 90, id: 'eixao10'},
+        {x: 2310, y: 245, radius: 90, id: 'eixao11'},
+        
+        // Grupo 4 - Saída
+        {x: 2541, y: 171, radius: 90, id: 'eixao12'},
+        {x: 2793, y: 197, radius: 90, id: 'eixao13'},
+        {x: 2628, y: 350, radius: 90, id: 'eixao14'},
+        {x: 2585, y: 102, radius: 90, id: 'eixao15'}
+    ],
+    shadows: [],
+    playerStart: {x: 100, y: 100},
+    playerStartEscape: {x: 2900, y: 190},
+    exit: {x: 2950, y: 80, w: 50, h: 100},
+    direction: 'right',
+    hasLayers: true
+},
     {
         name: "Fronteira com o Komando Satânico",
         subtitle: "Primeira superquadra",
