@@ -1,4 +1,4 @@
- console.log('Mad Night v1.9.67 - Parede Direita fix');
+ console.log('Mad Night v1.9.68 - Parede Direita fix');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.67 - Parede Direita fix'
+    version: 'v1.9.68 - Parede Direita fix'
 };
 
 // Player
@@ -1768,7 +1768,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.67 - Parede Direita fix');
+console.log('🎮 Mad Night v1.9.68 - Parede Direita fix');
 console.log('🚇 BASE: Código original v1.9.32 estável');
 console.log('🔧 TÚNEL: Paredes VISÍVEIS em cinza formando U');
 console.log('📍 Player inicia em (200,190)');
