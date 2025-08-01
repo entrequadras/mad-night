@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.72 - Export universal + garrafa reposicionada'
+    version: 'v1.9.73 - Correção do corredor horizontal do túnel'
 };
 
 // Player
@@ -546,20 +546,20 @@ const maps = [
 // PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel
 {x: 0, y: 190, w: 335, h: 340, invisible: false},  // Parede de X=0 até X=335, Y=190 até Y=530
 
-// ÁREA 3: Túnel horizontal inferior (X: 420-2580)
+// ÁREA 3: Túnel horizontal inferior (X: 420-2906)
 // Corredor horizontal no fundo
-{x: 445, y: 80, w: 2135, h: 380, invisible: false},   // Parede superior do túnel (AJUSTADA para simetria)
+{x: 445, y: 80, w: 2461, h: 380, invisible: false},   // Parede superior do túnel (w=2461: de X=445 até X=2906)
 {x: 0, y: 530, w: 3000, h: 258, invisible: false},    // Parede inferior do túnel
 
 // PAREDE VERTICAL DIREITA - bloqueia saída lateral do túnel (ESPELHADA)
-{x: 2665, y: 190, w: 335, h: 340, invisible: false}, // Parede direita espelhada (mesmas dimensões da esquerda)
+{x: 2906, y: 190, w: 94, h: 340, invisible: false}, // Parede direita ajustada (X=2906 até X=3000)
 
-// ÁREA 4: Rampa de subida (X: 2580-2620) - ESPELHADA
+// ÁREA 4: Rampa de subida (X: 2906-2950) - ESPELHADA
 // Paredes que forçam subida em diagonal (mesmas dimensões da descida)
-{x: 2545, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa (espelhada)
-{x: 2580, y: 600, w: 40, h: 188, invisible: false}, // Parede inferior da rampa (espelhada)
+{x: 2866, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa (espelhada)
+{x: 2906, y: 600, w: 40, h: 188, invisible: false}, // Parede inferior da rampa (espelhada)
 
-// ÁREA 5: Saída livre (X: 2620-3000)
+// ÁREA 5: Saída livre (X: 2950-3000)
 // Player pode andar livre após sair do túnel (mesmo espaço que entrada)
 
 // Bordas do mapa
@@ -2036,9 +2036,9 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.72 - Export universal + garrafa reposicionada');
-console.log('📸 NOVO: exportMapImage() funciona em QUALQUER mapa!');
-console.log('🗺️ SUPORTE: Maconhão (1920x1080) + Eixão (3000x868) + outros');
-console.log('🍺 AJUSTE: Garrafa quebrada2 movida para (1520, 1015)');
-console.log('🎯 Para exportar: digite exportMapImage() em qualquer mapa!');
-console.log('✨ Agora você pode imprimir Maconhão E Eixão!');
+console.log('🎮 Mad Night v1.9.73 - Correção do corredor horizontal do túnel');
+console.log('🚇 AJUSTE: Corredor horizontal vai até X=2906 agora');
+console.log('🔧 AJUSTE: Rampa de subida começa em X=2906 (mais tarde)');
+console.log('📐 AJUSTE: Parede direita reposicionada para X=2906');
+console.log('🎯 Agora o player percorre mais túnel antes de subir!');
+console.log('✨ Teste no Eixão da Morte (Mapa 1)!');
