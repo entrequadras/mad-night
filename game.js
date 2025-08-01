@@ -269,7 +269,7 @@ const maps = [
         streetLights: [],
         objects: [],
         walls: [
-            // ============ TÚNEL EM FORMATO U - PAREDES VISÍVEIS ============
+             // ============ TÚNEL EM FORMATO U - PAREDES VISÍVEIS ============
             // Vou construir o túnel em forma de U usando paredes cinzas normais
             
             // ÁREA 1: Entrada livre (X: 0-380)
@@ -289,13 +289,15 @@ const maps = [
             {x: 0, y: 530, w: 3000, h: 258, invisible: false},    // Parede inferior do túnel (SUBIU 70px: Y=600→530)
             
             // PAREDE VERTICAL DIREITA - bloqueia saída lateral do túnel
-            {x: 2840, y: 190, w: 350, h: 340, invisible: false}, // Parede direita: X=2665 até X=3000 (335px largura)
-            // CORREDOR LIVRE: Y = 460-600 (140px de altura para passar)
+            // MUDANÇA: Movendo 15 pixels para a esquerda (X: 2855 → 2840)
+            {x: 2840, y: 190, w: 350, h: 340, invisible: false}, // Parede direita agora começa em X=2840
+            // CORREDOR LIVRE: Agora tem 15px a mais de largura na subida!
             
             // ÁREA 4: Rampa de subida (X: 2800-2850) 
             // Paredes que forçam subida em diagonal
-            {x: 2855, y: 80, w: 50, h: 150, invisible: false},  // Parede superior da rampa
-            {x: 2855, y: 600, w: 50, h: 188, invisible: false}, // Parede inferior da rampa
+            // MUDANÇA: Ajustando as paredes da rampa para acompanhar
+            {x: 2840, y: 80, w: 65, h: 150, invisible: false},  // Parede superior da rampa (movida 15px para esquerda)
+            {x: 2840, y: 600, w: 65, h: 188, invisible: false}, // Parede inferior da rampa (movida 15px para esquerda)
             
             // ÁREA 5: Saída livre (X: 2850-3000)
             // Player pode andar livre após sair do túnel
