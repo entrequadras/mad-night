@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.71 - Ajustes no Maconhão (poste e bancos)'
+    version: 'v1.9.72 - Export universal + garrafa reposicionada'
 };
 
 // Player
@@ -506,7 +506,7 @@ const maps = [
             // Cadeira de praia
             {type: 'cadeiradepraia01', x: 210, y: 1000, rotation: 0},
             // Garrafa quebrada 2 reposicionada
-            {type: 'garrafaquebrada02', x: 1500, y: 70, rotation: 0}
+            {type: 'garrafaquebrada02', x: 1520, y: 1015, rotation: 0}
         ],
         walls: [
             // Paredes invisíveis para colisão apenas
@@ -2036,9 +2036,9 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.71 - Ajustes no Maconhão (poste e bancos)');
-console.log('📍 AJUSTE: Poste movido para X=650, pracinha acompanhou');
-console.log('📏 AJUSTE: Bancos corrigidos para 53px de largura');
-console.log('🍺 AJUSTE: Garrafa quebrada2 em X=1500, sem colisão');
-console.log('📸 Para exportar: vá ao Maconhão e digite exportMapImage()');
-console.log('✨ Pracinha agora em posição otimizada!');
+console.log('🎮 Mad Night v1.9.72 - Export universal + garrafa reposicionada');
+console.log('📸 NOVO: exportMapImage() funciona em QUALQUER mapa!');
+console.log('🗺️ SUPORTE: Maconhão (1920x1080) + Eixão (3000x868) + outros');
+console.log('🍺 AJUSTE: Garrafa quebrada2 movida para (1520, 1015)');
+console.log('🎯 Para exportar: digite exportMapImage() em qualquer mapa!');
+console.log('✨ Agora você pode imprimir Maconhão E Eixão!');
