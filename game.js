@@ -1,4 +1,4 @@
- console.log('Mad Night v1.9.66 - Parede Direita fix');
+ console.log('Mad Night v1.9.67 - Parede Direita fix');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.66 - Parede Direita fix'
+    version: 'v1.9.67 - Parede Direita fix'
 };
 
 // Player
@@ -269,40 +269,37 @@ const maps = [
         streetLights: [],
         objects: [],
         walls: [
-             // ============ TÚNEL EM FORMATO U - PAREDES VISÍVEIS ============
-            // Vou construir o túnel em forma de U usando paredes cinzas normais
-            
-            // ÁREA 1: Entrada livre (X: 0-380)
-            // Player pode andar livre até chegar na entrada do túnel
-            
-                       // ÁREA 2: Rampa de descida (X: 380-420)
-            // Paredes que forçam descida em diagonal
-            {x: 415, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa
-            {x: 380, y: 600, w: 40, h: 188, invisible: false}, // Parede inferior da rampa
-            
-            // PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel
-            {x: 0, y: 190, w: 335, h: 340, invisible: false},  // Parede de X=0 até X=335, Y=190 até Y=530
-            
-            // ÁREA 3: Túnel horizontal inferior (X: 420-2800)
-            // Corredor horizontal no fundo
-            {x: 445, y: 80, w: 2355, h: 380, invisible: false},   // Parede superior do túnel (COMEÇOU 25px depois: X=420→445)
-            {x: 0, y: 530, w: 3000, h: 258, invisible: false},    // Parede inferior do túnel (SUBIU 70px: Y=600→530)
-            
-            // PAREDE VERTICAL DIREITA - bloqueia saída lateral do túnel
-            // MUDANÇA: Movendo 15 pixels para a esquerda (X: 2855 → 2840)
-            {x: 2840, y: 190, w: 350, h: 340, invisible: false}, // Parede direita agora começa em X=2840
-            // CORREDOR LIVRE: Agora tem 15px a mais de largura na subida!
-            
-            // ÁREA 4: Rampa de subida (X: 2800-2850) 
-            // Paredes que forçam subida em diagonal
-            // MUDANÇA: Ajustando as paredes da rampa para acompanhar
-            {x: 2800, y: 50, w: 165, h: 150, invisible: false},  // Parede superior da rampa (movida 15px para esquerda)
-            {x: 2800, y: 480, w: 165, h: 188, invisible: false}, // Parede inferior da rampa (movida 15px para esquerda)
-            
-            // ÁREA 5: Saída livre (X: 2850-3000)
-            // Player pode andar livre após sair do túnel
-            
-            // Bordas do mapa
+// ============ TÚNEL EM FORMATO U - PAREDES VISÍVEIS ============
+// Vou construir o túnel em forma de U usando paredes cinzas normais
+
+// ÁREA 1: Entrada livre (X: 0-380)
+// Player pode andar livre até chegar na entrada do túnel
+
+// ÁREA 2: Rampa de descida (X: 380-420)
+// Paredes que forçam descida em diagonal
+{x: 415, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa
+{x: 380, y: 600, w: 40, h: 188, invisible: false}, // Parede inferior da rampa
+
+// PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel
+{x: 0, y: 190, w: 335, h: 340, invisible: false},  // Parede de X=0 até X=335, Y=190 até Y=530
+
+// ÁREA 3: Túnel horizontal inferior (X: 420-2580)
+// Corredor horizontal no fundo
+{x: 445, y: 80, w: 2135, h: 380, invisible: false},   // Parede superior do túnel (AJUSTADA para simetria)
+{x: 0, y: 530, w: 3000, h: 258, invisible: false},    // Parede inferior do túnel
+
+// PAREDE VERTICAL DIREITA - bloqueia saída lateral do túnel (ESPELHADA)
+{x: 2665, y: 190, w: 335, h: 340, invisible: false}, // Parede direita espelhada (mesmas dimensões da esquerda)
+
+// ÁREA 4: Rampa de subida (X: 2580-2620) - ESPELHADA
+// Paredes que forçam subida em diagonal (mesmas dimensões da descida)
+{x: 2545, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa (espelhada)
+{x: 2580, y: 600, w: 40, h: 188, invisible: false}, // Parede inferior da rampa (espelhada)
+
+// ÁREA 5: Saída livre (X: 2620-3000)
+// Player pode andar livre após sair do túnel (mesmo espaço que entrada)
+
+// Bordas do mapa
             {x: 0, y: 0, w: 3000, h: 80, invisible: true},
             {x: 0, y: 788, w: 3000, h: 80, invisible: true},
             {x: 0, y: 0, w: 20, h: 868, invisible: true},
@@ -1771,7 +1768,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.66 - Parede Direita fix');
+console.log('🎮 Mad Night v1.9.67 - Parede Direita fix');
 console.log('🚇 BASE: Código original v1.9.32 estável');
 console.log('🔧 TÚNEL: Paredes VISÍVEIS em cinza formando U');
 console.log('📍 Player inicia em (200,190)');
