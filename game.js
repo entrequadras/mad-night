@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.37 - Túnel Linha Verde');
+console.log('Mad Night v1.9.39 - Debug Túnel');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.37 - Túnel Linha Verde'
+    version: 'v1.9.39 - Debug Túnel'
 };
 
 // Player
@@ -1468,20 +1468,89 @@ function renderShadows(map, visibleArea) {
 }
 
 function renderWalls(map, visibleArea) {
-    ctx.fillStyle = '#333';
+    // RENDERIZAR TODAS AS PAREDES (incluindo invisíveis) para DEBUG
     map.walls.forEach(wall => {
-        // Só renderizar se não for invisível
-        if (!wall.invisible && 
-            wall.x + wall.w > visibleArea.left && 
+        if (wall.x + wall.w > visibleArea.left && 
             wall.x < visibleArea.right &&
             wall.y + wall.h > visibleArea.top && 
             wall.y < visibleArea.bottom) {
-            ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
+            
+            if (wall.invisible) {
+                // Paredes invisíveis em vermelho semi-transparente
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+                ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
+                
+                // Borda vermelha para melhor visualização
+                ctx.strokeStyle = '#f00';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(wall.x, wall.y, wall.w, wall.h);
+            } else {
+                // Paredes visíveis normais
+                ctx.fillStyle = '#333';
+                ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
+            }
         }
     });
 }
 
-function renderSpecialObjects(map) {
+function renderDebugInfo(map) {
+    // LINHA VERDE DE REFERÊNCIA - mostrar o caminho esperado
+    if (gameState.currentMap === 1) {
+        ctx.strokeStyle = '#0f0';
+        ctx.lineWidth = 4;
+        ctx.setLineDash([]);
+        
+        ctx.beginPath();
+        // Linha verde exata que o player deveria seguir
+        ctx.moveTo(200, 90);   // Início
+        ctx.lineTo(380, 190);  // Entrada do túnel
+        ctx.lineTo(420, 537);  // Descida para túnel
+        ctx.lineTo(2820, 537); // Travessia horizontal
+        ctx.lineTo(2845, 190); // Subida do túnel
+        ctx.lineTo(2950, 80);  // Saída
+        ctx.stroke();
+        
+        // Pontos de referência
+        ctx.fillStyle = '#ff0';
+        const points = [
+            {x: 200, y: 90, label: 'INÍCIO'},
+            {x: 380, y: 190, label: 'ENTRADA'},
+            {x: 420, y: 537, label: 'TÚNEL'},
+            {x: 2820, y: 537, label: 'FIM TÚNEL'},
+            {x: 2845, y: 190, label: 'SUBIDA'},
+            {x: 2950, y: 80, label: 'SAÍDA'}
+        ];
+        
+        points.forEach(point => {
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Labels dos pontos
+            ctx.fillStyle = '#fff';
+            ctx.font = '12px Arial';
+            ctx.fillText(point.label, point.x + 10, point.y - 10);
+            ctx.fillStyle = '#ff0';
+        });
+    }
+}
+
+function renderPlayerDebug() {
+    // Área de colisão do player em azul semi-transparente
+    ctx.fillStyle = 'rgba(0, 0, 255, 0.3)';
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+    
+    // Borda da colisão
+    ctx.strokeStyle = '#00f';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(player.x, player.y, player.width, player.height);
+    
+    // Centro do player
+    ctx.fillStyle = '#00f';
+    ctx.beginPath();
+    ctx.arc(player.x + player.width/2, player.y + player.height/2, 3, 0, Math.PI * 2);
+    ctx.fill();
+}
     if (map.orelhao) {
         ctx.fillStyle = '#00f';
         ctx.fillRect(map.orelhao.x, map.orelhao.y, map.orelhao.w, map.orelhao.h);
@@ -1608,6 +1677,11 @@ function renderUI(map) {
     ctx.fillText(gameState.version, canvas.width/2, 160);
     ctx.textAlign = 'left';
     
+    // DEBUG INFO - Posição do player
+    ctx.fillStyle = '#0f0';
+    ctx.font = '20px Arial';
+    ctx.fillText(`Player: (${Math.floor(player.x)}, ${Math.floor(player.y)})`, 20, canvas.height - 140);
+    
     // Info
     ctx.fillStyle = '#fff';
     ctx.font = '28px Arial';
@@ -1648,6 +1722,19 @@ function renderUI(map) {
     for (let i = 0; i < gameState.maxPedalPower; i++) {
         ctx.fillStyle = i < gameState.pedalPower ? '#0f0' : '#333';
         ctx.fillText('█', 240 + i * 24, 130);
+    }
+    
+    // DEBUG - Instruções
+    if (gameState.currentMap === 1) {
+        ctx.fillStyle = '#ff0';
+        ctx.font = '16px Arial';
+        ctx.fillText('DEBUG MODE:', 20, 300);
+        ctx.fillStyle = '#fff';
+        ctx.font = '14px Arial';
+        ctx.fillText('• Vermelho = Paredes invisíveis', 20, 320);
+        ctx.fillText('• Verde = Caminho esperado', 20, 340);
+        ctx.fillText('• Azul = Área de colisão do player', 20, 360);
+        ctx.fillText('• Amarelo = Pontos de referência', 20, 380);
     }
     
     // Aviso de áudio se falhou
@@ -1715,10 +1802,12 @@ function draw() {
         renderTrees(map, visibleArea, 'bottom');
         renderObjects(map, visibleArea);
         renderWalls(map, visibleArea);
+        renderDebugInfo(map); // LINHA VERDE E PONTOS DE REFERÊNCIA
         renderSpecialObjects(map);
         renderProjectiles(visibleArea);
         renderEnemies(visibleArea);
         renderPlayer();
+        renderPlayerDebug(); // ÁREA DE COLISÃO DO PLAYER
         
         // Camada 2 - Por cima do player (túnel do Eixão)
         if (map.hasLayers && gameState.currentMap === 1) {
@@ -1833,7 +1922,7 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.37 - Túnel Linha Verde 🎮');
+console.log('🎮 Mad Night v1.9.38 - Túnel Linha Verde 🎮');
 console.log('🚇 CLEAN START: Volta da v1.9.32 original');
 console.log('🛣️ Túnel de 80px ao redor da linha verde:');
 console.log('   📍 (200,90) → (380,190) → (420,537) → (2820,537) → (2845,190) → (2950,80)');
