@@ -1,4 +1,4 @@
- console.log('Mad Night v1.9.60 - Parede Direita fix');
+ console.log('Mad Night v1.9.61 - Parede Direita fix');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -1771,7 +1771,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.60 - Parede Direita fix');
+console.log('🎮 Mad Night v1.9.61 - Parede Direita fix');
 console.log('🚇 BASE: Código original v1.9.32 estável');
 console.log('🔧 TÚNEL: Paredes VISÍVEIS em cinza formando U');
 console.log('📍 Player inicia em (200,190)');
