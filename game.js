@@ -1040,7 +1040,7 @@ function updateProjectiles() {
         if (stone.x < player.x + player.width &&
             stone.x + stone.width > player.x &&
             stone.y < player.y + player.height &&
-            stone.y + player.height > player.y) {
+            stone.y + stone.height > player.y) {
             killPlayer();
             stone.active = false;
         }
