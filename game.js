@@ -277,7 +277,7 @@ const maps = [
             
             // ÁREA 2: Rampa de descida (X: 380-420)
             // Paredes que forçam descida em diagonal
-            {x: 415, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa
+            {x: 380, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa
             {x: 380, y: 600, w: 40, h: 188, invisible: false}, // Parede inferior da rampa
             
             // PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel
@@ -296,8 +296,8 @@ const maps = [
             // ÁREA 4: Rampa de subida (X: 2800-2850) 
             // Paredes que forçam subida em diagonal
             // MUDANÇA: Ajustando as paredes da rampa para acompanhar
-            {x: 2840, y: 80, w: 65, h: 150, invisible: false},  // Parede superior da rampa (movida 15px para esquerda)
-            {x: 2840, y: 600, w: 65, h: 188, invisible: false}, // Parede inferior da rampa (movida 15px para esquerda)
+            {x: 2800, y: 80, w: 65, h: 150, invisible: false},  // Parede superior da rampa (movida 15px para esquerda)
+            {x: 2800, y: 600, w: 65, h: 188, invisible: false}, // Parede inferior da rampa (movida 15px para esquerda)
             
             // ÁREA 5: Saída livre (X: 2850-3000)
             // Player pode andar livre após sair do túnel
