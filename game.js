@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.32 - Eixão Túnel');
+console.log('Mad Night v1.9.33 - Túnel Corrigido');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.32 - Eixão Túnel'
+    version: 'v1.9.33 - Túnel Corrigido'
 };
 
 // Player
@@ -269,37 +269,51 @@ const maps = [
         streetLights: [],
         objects: [],
         walls: [
+            // ============ BORDAS EXTERNAS DO MAPA ============
             // Borda superior
             {x: 0, y: 0, w: 3000, h: 80, invisible: true},
-            
-            // Borda inferior
-            {x: 0, y: 848, w: 3000, h: 20, invisible: true},
-            
+            // Borda inferior  
+            {x: 0, y: 788, w: 3000, h: 80, invisible: true},
             // Borda esquerda
             {x: 0, y: 0, w: 20, h: 868, invisible: true},
-            
             // Borda direita
             {x: 2980, y: 0, w: 20, h: 868, invisible: true},
             
-            // Parede que limita Y em 420 (antes da entrada do túnel)
-            {x: 20, y: 420, w: 325, h: 428, invisible: true},
+            // ============ ÁREA DE ENTRADA (X: 0-380) ============
+            // Player pode andar livremente em Y: 80-788
+            // Sem paredes adicionais - área totalmente livre
             
-            // Parede que limita Y em 420 (depois da entrada do túnel)
-            {x: 415, y: 420, w: 2430, h: 428, invisible: true},
+            // ============ TRANSIÇÃO ENTRADA DO TÚNEL (X: 380-420) ============
+            // Funil que força descida para o túnel
+            // Parede superior que bloqueia acesso ao topo após X=380
+            {x: 380, y: 80, w: 40, h: 110, invisible: true}, // Bloqueia Y: 80-190
+            // Parede inferior que força entrada no túnel
+            {x: 380, y: 590, w: 40, h: 198, invisible: true}, // Bloqueia Y: 590-788
+            // Restam livres: Y: 190-590 (400px de altura para entrada)
             
-            // Parede que limita Y em 420 (depois da saída do túnel)
-            {x: 2913, y: 420, w: 67, h: 428, invisible: true},
+            // ============ TÚNEL PRINCIPAL (X: 420-2820) ============
+            // Teto do túnel - impede subir
+            {x: 420, y: 80, w: 2400, h: 110, invisible: true}, // Y: 80-190 bloqueado
+            // Chão do túnel - impede descer muito
+            {x: 420, y: 590, w: 2400, h: 198, invisible: true}, // Y: 590-788 bloqueado
+            // Área livre do túnel: Y: 190-590 (400px de altura)
             
-            // Criar o túnel - parede superior dentro do túnel
-            {x: 288, y: 80, w: 2625, h: 110, invisible: true},
+            // ============ TRANSIÇÃO SAÍDA DO TÚNEL (X: 2820-2860) ============
+            // Funil que permite subida para a saída
+            // Parede superior que ainda bloqueia o topo
+            {x: 2820, y: 80, w: 40, h: 110, invisible: true}, // Bloqueia Y: 80-190
+            // Parede inferior que força saída do túnel
+            {x: 2820, y: 590, w: 40, h: 198, invisible: true}, // Bloqueia Y: 590-788
+            // Restam livres: Y: 190-590 (400px de altura para saída)
             
-            // Criar o túnel - parede inferior dentro do túnel
-            {x: 288, y: 730, w: 2625, h: 118, invisible: true}
+            // ============ ÁREA DE SAÍDA (X: 2860-3000) ============
+            // Player pode andar livremente em Y: 80-788
+            // Sem paredes adicionais - área totalmente livre para saída
         ],
         lights: [],
         shadows: [],
-        playerStart: {x: 200, y: 90},
-        playerStartEscape: {x: 2850, y: 190},
+        playerStart: {x: 200, y: 190}, // Começa no nível superior
+        playerStartEscape: {x: 2900, y: 190}, // Escape também no nível superior  
         exit: {x: 2950, y: 80, w: 50, h: 100},
         direction: 'right',
         hasLayers: true
@@ -1805,12 +1819,14 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.32 - Eixão Túnel 🎮');
-console.log('🚇 Sistema de duas camadas implementado');
-console.log('🛣️ Mapa do Eixão: 3000x868 pixels');
-console.log('📍 Player inicia em (200, 90)');
-console.log('🚪 Entrada do túnel: X=345-415');
-console.log('🛤️ Caminho definido com paredes invisíveis');
+console.log('🎮 Mad Night v1.9.33 - Túnel Corrigido 🎮');
+console.log('🚇 Sistema de túneis invisíveis reconfigurado');
+console.log('🛣️ Caminho esperado implementado:');
+console.log('   📍 Entrada (200,190) → Boca túnel (380,190)');
+console.log('   ⬇️  Descida forçada → Túnel Y:190-590');
+console.log('   ➡️  Travessia horizontal até X:2820');
+console.log('   ⬆️  Subida forçada → Saída (2950,80)');
+console.log('🔧 Paredes invisíveis ajustadas para forçar caminho');
 console.log('🎯 TESTE O TÚNEL AGORA!');
 
 // FIM DO ARQUIVO
