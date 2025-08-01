@@ -532,42 +532,41 @@ const maps = [
         streetLights: [],
         objects: [],
         walls: [
-// ============ TÚNEL EM FORMATO U - PAREDES VISÍVEIS ============
-// Vou construir o túnel em forma de U usando paredes cinzas normais
-
-// ÁREA 1: Entrada livre (X: 0-380)
-// Player pode andar livre até chegar na entrada do túnel
-
-// ÁREA 2: Rampa de descida (X: 380-420)
-// Paredes que forçam descida em diagonal
-{x: 415, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa
-{x: 380, y: 600, w: 40, h: 188, invisible: false}, // Parede inferior da rampa
-
-// PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel
-{x: 0, y: 190, w: 335, h: 340, invisible: false},  // Parede de X=0 até X=335, Y=190 até Y=530
-
-// ÁREA 3: Túnel horizontal inferior (X: 420-2906)
-// Corredor horizontal no fundo
-{x: 445, y: 80, w: 2461, h: 380, invisible: false},   // Parede superior do túnel (w=2461: de X=445 até X=2906)
-{x: 0, y: 530, w: 3000, h: 258, invisible: false},    // Parede inferior do túnel
-
-// PAREDE VERTICAL DIREITA - bloqueia saída lateral do túnel (ESPELHADA)
-{x: 2906, y: 190, w: 94, h: 340, invisible: false}, // Parede direita ajustada (X=2906 até X=3000)
-
-// ÁREA 4: Rampa de subida (X: 2906-2950) - ESPELHADA
-// Paredes que forçam subida em diagonal (mesmas dimensões da descida)
-{x: 2866, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa (espelhada)
-{x: 2906, y: 600, w: 40, h: 188, invisible: false}, // Parede inferior da rampa (espelhada)
-
-// ÁREA 5: Saída livre (X: 2950-3000)
-// Player pode andar livre após sair do túnel (mesmo espaço que entrada)
-
-// Bordas do mapa
-            {x: 0, y: 0, w: 3000, h: 80, invisible: true},
-            {x: 0, y: 788, w: 3000, h: 80, invisible: true},
-            {x: 0, y: 0, w: 20, h: 868, invisible: true},
-            {x: 2980, y: 0, w: 20, h: 868, invisible: true}
-        ],
+    // ============ TÚNEL EM FORMATO U - CORREDOR ESTENDIDO ============
+    
+    // ÁREA 1: Entrada livre (X: 0-380)
+    // Player pode andar livre até chegar na entrada do túnel
+    
+    // ÁREA 2: Rampa de descida (X: 380-420)
+    // Paredes que forçam descida em diagonal
+    {x: 415, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa
+    {x: 380, y: 600, w: 40, h: 188, invisible: false}, // Parede inferior da rampa
+    
+    // PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel
+    {x: 0, y: 190, w: 335, h: 340, invisible: false},  // Parede esquerda
+    
+    // ÁREA 3: Túnel horizontal inferior ESTENDIDO (X: 420-2880)
+    // Corredor horizontal no fundo - agora vai até 2880!
+    {x: 445, y: 80, w: 2435, h: 380, invisible: false},   // Parede superior ESTENDIDA (era 2135, agora 2435)
+    {x: 0, y: 530, w: 3000, h: 258, invisible: false},    // Parede inferior do túnel
+    
+    // PAREDE VERTICAL DIREITA - MOVIDA PARA X=2965
+    {x: 2965, y: 190, w: 35, h: 340, invisible: false},   // Parede direita (movida de 2665 para 2965)
+    
+    // ÁREA 4: Rampa de subida REPOSICIONADA (X: 2880-2920)
+    // Paredes que forçam subida em diagonal
+    {x: 2845, y: 80, w: 40, h: 150, invisible: false},    // Parede superior da rampa (movida de 2545 para 2845)
+    {x: 2880, y: 600, w: 40, h: 188, invisible: false},   // Parede inferior da rampa (movida de 2580 para 2880)
+    
+    // ÁREA 5: Saída livre (X: 2920-3000)
+    // Player pode andar livre após sair do túnel
+    
+    // Bordas do mapa
+    {x: 0, y: 0, w: 3000, h: 80, invisible: true},
+    {x: 0, y: 788, w: 3000, h: 80, invisible: true},
+    {x: 0, y: 0, w: 20, h: 868, invisible: true},
+    {x: 2980, y: 0, w: 20, h: 868, invisible: true}
+],
         lights: [],
         shadows: [],
         playerStart: {x: 100, y: 100},
