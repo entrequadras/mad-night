@@ -534,34 +534,34 @@ const maps = [
         // Substitua apenas a seção walls do mapa 1 (Eixão da Morte) por esta:
 
 walls: [
-    // ============ TÚNEL EM FORMATO U - SAÍDA EM X=2800 ============
+    // ============ TÚNEL EM FORMATO U - SAÍDA EM X=2780 E TÚNEL MAIS BAIXO ============
     
     // ÁREA 1: Entrada livre (X: 0-380)
     // Player pode andar livre até chegar na entrada do túnel
     
     // ÁREA 2: Rampa de descida (X: 380-420)
-    // Paredes que forçam descida em diagonal
-    {x: 415, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa
-    {x: 380, y: 600, w: 40, h: 188, invisible: false}, // Parede inferior da rampa
+    // Paredes que forçam descida em diagonal - ESTENDIDAS +42px
+    {x: 415, y: 80, w: 40, h: 192, invisible: false},  // Parede superior da rampa (era 150, agora 192)
+    {x: 380, y: 642, w: 40, h: 188, invisible: false}, // Parede inferior da rampa (Y movido de 600 para 642)
     
-    // PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel
-    {x: 0, y: 190, w: 335, h: 340, invisible: false},  // Parede esquerda
+    // PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel - DESCIDA +42px
+    {x: 0, y: 232, w: 335, h: 340, invisible: false},  // Parede esquerda (Y movido de 190 para 232)
     
-    // ÁREA 3: Túnel horizontal inferior (X: 420-2800)
-    // Corredor horizontal no fundo - agora vai até 2800!
-    {x: 445, y: 80, w: 2355, h: 380, invisible: false},   // Parede superior (2355 de largura)
-    {x: 0, y: 530, w: 3000, h: 258, invisible: false},    // Parede inferior do túnel
+    // ÁREA 3: Túnel horizontal inferior (X: 420-2780) - DESCIDO +42px
+    // Corredor horizontal no fundo - agora mais baixo e até 2780!
+    {x: 445, y: 80, w: 2335, h: 422, invisible: false},   // Parede superior (altura aumentada de 380 para 422)
+    {x: 0, y: 572, w: 3000, h: 216, invisible: false},    // Parede inferior (Y movido de 530 para 572)
     
-    // PAREDE VERTICAL DIREITA - AJUSTADA
-    {x: 2885, y: 190, w: 115, h: 340, invisible: false},  // Parede direita (em X=2885)
+    // PAREDE VERTICAL DIREITA - AJUSTADA E DESCIDA +42px
+    {x: 2865, y: 232, w: 135, h: 340, invisible: false},  // Parede direita (X=2865, Y=232)
     
-    // ÁREA 4: Rampa de subida (X: 2800-2840)
+    // ÁREA 4: Rampa de subida (X: 2780-2820) - AJUSTADA +42px
     // Paredes que forçam subida em diagonal
-    {x: 2765, y: 80, w: 40, h: 150, invisible: false},    // Parede superior da rampa
-    {x: 2800, y: 600, w: 40, h: 188, invisible: false},   // Parede inferior da rampa
+    {x: 2745, y: 80, w: 40, h: 192, invisible: false},    // Parede superior da rampa (altura 192)
+    {x: 2780, y: 642, w: 40, h: 188, invisible: false},   // Parede inferior da rampa (X=2780, Y=642)
     
-    // ÁREA 5: Saída livre (X: 2840-3000)
-    // Player pode andar livre após sair do túnel (160 pixels de espaço)
+    // ÁREA 5: Saída livre (X: 2820-3000)
+    // Player pode andar livre após sair do túnel (180 pixels de espaço)
     
     // Bordas do mapa
     {x: 0, y: 0, w: 3000, h: 80, invisible: true},
