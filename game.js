@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.36 - Rampa Suave');
+console.log('Mad Night v1.9.37 - Túnel Linha Verde');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.36 - Rampa Suave'
+    version: 'v1.9.37 - Túnel Linha Verde'
 };
 
 // Player
@@ -269,53 +269,69 @@ const maps = [
         streetLights: [],
         objects: [],
         walls: [
-            // ============ BORDAS EXTERNAS DO MAPA ============
-            {x: 0, y: 0, w: 3000, h: 80, invisible: true},      // Borda superior
-            {x: 0, y: 788, w: 3000, h: 80, invisible: true},    // Borda inferior  
-            {x: 0, y: 0, w: 20, h: 868, invisible: true},       // Borda esquerda
-            {x: 2980, y: 0, w: 20, h: 868, invisible: true},    // Borda direita
+            // Bordas do mapa
+            {x: 0, y: 0, w: 3000, h: 80, invisible: true},         // Topo
+            {x: 0, y: 788, w: 3000, h: 80, invisible: true},       // Base
+            {x: 0, y: 0, w: 20, h: 868, invisible: true},          // Esquerda
+            {x: 2980, y: 0, w: 20, h: 868, invisible: true},       // Direita
             
-            // ============ GRANDE BLOQUEIO CENTRAL ============
-            // Bloqueia TODA a área entre X=380 e X=2845
-            {x: 380, y: 80, w: 2465, h: 708, invisible: true},
+            // ============ TÚNEL SEGUINDO LINHA VERDE ============
+            // Criar túnel de 80px de largura ao redor da linha verde
+            // Linha verde: (200,90) → (380,190) → (420,537) → (2820,537) → (2845,190) → (2950,80)
             
-            // ============ CAMINHO VERDE SUAVE ============
-            // Rampa descida mais suave: (380,190) → (420,537)
+            // ÁREA 1: Entrada livre até X=380
+            // Sem paredes - área totalmente livre
             
-            // ENTRADA DA RAMPA
-            {x: 380, y: 180, w: 60, h: 40, invisible: false},   // Y: 180-220 (entrada ampla)
+            // ÁREA 2: Túnel da rampa descida (380,190) → (420,537)
+            // Calcular paredes ao redor da linha diagonal
+            // Rampa: 40px horizontal, 347px vertical
+            // Paredes a 40px de distância da linha central
             
-            // DEGRAUS DA DESCIDA (mais suaves)
-            {x: 390, y: 220, w: 60, h: 60, invisible: false},   // Y: 220-280
-            {x: 400, y: 280, w: 60, h: 60, invisible: false},   // Y: 280-340
-            {x: 410, y: 340, w: 60, h: 60, invisible: false},   // Y: 340-400
-            {x: 415, y: 400, w: 60, h: 60, invisible: false},   // Y: 400-460
-            {x: 418, y: 460, w: 60, h: 60, invisible: false},   // Y: 460-520
+            // Parede ACIMA da rampa de descida
+            {x: 340, y: 80, w: 120, h: 70, invisible: true},       // Bloqueia Y:80-150
+            {x: 350, y: 150, w: 110, h: 50, invisible: true},      // Bloqueia Y:150-200
+            {x: 360, y: 200, w: 100, h: 50, invisible: true},      // Bloqueia Y:200-250
+            {x: 370, y: 250, w: 90, h: 50, invisible: true},       // Bloqueia Y:250-300
+            {x: 380, y: 300, w: 80, h: 50, invisible: true},       // Bloqueia Y:300-350
+            {x: 390, y: 350, w: 70, h: 50, invisible: true},       // Bloqueia Y:350-400
+            {x: 400, y: 400, w: 60, h: 50, invisible: true},       // Bloqueia Y:400-450
+            {x: 410, y: 450, w: 50, h: 47, invisible: true},       // Bloqueia Y:450-497
             
-            // CONEXÃO COM O TÚNEL HORIZONTAL
-            {x: 420, y: 520, w: 60, h: 40, invisible: false},   // Y: 520-560 (conexão ampla)
+            // Parede ABAIXO da rampa de descida  
+            {x: 420, y: 577, w: 40, h: 50, invisible: true},       // Bloqueia Y:577-627
+            {x: 410, y: 627, w: 50, h: 50, invisible: true},       // Bloqueia Y:627-677
+            {x: 400, y: 677, w: 60, h: 50, invisible: true},       // Bloqueia Y:677-727
+            {x: 390, y: 727, w: 70, h: 61, invisible: true},       // Bloqueia Y:727-788
             
-            // TÚNEL HORIZONTAL: (420,537) → (2820,537)
-            // Centrado em Y=537, altura generosa para virar
-            {x: 420, y: 530, w: 2400, h: 50, invisible: false}, // Y: 530-580 (altura ampla)
+            // ÁREA 3: Túnel horizontal (420,537) → (2820,537)
+            // Túnel de 80px altura centrado em Y=537
             
-            // CONEXÃO COM A RAMPA DE SUBIDA  
-            {x: 2800, y: 520, w: 60, h: 40, invisible: false},  // Y: 520-560 (conexão ampla)
+            // Parede ACIMA do túnel horizontal
+            {x: 420, y: 80, w: 2400, h: 457, invisible: true},     // Bloqueia Y:80-497
             
-            // DEGRAUS DA SUBIDA (mais suaves): (2820,537) → (2845,190)
-            {x: 2820, y: 460, w: 60, h: 60, invisible: false},  // Y: 460-520
-            {x: 2822, y: 400, w: 60, h: 60, invisible: false},  // Y: 400-460
-            {x: 2825, y: 340, w: 60, h: 60, invisible: false},  // Y: 340-400
-            {x: 2830, y: 280, w: 60, h: 60, invisible: false},  // Y: 280-340
-            {x: 2835, y: 220, w: 60, h: 60, invisible: false},  // Y: 220-280
+            // Parede ABAIXO do túnel horizontal
+            {x: 420, y: 577, w: 2400, h: 211, invisible: true},    // Bloqueia Y:577-788
             
-            // SAÍDA DA RAMPA
-            {x: 2840, y: 180, w: 60, h: 40, invisible: false},  // Y: 180-220 (saída ampla)
+            // ÁREA 4: Túnel da rampa subida (2820,537) → (2845,190)
+            // Paredes ao redor da linha diagonal de subida
+            
+            // Parede ACIMA da rampa de subida
+            {x: 2820, y: 80, w: 50, h: 110, invisible: true},      // Bloqueia Y:80-150
+            {x: 2830, y: 150, w: 40, h: 40, invisible: true},      // Bloqueia Y:150-190
+            
+            // Parede ABAIXO da rampa de subida
+            {x: 2820, y: 577, w: 50, h: 50, invisible: true},      // Bloqueia Y:577-627
+            {x: 2830, y: 627, w: 40, h: 50, invisible: true},      // Bloqueia Y:627-677
+            {x: 2840, y: 677, w: 30, h: 50, invisible: true},      // Bloqueia Y:677-727
+            {x: 2850, y: 727, w: 20, h: 61, invisible: true},      // Bloqueia Y:727-788
+            
+            // ÁREA 5: Saída livre após X=2845
+            // Sem paredes - área totalmente livre
         ],
         lights: [],
         shadows: [],
-        playerStart: {x: 200, y: 190}, // Começa no nível superior
-        playerStartEscape: {x: 2900, y: 190}, // Escape também no nível superior  
+        playerStart: {x: 200, y: 90},
+        playerStartEscape: {x: 2850, y: 190},
         exit: {x: 2950, y: 80, w: 50, h: 100},
         direction: 'right',
         hasLayers: true
@@ -1024,7 +1040,7 @@ function updateProjectiles() {
         if (stone.x < player.x + player.width &&
             stone.x + stone.width > player.x &&
             stone.y < player.y + player.height &&
-            stone.y + stone.height > player.y) {
+            stone.y + player.height > player.y) {
             killPlayer();
             stone.active = false;
         }
@@ -1248,139 +1264,7 @@ function renderTiles(map, visibleArea) {
                 const x = Math.floor(tile.x);
                 const y = Math.floor(tile.y);
                 
-                ctx.drawImage(
-                    tileAsset.img, 
-                    0, 0, 120, 120,
-                    x, y, 121, 121
-                );
-            }
-        }
-    });
-}
-
-function renderEixaoLayer1(map) {
-    if (gameState.currentMap === 1 && assets.eixaoCamada1.loaded) {
-        ctx.drawImage(assets.eixaoCamada1.img, 0, 0);
-    }
-}
-
-function renderEixaoLayer2(map) {
-    if (gameState.currentMap === 1 && assets.eixaoCamada2.loaded) {
-        ctx.drawImage(assets.eixaoCamada2.img, 0, 0);
-    }
-}
-
-function renderCampo(map) {
-    if (gameState.currentMap === 0 && assets.campo.loaded) {
-        const campoX = (map.width - 800) / 2;
-        const campoY = (map.height - 462) / 2;
-        ctx.drawImage(assets.campo.img, campoX, campoY);
-    }
-}
-
-function renderCampoTraves() {
-    if (gameState.currentMap === 0 && assets.campoTraves.loaded) {
-        const campoX = (maps[0].width - 800) / 2;
-        const campoY = (maps[0].height - 462) / 2;
-        ctx.drawImage(assets.campoTraves.img, campoX, campoY);
-    }
-}
-
-function renderTrees(map, visibleArea, layer = 'bottom') {
-    if (!map.trees) return;
-    
-    map.trees.forEach(tree => {
-        const treeAsset = assets[tree.type];
-        if (treeAsset && treeAsset.loaded) {
-            if (tree.x + treeAsset.width > visibleArea.left && 
-                tree.x < visibleArea.right &&
-                tree.y + treeAsset.height > visibleArea.top && 
-                tree.y < visibleArea.bottom) {
-                
-                if (layer === 'bottom') {
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.rect(tree.x, tree.y + treeAsset.height * 0.7, treeAsset.width, treeAsset.height * 0.3);
-                    ctx.clip();
-                    ctx.drawImage(treeAsset.img, tree.x, tree.y);
-                    ctx.restore();
-                } else if (layer === 'top') {
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.rect(tree.x, tree.y, treeAsset.width, treeAsset.height * 0.75);
-                    ctx.clip();
-                    
-                    const playerUnderTree = player.x + player.width > tree.x &&
-                                          player.x < tree.x + treeAsset.width &&
-                                          player.y + player.height > tree.y &&
-                                          player.y < tree.y + treeAsset.height * 0.75;
-                    
-                    if (playerUnderTree) {
-                        ctx.globalAlpha = 0.7;
-                    }
-                    
-                    ctx.drawImage(treeAsset.img, tree.x, tree.y);
-                    ctx.restore();
-                }
-            }
-        }
-    });
-}
-
-function renderStreetLights(map, visibleArea) {
-    if (!map.streetLights) return;
-    
-    map.streetLights.forEach(light => {
-        renderRotatedObject(light, light.type, visibleArea);
-    });
-}
-
-function renderObjects(map, visibleArea) {
-    if (!map.objects) return;
-    
-    map.objects.forEach(obj => {
-        renderRotatedObject(obj, obj.type, visibleArea);
-    });
-}
-
-function renderFieldShadow(map) {
-    // Sombra do campo apenas no Maconhão
-    if (gameState.currentMap === 0) {
-        const campoX = (map.width - 800) / 2;
-        const campoY = (map.height - 462) / 2;
-        const centerX = campoX + 400;
-        const centerY = campoY + 231;
-        
-        // Gradiente maior e mais suave
-        const gradient = ctx.createRadialGradient(
-            centerX, centerY, 0,
-            centerX, centerY, 450
-        );
-        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
-        gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.45)');  
-        gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.35)');  
-        gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.2)');  
-        gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.1)');  
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        
-        ctx.fillStyle = gradient;
-        ctx.fillRect(
-            centerX - 450,
-            centerY - 450,
-            900,
-            900
-        );
-        
-        // Sombras nas quatro extremidades
-        // Canto superior esquerdo
-        const cornerGradient1 = ctx.createRadialGradient(
-            0, 0, 0,
-            0, 0, 400
-        );
-        cornerGradient1.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-        cornerGradient1.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
-        cornerGradient1.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = cornerGradient1;
+                ctx.fillStyle = cornerGradient1;
         ctx.fillRect(0, 0, 400, 400);
         
         // Canto superior direito
@@ -1821,12 +1705,143 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.36 - Rampa Suave 🎮');
-console.log('🚇 Correções aplicadas:');
-console.log('   📐 Rampa descida: Degraus maiores e suaves');
-console.log('   ➡️  Túnel horizontal: Y=530-580 (altura ampla)');
-console.log('   📐 Rampa subida: Degraus maiores e suaves');  
-console.log('   🔄 Conexões amplas para virar naturalmente');
-console.log('🎯 TESTE: Player deve conseguir virar à direita no túnel!');
+console.log('🎮 Mad Night v1.9.37 - Túnel Linha Verde 🎮');
+console.log('🚇 CLEAN START: Volta da v1.9.32 original');
+console.log('🛣️ Túnel de 80px ao redor da linha verde:');
+console.log('   📍 (200,90) → (380,190) → (420,537) → (2820,537) → (2845,190) → (2950,80)');
+console.log('🔧 Paredes invisíveis seguindo exatamente o caminho');
+console.log('🎯 TESTE: Player deve seguir só a linha verde!');
 
-// FIM DO ARQUIVO
+// FIM DO ARQUIVO.drawImage(
+                    tileAsset.img, 
+                    0, 0, 120, 120,
+                    x, y, 121, 121
+                );
+            }
+        }
+    });
+}
+
+function renderEixaoLayer1(map) {
+    if (gameState.currentMap === 1 && assets.eixaoCamada1.loaded) {
+        ctx.drawImage(assets.eixaoCamada1.img, 0, 0);
+    }
+}
+
+function renderEixaoLayer2(map) {
+    if (gameState.currentMap === 1 && assets.eixaoCamada2.loaded) {
+        ctx.drawImage(assets.eixaoCamada2.img, 0, 0);
+    }
+}
+
+function renderCampo(map) {
+    if (gameState.currentMap === 0 && assets.campo.loaded) {
+        const campoX = (map.width - 800) / 2;
+        const campoY = (map.height - 462) / 2;
+        ctx.drawImage(assets.campo.img, campoX, campoY);
+    }
+}
+
+function renderCampoTraves() {
+    if (gameState.currentMap === 0 && assets.campoTraves.loaded) {
+        const campoX = (maps[0].width - 800) / 2;
+        const campoY = (maps[0].height - 462) / 2;
+        ctx.drawImage(assets.campoTraves.img, campoX, campoY);
+    }
+}
+
+function renderTrees(map, visibleArea, layer = 'bottom') {
+    if (!map.trees) return;
+    
+    map.trees.forEach(tree => {
+        const treeAsset = assets[tree.type];
+        if (treeAsset && treeAsset.loaded) {
+            if (tree.x + treeAsset.width > visibleArea.left && 
+                tree.x < visibleArea.right &&
+                tree.y + treeAsset.height > visibleArea.top && 
+                tree.y < visibleArea.bottom) {
+                
+                if (layer === 'bottom') {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(tree.x, tree.y + treeAsset.height * 0.7, treeAsset.width, treeAsset.height * 0.3);
+                    ctx.clip();
+                    ctx.drawImage(treeAsset.img, tree.x, tree.y);
+                    ctx.restore();
+                } else if (layer === 'top') {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(tree.x, tree.y, treeAsset.width, treeAsset.height * 0.75);
+                    ctx.clip();
+                    
+                    const playerUnderTree = player.x + player.width > tree.x &&
+                                          player.x < tree.x + treeAsset.width &&
+                                          player.y + player.height > tree.y &&
+                                          player.y < tree.y + treeAsset.height * 0.75;
+                    
+                    if (playerUnderTree) {
+                        ctx.globalAlpha = 0.7;
+                    }
+                    
+                    ctx.drawImage(treeAsset.img, tree.x, tree.y);
+                    ctx.restore();
+                }
+            }
+        }
+    });
+}
+
+function renderStreetLights(map, visibleArea) {
+    if (!map.streetLights) return;
+    
+    map.streetLights.forEach(light => {
+        renderRotatedObject(light, light.type, visibleArea);
+    });
+}
+
+function renderObjects(map, visibleArea) {
+    if (!map.objects) return;
+    
+    map.objects.forEach(obj => {
+        renderRotatedObject(obj, obj.type, visibleArea);
+    });
+}
+
+function renderFieldShadow(map) {
+    // Sombra do campo apenas no Maconhão
+    if (gameState.currentMap === 0) {
+        const campoX = (map.width - 800) / 2;
+        const campoY = (map.height - 462) / 2;
+        const centerX = campoX + 400;
+        const centerY = campoY + 231;
+        
+        // Gradiente maior e mais suave
+        const gradient = ctx.createRadialGradient(
+            centerX, centerY, 0,
+            centerX, centerY, 450
+        );
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
+        gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.45)');  
+        gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.35)');  
+        gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.2)');  
+        gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.1)');  
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(
+            centerX - 450,
+            centerY - 450,
+            900,
+            900
+        );
+        
+        // Sombras nas quatro extremidades
+        // Canto superior esquerdo
+        const cornerGradient1 = ctx.createRadialGradient(
+            0, 0, 0,
+            0, 0, 400
+        );
+        cornerGradient1.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+        cornerGradient1.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+        cornerGradient1.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx
