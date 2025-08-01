@@ -1,4 +1,4 @@
- console.log('Mad Night v1.9.62 - Parede Direita fix');
+ console.log('Mad Night v1.9.63 - Parede Direita fix');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.62 - Parede Direita fix'
+    version: 'v1.9.63 - Parede Direita fix'
 };
 
 // Player
@@ -278,7 +278,7 @@ const maps = [
             // ÁREA 2: Rampa de descida (X: 380-420)
             // Paredes que forçam descida em diagonal
             {x: 380, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa
-            {x: 380, y: 600, w: 40, h: 188, invisible: false}, // Parede inferior da rampa
+            {x: 415, y: 600, w: 40, h: 188, invisible: false}, // Parede inferior da rampa
             
             // PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel
             {x: 0, y: 190, w: 335, h: 340, invisible: false},  // Parede de X=0 até X=335, Y=190 até Y=530
@@ -1771,7 +1771,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.62 - Parede Direita fix');
+console.log('🎮 Mad Night v1.9.63 - Parede Direita fix');
 console.log('🚇 BASE: Código original v1.9.32 estável');
 console.log('🔧 TÚNEL: Paredes VISÍVEIS em cinza formando U');
 console.log('📍 Player inicia em (200,190)');
