@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.34 - Túnel Real');
+console.log('Mad Night v1.9.35 - Caminho Verde');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.34 - Túnel Real'
+    version: 'v1.9.35 - Caminho Verde'
 };
 
 // Player
@@ -270,63 +270,63 @@ const maps = [
         objects: [],
         walls: [
             // ============ BORDAS EXTERNAS DO MAPA ============
-            // Borda superior
-            {x: 0, y: 0, w: 3000, h: 80, invisible: true},
-            // Borda inferior  
-            {x: 0, y: 788, w: 3000, h: 80, invisible: true},
-            // Borda esquerda
-            {x: 0, y: 0, w: 20, h: 868, invisible: true},
-            // Borda direita
-            {x: 2980, y: 0, w: 20, h: 868, invisible: true},
+            {x: 0, y: 0, w: 3000, h: 80, invisible: true},      // Borda superior
+            {x: 0, y: 788, w: 3000, h: 80, invisible: true},    // Borda inferior  
+            {x: 0, y: 0, w: 20, h: 868, invisible: true},       // Borda esquerda
+            {x: 2980, y: 0, w: 20, h: 868, invisible: true},    // Borda direita
             
-            // ============ GRANDE PAREDE CENTRAL (Forma o túnel em U) ============
-            // Esta parede bloqueia TODA a área entre X=380 e X=2845
-            // EXCETO os buracos específicos para rampas e túnel
+            // ============ GRANDE BLOQUEIO CENTRAL ============
+            // Bloqueia TODA a área entre X=380 e X=2845
+            // Player SÓ pode passar pela linha verde exata
+            {x: 380, y: 80, w: 2465, h: 708, invisible: true},
             
-            // PARTE 1: Parede superior (bloqueia acima do túnel superior)
-            {x: 380, y: 80, w: 2465, h: 110, invisible: true}, // Y: 80-190 bloqueado
+            // ============ BURACOS PARA O CAMINHO VERDE ============
+            // Criar "túnel" exato seguindo a linha verde
             
-            // PARTE 2: Parede central principal (força descida ao túnel)
-            {x: 380, y: 190, w: 2465, h: 347, invisible: true}, // Y: 190-537 bloqueado
+            // RAMPA DESCIDA: (380,190) → (420,537)
+            // Diagonal de 40px largura, 347px altura
+            {x: 380, y: 190, w: 40, h: 20, invisible: false},   // Y: 190-210
+            {x: 385, y: 210, w: 40, h: 20, invisible: false},   // Y: 210-230  
+            {x: 390, y: 230, w: 40, h: 20, invisible: false},   // Y: 230-250
+            {x: 395, y: 250, w: 40, h: 20, invisible: false},   // Y: 250-270
+            {x: 400, y: 270, w: 40, h: 20, invisible: false},   // Y: 270-290
+            {x: 405, y: 290, w: 40, h: 20, invisible: false},   // Y: 290-310
+            {x: 410, y: 310, w: 40, h: 20, invisible: false},   // Y: 310-330
+            {x: 415, y: 330, w: 40, h: 20, invisible: false},   // Y: 330-350
+            {x: 420, y: 350, w: 40, h: 20, invisible: false},   // Y: 350-370
+            {x: 420, y: 370, w: 40, h: 20, invisible: false},   // Y: 370-390
+            {x: 420, y: 390, w: 40, h: 20, invisible: false},   // Y: 390-410
+            {x: 420, y: 410, w: 40, h: 20, invisible: false},   // Y: 410-430
+            {x: 420, y: 430, w: 40, h: 20, invisible: false},   // Y: 430-450
+            {x: 420, y: 450, w: 40, h: 20, invisible: false},   // Y: 450-470
+            {x: 420, y: 470, w: 40, h: 20, invisible: false},   // Y: 470-490
+            {x: 420, y: 490, w: 40, h: 20, invisible: false},   // Y: 490-510
+            {x: 420, y: 510, w: 40, h: 27, invisible: false},   // Y: 510-537
             
-            // PARTE 3: Parede inferior (bloqueia abaixo do túnel inferior)  
-            {x: 380, y: 590, w: 2465, h: 198, invisible: true}, // Y: 590-788 bloqueado
+            // TÚNEL HORIZONTAL: (420,537) → (2820,537)  
+            // Linha reta horizontal, altura de 60px para o player passar
+            {x: 420, y: 517, w: 2400, h: 60, invisible: false}, // Y: 517-577 (centrado em 537)
             
-            // ============ BURACOS NA PAREDE (permitem o caminho em U) ============
-            
-            // BURACO 1: Rampa de descida (X: 380-420, Y: 190-537)
-            // Remove parte da parede central para permitir descida
-            {x: 380, y: 190, w: 40, h: 347, invisible: false}, // Libera rampa descida
-            
-            // BURACO 2: Túnel inferior horizontal (X: 420-2820, Y: 537-590) 
-            // Remove parte da parede para permitir travessia horizontal
-            {x: 420, y: 537, w: 2400, h: 53, invisible: false}, // Libera túnel inferior
-            
-            // BURACO 3: Rampa de subida (X: 2820-2845, Y: 190-537)
-            // Remove parte da parede central para permitir subida
-            {x: 2820, y: 190, w: 25, h: 347, invisible: false}, // Libera rampa subida
-            
-            // ============ CORRIGIR PAREDES (bloquear os buracos falsos) ============
-            // Como removemos partes da parede principal, precisamos rebloquear
-            // as áreas que NÃO devem estar livres
-            
-            // Rebloquear área ACIMA da rampa de descida
-            {x: 380, y: 80, w: 40, h: 110, invisible: true}, // Y: 80-190
-            
-            // Rebloquear área ABAIXO da rampa de descida  
-            {x: 380, y: 590, w: 40, h: 198, invisible: true}, // Y: 590-788
-            
-            // Rebloquear área ACIMA do túnel inferior
-            {x: 420, y: 80, w: 2400, h: 457, invisible: true}, // Y: 80-537
-            
-            // Rebloquear área ABAIXO do túnel inferior
-            {x: 420, y: 590, w: 2400, h: 198, invisible: true}, // Y: 590-788
-            
-            // Rebloquear área ACIMA da rampa de subida
-            {x: 2820, y: 80, w: 25, h: 110, invisible: true}, // Y: 80-190
-            
-            // Rebloquear área ABAIXO da rampa de subida
-            {x: 2820, y: 590, w: 25, h: 198, invisible: true}, // Y: 590-788
+            // RAMPA SUBIDA: (2820,537) → (2845,190)
+            // Diagonal de 25px largura, 347px altura  
+            {x: 2820, y: 517, w: 25, h: 20, invisible: false},  // Y: 517-537
+            {x: 2820, y: 497, w: 25, h: 20, invisible: false},  // Y: 497-517
+            {x: 2820, y: 477, w: 25, h: 20, invisible: false},  // Y: 477-497
+            {x: 2820, y: 457, w: 25, h: 20, invisible: false},  // Y: 457-477
+            {x: 2820, y: 437, w: 25, h: 20, invisible: false},  // Y: 437-457
+            {x: 2820, y: 417, w: 25, h: 20, invisible: false},  // Y: 417-437
+            {x: 2820, y: 397, w: 25, h: 20, invisible: false},  // Y: 397-417
+            {x: 2820, y: 377, w: 25, h: 20, invisible: false},  // Y: 377-397
+            {x: 2820, y: 357, w: 25, h: 20, invisible: false},  // Y: 357-377
+            {x: 2820, y: 337, w: 25, h: 20, invisible: false},  // Y: 337-357
+            {x: 2820, y: 317, w: 25, h: 20, invisible: false},  // Y: 317-337
+            {x: 2820, y: 297, w: 25, h: 20, invisible: false},  // Y: 297-317
+            {x: 2820, y: 277, w: 25, h: 20, invisible: false},  // Y: 277-297
+            {x: 2820, y: 257, w: 25, h: 20, invisible: false},  // Y: 257-277
+            {x: 2820, y: 237, w: 25, h: 20, invisible: false},  // Y: 237-257
+            {x: 2820, y: 217, w: 25, h: 20, invisible: false},  // Y: 217-237
+            {x: 2820, y: 197, w: 25, h: 20, invisible: false},  // Y: 197-217
+            {x: 2820, y: 190, w: 25, h: 7, invisible: false},   // Y: 190-197
         ],
         lights: [],
         shadows: [],
@@ -1837,14 +1837,12 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.34 - Túnel Real 🎮');
-console.log('🚇 Túnel em forma de U implementado corretamente');
-console.log('🛣️ Caminho obrigatório da linha verde:');
-console.log('   📍 (200,90) → (380,190) → rampa descida');
-console.log('   ⬇️  (400,537) → túnel horizontal → (2820,537)');
-console.log('   ⬆️  rampa subida → (2845,190) → (2950,80)');
-console.log('🔧 Grande parede central com buracos específicos');
-console.log('🎯 ÁREA LIVRE: X<380 e X>2845 apenas');
-console.log('💥 TESTE O TÚNEL EM U AGORA!');
+console.log('🎮 Mad Night v1.9.35 - Caminho Verde 🎮');
+console.log('🚇 ABORDAGEM SIMPLES: Grande parede + buraco exato');
+console.log('🛣️ Caminho verde implementado:');
+console.log('   🔒 TUDO bloqueado entre X=380 e X=2845');
+console.log('   🕳️  EXCETO linha verde exata com buracos pequenos');
+console.log('   📍 (380,190) → rampa → (420,537) → horizontal → (2820,537) → rampa → (2845,190)');
+console.log('🎯 TESTE: Só consegue passar pela linha verde!');
 
 // FIM DO ARQUIVO
