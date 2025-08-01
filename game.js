@@ -533,41 +533,41 @@ const maps = [
     streetLights: [],
     objects: [],
     walls: [
-        // ============ TÚNEL EM FORMATO U - SAÍDA EM X=2780 E TÚNEL 32px MAIS BAIXO ============
-        
-        // ÁREA 1: Entrada livre (X: 0-380)
-        // Player pode andar livre até chegar na entrada do túnel
-        
-        // ÁREA 2: Rampa de descida (X: 380-420)
-        // Paredes que forçam descida em diagonal - ESTENDIDAS +32px
-        {x: 415, y: 80, w: 40, h: 182, invisible: false},  // Parede superior da rampa
-        {x: 380, y: 632, w: 40, h: 188, invisible: false}, // Parede inferior da rampa
-        
-        // PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel - DESCIDA +32px
-        {x: 0, y: 222, w: 335, h: 340, invisible: false},  // Parede esquerda
-        
-        // ÁREA 3: Túnel horizontal inferior (X: 420-2780) - DESCIDO +32px
-        // Corredor horizontal no fundo - agora 32px mais baixo e até 2780!
-        {x: 445, y: 80, w: 2335, h: 412, invisible: false},   // Parede superior
-        {x: 0, y: 562, w: 3000, h: 226, invisible: false},    // Parede inferior
-        
-        // PAREDE VERTICAL DIREITA - AJUSTADA E DESCIDA +32px
-        {x: 2865, y: 222, w: 135, h: 340, invisible: false},  // Parede direita
-        
-        // ÁREA 4: Rampa de subida (X: 2780-2820) - AJUSTADA +32px
-        // Paredes que forçam subida em diagonal
-        {x: 2745, y: 80, w: 40, h: 182, invisible: false},    // Parede superior da rampa
-        {x: 2780, y: 632, w: 40, h: 188, invisible: false},   // Parede inferior da rampa
-        
-        // ÁREA 5: Saída livre (X: 2820-3000)
-        // Player pode andar livre após sair do túnel (180 pixels de espaço)
-        
-        // Bordas do mapa
-        {x: 0, y: 0, w: 3000, h: 80, invisible: true},
-        {x: 0, y: 788, w: 3000, h: 80, invisible: true},
-        {x: 0, y: 0, w: 20, h: 868, invisible: true},
-        {x: 2980, y: 0, w: 20, h: 868, invisible: true}
-    ],
+    // ============ TÚNEL EM FORMATO U - TODAS AS PAREDES INVISÍVEIS ============
+    
+    // ÁREA 1: Entrada livre (X: 0-380)
+    // Player pode andar livre até chegar na entrada do túnel
+    
+    // ÁREA 2: Rampa de descida (X: 380-420)
+    // Paredes que forçam descida em diagonal - ESTENDIDAS +32px
+    {x: 415, y: 80, w: 40, h: 182, invisible: true},  // Parede superior da rampa
+    {x: 380, y: 632, w: 40, h: 188, invisible: true}, // Parede inferior da rampa
+    
+    // PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel - DESCIDA +32px
+    {x: 0, y: 222, w: 335, h: 340, invisible: true},  // Parede esquerda
+    
+    // ÁREA 3: Túnel horizontal inferior (X: 420-2780) - DESCIDO +32px
+    // Corredor horizontal no fundo - agora 32px mais baixo e até 2780!
+    {x: 445, y: 80, w: 2335, h: 412, invisible: true},   // Parede superior
+    {x: 0, y: 562, w: 3000, h: 226, invisible: true},    // Parede inferior
+    
+    // PAREDE VERTICAL DIREITA - AJUSTADA E DESCIDA +32px
+    {x: 2865, y: 222, w: 135, h: 340, invisible: true},  // Parede direita
+    
+    // ÁREA 4: Rampa de subida (X: 2780-2820) - AJUSTADA +32px
+    // Paredes que forçam subida em diagonal
+    {x: 2745, y: 80, w: 40, h: 182, invisible: true},    // Parede superior da rampa
+    {x: 2780, y: 632, w: 40, h: 188, invisible: true},   // Parede inferior da rampa
+    
+    // ÁREA 5: Saída livre (X: 2820-3000)
+    // Player pode andar livre após sair do túnel (180 pixels de espaço)
+    
+    // Bordas do mapa (já eram invisíveis)
+    {x: 0, y: 0, w: 3000, h: 80, invisible: true},
+    {x: 0, y: 788, w: 3000, h: 80, invisible: true},
+    {x: 0, y: 0, w: 20, h: 868, invisible: true},
+    {x: 2980, y: 0, w: 20, h: 868, invisible: true}
+],
     lights: [
     // Grupo 1 - Entrada
     {x: 448, y: 185, radius: 100, id: 'eixao1'},
