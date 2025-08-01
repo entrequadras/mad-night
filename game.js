@@ -32,8 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.31 - Limpeza Focada',
-    debugMode: false
+    version: 'v1.9.31 - Limpeza Focada'
 };
 
 // Player
@@ -192,6 +191,7 @@ const maps = [
         enemies: [],
         tiles: generateGrassTiles(1920, 1080, 120),
         trees: [
+            // Árvores do mapa original
             {type: 'arvore001', x: 300, y: 150},
             {type: 'arvore002', x: 1400, y: 120},
             {type: 'arvore003', x: 150, y: 700},
@@ -207,6 +207,7 @@ const maps = [
             {type: 'arvore004', x: 1480, y: 830},
             {type: 'arvore001', x: 1550, y: 850},
             
+            // Barreira de árvores no lado esquerdo
             {type: 'arvore002', x: -80, y: -30},
             {type: 'arvore001', x: -60, y: 120},
             {type: 'arvore003', x: -90, y: 270},
@@ -216,10 +217,12 @@ const maps = [
             {type: 'arvore001', x: -65, y: 880},
             {type: 'arvore003', x: -95, y: 1000},
             
+            // Barreira de árvores no lado direito (com buraco para passagem)
             {type: 'arvore001', x: 1820, y: -50},
             {type: 'arvore002', x: 1850, y: 100},
             {type: 'arvore003', x: 1830, y: 250},
             {type: 'arvore004', x: 1860, y: 380},
+            // BURACO - sem árvores entre Y: 490-650 (160 pixels de espaço)
             {type: 'arvore001', x: 1840, y: 720},
             {type: 'arvore002', x: 1810, y: 850},
             {type: 'arvore003', x: 1870, y: 970},
@@ -233,6 +236,7 @@ const maps = [
             {type: 'caixadeluz', x: 1750, y: 560, rotation: 0}
         ],
         walls: [
+            // Paredes invisíveis para colisão apenas
             {x: 0, y: 0, w: 1920, h: 20, invisible: true},
             {x: 0, y: 1060, w: 1920, h: 20, invisible: true},
             {x: 0, y: 20, w: 20, h: 1040, invisible: true},
@@ -274,32 +278,6 @@ const maps = [
         playerStartEscape: {x: 700, y: 300},
         exit: {x: 720, y: 250, w: 50, h: 100},
         direction: 'right'
-    }, 100, invisible: true},
-            {x: 415, y: 90, w: 585, h: 100, invisible: true},
-            
-            // Parede inferior (limita Y em 420)
-            {x: 190, y: 420, w: 155, h: 448, invisible: true},
-            {x: 415, y: 420, w: 2430, h: 448, invisible: true},
-            
-            // Dentro do túnel - parede superior
-            {x: 345, y: 190, w: 2500, h: 230, invisible: true},
-            
-            // Dentro do túnel - parede inferior
-            {x: 288, y: 730, w: 2625, h: 138, invisible: true},
-            
-            // Bloqueio na saída
-            {x: 2913, y: 537, w: 87, h: 331, invisible: true},
-            
-            // Parede direita
-            {x: 2950, y: 180, w: 50, h: 688, invisible: true}
-        ],
-        lights: [],
-        shadows: [],
-        playerStart: {x: 220, y: 100},
-        playerStartEscape: {x: 2850, y: 190},
-        exit: {x: 2950, y: 80, w: 50, h: 100},
-        direction: 'right',
-        hasLayers: true
     },
     {
         name: "Fronteira com o Komando Satânico",
@@ -1778,11 +1756,13 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.39 - Comentários Removidos 🎮');
-console.log('✅ Removidos TODOS os comentários problemáticos');
-console.log('✅ Arrays de trees e walls limpos');
-console.log('✅ Código sem comentários dentro de arrays');
-console.log('🔍 Debug mode: tecla D');
-console.log('🎯 AGORA DEVE FUNCIONAR!');
+console.log('🎮 Mad Night v1.9.31 - Limpeza Focada 🎮');
+console.log('✅ Código limpo e organizado');
+console.log('✅ Removido: banco01, banco02, isInLight');
+console.log('✅ Tiles de grama apenas no mapa 1');
+console.log('✅ Sistema de áudio com melhor tratamento de erro');
+console.log('✅ Variáveis de loading consolidadas');
+console.log('✅ Renderização de tiles otimizada');
+console.log('🎯 PRONTO PARA PRÓXIMAS FEATURES!');
 
 // FIM DO ARQUIVO
