@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.70 - Melhoria do Maconhão com novos objetos'
+    version: 'v1.9.71 - Ajustes no Maconhão (poste e bancos)'
 };
 
 // Player
@@ -74,8 +74,8 @@ const assets = {
     grama003: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama004: { img: new Image(), loaded: false, width: 120, height: 120 },
     caixadeluz: { img: new Image(), loaded: false, width: 45, height: 45 },
-    banco03: { img: new Image(), loaded: false, width: 44, height: 34 },
-    banco04: { img: new Image(), loaded: false, width: 44, height: 36 },
+    banco03: { img: new Image(), loaded: false, width: 53, height: 43 },
+    banco04: { img: new Image(), loaded: false, width: 53, height: 45 },
     garrafaquebrada01: { img: new Image(), loaded: false, width: 40, height: 24 },
     garrafaquebrada02: { img: new Image(), loaded: false, width: 40, height: 24 },
     cadeiradepraia01: { img: new Image(), loaded: false, width: 29, height: 40 },
@@ -495,18 +495,18 @@ const maps = [
         streetLights: [
             {type: 'poste000', x: 960, y: 780, rotation: 0, lightRadius: 100, id: 'post3'},
             {type: 'poste001', x: 1400, y: 540, rotation: 0, lightRadius: 100, id: 'post4'},
-            {type: 'poste000', x: 450, y: 60, rotation: 0, lightRadius: 100, id: 'post5'}
+            {type: 'poste000', x: 650, y: 60, rotation: 0, lightRadius: 100, id: 'post5'}
         ],
         objects: [
             {type: 'caixadeluz', x: 1750, y: 560, rotation: 0},
-            // Pracinha embaixo do poste novo
-            {type: 'banco03', x: 430, y: 200, rotation: 0},
-            {type: 'banco04', x: 480, y: 200, rotation: 0},
-            {type: 'garrafaquebrada01', x: 455, y: 240, rotation: 0},
+            // Pracinha embaixo do poste reposicionado (X: 650)
+            {type: 'banco03', x: 630, y: 200, rotation: 0},
+            {type: 'banco04', x: 680, y: 200, rotation: 0},
+            {type: 'garrafaquebrada01', x: 655, y: 240, rotation: 0},
             // Cadeira de praia
             {type: 'cadeiradepraia01', x: 210, y: 1000, rotation: 0},
-            // Garrafa quebrada 2
-            {type: 'garrafaquebrada02', x: 1730, y: 70, rotation: 0}
+            // Garrafa quebrada 2 reposicionada
+            {type: 'garrafaquebrada02', x: 1500, y: 70, rotation: 0}
         ],
         walls: [
             // Paredes invisíveis para colisão apenas
@@ -805,9 +805,14 @@ function checkWallCollision(entity, newX, newY) {
         }
     }
     
-    // Verificar colisão com objetos
+    // Verificar colisão com objetos (garrafas quebradas não têm colisão)
     if (map.objects) {
         for (let obj of map.objects) {
+            // Pular garrafas quebradas - sem colisão
+            if (obj.type === 'garrafaquebrada01' || obj.type === 'garrafaquebrada02') {
+                continue;
+            }
+            
             const objAsset = assets[obj.type];
             if (objAsset && objAsset.loaded) {
                 const objCollision = {
@@ -2031,9 +2036,9 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.70 - Melhoria do Maconhão com novos objetos');
-console.log('🏞️ NOVO: Poste em (450,60) com pracinha completa');
-console.log('🪑 NOVO: Bancos, cadeira de praia e garrafas quebradas');
-console.log('🌑 NOVO: Sombras 20% mais escuras em todo o mapa');
+console.log('🎮 Mad Night v1.9.71 - Ajustes no Maconhão (poste e bancos)');
+console.log('📍 AJUSTE: Poste movido para X=650, pracinha acompanhou');
+console.log('📏 AJUSTE: Bancos corrigidos para 53px de largura');
+console.log('🍺 AJUSTE: Garrafa quebrada2 em X=1500, sem colisão');
 console.log('📸 Para exportar: vá ao Maconhão e digite exportMapImage()');
-console.log('✨ Player posicionado em (150, 300) - explore a pracinha!');
+console.log('✨ Pracinha agora em posição otimizada!');
