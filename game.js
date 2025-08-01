@@ -289,7 +289,7 @@ const maps = [
             {x: 0, y: 530, w: 3000, h: 258, invisible: false},    // Parede inferior do túnel (SUBIU 70px: Y=600→530)
             
             // PAREDE VERTICAL DIREITA - bloqueia saída lateral do túnel
-            {x: 2665, y: 190, w: 335, h: 340, invisible: false}, // Parede direita: X=2665 até X=3000 (335px largura)
+            {x: 2600, y: 190, w: 270, h: 340, invisible: false}, // Parede direita: X=2665 até X=3000 (335px largura)
             // CORREDOR LIVRE: Y = 460-600 (140px de altura para passar)
             
             // ÁREA 4: Rampa de subida (X: 2800-2850) 
