@@ -1,4 +1,4 @@
- console.log('Mad Night v1.9.68 - Parede Direita fix');
+console.log('Mad Night v1.9.61 - Corredor do túnel aberto');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.68 - Parede Direita fix'
+    version: 'v1.9.61 - Corredor do túnel aberto'
 };
 
 // Player
@@ -48,7 +48,7 @@ const player = {
     isDead: false,
     deathFrame: 12,
     isDashing: false,
-    dash: 0,
+    dashStart: 0,
     dashDuration: 150,
     dashDistance: 60,
     dashStartX: 0,
@@ -254,7 +254,7 @@ const maps = [
         ],
         lights: [],
         shadows: [],
-        playerStart: {x: 150, y: 300},
+        playerStart: {x: 200, y: 300},
         playerStartEscape: {x: 1700, y: 540},
         exit: {x: 1800, y: 490, w: 80, h: 100},
         direction: 'right'
@@ -269,37 +269,38 @@ const maps = [
         streetLights: [],
         objects: [],
         walls: [
-// ============ TÚNEL EM FORMATO U - PAREDES VISÍVEIS ============
-// Vou construir o túnel em forma de U usando paredes cinzas normais
-
-// ÁREA 1: Entrada livre (X: 0-380)
-// Player pode andar livre até chegar na entrada do túnel
-
-// ÁREA 2: Rampa de descida (X: 380-420)
-// Paredes que forçam descida em diagonal
-{x: 415, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa
-{x: 380, y: 600, w: 40, h: 188, invisible: false}, // Parede inferior da rampa
-
-// PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel
-{x: 0, y: 190, w: 335, h: 340, invisible: false},  // Parede de X=0 até X=335, Y=190 até Y=530
-
-// ÁREA 3: Túnel horizontal inferior (X: 420-2580)
-// Corredor horizontal no fundo
-{x: 445, y: 80, w: 2135, h: 380, invisible: false},   // Parede superior do túnel (AJUSTADA para simetria)
-{x: 0, y: 530, w: 3000, h: 258, invisible: false},    // Parede inferior do túnel
-
-// PAREDE VERTICAL DIREITA - bloqueia saída lateral do túnel (ESPELHADA)
-{x: 2665, y: 190, w: 335, h: 340, invisible: false}, // Parede direita espelhada (mesmas dimensões da esquerda)
-
-// ÁREA 4: Rampa de subida (X: 2580-2620) - ESPELHADA
-// Paredes que forçam subida em diagonal (mesmas dimensões da descida)
-{x: 2545, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa (espelhada)
-{x: 2580, y: 600, w: 40, h: 188, invisible: false}, // Parede inferior da rampa (espelhada)
-
-// ÁREA 5: Saída livre (X: 2620-3000)
-// Player pode andar livre após sair do túnel (mesmo espaço que entrada)
-
-// Bordas do mapa
+            // ============ TÚNEL EM FORMATO U - PAREDES VISÍVEIS ============
+            // Vou construir o túnel em forma de U usando paredes cinzas normais
+            
+            // ÁREA 1: Entrada livre (X: 0-380)
+            // Player pode andar livre até chegar na entrada do túnel
+            
+            // ÁREA 2: Rampa de descida (X: 380-420)
+            // Paredes que forçam descida em diagonal
+            {x: 415, y: 80, w: 40, h: 150, invisible: false},  // Parede superior da rampa
+            {x: 380, y: 600, w: 40, h: 188, invisible: false}, // Parede inferior da rampa
+            
+            // PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel
+            {x: 0, y: 190, w: 335, h: 340, invisible: false},  // Parede de X=0 até X=335, Y=190 até Y=530
+            
+            // ÁREA 3: Túnel horizontal inferior (X: 420-2800)
+            // Corredor horizontal no fundo
+            {x: 445, y: 80, w: 2340, h: 380, invisible: false},   // Parede superior do túnel (REDUZIDA: w=2340 ao invés de 2355)
+            {x: 0, y: 530, w: 3000, h: 258, invisible: false},    // Parede inferior do túnel (SUBIU 70px: Y=600→530)
+            
+            // PAREDE VERTICAL DIREITA - bloqueia saída lateral do túnel
+            {x: 2855, y: 190, w: 335, h: 340, invisible: false}, // Parede direita: X=2665 até X=3000 (335px largura)
+            // CORREDOR LIVRE: Y = 460-600 (140px de altura para passar)
+            
+            // ÁREA 4: Rampa de subida (X: 2800-2850) 
+            // Paredes que forçam subida em diagonal
+            {x: 2855, y: 80, w: 50, h: 150, invisible: false},  // Parede superior da rampa
+            {x: 2855, y: 600, w: 50, h: 188, invisible: false}, // Parede inferior da rampa
+            
+            // ÁREA 5: Saída livre (X: 2850-3000)
+            // Player pode andar livre após sair do túnel
+            
+            // Bordas do mapa
             {x: 0, y: 0, w: 3000, h: 80, invisible: true},
             {x: 0, y: 788, w: 3000, h: 80, invisible: true},
             {x: 0, y: 0, w: 20, h: 868, invisible: true},
@@ -1391,385 +1392,3 @@ function renderFieldShadow(map) {
 
 function renderShadows(map, visibleArea) {
     if (map.trees) {
-        map.trees.forEach(tree => {
-            const treeAsset = assets[tree.type];
-            if (treeAsset && treeAsset.loaded) {
-                let shadowRadius = tree.type === 'arvorebloco001' ? 
-                    treeAsset.width * 0.35 : treeAsset.width * 0.5;
-                
-                const shadowX = tree.x + treeAsset.width * 0.5;
-                const shadowY = tree.y + treeAsset.height * 0.85;
-                
-                if (shadowX + shadowRadius > visibleArea.left && 
-                    shadowX - shadowRadius < visibleArea.right &&
-                    shadowY + shadowRadius > visibleArea.top && 
-                    shadowY - shadowRadius < visibleArea.bottom) {
-                    
-                    const gradient = ctx.createRadialGradient(
-                        shadowX, shadowY, 0,
-                        shadowX, shadowY, shadowRadius
-                    );
-                    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-                    gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
-                    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(
-                        shadowX - shadowRadius,
-                        shadowY - shadowRadius,
-                        shadowRadius * 2,
-                        shadowRadius * 2
-                    );
-                }
-            }
-        });
-    }
-}
-
-function renderWalls(map, visibleArea) {
-    ctx.fillStyle = '#666';
-    map.walls.forEach(wall => {
-        if (wall.x + wall.w > visibleArea.left && 
-            wall.x < visibleArea.right &&
-            wall.y + wall.h > visibleArea.top && 
-            wall.y < visibleArea.bottom) {
-            
-            if (!wall.invisible) {
-                // Paredes visíveis em cinza
-                ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
-            }
-        }
-    });
-}
-
-function renderSpecialObjects(map) {
-    if (map.orelhao) {
-        ctx.fillStyle = '#00f';
-        ctx.fillRect(map.orelhao.x, map.orelhao.y, map.orelhao.w, map.orelhao.h);
-        ctx.fillStyle = '#fff';
-        ctx.font = '10px Arial';
-        ctx.fillText('TEL', map.orelhao.x + 5, map.orelhao.y + 30);
-    }
-    
-    if (map.lixeira) {
-        ctx.fillStyle = gameState.bombPlaced ? '#f00' : '#080';
-        ctx.fillRect(map.lixeira.x, map.lixeira.y, map.lixeira.w, map.lixeira.h);
-        ctx.fillStyle = '#fff';
-        ctx.font = '10px Arial';
-        ctx.fillText(gameState.bombPlaced ? 'BOOM!' : 'LIXO', map.lixeira.x + 2, map.lixeira.y + 25);
-    }
-    
-    if (map.exit) {
-        ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#0f0';
-        ctx.fillRect(map.exit.x, map.exit.y, map.exit.w, map.exit.h);
-        ctx.fillStyle = '#fff';
-        ctx.font = '12px Arial';
-        ctx.fillText(gameState.phase === 'escape' ? 'VOLTA' : 'SAÍDA', map.exit.x + 5, map.exit.y + 30);
-    }
-}
-
-function renderProjectiles(visibleArea) {
-    projectiles.forEach(stone => {
-        if (stone.x > visibleArea.left && stone.x < visibleArea.right &&
-            stone.y > visibleArea.top && stone.y < visibleArea.bottom) {
-            ctx.fillStyle = '#888';
-            ctx.fillRect(stone.x - 5, stone.y - 5, stone.width, stone.height);
-        }
-    });
-}
-
-function renderEnemies(visibleArea) {
-    enemies.forEach(enemy => {
-        if (enemy.x + enemy.width > visibleArea.left && 
-            enemy.x < visibleArea.right &&
-            enemy.y + enemy.height > visibleArea.top && 
-            enemy.y < visibleArea.bottom) {
-            
-            const loadedCheck = {
-                'faquinha': spritesLoaded.faquinha >= 16,
-                'morcego': spritesLoaded.morcego >= 16,
-                'caveirinha': spritesLoaded.caveirinha >= 16,
-                'janis': spritesLoaded.janis >= 16,
-                'chacal': spritesLoaded.chacal >= 16
-            };
-            
-            if (loadedCheck[enemy.type]) {
-                const sprite = enemy.getSprite();
-                if (sprite) {
-                    if (isInShadow(enemy.x + enemy.width/2, enemy.y + enemy.height/2)) {
-                        ctx.globalAlpha = 0.5;
-                    }
-                    
-                    if (enemy.type === 'chacal' && !enemy.isDead && enemy.health < enemy.maxHealth) {
-                        ctx.fillStyle = '#800';
-                        ctx.fillRect(enemy.x, enemy.y - 10, enemy.width, 5);
-                        ctx.fillStyle = '#f00';
-                        ctx.fillRect(enemy.x, enemy.y - 10, enemy.width * (enemy.health / enemy.maxHealth), 5);
-                    }
-                    
-                    if (enemy.isInvulnerable) {
-                        ctx.globalAlpha = 0.5;
-                    }
-                    
-                    ctx.drawImage(sprite, enemy.x, enemy.y, enemy.width, enemy.height);
-                    ctx.globalAlpha = 1;
-                }
-            } else {
-                if (!enemy.isDead) {
-                    const colors = {
-                        'faquinha': '#808',
-                        'morcego': '#408',
-                        'caveirinha': '#c0c',
-                        'janis': '#0cc',
-                        'chacal': '#f80'
-                    };
-                    ctx.fillStyle = enemy.state === 'chase' ? '#f0f' : colors[enemy.type];
-                    ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-                }
-            }
-            
-            if (!enemy.isDead && gameState.phase === 'escape') {
-                ctx.fillStyle = '#f00';
-                ctx.font = '10px Arial';
-                ctx.fillText('!', enemy.x + 23, enemy.y - 5);
-            }
-        }
-    });
-}
-
-function renderPlayer() {
-    if (spritesLoaded.madmax >= 16) {
-        const sprite = getPlayerSprite();
-        if (sprite) {
-            if (player.inShadow) ctx.globalAlpha = 0.5;
-            ctx.drawImage(sprite, player.x, player.y, player.width, player.height);
-            ctx.globalAlpha = 1;
-        }
-    } else {
-        ctx.fillStyle = player.isDashing ? '#ff0' : (player.isDead ? '#800' : '#f00');
-        if (player.inShadow) ctx.globalAlpha = 0.5;
-        ctx.fillRect(player.x, player.y, player.width, player.height);
-        ctx.globalAlpha = 1;
-    }
-}
-
-function renderUI(map) {
-    ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#ff0';
-    ctx.font = 'bold 48px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(map.name, canvas.width/2, 80);
-    ctx.font = '32px Arial';
-    ctx.fillText(map.subtitle, canvas.width/2, 120);
-    
-    ctx.fillStyle = '#666';
-    ctx.font = '24px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(gameState.version, canvas.width/2, 160);
-    ctx.textAlign = 'left';
-    
-    ctx.fillStyle = '#fff';
-    ctx.font = '28px Arial';
-    ctx.fillText(`Mapa: ${gameState.currentMap + 1}/6`, 20, canvas.height - 80);
-    ctx.fillText(`Inimigos: ${enemies.filter(e => !e.isDead).length}`, 20, canvas.height - 40);
-    
-    ctx.fillText('Vidas: ', 20, 50);
-    for (let i = 0; i < 5; i++) {
-        ctx.font = '40px Arial';
-        if (i >= gameState.deaths) {
-            ctx.fillStyle = '#f00';
-            ctx.fillText('💀', 120 + i * 60, 50);
-        }
-    }
-    ctx.font = '28px Arial';
-    
-    if (player.inShadow) {
-        ctx.fillStyle = '#0f0';
-        ctx.fillText('NA SOMBRA - Invisível!', 20, 210);
-    }
-    
-    if (map.orelhao && !gameState.dashUnlocked) {
-        ctx.fillStyle = '#ff0';
-        ctx.fillText('Atenda o orelhão!', 20, 250);
-    }
-    
-    if (map.lixeira && !gameState.bombPlaced) {
-        ctx.fillStyle = '#ff0';
-        ctx.fillText('Elimine todos e plante o explosivo!', 20, 250);
-    }
-    
-    ctx.fillStyle = '#fff';
-    ctx.fillText('Força de Pedal: ', 20, 130);
-    for (let i = 0; i < gameState.maxPedalPower; i++) {
-        ctx.fillStyle = i < gameState.pedalPower ? '#0f0' : '#333';
-        ctx.fillText('█', 240 + i * 24, 130);
-    }
-    
-    if (audio.failedToLoad) {
-        ctx.fillStyle = '#f00';
-        ctx.font = '20px Arial';
-        ctx.fillText('⚠️ Áudio não carregado', 20, 170);
-        ctx.font = '28px Arial';
-    }
-    
-    if (player.isDead) {
-        ctx.fillStyle = '#f00';
-        ctx.font = '64px Arial';
-        ctx.textAlign = 'center';
-        const msg = gameState.deaths < 5 ? "ah véi, se liga carái" : "sifudêu";
-        ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
-        ctx.textAlign = 'left';
-    }
-}
-
-function draw() {
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.save();
-    ctx.fillStyle = '#fff';
-    ctx.font = '24px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(gameState.version, canvas.width/2, 30);
-    ctx.textAlign = 'left';
-    ctx.restore();
-    
-    try {
-        const map = maps[gameState.currentMap];
-        
-        ctx.save();
-        ctx.scale(camera.zoom, camera.zoom);
-        ctx.translate(-camera.x, -camera.y);
-        
-        ctx.fillStyle = '#1a1a1a';
-        ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
-        
-        const visibleArea = {
-            left: camera.x - 100,
-            right: camera.x + camera.width + 100,
-            top: camera.y - 100,
-            bottom: camera.y + camera.height + 100
-        };
-        
-        if (map.hasLayers && gameState.currentMap === 1) {
-            renderEixaoLayer1(map);
-        } else {
-            renderTiles(map, visibleArea);
-        }
-        
-        renderCampo(map);
-        renderShadows(map, visibleArea);
-        renderTrees(map, visibleArea, 'bottom');
-        renderObjects(map, visibleArea);
-        renderWalls(map, visibleArea);
-        renderSpecialObjects(map);
-        renderProjectiles(visibleArea);
-        renderEnemies(visibleArea);
-        renderPlayer();
-        
-        if (map.hasLayers && gameState.currentMap === 1) {
-            renderEixaoLayer2(map);
-        }
-        
-        renderCampoTraves();
-        renderFieldShadow(map);
-        renderStreetLights(map, visibleArea);
-        renderTrees(map, visibleArea, 'top');
-        
-        ctx.fillStyle = 'rgba(0, 0, 40, 0.4)';
-        ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
-        
-        if (map.streetLights) {
-            ctx.save();
-            ctx.globalCompositeOperation = 'lighter';
-            
-            map.streetLights.forEach(light => {
-                const intensity = flickerSystem.update(light.id || 'default');
-                
-                const gradient = ctx.createRadialGradient(
-                    light.x + 20, light.y + 45, 0,
-                    light.x + 20, light.y + 45, 100
-                );
-                gradient.addColorStop(0, `rgba(255, 200, 100, ${0.4 * intensity})`);
-                gradient.addColorStop(0.5, `rgba(255, 180, 80, ${0.2 * intensity})`);
-                gradient.addColorStop(1, 'rgba(255, 160, 60, 0)');
-                
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(light.x + 20, light.y + 45, 100, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            
-            ctx.restore();
-        }
-        
-        ctx.restore();
-        renderUI(map);
-        
-    } catch (error) {
-        ctx.fillStyle = '#f00';
-        ctx.font = '32px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('ERRO NO RENDER', canvas.width/2, canvas.height/2);
-        ctx.font = '20px Arial';
-        ctx.fillText(error.message, canvas.width/2, canvas.height/2 + 40);
-        console.error('Erro no draw:', error);
-    }
-}
-
-function gameLoop() {
-    update();
-    draw();
-    requestAnimationFrame(gameLoop);
-}
-
-for (let i = 0; i <= 15; i++) {
-    const img = new Image();
-    img.src = `assets/sprites/madmax${String(i).padStart(3, '0')}.png`;
-    img.onload = () => spritesLoaded.madmax++;
-    player.sprites[i] = img;
-}
-
-for (let i = 0; i <= 15; i++) {
-    const img = new Image();
-    img.src = `assets/sprites/faquinha${String(i).padStart(3, '0')}.png`;
-    img.onload = () => spritesLoaded.faquinha++;
-    faquinhaSprites[i] = img;
-}
-
-for (let i = 0; i <= 15; i++) {
-    const img = new Image();
-    img.src = `assets/sprites/morcego${String(i).padStart(3, '0')}.png`;
-    img.onload = () => spritesLoaded.morcego++;
-    morcegoSprites[i] = img;
-}
-
-for (let i = 0; i <= 15; i++) {
-    const img = new Image();
-    img.src = `assets/sprites/caveirinha${String(i).padStart(3, '0')}.png`;
-    img.onload = () => spritesLoaded.caveirinha++;
-    caveirinhaSprites[i] = img;
-}
-
-for (let i = 0; i <= 15; i++) {
-    const img = new Image();
-    img.src = `assets/sprites/janis${String(i).padStart(3, '0')}.png`;
-    img.onload = () => spritesLoaded.janis++;
-    janisSprites[i] = img;
-}
-
-for (let i = 0; i <= 15; i++) {
-    const img = new Image();
-    img.src = `assets/sprites/chacal${String(i).padStart(3, '0')}.png`;
-    img.onload = () => spritesLoaded.chacal++;
-    chacalSprites[i] = img;
-}
-
-loadAudio();
-loadMap(0);
-setTimeout(() => playMusic('inicio'), 1000);
-gameLoop();
-
-console.log('🎮 Mad Night v1.9.68 - Parede Direita fix');
-console.log('🚇 BASE: Código original v1.9.32 estável');
-console.log('🔧 TÚNEL: Paredes VISÍVEIS em cinza formando U');
-console.log('📍 Player inicia em (200,190)');
-console.log('🎯 Pressione N para Mapa 2 e veja as paredes!');
