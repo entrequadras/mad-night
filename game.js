@@ -308,7 +308,7 @@ const maps = [
         ],
         lights: [],
         shadows: [],
-        playerStart: {x: 50, y: 50},
+        playerStart: {x: 70, y: 70},
         playerStartEscape: {x: 2900, y: 190},
         exit: {x: 2950, y: 80, w: 50, h: 100},
         direction: 'right',
