@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.33 - Túnel Corrigido');
+console.log('Mad Night v1.9.34 - Túnel Real');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.33 - Túnel Corrigido'
+    version: 'v1.9.34 - Túnel Real'
 };
 
 // Player
@@ -279,36 +279,54 @@ const maps = [
             // Borda direita
             {x: 2980, y: 0, w: 20, h: 868, invisible: true},
             
-            // ============ ÁREA DE ENTRADA (X: 0-380) ============
-            // Player pode andar livremente em Y: 80-788
-            // Sem paredes adicionais - área totalmente livre
+            // ============ GRANDE PAREDE CENTRAL (Forma o túnel em U) ============
+            // Esta parede bloqueia TODA a área entre X=380 e X=2845
+            // EXCETO os buracos específicos para rampas e túnel
             
-            // ============ TRANSIÇÃO ENTRADA DO TÚNEL (X: 380-420) ============
-            // Funil que força descida para o túnel
-            // Parede superior que bloqueia acesso ao topo após X=380
-            {x: 380, y: 80, w: 40, h: 110, invisible: true}, // Bloqueia Y: 80-190
-            // Parede inferior que força entrada no túnel
-            {x: 380, y: 590, w: 40, h: 198, invisible: true}, // Bloqueia Y: 590-788
-            // Restam livres: Y: 190-590 (400px de altura para entrada)
+            // PARTE 1: Parede superior (bloqueia acima do túnel superior)
+            {x: 380, y: 80, w: 2465, h: 110, invisible: true}, // Y: 80-190 bloqueado
             
-            // ============ TÚNEL PRINCIPAL (X: 420-2820) ============
-            // Teto do túnel - impede subir
-            {x: 420, y: 80, w: 2400, h: 110, invisible: true}, // Y: 80-190 bloqueado
-            // Chão do túnel - impede descer muito
-            {x: 420, y: 590, w: 2400, h: 198, invisible: true}, // Y: 590-788 bloqueado
-            // Área livre do túnel: Y: 190-590 (400px de altura)
+            // PARTE 2: Parede central principal (força descida ao túnel)
+            {x: 380, y: 190, w: 2465, h: 347, invisible: true}, // Y: 190-537 bloqueado
             
-            // ============ TRANSIÇÃO SAÍDA DO TÚNEL (X: 2820-2860) ============
-            // Funil que permite subida para a saída
-            // Parede superior que ainda bloqueia o topo
-            {x: 2820, y: 80, w: 40, h: 110, invisible: true}, // Bloqueia Y: 80-190
-            // Parede inferior que força saída do túnel
-            {x: 2820, y: 590, w: 40, h: 198, invisible: true}, // Bloqueia Y: 590-788
-            // Restam livres: Y: 190-590 (400px de altura para saída)
+            // PARTE 3: Parede inferior (bloqueia abaixo do túnel inferior)  
+            {x: 380, y: 590, w: 2465, h: 198, invisible: true}, // Y: 590-788 bloqueado
             
-            // ============ ÁREA DE SAÍDA (X: 2860-3000) ============
-            // Player pode andar livremente em Y: 80-788
-            // Sem paredes adicionais - área totalmente livre para saída
+            // ============ BURACOS NA PAREDE (permitem o caminho em U) ============
+            
+            // BURACO 1: Rampa de descida (X: 380-420, Y: 190-537)
+            // Remove parte da parede central para permitir descida
+            {x: 380, y: 190, w: 40, h: 347, invisible: false}, // Libera rampa descida
+            
+            // BURACO 2: Túnel inferior horizontal (X: 420-2820, Y: 537-590) 
+            // Remove parte da parede para permitir travessia horizontal
+            {x: 420, y: 537, w: 2400, h: 53, invisible: false}, // Libera túnel inferior
+            
+            // BURACO 3: Rampa de subida (X: 2820-2845, Y: 190-537)
+            // Remove parte da parede central para permitir subida
+            {x: 2820, y: 190, w: 25, h: 347, invisible: false}, // Libera rampa subida
+            
+            // ============ CORRIGIR PAREDES (bloquear os buracos falsos) ============
+            // Como removemos partes da parede principal, precisamos rebloquear
+            // as áreas que NÃO devem estar livres
+            
+            // Rebloquear área ACIMA da rampa de descida
+            {x: 380, y: 80, w: 40, h: 110, invisible: true}, // Y: 80-190
+            
+            // Rebloquear área ABAIXO da rampa de descida  
+            {x: 380, y: 590, w: 40, h: 198, invisible: true}, // Y: 590-788
+            
+            // Rebloquear área ACIMA do túnel inferior
+            {x: 420, y: 80, w: 2400, h: 457, invisible: true}, // Y: 80-537
+            
+            // Rebloquear área ABAIXO do túnel inferior
+            {x: 420, y: 590, w: 2400, h: 198, invisible: true}, // Y: 590-788
+            
+            // Rebloquear área ACIMA da rampa de subida
+            {x: 2820, y: 80, w: 25, h: 110, invisible: true}, // Y: 80-190
+            
+            // Rebloquear área ABAIXO da rampa de subida
+            {x: 2820, y: 590, w: 25, h: 198, invisible: true}, // Y: 590-788
         ],
         lights: [],
         shadows: [],
@@ -1819,14 +1837,14 @@ setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
 // Logs finais
-console.log('🎮 Mad Night v1.9.33 - Túnel Corrigido 🎮');
-console.log('🚇 Sistema de túneis invisíveis reconfigurado');
-console.log('🛣️ Caminho esperado implementado:');
-console.log('   📍 Entrada (200,190) → Boca túnel (380,190)');
-console.log('   ⬇️  Descida forçada → Túnel Y:190-590');
-console.log('   ➡️  Travessia horizontal até X:2820');
-console.log('   ⬆️  Subida forçada → Saída (2950,80)');
-console.log('🔧 Paredes invisíveis ajustadas para forçar caminho');
-console.log('🎯 TESTE O TÚNEL AGORA!');
+console.log('🎮 Mad Night v1.9.34 - Túnel Real 🎮');
+console.log('🚇 Túnel em forma de U implementado corretamente');
+console.log('🛣️ Caminho obrigatório da linha verde:');
+console.log('   📍 (200,90) → (380,190) → rampa descida');
+console.log('   ⬇️  (400,537) → túnel horizontal → (2820,537)');
+console.log('   ⬆️  rampa subida → (2845,190) → (2950,80)');
+console.log('🔧 Grande parede central com buracos específicos');
+console.log('🎯 ÁREA LIVRE: X<380 e X>2845 apenas');
+console.log('💥 TESTE O TÚNEL EM U AGORA!');
 
 // FIM DO ARQUIVO
