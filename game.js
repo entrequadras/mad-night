@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.43 - Túnel Visual Base Original');
+console.log('Mad Night v1.9.45 - Túnel Mais Estreito');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.43 - Túnel Visual Base Original'
+    version: 'v1.9.45 - Túnel Mais Estreito'
 };
 
 // Player
@@ -283,7 +283,7 @@ const maps = [
             // ÁREA 3: Túnel horizontal inferior (X: 420-2800)
             // Corredor horizontal no fundo
             {x: 420, y: 80, w: 2380, h: 380, invisible: false},   // Parede superior do túnel
-            {x: 0, y: 600, w: 3000, h: 188, invisible: false},    // Parede inferior do túnel (CORRIGIDA - vai de ponta a ponta)
+            {x: 0, y: 530, w: 3000, h: 258, invisible: false},    // Parede inferior do túnel (SUBIU 70px: Y=600→530)
             // CORREDOR LIVRE: Y = 460-600 (140px de altura para passar)
             
             // ÁREA 4: Rampa de subida (X: 2800-2850) 
@@ -1763,7 +1763,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.43 - Túnel Visual Base Original');
+console.log('🎮 Mad Night v1.9.45 - Túnel Mais Estreito');
 console.log('🚇 BASE: Código original v1.9.32 estável');
 console.log('🔧 TÚNEL: Paredes VISÍVEIS em cinza formando U');
 console.log('📍 Player inicia em (200,190)');
