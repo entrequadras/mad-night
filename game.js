@@ -282,11 +282,7 @@ const maps = [
             // ÁREA 1: Entrada livre até X=380
             // Sem paredes - área totalmente livre
             
-            // ÁREA 2: Túnel da rampa descida (380,190) → (420,537)
-            // Calcular paredes ao redor da linha diagonal
-            // Rampa: 40px horizontal, 347px vertical
-            // Paredes a 40px de distância da linha central
-            
+            // ÁREA 2: Túnel da rampa descida (380,190) → (420,537)  
             // Parede ACIMA da rampa de descida
             {x: 340, y: 80, w: 120, h: 70, invisible: true},       // Bloqueia Y:80-150
             {x: 350, y: 150, w: 110, h: 50, invisible: true},      // Bloqueia Y:150-200
@@ -1264,7 +1260,139 @@ function renderTiles(map, visibleArea) {
                 const x = Math.floor(tile.x);
                 const y = Math.floor(tile.y);
                 
-                ctx.fillStyle = cornerGradient1;
+                ctx.drawImage(
+                    tileAsset.img, 
+                    0, 0, 120, 120,
+                    x, y, 121, 121
+                );
+            }
+        }
+    });
+}
+
+function renderEixaoLayer1(map) {
+    if (gameState.currentMap === 1 && assets.eixaoCamada1.loaded) {
+        ctx.drawImage(assets.eixaoCamada1.img, 0, 0);
+    }
+}
+
+function renderEixaoLayer2(map) {
+    if (gameState.currentMap === 1 && assets.eixaoCamada2.loaded) {
+        ctx.drawImage(assets.eixaoCamada2.img, 0, 0);
+    }
+}
+
+function renderCampo(map) {
+    if (gameState.currentMap === 0 && assets.campo.loaded) {
+        const campoX = (map.width - 800) / 2;
+        const campoY = (map.height - 462) / 2;
+        ctx.drawImage(assets.campo.img, campoX, campoY);
+    }
+}
+
+function renderCampoTraves() {
+    if (gameState.currentMap === 0 && assets.campoTraves.loaded) {
+        const campoX = (maps[0].width - 800) / 2;
+        const campoY = (maps[0].height - 462) / 2;
+        ctx.drawImage(assets.campoTraves.img, campoX, campoY);
+    }
+}
+
+function renderTrees(map, visibleArea, layer = 'bottom') {
+    if (!map.trees) return;
+    
+    map.trees.forEach(tree => {
+        const treeAsset = assets[tree.type];
+        if (treeAsset && treeAsset.loaded) {
+            if (tree.x + treeAsset.width > visibleArea.left && 
+                tree.x < visibleArea.right &&
+                tree.y + treeAsset.height > visibleArea.top && 
+                tree.y < visibleArea.bottom) {
+                
+                if (layer === 'bottom') {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(tree.x, tree.y + treeAsset.height * 0.7, treeAsset.width, treeAsset.height * 0.3);
+                    ctx.clip();
+                    ctx.drawImage(treeAsset.img, tree.x, tree.y);
+                    ctx.restore();
+                } else if (layer === 'top') {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(tree.x, tree.y, treeAsset.width, treeAsset.height * 0.75);
+                    ctx.clip();
+                    
+                    const playerUnderTree = player.x + player.width > tree.x &&
+                                          player.x < tree.x + treeAsset.width &&
+                                          player.y + player.height > tree.y &&
+                                          player.y < tree.y + treeAsset.height * 0.75;
+                    
+                    if (playerUnderTree) {
+                        ctx.globalAlpha = 0.7;
+                    }
+                    
+                    ctx.drawImage(treeAsset.img, tree.x, tree.y);
+                    ctx.restore();
+                }
+            }
+        }
+    });
+}
+
+function renderStreetLights(map, visibleArea) {
+    if (!map.streetLights) return;
+    
+    map.streetLights.forEach(light => {
+        renderRotatedObject(light, light.type, visibleArea);
+    });
+}
+
+function renderObjects(map, visibleArea) {
+    if (!map.objects) return;
+    
+    map.objects.forEach(obj => {
+        renderRotatedObject(obj, obj.type, visibleArea);
+    });
+}
+
+function renderFieldShadow(map) {
+    // Sombra do campo apenas no Maconhão
+    if (gameState.currentMap === 0) {
+        const campoX = (map.width - 800) / 2;
+        const campoY = (map.height - 462) / 2;
+        const centerX = campoX + 400;
+        const centerY = campoY + 231;
+        
+        // Gradiente maior e mais suave
+        const gradient = ctx.createRadialGradient(
+            centerX, centerY, 0,
+            centerX, centerY, 450
+        );
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
+        gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.45)');  
+        gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.35)');  
+        gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.2)');  
+        gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.1)');  
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(
+            centerX - 450,
+            centerY - 450,
+            900,
+            900
+        );
+        
+        // Sombras nas quatro extremidades
+        // Canto superior esquerdo
+        const cornerGradient1 = ctx.createRadialGradient(
+            0, 0, 0,
+            0, 0, 400
+        );
+        cornerGradient1.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+        cornerGradient1.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
+        cornerGradient1.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = cornerGradient1;
         ctx.fillRect(0, 0, 400, 400);
         
         // Canto superior direito
@@ -1712,136 +1840,4 @@ console.log('   📍 (200,90) → (380,190) → (420,537) → (2820,537) → (28
 console.log('🔧 Paredes invisíveis seguindo exatamente o caminho');
 console.log('🎯 TESTE: Player deve seguir só a linha verde!');
 
-// FIM DO ARQUIVO.drawImage(
-                    tileAsset.img, 
-                    0, 0, 120, 120,
-                    x, y, 121, 121
-                );
-            }
-        }
-    });
-}
-
-function renderEixaoLayer1(map) {
-    if (gameState.currentMap === 1 && assets.eixaoCamada1.loaded) {
-        ctx.drawImage(assets.eixaoCamada1.img, 0, 0);
-    }
-}
-
-function renderEixaoLayer2(map) {
-    if (gameState.currentMap === 1 && assets.eixaoCamada2.loaded) {
-        ctx.drawImage(assets.eixaoCamada2.img, 0, 0);
-    }
-}
-
-function renderCampo(map) {
-    if (gameState.currentMap === 0 && assets.campo.loaded) {
-        const campoX = (map.width - 800) / 2;
-        const campoY = (map.height - 462) / 2;
-        ctx.drawImage(assets.campo.img, campoX, campoY);
-    }
-}
-
-function renderCampoTraves() {
-    if (gameState.currentMap === 0 && assets.campoTraves.loaded) {
-        const campoX = (maps[0].width - 800) / 2;
-        const campoY = (maps[0].height - 462) / 2;
-        ctx.drawImage(assets.campoTraves.img, campoX, campoY);
-    }
-}
-
-function renderTrees(map, visibleArea, layer = 'bottom') {
-    if (!map.trees) return;
-    
-    map.trees.forEach(tree => {
-        const treeAsset = assets[tree.type];
-        if (treeAsset && treeAsset.loaded) {
-            if (tree.x + treeAsset.width > visibleArea.left && 
-                tree.x < visibleArea.right &&
-                tree.y + treeAsset.height > visibleArea.top && 
-                tree.y < visibleArea.bottom) {
-                
-                if (layer === 'bottom') {
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.rect(tree.x, tree.y + treeAsset.height * 0.7, treeAsset.width, treeAsset.height * 0.3);
-                    ctx.clip();
-                    ctx.drawImage(treeAsset.img, tree.x, tree.y);
-                    ctx.restore();
-                } else if (layer === 'top') {
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.rect(tree.x, tree.y, treeAsset.width, treeAsset.height * 0.75);
-                    ctx.clip();
-                    
-                    const playerUnderTree = player.x + player.width > tree.x &&
-                                          player.x < tree.x + treeAsset.width &&
-                                          player.y + player.height > tree.y &&
-                                          player.y < tree.y + treeAsset.height * 0.75;
-                    
-                    if (playerUnderTree) {
-                        ctx.globalAlpha = 0.7;
-                    }
-                    
-                    ctx.drawImage(treeAsset.img, tree.x, tree.y);
-                    ctx.restore();
-                }
-            }
-        }
-    });
-}
-
-function renderStreetLights(map, visibleArea) {
-    if (!map.streetLights) return;
-    
-    map.streetLights.forEach(light => {
-        renderRotatedObject(light, light.type, visibleArea);
-    });
-}
-
-function renderObjects(map, visibleArea) {
-    if (!map.objects) return;
-    
-    map.objects.forEach(obj => {
-        renderRotatedObject(obj, obj.type, visibleArea);
-    });
-}
-
-function renderFieldShadow(map) {
-    // Sombra do campo apenas no Maconhão
-    if (gameState.currentMap === 0) {
-        const campoX = (map.width - 800) / 2;
-        const campoY = (map.height - 462) / 2;
-        const centerX = campoX + 400;
-        const centerY = campoY + 231;
-        
-        // Gradiente maior e mais suave
-        const gradient = ctx.createRadialGradient(
-            centerX, centerY, 0,
-            centerX, centerY, 450
-        );
-        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
-        gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.45)');  
-        gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.35)');  
-        gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.2)');  
-        gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.1)');  
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        
-        ctx.fillStyle = gradient;
-        ctx.fillRect(
-            centerX - 450,
-            centerY - 450,
-            900,
-            900
-        );
-        
-        // Sombras nas quatro extremidades
-        // Canto superior esquerdo
-        const cornerGradient1 = ctx.createRadialGradient(
-            0, 0, 0,
-            0, 0, 400
-        );
-        cornerGradient1.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-        cornerGradient1.addColorStop(0.6, 'rgba(0, 0, 0, 0.3)');
-        cornerGradient1.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx
+// FIM DO ARQUIVO
