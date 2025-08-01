@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.46 - Parede Vertical Esquerda');
+console.log('Mad Night v1.9.47 - Ajustes Dimensões');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.46 - Parede Vertical Esquerda'
+    version: 'v1.9.47 - Ajustes Dimensões'
 };
 
 // Player
@@ -281,11 +281,11 @@ const maps = [
             {x: 380, y: 600, w: 40, h: 188, invisible: false}, // Parede inferior da rampa
             
             // PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel
-            {x: 0, y: 190, w: 380, h: 340, invisible: false},  // Parede de X=0 até X=380, Y=190 até Y=530
+            {x: 0, y: 190, w: 335, h: 340, invisible: false},  // Parede de X=0 até X=335, Y=190 até Y=530
             
             // ÁREA 3: Túnel horizontal inferior (X: 420-2800)
             // Corredor horizontal no fundo
-            {x: 420, y: 80, w: 2380, h: 380, invisible: false},   // Parede superior do túnel
+            {x: 445, y: 80, w: 2355, h: 380, invisible: false},   // Parede superior do túnel (COMEÇOU 25px depois: X=420→445)
             {x: 0, y: 530, w: 3000, h: 258, invisible: false},    // Parede inferior do túnel (SUBIU 70px: Y=600→530)
             // CORREDOR LIVRE: Y = 460-600 (140px de altura para passar)
             
@@ -1766,7 +1766,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.46 - Parede Vertical Esquerda');
+console.log('🎮 Mad Night v1.9.47 - Ajustes Dimensões');
 console.log('🚇 BASE: Código original v1.9.32 estável');
 console.log('🔧 TÚNEL: Paredes VISÍVEIS em cinza formando U');
 console.log('📍 Player inicia em (200,190)');
