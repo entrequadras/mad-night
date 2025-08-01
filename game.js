@@ -1642,7 +1642,7 @@ function renderLightsOnly(map, visibleArea) {
                 light.x, light.y, 0,
                 light.x, light.y, light.radius
             );
-            // Intensidade reduzida em 30% (0.4 * 0.7 = 0.28, 0.2 * 0.7 = 0.14)
+            // MUDANÇA AQUI - Intensidade reduzida em 30%
             gradient.addColorStop(0, `rgba(255, 200, 100, ${0.28 * intensity})`);
             gradient.addColorStop(0.5, `rgba(255, 180, 80, ${0.14 * intensity})`);
             gradient.addColorStop(1, 'rgba(255, 160, 60, 0)');
