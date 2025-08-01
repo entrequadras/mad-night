@@ -283,7 +283,7 @@ const maps = [
             // ÁREA 3: Túnel horizontal inferior (X: 420-2800)
             // Corredor horizontal no fundo
             {x: 420, y: 80, w: 2380, h: 380, invisible: false},   // Parede superior do túnel
-            {x: 420, y: 600, w: 2380, h: 188, invisible: false},  // Parede inferior do túnel
+            {x: 0, y: 600, w: 3000, h: 188, invisible: false},    // Parede inferior do túnel (CORRIGIDA - vai de ponta a ponta)
             // CORREDOR LIVRE: Y = 460-600 (140px de altura para passar)
             
             // ÁREA 4: Rampa de subida (X: 2800-2850) 
