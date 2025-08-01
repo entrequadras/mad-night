@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.48 - Player e Parede Direita'
+    version: 'v1.9.61 - Parede Direita fix'
 };
 
 // Player
