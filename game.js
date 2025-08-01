@@ -294,8 +294,8 @@ const maps = [
             
             // ÁREA 4: Rampa de subida (X: 2800-2850) 
             // Paredes que forçam subida em diagonal
-            {x: 2800, y: 80, w: 50, h: 150, invisible: false},  // Parede superior da rampa
-            {x: 2800, y: 600, w: 50, h: 188, invisible: false}, // Parede inferior da rampa
+            {x: 2855, y: 80, w: 50, h: 150, invisible: false},  // Parede superior da rampa
+            {x: 2855, y: 600, w: 50, h: 188, invisible: false}, // Parede inferior da rampa
             
             // ÁREA 5: Saída livre (X: 2850-3000)
             // Player pode andar livre após sair do túnel
