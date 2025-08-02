@@ -86,6 +86,7 @@ const assets = {
 carro001fundos: { img: new Image(), loaded: false, width: 102, height: 130 },
 carro002frente: { img: new Image(), loaded: false, width: 118, height: 140 },
 carro002fundos: { img: new Image(), loaded: false, width: 118, height: 130 },
+carro003fundos: { img: new Image(), loaded: false, width: 102, height: 130 },
 carro004fundos: { img: new Image(), loaded: false, width: 96, height: 140 },
 carro004frente: { img: new Image(), loaded: false, width: 102, height: 130 },
 };
