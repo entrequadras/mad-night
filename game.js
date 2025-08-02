@@ -81,7 +81,7 @@ const assets = {
     cadeiradepraia01: { img: new Image(), loaded: false, width: 29, height: 40 },
     // Assets do Eixão
     eixaoCamada1: { img: new Image(), loaded: false, width: 3000, height: 868 },
-    eixaoCamada2: { img: new Image(), loaded: false, width: 3000, height: 868 }
+    eixaoCamada2: { img: new Image(), loaded: false, width: 3000, height: 868 },
     carro001frente: { img: new Image(), loaded: false, width: 118, height: 140 },
 carro001fundos: { img: new Image(), loaded: false, width: 102, height: 130 },
 carro002frente: { img: new Image(), loaded: false, width: 118, height: 140 },
