@@ -88,6 +88,7 @@ const assets = {
     carro002fundos: { img: new Image(), loaded: false, width: 130, height: 138 },
     carro003fundos: { img: new Image(), loaded: false, width: 150, height: 110 },
     carro004frente: { img: new Image(), loaded: false, width: 102, height: 130 },
+    carro004fundos: { img: new Image(), loaded: false, width: 93, height: 140 },
 };
 
 // Carregar assets
@@ -2216,7 +2217,7 @@ function draw() {
         renderShadows(map, visibleArea);
         renderTrees(map, visibleArea, 'bottom');
         renderObjects(map, visibleArea);
-        renderWalls(map, visibleArea)
+        renderWalls(map, visibleArea);
         renderSpecialObjects(map);
         renderProjectiles(visibleArea);
         renderEnemies(visibleArea);
