@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.91 - Sistema de tráfego completo');
+console.log('Mad Night v1.9.91 - tempo entre carros');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
