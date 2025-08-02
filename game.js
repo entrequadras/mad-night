@@ -228,9 +228,9 @@ const trafficSystem = {
     // Configurações de spawn - madrugada, pouco movimento
     spawnConfig: {
         mainLanes: {
-            minInterval: 7000,  // 7 segundos mínimo
-            maxInterval: 13000,  // 13 segundos máximo
-            rushChance: 0.10    // 10% chance de "rush" com mais carros
+            minInterval: 10000,  // 10 segundos mínimo
+            maxInterval: 19000,  // 19 segundos máximo
+            rushChance: 0.05    // 5% chance de "rush" com mais carros
         }
     },
     
