@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.87 - Sistema de trafego corrigido');
+console.log('Mad Night vv1.9.88 - Sistema de trafego corrigido');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'Versão: v1.9.86 - Carros reduzidos para 60%
+    version: 'Versão: v1.9.88 - Carros reduzidos para 60%'
 };
 
 // Player
@@ -239,19 +239,28 @@ const trafficSystem = {
         }
     },
     
-    // Tipos de carros e suas dimensões
-    carTypes: {
-        northSouth: [
-            { sprite: 'carro001frente', width: 118, height: 140 },
-            { sprite: 'carro002frente', width: 118, height: 140 },
-            { sprite: 'carro004frente', width: 102, height: 130 }
-        ],
-        southNorth: [
-            { sprite: 'carro001fundos', width: 102, height: 130 },
-            { sprite: 'carro002fundos', width: 130, height: 138 },
-            { sprite: 'carro003fundos', width: 150, height: 110 }
-        ]
-    },
+   // Tipos de carros - dimensões pegadas direto dos assets
+carTypes: {
+    northSouth: [
+        { sprite: 'carro001frente' },
+        { sprite: 'carro002frente' },
+        { sprite: 'carro004frente' }
+    ],
+    southNorth: [
+        { sprite: 'carro001fundos' },
+        { sprite: 'carro002fundos' },
+        { sprite: 'carro003fundos' }
+    ]
+},
+
+// Helper para pegar dimensões do asset
+getCarDimensions: function(spriteName) {
+    const asset = assets[spriteName];
+    return {
+        width: asset.width || 100,  // fallback caso não carregado
+        height: asset.height || 100
+    };
+},
     
     update: function() {
         const now = Date.now();
@@ -328,53 +337,55 @@ const trafficSystem = {
             usedLanes.push(lane);
             
             const carType = this.carTypes[direction][Math.floor(Math.random() * this.carTypes[direction].length)];
-            const speed = 4.5 + Math.random() * 1.5; // 80km/h ± variação
-            
-            this.cars.push({
-                sprite: carType.sprite,
-                x: lane - carType.width/2, // Centralizar na pista
-                y: direction === 'northSouth' ? -150 : 968,
-                vy: direction === 'northSouth' ? speed : -speed,
-                vx: 0,
-                diagonal: false,
-                width: carType.width,
-                height: carType.height,
-                headlightOffsetY: direction === 'northSouth' ? carType.height - 20 : 20
-            });
+const dimensions = this.getCarDimensions(carType.sprite);
+const speed = 4.5 + Math.random() * 1.5; // 80km/h ± variação
+
+this.cars.push({
+    sprite: carType.sprite,
+    x: lane - dimensions.width/2, // Centralizar na pista
+    y: direction === 'northSouth' ? -150 : 968,
+    vy: direction === 'northSouth' ? speed : -speed,
+    vx: 0,
+    diagonal: false,
+    width: dimensions.width,
+    height: dimensions.height,
+    headlightOffsetY: direction === 'northSouth' ? dimensions.height - 20 : 20
+});
         }
     },
     
     spawnDiagonalLane: function(direction) {
-        const carType = this.carTypes[direction][Math.floor(Math.random() * this.carTypes[direction].length)];
-        
-        if (direction === 'northSouth') {
-            // Rampa 525 para 420
-            this.cars.push({
-                sprite: carType.sprite,
-                x: 525,
-                y: -150,
-                vx: -0.7,  // Movimento diagonal
-                vy: 3.2,   // Mais devagar
-                diagonal: true,
-                width: carType.width,
-                height: carType.height,
-                headlightOffsetY: carType.height - 20
-            });
-        } else {
-            // Rampa 2580 para 2680
-            this.cars.push({
-                sprite: carType.sprite,
-                x: 2580 - carType.width/2,
-                y: 968,
-                vx: 0.7,   // Movimento diagonal
-                vy: -3.2,  // Mais devagar
-                diagonal: true,
-                width: carType.width,
-                height: carType.height,
-                headlightOffsetY: 20
-            });
-        }
-    },
+    const carType = this.carTypes[direction][Math.floor(Math.random() * this.carTypes[direction].length)];
+    const dimensions = this.getCarDimensions(carType.sprite);
+    
+    if (direction === 'northSouth') {
+        // Rampa 525 para 420
+        this.cars.push({
+            sprite: carType.sprite,
+            x: 525,
+            y: -150,
+            vx: -0.7,  // Movimento diagonal
+            vy: 3.2,   // Mais devagar
+            diagonal: true,
+            width: dimensions.width,
+            height: dimensions.height,
+            headlightOffsetY: dimensions.height - 20
+        });
+    } else {
+        // Rampa 2580 para 2680
+        this.cars.push({
+            sprite: carType.sprite,
+            x: 2580 - dimensions.width/2,
+            y: 968,
+            vx: 0.7,   // Movimento diagonal
+            vy: -3.2,  // Mais devagar
+            diagonal: true,
+            width: dimensions.width,
+            height: dimensions.height,
+            headlightOffsetY: 20
+        });
+    }
+},
     render: function(ctx, visibleArea) {
         this.cars.forEach(car => {
             // Verificar se o carro está visível
@@ -798,7 +809,7 @@ const maps = [
     {x: 0, y: 222, w: 335, h: 340, invisible: true},  // Parede esquerda
     
     // ÁREA 3: Túnel horizontal inferior (X: 420-2780) - DESCIDO +32px
-    // Corredor horizontal no fundo - agora 32px mais baixo e até 2780!
+    // Corredor horizontal no fundo - agora 32px mais baixo e até 2906!
     {x: 445, y: 80, w: 2335, h: 412, invisible: true},   // Parede superior
     {x: 0, y: 562, w: 3000, h: 226, invisible: true},    // Parede inferior
     
@@ -2357,7 +2368,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night Versão: v1.9.86 - Carros reduzidos para 60%);
+console.log('🎮 Mad Night Versão: v1.9.88 - Carros reduzidos para 60%');
 console.log('🚇 AJUSTE: Corredor horizontal vai até X=2906 agora');
 console.log('📐 AJUSTE: Parede direita reposicionada para X=2906');
 console.log('🎯 Agora o player percorre mais túnel antes de subir!');
