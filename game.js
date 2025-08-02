@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.91 - Faróis ajustados');
+console.log('Mad Night v1.9.95 - Correção dos carros');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'Versão: v1.9.91 - Faróis ajustados'
+    version: 'Versão: v1.9.95 - Correção dos carros'
 };
 
 // Player
@@ -2328,7 +2328,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night Versão: 1.9.94 - Tráfego ultra reduzido');
+console.log('🎮 Mad Night Versão: 1.9.95 - Correção dos carros');
 console.log('🚇 AJUSTE: Corredor horizontal vai até X=2906 agora');
 console.log('📐 AJUSTE: Parede direita reposicionada para X=2906');
 console.log('🎯 Agora o player percorre mais túnel antes de subir!');
