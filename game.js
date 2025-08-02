@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.76 - Melhoria do Maconhão com novos objetos');
+console.log('Mad Night v1.9.77 - Melhoria do Maconhão com novos objetos');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.76 - Correção do corredor horizontal do túnel'
+    version: 'v1.9.77 - Correção do corredor horizontal do túnel'
 };
 
 // Player
@@ -191,7 +191,210 @@ const flickerSystem = {
         return light.intensity;
     }
 };
+// Adicione este sistema após o flickerSystem (aproximadamente linha 250)
 
+// Sistema de tráfego do Eixão
+const trafficSystem = {
+    cars: [],
+    lastSpawn: {
+        mainNorthSouth: 0,
+        mainSouthNorth: 0,
+        diagonalNorthSouth: 0,
+        diagonalSouthNorth: 0
+    },
+    
+    // Configurações de spawn - madrugada, pouco movimento
+    spawnConfig: {
+        mainLanes: {
+            minInterval: 3000,  // 3 segundos mínimo
+            maxInterval: 8000,  // 8 segundos máximo
+            rushChance: 0.15    // 15% chance de "rush" com mais carros
+        },
+        diagonalLanes: {
+            interval: 5000      // 5 segundos fixo para rampas
+        }
+    },
+    
+    // Tipos de carros e suas velocidades
+    carTypes: {
+        northSouth: ['carro001frente', 'carro002frente', 'carro004frente'],
+        southNorth: ['carro001fundos', 'carro002fundos', 'carro003fundos']
+    },
+    
+    update: function() {
+        const now = Date.now();
+        
+        // Spawn nas pistas principais (80km/h)
+        if (now - this.lastSpawn.mainNorthSouth > this.getNextSpawnTime('main')) {
+            this.spawnMainLanes('northSouth');
+            this.lastSpawn.mainNorthSouth = now;
+        }
+        
+        if (now - this.lastSpawn.mainSouthNorth > this.getNextSpawnTime('main')) {
+            this.spawnMainLanes('southNorth');
+            this.lastSpawn.mainSouthNorth = now;
+        }
+        
+        // Spawn nas rampas diagonais
+        if (now - this.lastSpawn.diagonalNorthSouth > this.spawnConfig.diagonalLanes.interval) {
+            this.spawnDiagonalLane('northSouth');
+            this.lastSpawn.diagonalNorthSouth = now;
+        }
+        
+        if (now - this.lastSpawn.diagonalSouthNorth > this.spawnConfig.diagonalLanes.interval) {
+            this.spawnDiagonalLane('southNorth');
+            this.lastSpawn.diagonalSouthNorth = now;
+        }
+        
+        // Atualizar carros existentes
+        for (let i = this.cars.length - 1; i >= 0; i--) {
+            const car = this.cars[i];
+            
+            // Movimento do carro
+            if (car.diagonal) {
+                // Movimento diagonal nas rampas
+                car.x += car.vx;
+                car.y += car.vy;
+            } else {
+                // Movimento reto nas pistas principais
+                car.y += car.vy;
+            }
+            
+            // Remover carros fora da tela
+            if (car.y < -200 || car.y > 1068 || car.x < -200 || car.x > 3200) {
+                this.cars.splice(i, 1);
+            }
+        }
+    },
+    
+    getNextSpawnTime: function(laneType) {
+        const config = this.spawnConfig.mainLanes;
+        
+        // Chance de "rush" - vários carros juntos
+        if (Math.random() < config.rushChance) {
+            return 800; // Spawn rápido durante rush
+        }
+        
+        // Tempo aleatório normal
+        return config.minInterval + Math.random() * (config.maxInterval - config.minInterval);
+    },
+    
+    spawnMainLanes: function(direction) {
+        const lanes = direction === 'northSouth' ? 
+            [1305, 1390, 1470, 1550] : 
+            [1637, 1706, 1790, 1883];
+        
+        // Escolher 1-2 pistas aleatórias para spawn
+        const numCars = Math.random() < 0.3 ? 2 : 1;
+        const usedLanes = [];
+        
+        for (let i = 0; i < numCars; i++) {
+            let lane;
+            do {
+                lane = lanes[Math.floor(Math.random() * lanes.length)];
+            } while (usedLanes.includes(lane));
+            usedLanes.push(lane);
+            
+            const carType = this.carTypes[direction][Math.floor(Math.random() * this.carTypes[direction].length)];
+            const speed = 4.5 + Math.random() * 1.5; // 80km/h ± variação
+            
+            this.cars.push({
+                type: carType,
+                x: lane,
+                y: direction === 'northSouth' ? -100 : 968,
+                vy: direction === 'northSouth' ? speed : -speed,
+                vx: 0,
+                diagonal: false,
+                width: 100, // Ajustar conforme assets
+                height: 120,
+                headlightOffset: direction === 'northSouth' ? 80 : -20
+            });
+        }
+    },
+    
+    spawnDiagonalLane: function(direction) {
+        const carType = this.carTypes[direction][Math.floor(Math.random() * this.carTypes[direction].length)];
+        
+        if (direction === 'northSouth') {
+            // Rampa 525 para 420
+            this.cars.push({
+                type: carType,
+                x: 525,
+                y: -100,
+                vx: -0.7,  // Movimento diagonal
+                vy: 3.2,   // Mais devagar
+                diagonal: true,
+                width: 100,
+                height: 120,
+                headlightOffset: 80
+            });
+        } else {
+            // Rampa 2580 para 2680
+            this.cars.push({
+                type: carType,
+                x: 2580,
+                y: 968,
+                vx: 0.7,   // Movimento diagonal
+                vy: -3.2,  // Mais devagar
+                diagonal: true,
+                width: 100,
+                height: 120,
+                headlightOffset: -20
+            });
+        }
+    },
+    
+    render: function(ctx, visibleArea) {
+        this.cars.forEach(car => {
+            // Verificar se o carro está visível
+            if (car.x + car.width < visibleArea.left || 
+                car.x > visibleArea.right ||
+                car.y + car.height < visibleArea.top || 
+                car.y > visibleArea.bottom) return;
+            
+            // Por enquanto, renderizar como retângulo colorido
+            // Substituir por sprites quando disponíveis
+            ctx.fillStyle = car.vy > 0 ? '#c44' : '#44c'; // Vermelho indo pra baixo, azul pra cima
+            ctx.fillRect(car.x, car.y, car.width, car.height);
+            
+            // Renderizar faróis
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            
+            // Dois faróis por carro
+            const headlightY = car.y + car.headlightOffset;
+            const headlightPositions = [
+                { x: car.x + 20, y: headlightY },
+                { x: car.x + car.width - 20, y: headlightY }
+            ];
+            
+            headlightPositions.forEach(pos => {
+                const gradient = ctx.createRadialGradient(
+                    pos.x, pos.y, 0,
+                    pos.x, pos.y, 40
+                );
+                gradient.addColorStop(0, 'rgba(255, 255, 200, 0.6)');
+                gradient.addColorStop(0.5, 'rgba(255, 255, 150, 0.3)');
+                gradient.addColorStop(1, 'rgba(255, 255, 100, 0)');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 40, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            ctx.restore();
+        });
+    }
+};
+
+// Na função update() principal, adicione após updateProjectiles():
+trafficSystem.update();
+
+// Na função draw(), adicione após renderWalls e antes de renderSpecialObjects:
+if (gameState.currentMap === 1) {
+    trafficSystem.render(ctx, visibleArea);
+}
 // Função para gerar tiles de grama (apenas para mapa 1)
 function generateGrassTiles(mapWidth, mapHeight, tileSize) {
     const tiles = [];
@@ -1386,7 +1589,7 @@ function update() {
     
     enemies.forEach(enemy => enemy.update());
     updateProjectiles();
-    
+    trafficSystem.update();
     enemies.forEach((enemy, index) => {
         if (enemy.isDead && !enemy.removeTime) {
             enemy.removeTime = Date.now() + 3000;
@@ -1992,6 +2195,9 @@ function draw() {
         renderTrees(map, visibleArea, 'bottom');
         renderObjects(map, visibleArea);
         renderWalls(map, visibleArea);
+        if (gameState.currentMap === 1) {
+            trafficSystem.render(ctx, visibleArea);
+            }
         renderSpecialObjects(map);
         renderProjectiles(visibleArea);
         renderEnemies(visibleArea);
@@ -2103,7 +2309,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.76 - Correção do corredor horizontal do túnel');
+console.log('🎮 Mad Night v1.9.77 - Correção do corredor horizontal do túnel');
 console.log('🚇 AJUSTE: Corredor horizontal vai até X=2906 agora');
 console.log('🔧 AJUSTE: Rampa de subida começa em X=2906 (mais tarde)');
 console.log('📐 AJUSTE: Parede direita reposicionada para X=2906');
