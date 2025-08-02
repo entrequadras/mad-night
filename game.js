@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.78 - Melhoria do Maconhão com novos objetos');
+console.log('Mad Night v1.9.79 - Melhoria do Maconhão com novos objetos');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.78 - Correção do corredor horizontal do túnel'
+    version: 'v1.9.79 - Correção do corredor horizontal do túnel'
 };
 
 // Player
@@ -2224,10 +2224,6 @@ function draw() {
         renderShadows(map, visibleArea);
         renderTrees(map, visibleArea, 'bottom');
         renderObjects(map, visibleArea);
-        renderWalls(map, visibleArea);
-        if (gameState.currentMap === 1) {
-            trafficSystem.render(ctx, visibleArea);
-            }
         renderSpecialObjects(map);
         renderProjectiles(visibleArea);
         renderEnemies(visibleArea);
@@ -2236,7 +2232,10 @@ function draw() {
         if (map.hasLayers && gameState.currentMap === 1) {
             renderEixaoLayer2(map);
         }
-        
+        // Renderizar carros APÓS a camada 2 do Eixão
+if (gameState.currentMap === 1) {
+    trafficSystem.render(ctx, visibleArea);
+}
         renderCampoTraves();
         renderFieldShadow(map);
         renderStreetLights(map, visibleArea);
@@ -2339,7 +2338,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.78 - Correção do corredor horizontal do túnel');
+console.log('🎮 Mad Night v1.9.79 - Correção do corredor horizontal do túnel');
 console.log('🚇 AJUSTE: Corredor horizontal vai até X=2906 agora');
 console.log('🔧 AJUSTE: Rampa de subida começa em X=2906 (mais tarde)');
 console.log('📐 AJUSTE: Parede direita reposicionada para X=2906');
