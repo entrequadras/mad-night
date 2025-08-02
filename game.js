@@ -243,7 +243,7 @@ const trafficSystem = {
         ],
         southNorth: [
             { sprite: 'carro001fundos' },
-            { sprite: 'carro002fundos' },
+            { sprite: 'carro003fundos' },
             { sprite: 'carro004fundos' }
         ]
     },
