@@ -1,4 +1,4 @@
-console.log('Mad Night 1.9.92 - Carros escurecidos no Eixão');
+console.log('Mad Night 1.9.92 - Tráfego ultra reduzido');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'Versão: 1.9.92 - Carros escurecidos no Eixão'
+    version: 'Versão: 1.9.92 - Tráfego ultra reduzido'
 };
 
 // Player
@@ -290,7 +290,7 @@ const trafficSystem = {
         
         // Chance de "rush" - vários carros juntos
         if (Math.random() < config.rushChance) {
-            return 800; // Spawn rápido durante rush
+            return 5000; // MUDOU DE 800 PARA 5000 (5 segundos durante rush)
         }
         
         // Tempo aleatório normal
@@ -303,8 +303,8 @@ const trafficSystem = {
             [1637, 1706, 1790, 1883];
         
         // Escolher 1-2 pistas aleatórias para spawn
-        const numCars = Math.random() < 0.3 ? 2 : 1;
-        const usedLanes = [];
+const numCars = 1; // MUDOU - sempre apenas 1 carro
+const usedLanes = [];
         
         for (let i = 0; i < numCars; i++) {
             let lane;
@@ -2322,7 +2322,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night Versão: 1.9.92 - Carros escurecidos no Eixão');
+console.log('🎮 Mad Night Versão: 1.9.92 - Tráfego ultra reduzido');
 console.log('🚇 AJUSTE: Corredor horizontal vai até X=2906 agora');
 console.log('📐 AJUSTE: Parede direita reposicionada para X=2906');
 console.log('🎯 Agora o player percorre mais túnel antes de subir!');
