@@ -228,9 +228,9 @@ const trafficSystem = {
     // Configurações de spawn - madrugada, pouco movimento
     spawnConfig: {
         mainLanes: {
-            minInterval: 10000,  // 10 segundos mínimo
-            maxInterval: 25000,  // 25 segundos máximo
-            rushChance: 0.10    // 10% chance de "rush" com mais carros
+            minInterval: 6000,   // 6 segundos mínimo
+            maxInterval: 12000,  // 12 segundos máximo
+            rushChance: 0.15     // 15% chance de "rush" com mais carros
         }
     },
     
@@ -243,6 +243,7 @@ const trafficSystem = {
         ],
         southNorth: [
             { sprite: 'carro001fundos' },
+            { sprite: 'carro002fundos' },
             { sprite: 'carro003fundos' },
             { sprite: 'carro004fundos' }
         ]
@@ -259,6 +260,11 @@ const trafficSystem = {
     
     update: function() {
         const now = Date.now();
+        
+        // Limitar número máximo de carros para evitar travamento
+        if (this.cars.length > 15) {
+            this.cars.splice(0, this.cars.length - 15);
+        }
         
         // Spawn nas pistas principais norte-sul
         if (now - this.lastSpawn.mainNorthSouth > this.getNextSpawnTime('main')) {
@@ -290,7 +296,7 @@ const trafficSystem = {
         
         // Chance de "rush" - vários carros juntos
         if (Math.random() < config.rushChance) {
-            return 5000; // MUDOU DE 800 PARA 5000 (5 segundos durante rush)
+            return 3000; // 3 segundos durante rush
         }
         
         // Tempo aleatório normal
@@ -303,8 +309,8 @@ const trafficSystem = {
             [1637, 1706, 1790, 1883];
         
         // Escolher 1-2 pistas aleatórias para spawn
-const numCars = 1; // MUDOU - sempre apenas 1 carro
-const usedLanes = [];
+        const numCars = Math.random() < 0.25 ? 2 : 1; // 25% de chance de 2 carros
+        const usedLanes = [];
         
         for (let i = 0; i < numCars; i++) {
             let lane;
@@ -346,36 +352,36 @@ const usedLanes = [];
             const offsetX = (car.width - scaledWidth) / 2;
             const offsetY = (car.height - scaledHeight) / 2;
 
-            // NOVO: Aplicar escurecimento para o Eixão
-        ctx.save();
-        ctx.filter = 'brightness(0.6)'; // 60% do brilho original = 40% mais escuro
-        
-        // Renderizar sprite do carro se carregado
-        const carAsset = assets[car.sprite];
-        if (carAsset && carAsset.loaded) {
-            ctx.drawImage(
-                carAsset.img, 
-                car.x + offsetX, 
-                car.y + offsetY, 
-                scaledWidth, 
-                scaledHeight
-            );
-        } else {
-            // Fallback: retângulo colorido também reduzido
-            ctx.fillStyle = car.vy > 0 ? '#c44' : '#44c';
-            ctx.fillRect(
-                car.x + offsetX, 
-                car.y + offsetY, 
-                scaledWidth, 
-                scaledHeight
-            );
-        }
-        
-        ctx.restore(); // Remove o filtro de escurecimento
-        
-        // Renderizar faróis (sem escurecimento)
-        ctx.save();
-        ctx.globalCompositeOperation = 'lighter';
+            // Aplicar escurecimento para o Eixão
+            ctx.save();
+            ctx.filter = 'brightness(0.6)'; // 60% do brilho original = 40% mais escuro
+            
+            // Renderizar sprite do carro se carregado
+            const carAsset = assets[car.sprite];
+            if (carAsset && carAsset.loaded) {
+                ctx.drawImage(
+                    carAsset.img, 
+                    car.x + offsetX, 
+                    car.y + offsetY, 
+                    scaledWidth, 
+                    scaledHeight
+                );
+            } else {
+                // Fallback: retângulo colorido também reduzido
+                ctx.fillStyle = car.vy > 0 ? '#c44' : '#44c';
+                ctx.fillRect(
+                    car.x + offsetX, 
+                    car.y + offsetY, 
+                    scaledWidth, 
+                    scaledHeight
+                );
+            }
+            
+            ctx.restore(); // Remove o filtro de escurecimento
+            
+            // Renderizar faróis (sem escurecimento)
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
             
             // Ajuste adicional para carros sul-norte (subindo 5 pixels)
             const yAdjustment = car.vy < 0 ? -5 : 0;
@@ -390,9 +396,9 @@ const usedLanes = [];
             headlightPositions.forEach(pos => {
                 const gradient = ctx.createRadialGradient(
                     pos.x, pos.y, 0,
-                    pos.x, pos.y, 40  // Raio do farol também reduzido (era 50)
+                    pos.x, pos.y, 40  // Raio do farol
                 );
-                // Intensidade reduzida em 50% (0.6 → 0.3, 0.3 → 0.15, etc)
+                // Intensidade reduzida em 50%
                 gradient.addColorStop(0, 'rgba(255, 255, 200, 0.3)');
                 gradient.addColorStop(0.5, 'rgba(255, 255, 150, 0.15)');
                 gradient.addColorStop(1, 'rgba(255, 255, 100, 0)');
