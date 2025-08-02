@@ -384,31 +384,50 @@ const trafficSystem = {
                 car.y + car.height < visibleArea.top || 
                 car.y > visibleArea.bottom) return;
             
+            // Calcular dimensões reduzidas (60% do tamanho)
+            const scaledWidth = car.width * 0.6;
+            const scaledHeight = car.height * 0.6;
+            
+            // Centralizar o carro reduzido na posição original
+            const offsetX = (car.width - scaledWidth) / 2;
+            const offsetY = (car.height - scaledHeight) / 2;
+            
             // Renderizar sprite do carro se carregado
             const carAsset = assets[car.sprite];
             if (carAsset && carAsset.loaded) {
-                ctx.drawImage(carAsset.img, car.x, car.y, car.width, car.height);
+                ctx.drawImage(
+                    carAsset.img, 
+                    car.x + offsetX, 
+                    car.y + offsetY, 
+                    scaledWidth, 
+                    scaledHeight
+                );
             } else {
-                // Fallback: retângulo colorido
+                // Fallback: retângulo colorido também reduzido
                 ctx.fillStyle = car.vy > 0 ? '#c44' : '#44c';
-                ctx.fillRect(car.x, car.y, car.width, car.height);
+                ctx.fillRect(
+                    car.x + offsetX, 
+                    car.y + offsetY, 
+                    scaledWidth, 
+                    scaledHeight
+                );
             }
             
-            // Renderizar faróis
+            // Renderizar faróis (ajustados para o tamanho reduzido)
             ctx.save();
             ctx.globalCompositeOperation = 'lighter';
             
-            // Dois faróis por carro
-            const headlightY = car.y + car.headlightOffsetY;
+            // Dois faróis por carro - posições ajustadas para 60%
+            const headlightY = car.y + offsetY + (car.headlightOffsetY * 0.6);
             const headlightPositions = [
-                { x: car.x + car.width * 0.25, y: headlightY },
-                { x: car.x + car.width * 0.75, y: headlightY }
+                { x: car.x + offsetX + scaledWidth * 0.25, y: headlightY },
+                { x: car.x + offsetX + scaledWidth * 0.75, y: headlightY }
             ];
             
             headlightPositions.forEach(pos => {
                 const gradient = ctx.createRadialGradient(
                     pos.x, pos.y, 0,
-                    pos.x, pos.y, 50
+                    pos.x, pos.y, 40  // Raio do farol também reduzido (era 50)
                 );
                 gradient.addColorStop(0, 'rgba(255, 255, 200, 0.6)');
                 gradient.addColorStop(0.5, 'rgba(255, 255, 150, 0.3)');
@@ -416,7 +435,7 @@ const trafficSystem = {
                 
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
-                ctx.arc(pos.x, pos.y, 50, 0, Math.PI * 2);
+                ctx.arc(pos.x, pos.y, 40, 0, Math.PI * 2);
                 ctx.fill();
             });
             
