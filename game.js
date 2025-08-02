@@ -1,4 +1,4 @@
-console.log('Mad Night Versão: v1.9.86 - Carros reduzidos para 60%);
+console.log('Mad Night v1.9.87 - Sistema de trafego corrigido');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
