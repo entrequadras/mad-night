@@ -303,7 +303,7 @@ const trafficSystem = {
             [1637, 1706, 1790, 1883];
         
         // Escolher 1-2 pistas aleatórias para spawn
-const numCars = 1; // MUDOU - sempre apenas 1 carro
+const numCars = 2; // MUDOU - sempre apenas 1 carro
 const usedLanes = [];
         
         for (let i = 0; i < numCars; i++) {
