@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'Versão: v1.9.90 - Carros reduzidos para 60%'
+    version: 'Versão: v1.9.91 - Carros reduzidos para 50%'
 };
 
 // Player
@@ -374,8 +374,8 @@ const trafficSystem = {
             // Ajuste adicional para carros sul-norte (subindo 5 pixels)
             const yAdjustment = car.vy < 0 ? -5 : 0;
             
-            // Dois faróis por carro - posições ajustadas para 60%
-            const headlightY = car.y + offsetY + (car.headlightOffsetY * 0.6) + yAdjustment;
+            // Dois faróis por carro - posições ajustadas para 50%
+            const headlightY = car.y + offsetY + (car.headlightOffsetY * 0.5) + yAdjustment;
             const headlightPositions = [
                 { x: car.x + offsetX + scaledWidth * 0.25, y: headlightY },
                 { x: car.x + offsetX + scaledWidth * 0.75, y: headlightY }
