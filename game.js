@@ -1,4 +1,4 @@
-console.log('Mad Night 1.9.94 - Tráfego ultra reduzido');
+console.log('Mad Night v1.9.91 - Faróis ajustados');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'Versão: 1.9.94 - Tráfego ultra reduzido'
+    version: 'Versão: v1.9.91 - Faróis ajustados'
 };
 
 // Player
@@ -83,12 +83,11 @@ const assets = {
     eixaoCamada1: { img: new Image(), loaded: false, width: 3000, height: 868 },
     eixaoCamada2: { img: new Image(), loaded: false, width: 3000, height: 868 },
     carro001frente: { img: new Image(), loaded: false, width: 118, height: 140 },
-carro001fundos: { img: new Image(), loaded: false, width: 102, height: 130 },
-carro002frente: { img: new Image(), loaded: false, width: 118, height: 140 },
-carro002fundos: { img: new Image(), loaded: false, width: 118, height: 130 },
-carro003fundos: { img: new Image(), loaded: false, width: 102, height: 130 },
-carro004fundos: { img: new Image(), loaded: false, width: 96, height: 140 },
-carro004frente: { img: new Image(), loaded: false, width: 102, height: 130 },
+    carro001fundos: { img: new Image(), loaded: false, width: 102, height: 130 },
+    carro002frente: { img: new Image(), loaded: false, width: 118, height: 140 },
+    carro002fundos: { img: new Image(), loaded: false, width: 130, height: 138 },
+    carro003fundos: { img: new Image(), loaded: false, width: 150, height: 110 },
+    carro004frente: { img: new Image(), loaded: false, width: 102, height: 130 },
 };
 
 // Carregar assets
