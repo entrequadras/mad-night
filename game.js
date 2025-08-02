@@ -228,7 +228,7 @@ const trafficSystem = {
     // Configurações de spawn - madrugada, pouco movimento
     spawnConfig: {
         mainLanes: {
-            minInterval: 18000,  // 18 segundos mínimo
+            minInterval: 10000,  // 10 segundos mínimo
             maxInterval: 25000,  // 25 segundos máximo
             rushChance: 0.05    // 5% chance de "rush" com mais carros
         }
@@ -303,7 +303,7 @@ const trafficSystem = {
             [1637, 1706, 1790, 1883];
         
         // Escolher 1-2 pistas aleatórias para spawn
-const numCars = 2; // MUDOU - sempre apenas 2 carro
+const numCars = 1; // MUDOU - sempre apenas 1 carro
 const usedLanes = [];
         
         for (let i = 0; i < numCars; i++) {
