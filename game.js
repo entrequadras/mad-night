@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.79 - Correção do corredor horizontal do túnel'
+    version: 'v1.9.85 - Tráfego do Eixão com sprites'
 };
 
 // Player
@@ -2224,6 +2224,7 @@ function draw() {
         renderShadows(map, visibleArea);
         renderTrees(map, visibleArea, 'bottom');
         renderObjects(map, visibleArea);
+        renderWalls(map, visibleArea)
         renderSpecialObjects(map);
         renderProjectiles(visibleArea);
         renderEnemies(visibleArea);
@@ -2338,9 +2339,8 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.79 - Correção do corredor horizontal do túnel');
+console.log('🎮 Mad Night v1.9.85 - Tráfego do Eixão com sprites');
 console.log('🚇 AJUSTE: Corredor horizontal vai até X=2906 agora');
-console.log('🔧 AJUSTE: Rampa de subida começa em X=2906 (mais tarde)');
 console.log('📐 AJUSTE: Parede direita reposicionada para X=2906');
 console.log('🎯 Agora o player percorre mais túnel antes de subir!');
 console.log('✨ Teste no Eixão da Morte (Mapa 1)!');
