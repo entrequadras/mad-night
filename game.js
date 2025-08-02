@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.91 - tempo entre carros');
+console.log('Mad Night 1.9.92 - Carros escurecidos no Eixão');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'Versão: v1.9.91 - Carros reduzidos para 50%'
+    version: 'Versão: 1.9.92 - Carros escurecidos no Eixão'
 };
 
 // Player
@@ -345,31 +345,37 @@ const trafficSystem = {
             // Centralizar o carro reduzido na posição original
             const offsetX = (car.width - scaledWidth) / 2;
             const offsetY = (car.height - scaledHeight) / 2;
-            
-            // Renderizar sprite do carro se carregado
-            const carAsset = assets[car.sprite];
-            if (carAsset && carAsset.loaded) {
-                ctx.drawImage(
-                    carAsset.img, 
-                    car.x + offsetX, 
-                    car.y + offsetY, 
-                    scaledWidth, 
-                    scaledHeight
-                );
-            } else {
-                // Fallback: retângulo colorido também reduzido
-                ctx.fillStyle = car.vy > 0 ? '#c44' : '#44c';
-                ctx.fillRect(
-                    car.x + offsetX, 
-                    car.y + offsetY, 
-                    scaledWidth, 
-                    scaledHeight
-                );
-            }
-            
-            // Renderizar faróis (ajustados para o tamanho reduzido)
-            ctx.save();
-            ctx.globalCompositeOperation = 'lighter';
+
+            // NOVO: Aplicar escurecimento para o Eixão
+        ctx.save();
+        ctx.filter = 'brightness(0.6)'; // 60% do brilho original = 40% mais escuro
+        
+        // Renderizar sprite do carro se carregado
+        const carAsset = assets[car.sprite];
+        if (carAsset && carAsset.loaded) {
+            ctx.drawImage(
+                carAsset.img, 
+                car.x + offsetX, 
+                car.y + offsetY, 
+                scaledWidth, 
+                scaledHeight
+            );
+        } else {
+            // Fallback: retângulo colorido também reduzido
+            ctx.fillStyle = car.vy > 0 ? '#c44' : '#44c';
+            ctx.fillRect(
+                car.x + offsetX, 
+                car.y + offsetY, 
+                scaledWidth, 
+                scaledHeight
+            );
+        }
+        
+        ctx.restore(); // Remove o filtro de escurecimento
+        
+        // Renderizar faróis (sem escurecimento)
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
             
             // Ajuste adicional para carros sul-norte (subindo 5 pixels)
             const yAdjustment = car.vy < 0 ? -5 : 0;
@@ -2316,7 +2322,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night Versão: v1.9.90 - Carros reduzidos para 60%');
+console.log('🎮 Mad Night Versão: 1.9.92 - Carros escurecidos no Eixão');
 console.log('🚇 AJUSTE: Corredor horizontal vai até X=2906 agora');
 console.log('📐 AJUSTE: Parede direita reposicionada para X=2906');
 console.log('🎯 Agora o player percorre mais túnel antes de subir!');
