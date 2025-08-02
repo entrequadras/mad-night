@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.85 - Tráfego do Eixão com sprites');
+console.log('Mad Night Versão: v1.9.86 - Carros reduzidos para 60%);
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.85 - Tráfego do Eixão com sprites'
+    version: 'Versão: v1.9.86 - Carros reduzidos para 60%
 };
 
 // Player
@@ -2357,7 +2357,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.85 - Tráfego do Eixão com sprites');
+console.log('🎮 Mad Night Versão: v1.9.86 - Carros reduzidos para 60%);
 console.log('🚇 AJUSTE: Corredor horizontal vai até X=2906 agora');
 console.log('📐 AJUSTE: Parede direita reposicionada para X=2906');
 console.log('🎯 Agora o player percorre mais túnel antes de subir!');
