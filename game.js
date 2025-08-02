@@ -173,11 +173,14 @@ assets.carro002frente.img.onload = () => { assets.carro002frente.loaded = true; 
 assets.carro002fundos.img.src = 'assets/scenary/carro002-fundos.png';
 assets.carro002fundos.img.onload = () => { assets.carro002fundos.loaded = true; };
 
-assets.carro004fundos.img.src = 'assets/scenary/carro003-fundos.png';
-assets.carro004fundos.img.onload = () => { assets.carro004fundos.loaded = true; };
+assets.carro003fundos.img.src = 'assets/scenary/carro003-fundos.png';
+assets.carro003fundos.img.onload = () => { assets.carro003fundos.loaded = true; };
 
 assets.carro004frente.img.src = 'assets/scenary/carro004-frente.png';
 assets.carro004frente.img.onload = () => { assets.carro004frente.loaded = true; };
+
+assets.carro004fundos.img.src = 'assets/scenary/carro004-fundos.png';
+assets.carro004fundos.img.onload = () => { assets.carro004fundos.loaded = true; };
 
 
 // Sistema de flicker para postes
