@@ -230,12 +230,12 @@ const trafficSystem = {
     // Configurações de spawn - madrugada, pouco movimento
     spawnConfig: {
         mainLanes: {
-            minInterval: 3000,  // 3 segundos mínimo
-            maxInterval: 8000,  // 8 segundos máximo
-            rushChance: 0.15    // 15% chance de "rush" com mais carros
+            minInterval: 5000,  // 5 segundos mínimo
+            maxInterval: 9000,  // 9 segundos máximo
+            rushChance: 0.10    // 10% chance de "rush" com mais carros
         },
         diagonalLanes: {
-            interval: 5000      // 5 segundos fixo para rampas
+            interval: 9000      // 9 segundos fixo para rampas
         }
     },
     
@@ -394,9 +394,9 @@ this.cars.push({
                 car.y + car.height < visibleArea.top || 
                 car.y > visibleArea.bottom) return;
             
-            // Calcular dimensões reduzidas (60% do tamanho)
-            const scaledWidth = car.width * 0.6;
-            const scaledHeight = car.height * 0.6;
+            // Calcular dimensões reduzidas (30% do tamanho)
+            const scaledWidth = car.width * 0.3;
+            const scaledHeight = car.height * 0.3;
             
             // Centralizar o carro reduzido na posição original
             const offsetX = (car.width - scaledWidth) / 2;
