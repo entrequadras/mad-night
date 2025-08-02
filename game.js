@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.79 - Melhoria do Maconhão com novos objetos');
+console.log('Mad Night v1.9.85 - Tráfego do Eixão com sprites');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
