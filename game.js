@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.89 - Sistema de trafego corrigido');
+console.log('Mad Night v1.9.91 - Sistema de tráfego completo');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'Versão: v1.9.89 - Carros reduzidos para 60%'
+    version: 'Versão: v1.9.90 - Carros reduzidos para 60%'
 };
 
 // Player
@@ -222,50 +222,45 @@ const trafficSystem = {
     cars: [],
     lastSpawn: {
         mainNorthSouth: 0,
-        mainSouthNorth: 0,
-        diagonalNorthSouth: 0,
-        diagonalSouthNorth: 0
+        mainSouthNorth: 0
     },
     
     // Configurações de spawn - madrugada, pouco movimento
     spawnConfig: {
         mainLanes: {
-            minInterval: 5000,  // 5 segundos mínimo
-            maxInterval: 9000,  // 9 segundos máximo
+            minInterval: 7000,  // 7 segundos mínimo
+            maxInterval: 13000,  // 13 segundos máximo
             rushChance: 0.10    // 10% chance de "rush" com mais carros
-        },
-        diagonalLanes: {
-            interval: 9000      // 9 segundos fixo para rampas
         }
     },
     
-   // Tipos de carros - dimensões pegadas direto dos assets
-carTypes: {
-    northSouth: [
-        { sprite: 'carro001frente' },
-        { sprite: 'carro002frente' },
-        { sprite: 'carro004frente' }
-    ],
-    southNorth: [
-        { sprite: 'carro001fundos' },
-        { sprite: 'carro002fundos' },
-        { sprite: 'carro003fundos' }
-    ]
-},
-
-// Helper para pegar dimensões do asset
-getCarDimensions: function(spriteName) {
-    const asset = assets[spriteName];
-    return {
-        width: asset.width || 100,  // fallback caso não carregado
-        height: asset.height || 100
-    };
-},
+    // Tipos de carros - dimensões pegadas direto dos assets
+    carTypes: {
+        northSouth: [
+            { sprite: 'carro001frente' },
+            { sprite: 'carro002frente' },
+            { sprite: 'carro004frente' }
+        ],
+        southNorth: [
+            { sprite: 'carro001fundos' },
+            { sprite: 'carro002fundos' },
+            { sprite: 'carro003fundos' }
+        ]
+    },
+    
+    // Helper para pegar dimensões do asset
+    getCarDimensions: function(spriteName) {
+        const asset = assets[spriteName];
+        return {
+            width: asset.width || 100,
+            height: asset.height || 100
+        };
+    },
     
     update: function() {
         const now = Date.now();
         
-        // Spawn nas pistas principais (80km/h)
+        // Spawn nas pistas principais norte-sul
         if (now - this.lastSpawn.mainNorthSouth > this.getNextSpawnTime('main')) {
             this.spawnMainLanes('northSouth');
             this.lastSpawn.mainNorthSouth = now;
@@ -276,33 +271,15 @@ getCarDimensions: function(spriteName) {
             this.lastSpawn.mainSouthNorth = now;
         }
         
-        // Spawn nas rampas diagonais
-        if (now - this.lastSpawn.diagonalNorthSouth > this.spawnConfig.diagonalLanes.interval) {
-            this.spawnDiagonalLane('northSouth');
-            this.lastSpawn.diagonalNorthSouth = now;
-        }
-        
-        if (now - this.lastSpawn.diagonalSouthNorth > this.spawnConfig.diagonalLanes.interval) {
-            this.spawnDiagonalLane('southNorth');
-            this.lastSpawn.diagonalSouthNorth = now;
-        }
-        
         // Atualizar carros existentes
         for (let i = this.cars.length - 1; i >= 0; i--) {
             const car = this.cars[i];
             
-            // Movimento do carro
-            if (car.diagonal) {
-                // Movimento diagonal nas rampas
-                car.x += car.vx;
-                car.y += car.vy;
-            } else {
-                // Movimento reto nas pistas principais
-                car.y += car.vy;
-            }
+            // Movimento reto nas pistas principais
+            car.y += car.vy;
             
             // Remover carros fora da tela
-            if (car.y < -200 || car.y > 1068 || car.x < -200 || car.x > 3200) {
+            if (car.y < -200 || car.y > 1068) {
                 this.cars.splice(i, 1);
             }
         }
@@ -337,55 +314,22 @@ getCarDimensions: function(spriteName) {
             usedLanes.push(lane);
             
             const carType = this.carTypes[direction][Math.floor(Math.random() * this.carTypes[direction].length)];
-const dimensions = this.getCarDimensions(carType.sprite);
-const speed = 4.5 + Math.random() * 1.5; // 80km/h ± variação
-
-this.cars.push({
-    sprite: carType.sprite,
-    x: lane - dimensions.width/2, // Centralizar na pista
-    y: direction === 'northSouth' ? -150 : 968,
-    vy: direction === 'northSouth' ? speed : -speed,
-    vx: 0,
-    diagonal: false,
-    width: dimensions.width,
-    height: dimensions.height,
-    headlightOffsetY: direction === 'northSouth' ? dimensions.height - 20 : 20
-});
+            const dimensions = this.getCarDimensions(carType.sprite);
+            const speed = 4.5 + Math.random() * 1.5; // 80km/h ± variação
+            
+            this.cars.push({
+                sprite: carType.sprite,
+                x: lane - dimensions.width/2, // Centralizar na pista
+                y: direction === 'northSouth' ? -150 : 968,
+                vy: direction === 'northSouth' ? speed : -speed,
+                vx: 0,
+                width: dimensions.width,
+                height: dimensions.height,
+                headlightOffsetY: direction === 'northSouth' ? dimensions.height - 20 : 20
+            });
         }
     },
     
-    spawnDiagonalLane: function(direction) {
-    const carType = this.carTypes[direction][Math.floor(Math.random() * this.carTypes[direction].length)];
-    const dimensions = this.getCarDimensions(carType.sprite);
-    
-    if (direction === 'northSouth') {
-        // Rampa 525 para 420
-        this.cars.push({
-            sprite: carType.sprite,
-            x: 525,
-            y: -150,
-            vx: -0.7,  // Movimento diagonal
-            vy: 3.2,   // Mais devagar
-            diagonal: true,
-            width: dimensions.width,
-            height: dimensions.height,
-            headlightOffsetY: dimensions.height - 20
-        });
-    } else {
-        // Rampa 2580 para 2680
-        this.cars.push({
-            sprite: carType.sprite,
-            x: 2580 - dimensions.width/2,
-            y: 968,
-            vx: 0.7,   // Movimento diagonal
-            vy: -3.2,  // Mais devagar
-            diagonal: true,
-            width: dimensions.width,
-            height: dimensions.height,
-            headlightOffsetY: 20
-        });
-    }
-},
     render: function(ctx, visibleArea) {
         this.cars.forEach(car => {
             // Verificar se o carro está visível
@@ -394,9 +338,9 @@ this.cars.push({
                 car.y + car.height < visibleArea.top || 
                 car.y > visibleArea.bottom) return;
             
-            // Calcular dimensões reduzidas (30% do tamanho)
-            const scaledWidth = car.width * 0.3;
-            const scaledHeight = car.height * 0.3;
+            // Calcular dimensões reduzidas (50% do tamanho)
+            const scaledWidth = car.width * 0.5;
+            const scaledHeight = car.height * 0.5;
             
             // Centralizar o carro reduzido na posição original
             const offsetX = (car.width - scaledWidth) / 2;
@@ -427,8 +371,11 @@ this.cars.push({
             ctx.save();
             ctx.globalCompositeOperation = 'lighter';
             
+            // Ajuste adicional para carros sul-norte (subindo 5 pixels)
+            const yAdjustment = car.vy < 0 ? -5 : 0;
+            
             // Dois faróis por carro - posições ajustadas para 60%
-            const headlightY = car.y + offsetY + (car.headlightOffsetY * 0.6);
+            const headlightY = car.y + offsetY + (car.headlightOffsetY * 0.6) + yAdjustment;
             const headlightPositions = [
                 { x: car.x + offsetX + scaledWidth * 0.25, y: headlightY },
                 { x: car.x + offsetX + scaledWidth * 0.75, y: headlightY }
@@ -439,8 +386,9 @@ this.cars.push({
                     pos.x, pos.y, 0,
                     pos.x, pos.y, 40  // Raio do farol também reduzido (era 50)
                 );
-                gradient.addColorStop(0, 'rgba(255, 255, 200, 0.6)');
-                gradient.addColorStop(0.5, 'rgba(255, 255, 150, 0.3)');
+                // Intensidade reduzida em 50% (0.6 → 0.3, 0.3 → 0.15, etc)
+                gradient.addColorStop(0, 'rgba(255, 255, 200, 0.3)');
+                gradient.addColorStop(0.5, 'rgba(255, 255, 150, 0.15)');
                 gradient.addColorStop(1, 'rgba(255, 255, 100, 0)');
                 
                 ctx.fillStyle = gradient;
@@ -2368,7 +2316,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night Versão: v1.9.89 - Carros reduzidos para 60%');
+console.log('🎮 Mad Night Versão: v1.9.90 - Carros reduzidos para 60%');
 console.log('🚇 AJUSTE: Corredor horizontal vai até X=2906 agora');
 console.log('📐 AJUSTE: Parede direita reposicionada para X=2906');
 console.log('🎯 Agora o player percorre mais túnel antes de subir!');
