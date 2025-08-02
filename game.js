@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.77 - Melhoria do Maconhão com novos objetos');
+console.log('Mad Night v1.9.78 - Melhoria do Maconhão com novos objetos');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.9.77 - Correção do corredor horizontal do túnel'
+    version: 'v1.9.78 - Correção do corredor horizontal do túnel'
 };
 
 // Player
@@ -82,6 +82,12 @@ const assets = {
     // Assets do Eixão
     eixaoCamada1: { img: new Image(), loaded: false, width: 3000, height: 868 },
     eixaoCamada2: { img: new Image(), loaded: false, width: 3000, height: 868 }
+    carro001frente: { img: new Image(), loaded: false, width: 118, height: 140 },
+carro001fundos: { img: new Image(), loaded: false, width: 102, height: 130 },
+carro002frente: { img: new Image(), loaded: false, width: 118, height: 140 },
+carro002fundos: { img: new Image(), loaded: false, width: 130, height: 138 },
+carro003fundos: { img: new Image(), loaded: false, width: 150, height: 110 },
+carro004frente: { img: new Image(), loaded: false, width: 102, height: 130 },
 };
 
 // Carregar assets
@@ -154,6 +160,26 @@ assets.eixaoCamada1.img.onload = () => { assets.eixaoCamada1.loaded = true; };
 assets.eixaoCamada2.img.src = 'assets/floors/eixao_da_morte_camada2.png';
 assets.eixaoCamada2.img.onload = () => { assets.eixaoCamada2.loaded = true; };
 
+// Carregar sprites dos carros
+assets.carro001frente.img.src = 'assets/scenary/carro001-frente.png';
+assets.carro001frente.img.onload = () => { assets.carro001frente.loaded = true; };
+
+assets.carro001fundos.img.src = 'assets/scenary/carro001-fundos.png';
+assets.carro001fundos.img.onload = () => { assets.carro001fundos.loaded = true; };
+
+assets.carro002frente.img.src = 'assets/scenary/carro002-frente.png';
+assets.carro002frente.img.onload = () => { assets.carro002frente.loaded = true; };
+
+assets.carro002fundos.img.src = 'assets/scenary/carro002-fundos.png';
+assets.carro002fundos.img.onload = () => { assets.carro002fundos.loaded = true; };
+
+assets.carro003fundos.img.src = 'assets/scenary/carro003-fundos.png';
+assets.carro003fundos.img.onload = () => { assets.carro003fundos.loaded = true; };
+
+assets.carro004frente.img.src = 'assets/scenary/carro004-frente.png';
+assets.carro004frente.img.onload = () => { assets.carro004frente.loaded = true; };
+
+
 // Sistema de flicker para postes
 const flickerSystem = {
     lights: {},
@@ -191,9 +217,7 @@ const flickerSystem = {
         return light.intensity;
     }
 };
-// Adicione este sistema após o flickerSystem (aproximadamente linha 250)
 
-// Sistema de tráfego do Eixão
 const trafficSystem = {
     cars: [],
     lastSpawn: {
@@ -215,10 +239,18 @@ const trafficSystem = {
         }
     },
     
-    // Tipos de carros e suas velocidades
+    // Tipos de carros e suas dimensões
     carTypes: {
-        northSouth: ['carro001frente', 'carro002frente', 'carro004frente'],
-        southNorth: ['carro001fundos', 'carro002fundos', 'carro003fundos']
+        northSouth: [
+            { sprite: 'carro001frente', width: 118, height: 140 },
+            { sprite: 'carro002frente', width: 118, height: 140 },
+            { sprite: 'carro004frente', width: 102, height: 130 }
+        ],
+        southNorth: [
+            { sprite: 'carro001fundos', width: 102, height: 130 },
+            { sprite: 'carro002fundos', width: 130, height: 138 },
+            { sprite: 'carro003fundos', width: 150, height: 110 }
+        ]
     },
     
     update: function() {
@@ -299,15 +331,15 @@ const trafficSystem = {
             const speed = 4.5 + Math.random() * 1.5; // 80km/h ± variação
             
             this.cars.push({
-                type: carType,
-                x: lane,
-                y: direction === 'northSouth' ? -100 : 968,
+                sprite: carType.sprite,
+                x: lane - carType.width/2, // Centralizar na pista
+                y: direction === 'northSouth' ? -150 : 968,
                 vy: direction === 'northSouth' ? speed : -speed,
                 vx: 0,
                 diagonal: false,
-                width: 100, // Ajustar conforme assets
-                height: 120,
-                headlightOffset: direction === 'northSouth' ? 80 : -20
+                width: carType.width,
+                height: carType.height,
+                headlightOffsetY: direction === 'northSouth' ? carType.height - 20 : 20
             });
         }
     },
@@ -318,28 +350,28 @@ const trafficSystem = {
         if (direction === 'northSouth') {
             // Rampa 525 para 420
             this.cars.push({
-                type: carType,
+                sprite: carType.sprite,
                 x: 525,
-                y: -100,
+                y: -150,
                 vx: -0.7,  // Movimento diagonal
                 vy: 3.2,   // Mais devagar
                 diagonal: true,
-                width: 100,
-                height: 120,
-                headlightOffset: 80
+                width: carType.width,
+                height: carType.height,
+                headlightOffsetY: carType.height - 20
             });
         } else {
             // Rampa 2580 para 2680
             this.cars.push({
-                type: carType,
-                x: 2580,
+                sprite: carType.sprite,
+                x: 2580 - carType.width/2,
                 y: 968,
                 vx: 0.7,   // Movimento diagonal
                 vy: -3.2,  // Mais devagar
                 diagonal: true,
-                width: 100,
-                height: 120,
-                headlightOffset: -20
+                width: carType.width,
+                height: carType.height,
+                headlightOffsetY: 20
             });
         }
     },
@@ -352,26 +384,31 @@ const trafficSystem = {
                 car.y + car.height < visibleArea.top || 
                 car.y > visibleArea.bottom) return;
             
-            // Por enquanto, renderizar como retângulo colorido
-            // Substituir por sprites quando disponíveis
-            ctx.fillStyle = car.vy > 0 ? '#c44' : '#44c'; // Vermelho indo pra baixo, azul pra cima
-            ctx.fillRect(car.x, car.y, car.width, car.height);
+            // Renderizar sprite do carro se carregado
+            const carAsset = assets[car.sprite];
+            if (carAsset && carAsset.loaded) {
+                ctx.drawImage(carAsset.img, car.x, car.y, car.width, car.height);
+            } else {
+                // Fallback: retângulo colorido
+                ctx.fillStyle = car.vy > 0 ? '#c44' : '#44c';
+                ctx.fillRect(car.x, car.y, car.width, car.height);
+            }
             
             // Renderizar faróis
             ctx.save();
             ctx.globalCompositeOperation = 'lighter';
             
             // Dois faróis por carro
-            const headlightY = car.y + car.headlightOffset;
+            const headlightY = car.y + car.headlightOffsetY;
             const headlightPositions = [
-                { x: car.x + 20, y: headlightY },
-                { x: car.x + car.width - 20, y: headlightY }
+                { x: car.x + car.width * 0.25, y: headlightY },
+                { x: car.x + car.width * 0.75, y: headlightY }
             ];
             
             headlightPositions.forEach(pos => {
                 const gradient = ctx.createRadialGradient(
                     pos.x, pos.y, 0,
-                    pos.x, pos.y, 40
+                    pos.x, pos.y, 50
                 );
                 gradient.addColorStop(0, 'rgba(255, 255, 200, 0.6)');
                 gradient.addColorStop(0.5, 'rgba(255, 255, 150, 0.3)');
@@ -379,25 +416,18 @@ const trafficSystem = {
                 
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
-                ctx.arc(pos.x, pos.y, 40, 0, Math.PI * 2);
+                ctx.arc(pos.x, pos.y, 50, 0, Math.PI * 2);
                 ctx.fill();
             });
             
             ctx.restore();
         });
     }
-};
+};  // ← Fim do trafficSystem
 
-// Na função update() principal, adicione após updateProjectiles():
-trafficSystem.update();
-
-// Na função draw(), adicione após renderWalls e antes de renderSpecialObjects:
-if (gameState.currentMap === 1) {
-    trafficSystem.render(ctx, visibleArea);
-}
 // Função para gerar tiles de grama (apenas para mapa 1)
 function generateGrassTiles(mapWidth, mapHeight, tileSize) {
-    const tiles = [];
+    const tiles = []
     const types = ['grama000', 'grama001', 'grama002', 'grama003', 'grama004'];
     
     for (let y = 0; y < mapHeight; y += tileSize) {
@@ -2309,7 +2339,7 @@ loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 gameLoop();
 
-console.log('🎮 Mad Night v1.9.77 - Correção do corredor horizontal do túnel');
+console.log('🎮 Mad Night v1.9.78 - Correção do corredor horizontal do túnel');
 console.log('🚇 AJUSTE: Corredor horizontal vai até X=2906 agora');
 console.log('🔧 AJUSTE: Rampa de subida começa em X=2906 (mais tarde)');
 console.log('📐 AJUSTE: Parede direita reposicionada para X=2906');
