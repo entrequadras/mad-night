@@ -375,7 +375,6 @@ const trafficSystem = {
             });
         }
     },
-    
     render: function(ctx, visibleArea) {
         this.cars.forEach(car => {
             // Verificar se o carro está visível
