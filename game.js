@@ -86,7 +86,7 @@ const assets = {
 carro001fundos: { img: new Image(), loaded: false, width: 102, height: 130 },
 carro002frente: { img: new Image(), loaded: false, width: 118, height: 140 },
 carro002fundos: { img: new Image(), loaded: false, width: 118, height: 130 },
-carro003fundos: { img: new Image(), loaded: false, width: 102, height: 130 },
+carro004fundos: { img: new Image(), loaded: false, width: 96, height: 140 },
 carro004frente: { img: new Image(), loaded: false, width: 102, height: 130 },
 };
 
@@ -173,8 +173,8 @@ assets.carro002frente.img.onload = () => { assets.carro002frente.loaded = true; 
 assets.carro002fundos.img.src = 'assets/scenary/carro002-fundos.png';
 assets.carro002fundos.img.onload = () => { assets.carro002fundos.loaded = true; };
 
-assets.carro003fundos.img.src = 'assets/scenary/carro003-fundos.png';
-assets.carro003fundos.img.onload = () => { assets.carro003fundos.loaded = true; };
+assets.carro004fundos.img.src = 'assets/scenary/carro003-fundos.png';
+assets.carro004fundos.img.onload = () => { assets.carro004fundos.loaded = true; };
 
 assets.carro004frente.img.src = 'assets/scenary/carro004-frente.png';
 assets.carro004frente.img.onload = () => { assets.carro004frente.loaded = true; };
@@ -230,7 +230,7 @@ const trafficSystem = {
         mainLanes: {
             minInterval: 10000,  // 10 segundos mínimo
             maxInterval: 25000,  // 25 segundos máximo
-            rushChance: 0.05    // 5% chance de "rush" com mais carros
+            rushChance: 0.10    // 10% chance de "rush" com mais carros
         }
     },
     
@@ -244,7 +244,7 @@ const trafficSystem = {
         southNorth: [
             { sprite: 'carro001fundos' },
             { sprite: 'carro002fundos' },
-            { sprite: 'carro003fundos' }
+            { sprite: 'carro004fundos' }
         ]
     },
     
@@ -2131,7 +2131,7 @@ function renderUI(map) {
     
     if (player.inShadow) {
         ctx.fillStyle = '#0f0';
-        ctx.fillText('NA SOMBRA - Invisível!', 20, 210);
+        ctx.fillText('Mocozado na sombra!', 20, 210);
     }
     
     if (map.orelhao && !gameState.dashUnlocked) {
@@ -2141,7 +2141,7 @@ function renderUI(map) {
     
     if (map.lixeira && !gameState.bombPlaced) {
         ctx.fillStyle = '#ff0';
-        ctx.fillText('Elimine todos e plante o explosivo!', 20, 250);
+        ctx.fillText('Quebra geral e planta o explosivo!', 20, 250);
     }
     
     ctx.fillStyle = '#fff';
@@ -2154,7 +2154,7 @@ function renderUI(map) {
     if (audio.failedToLoad) {
         ctx.fillStyle = '#f00';
         ctx.font = '20px Arial';
-        ctx.fillText('⚠️ Áudio não carregado', 20, 170);
+        ctx.fillText('⚠️ clique na tela e ative o som', 20, 170);
         ctx.font = '28px Arial';
     }
     
@@ -2162,7 +2162,7 @@ function renderUI(map) {
         ctx.fillStyle = '#f00';
         ctx.font = '64px Arial';
         ctx.textAlign = 'center';
-        const msg = gameState.deaths < 5 ? "ah véi, se liga carái" : "sifudêu";
+        const msg = gameState.deaths < 5 ? "Ah véi, se liga carái!" : "SIFUDÊU";
         ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
         ctx.textAlign = 'left';
     }
