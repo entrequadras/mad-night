@@ -4,6 +4,11 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
+// Configurar fonte padrão
+ctx.font = '10px "Press Start 2P"';
+ctx.textBaseline = 'top';
+ctx.textAlign = 'left';
+
 // Configurações de câmera
 const camera = {
     x: 0,
@@ -56,6 +61,12 @@ const player = {
     lastMove: Date.now(),
     inShadow: false
 };
+
+// Helper para definir tamanhos de fonte consistentes
+function setPixelFont(size) {
+    ctx.font = `${size}px "Press Start 2P"`;
+    ctx.textBaseline = 'top';
+}
 
 // Sistema de assets
 const assets = {
@@ -2003,7 +2014,7 @@ function renderSpecialObjects(map) {
         ctx.fillStyle = '#00f';
         ctx.fillRect(map.orelhao.x, map.orelhao.y, map.orelhao.w, map.orelhao.h);
         ctx.fillStyle = '#fff';
-        ctx.font = '10px Arial';
+       setPixelFont(8);
         ctx.fillText('TEL', map.orelhao.x + 5, map.orelhao.y + 30);
     }
     
@@ -2011,7 +2022,7 @@ function renderSpecialObjects(map) {
         ctx.fillStyle = gameState.bombPlaced ? '#f00' : '#080';
         ctx.fillRect(map.lixeira.x, map.lixeira.y, map.lixeira.w, map.lixeira.h);
         ctx.fillStyle = '#fff';
-        ctx.font = '10px Arial';
+       setPixelFont(8);
         ctx.fillText(gameState.bombPlaced ? 'BOOM!' : 'LIXO', map.lixeira.x + 2, map.lixeira.y + 25);
     }
     
@@ -2086,7 +2097,7 @@ function renderEnemies(visibleArea) {
             
             if (!enemy.isDead && gameState.phase === 'escape') {
                 ctx.fillStyle = '#f00';
-                ctx.font = '10px Arial';
+                setPixelFont(8);
                 ctx.fillText('!', enemy.x + 23, enemy.y - 5);
             }
         }
@@ -2110,68 +2121,78 @@ function renderPlayer() {
 }
 
 function renderUI(map) {
+    // Título do mapa
     ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#ff0';
-    ctx.font = 'bold 48px Arial';
+    setPixelFont(20); // Era 48px
     ctx.textAlign = 'center';
-    ctx.fillText(map.name, canvas.width/2, 80);
-    ctx.font = '32px Arial';
-    ctx.fillText(map.subtitle, canvas.width/2, 120);
+    ctx.fillText(map.name, canvas.width/2, 60); // Ajustei Y
     
+    // Subtítulo
+    setPixelFont(10); // Era 32px
+    ctx.fillText(map.subtitle, canvas.width/2, 90); // Ajustei Y
+    
+    // Versão
     ctx.fillStyle = '#666';
-    ctx.font = '24px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(gameState.version, canvas.width/2, 160);
+    setPixelFont(8); // Era 24px
+    ctx.fillText(gameState.version, canvas.width/2, 115); // Ajustei Y
     ctx.textAlign = 'left';
     
+    // Status do jogo
     ctx.fillStyle = '#fff';
-    ctx.font = '28px Arial';
+    setPixelFont(10); // Era 28px
     ctx.fillText(`Mapa: ${gameState.currentMap + 1}/6`, 20, canvas.height - 80);
-    ctx.fillText(`Inimigos: ${enemies.filter(e => !e.isDead).length}`, 20, canvas.height - 40);
+    ctx.fillText(`Inimigos: ${enemies.filter(e => !e.isDead).length}`, 20, canvas.height - 50);
     
-    ctx.fillText('Vidas: ', 20, 50);
+    // Vidas
+    ctx.fillText('Vidas: ', 20, 40);
+    setPixelFont(16); // Era 40px para o emoji
     for (let i = 0; i < 5; i++) {
-        ctx.font = '40px Arial';
         if (i >= gameState.deaths) {
             ctx.fillStyle = '#f00';
-            ctx.fillText('💀', 120 + i * 60, 50);
+            ctx.fillText('💀', 100 + i * 40, 35); // Ajustei espaçamento
         }
     }
-    ctx.font = '28px Arial';
+    
+    // Textos informativos
+    setPixelFont(10);
+    ctx.fillStyle = '#fff';
     
     if (player.inShadow) {
         ctx.fillStyle = '#0f0';
-        ctx.fillText('Mocozado na sombra!', 20, 210);
+        ctx.fillText('Mocozado na sombra!', 20, 180);
     }
     
     if (map.orelhao && !gameState.dashUnlocked) {
         ctx.fillStyle = '#ff0';
-        ctx.fillText('Atenda o orelhão!', 20, 250);
+        ctx.fillText('Atenda o orelhao!', 20, 220);
     }
     
     if (map.lixeira && !gameState.bombPlaced) {
         ctx.fillStyle = '#ff0';
-        ctx.fillText('Quebra geral e planta o explosivo!', 20, 250);
+        ctx.fillText('Quebra geral e planta o explosivo!', 20, 220);
     }
     
+    // Força de Pedal
     ctx.fillStyle = '#fff';
-    ctx.fillText('Força de Pedal: ', 20, 130);
+    ctx.fillText('Força de Pedal: ', 20, 100);
     for (let i = 0; i < gameState.maxPedalPower; i++) {
         ctx.fillStyle = i < gameState.pedalPower ? '#0f0' : '#333';
-        ctx.fillText('█', 240 + i * 24, 130);
+        ctx.fillText('█', 200 + i * 20, 100); // Ajustei espaçamento
     }
     
+    // Aviso de áudio
     if (audio.failedToLoad) {
         ctx.fillStyle = '#f00';
-        ctx.font = '20px Arial';
-        ctx.fillText('⚠️ clique na tela e ative o som', 20, 170);
-        ctx.font = '28px Arial';
+        setPixelFont(8);
+        ctx.fillText('! clique na tela e ative o som', 20, 140);
     }
     
+    // Mensagem de morte
     if (player.isDead) {
         ctx.fillStyle = '#f00';
-        ctx.font = '64px Arial';
+        setPixelFont(24); // Era 64px
         ctx.textAlign = 'center';
-        const msg = gameState.deaths < 5 ? "Ah véi, se liga carái!" : "SIFUDÊU";
+        const msg = gameState.deaths < 5 ? "Ah vei, se liga carai!" : "SIFUDEU";
         ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
         ctx.textAlign = 'left';
     }
@@ -2278,6 +2299,17 @@ if (gameState.currentMap === 1) {
     }
 }
 
+// Aguardar fontes carregarem
+document.fonts.ready.then(() => {
+    console.log('Fontes carregadas!');
+    gameLoop();
+}).catch(() => {
+    console.log('Erro ao carregar fontes, usando fallback');
+    gameLoop();
+});
+
+// REMOVA a chamada direta:
+// gameLoop(); // Comentar ou remover esta linha
 function gameLoop() {
     update();
     draw();
