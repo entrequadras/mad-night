@@ -983,11 +983,45 @@ const spritesLoaded = {
 
 // Audio com melhor tratamento de erro
 const audio = {
+    // Músicas
     inicio: null,
     fuga: null,
     creditos: null,
-    failedToLoad: false
+    
+    // SFX - Efeitos sonoros
+    ataque_janis: new Audio('assets/audio/ataque_janis.mp3'),
+    dash: new Audio('assets/audio/dash.mp3'),
+    mobilete: new Audio('assets/audio/mobilete.mp3'),
+    morte_caveira: new Audio('assets/audio/morte_caveira.mp3'),
+    morte_chacal: new Audio('assets/audio/morte_chacal.mp3'),
+    morte_janis: new Audio('assets/audio/morte_janis.mp3'),
+    morte_faquinha: new Audio('assets/audio/morte_faquinha.mp3'),
+    morte_madmax: new Audio('assets/audio/morte_madmax.mp3'),
+    morte_morcego: new Audio('assets/audio/morte_morcego.mp3'),
+    phone_ring: new Audio('assets/audio/phone_ring.mp3'),
+    
+    failedToLoad: false,
+    
+    // Função para tocar SFX
+    playSFX: function(soundName, volume = 0.7) {
+        if (this.failedToLoad || !this[soundName]) return;
+        
+        try {
+            this[soundName].volume = volume;
+            this[soundName].currentTime = 0; // Reinicia do início
+            this[soundName].play().catch(e => {
+                console.warn(`Não foi possível tocar SFX ${soundName}:`, e);
+            });
+        } catch (e) {
+            console.warn(`Erro ao tocar SFX ${soundName}:`, e);
+        }
+    }
 };
+
+// Configurar propriedades dos SFX
+audio.mobilete.loop = true; // Som da mobilete fica em loop
+audio.mobilete.volume = 0.5; // Volume mais baixo para não cansar
+audio.phone_ring.loop = false;
 
 // Funções auxiliares
 function isInShadow(x, y) {
@@ -1221,6 +1255,7 @@ class Enemy {
             };
             
             projectiles.push(stone);
+            audio.playSFX('ataque_janis', 0.5); // Som do ataque
         }
     }
     
@@ -1366,6 +1401,19 @@ class Enemy {
         if (this.isDead) return;
         this.isDead = true;
         this.deathFrame = Math.floor(Math.random() * 4) + 12;
+        
+        // Som de morte baseado no tipo
+        const deathSounds = {
+            'faquinha': 'morte_faquinha',
+            'morcego': 'morte_morcego', 
+            'caveirinha': 'morte_caveira',
+            'janis': 'morte_janis',
+            'chacal': 'morte_chacal'
+        };
+        
+        if (deathSounds[this.type]) {
+            audio.playSFX(deathSounds[this.type], 0.6);
+        }
     }
     
     getSprite() {
@@ -1522,6 +1570,9 @@ function killPlayer() {
     player.isDashing = false;
     player.deathFrame = Math.floor(Math.random() * 4) + 12;
     gameState.deaths++;
+    
+    // Som de morte do player
+    audio.playSFX('morte_madmax', 0.8);
     
     setTimeout(() => {
         if (gameState.deaths >= 5) {
@@ -1695,8 +1746,8 @@ function update() {
             player.isDashing = true;
             player.dashStart = Date.now();
             gameState.pedalPower--;
+            audio.playSFX('dash', 0.6); // Som do dash
         }
-    }
     
     // Atualizar câmera
     camera.x = player.x + player.width/2 - camera.width/2;
@@ -1704,9 +1755,37 @@ function update() {
     camera.x = Math.max(0, Math.min(map.width - camera.width, camera.x));
     camera.y = Math.max(0, Math.min(map.height - camera.height, camera.y));
     
+    // Verificar proximidade do orelhão para som do telefone
+    if (map.orelhao && !gameState.dashUnlocked) {
+        const orelhaoCenter = {
+            x: map.orelhao.x + map.orelhao.w / 2,
+            y: map.orelhao.y + map.orelhao.h / 2
+        };
+        const playerCenter = {
+            x: player.x + player.width / 2,
+            y: player.y + player.height / 2
+        };
+        
+        const distance = Math.sqrt(
+            Math.pow(playerCenter.x - orelhaoCenter.x, 2) + 
+            Math.pow(playerCenter.y - orelhaoCenter.y, 2)
+        );
+        
+        // Tocar telefone quando estiver próximo (raio de 150 pixels)
+        if (distance < 150 && audio.phone_ring.paused) {
+            audio.playSFX('phone_ring', 0.7);
+        }
+        // Parar de tocar se se afastar muito
+        else if (distance > 200 && !audio.phone_ring.paused) {
+            audio.phone_ring.pause();
+        }
+    }
+    
+    // Atender o telefone (tocar no orelhão)
     if (map.orelhao && checkRectCollision(player, map.orelhao)) {
         if (!gameState.dashUnlocked) {
             gameState.dashUnlocked = true;
+            audio.phone_ring.pause(); // Para o toque quando atende
         }
     }
     
