@@ -82,11 +82,11 @@ const assets = {
     // Assets do Eixão
     eixaoCamada1: { img: new Image(), loaded: false, width: 3000, height: 868 },
     eixaoCamada2: { img: new Image(), loaded: false, width: 3000, height: 868 },
-    carro001frente: { img: new Image(), loaded: false, width: 118, height: 140 },
+    carro001frente: { img: new Image(), loaded: false, width: 114, height: 140 },
     carro001fundos: { img: new Image(), loaded: false, width: 102, height: 130 },
     carro002frente: { img: new Image(), loaded: false, width: 118, height: 140 },
-    carro002fundos: { img: new Image(), loaded: false, width: 130, height: 138 },
-    carro003fundos: { img: new Image(), loaded: false, width: 150, height: 110 },
+    carro002fundos: { img: new Image(), loaded: false, width: 120, height: 138 },
+    carro003fundos: { img: new Image(), loaded: false, width: 102, height: 130 },
     carro004frente: { img: new Image(), loaded: false, width: 102, height: 130 },
     carro004fundos: { img: new Image(), loaded: false, width: 93, height: 140 },
 };
