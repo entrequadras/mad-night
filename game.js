@@ -293,7 +293,6 @@ const trafficSystem = {
         car.y += car.vy;
     });
 
-    }
 },
     
     getNextSpawnTime: function(laneType) {
