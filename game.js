@@ -263,13 +263,17 @@ const trafficSystem = {
     },
     
     update: function() {
-        const now = Date.now();
-        
-        // Limitar número máximo de carros para evitar travamento
-        if (this.cars.length > 15) {
-            this.cars.splice(0, this.cars.length - 15);
-        }
-        
+    const now = Date.now();
+    
+    // MELHORIA 1: Remover carros fora da tela ANTES de verificar spawns
+    // Isso evita acúmulo desnecessário
+    this.cars = this.cars.filter(car => 
+        car.y >= -200 && car.y <= 1068
+    );
+    
+    // MELHORIA 2: Só spawnar se tiver menos de 10 carros (antes era 15)
+    // E verificar o limite ANTES de tentar spawnar
+    if (this.cars.length < 10) {
         // Spawn nas pistas principais norte-sul
         if (now - this.lastSpawn.mainNorthSouth > this.getNextSpawnTime('main')) {
             this.spawnMainLanes('northSouth');
@@ -280,20 +284,17 @@ const trafficSystem = {
             this.spawnMainLanes('southNorth');
             this.lastSpawn.mainSouthNorth = now;
         }
-        
-        // Atualizar carros existentes
-        for (let i = this.cars.length - 1; i >= 0; i--) {
-            const car = this.cars[i];
-            
-            // Movimento reto nas pistas principais
-            car.y += car.vy;
-            
-            // Remover carros fora da tela
-            if (car.y < -200 || car.y > 1068) {
-                this.cars.splice(i, 1);
-            }
-        }
-    },
+    }
+    
+    // MELHORIA 3: Atualizar movimento dos carros de forma mais eficiente
+    // Usando forEach em vez de loop reverso (já que filtramos acima)
+    this.cars.forEach(car => {
+        // Movimento reto nas pistas principais
+        car.y += car.vy;
+    });
+
+    }
+},
     
     getNextSpawnTime: function(laneType) {
         const config = this.spawnConfig.mainLanes;
