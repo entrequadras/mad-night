@@ -2192,7 +2192,7 @@ function renderUI(map) {
         ctx.fillStyle = '#f00';
         setPixelFont(24); // Era 64px
         ctx.textAlign = 'center';
-        const msg = gameState.deaths < 5 ? "Ah vei, se liga carai!" : "SIFUDEU";
+        const msg = gameState.deaths < 5 ? "Ah véi, se liga carái!" : "SIFUDEU";
         ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
         ctx.textAlign = 'left';
     }
