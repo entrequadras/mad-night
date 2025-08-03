@@ -3,6 +3,14 @@
 <head>
     <title>Mad Night</title>
     <style>
+        /* DEFINE A FONTE LOCAL */
+        @font-face {
+            font-family: 'Press Start 2P';
+            src: url('assets/fonts/PressStart2P-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
         body {
             margin: 0;
             background: #000;
@@ -10,13 +18,28 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            /* USA A FONTE COM FALLBACK */
+            font-family: 'Press Start 2P', monospace;
         }
+        
         canvas {
             border: 2px solid #333;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        
+        /* FORÇA O CARREGAMENTO DA FONTE */
+        .font-preload {
+            font-family: 'Press Start 2P';
+            position: absolute;
+            left: -9999px;
         }
     </style>
 </head>
 <body>
+    <!-- DIV INVISÍVEL PARA PRÉ-CARREGAR A FONTE -->
+    <div class="font-preload">.</div>
+    
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <script src="game.js"></script>
 </body>
