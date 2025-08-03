@@ -1,4 +1,4 @@
-console.log('Mad Night v1.9.95 - Correção dos carros');
+console.log('Mad Night v1.10 - revisão do som');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -37,7 +37,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'Versão: v1.9.95 - Correção dos carros'
+    version: 'Versão: v1.10 - revisão do som'
 };
 
 // Player
@@ -1748,7 +1748,7 @@ function update() {
             gameState.pedalPower--;
             audio.playSFX('dash', 0.6); // Som do dash
         }
-    
+     }
     // Atualizar câmera
     camera.x = player.x + player.width/2 - camera.width/2;
     camera.y = player.y + player.height/2 - camera.height/2;
@@ -2440,7 +2440,7 @@ for (let i = 0; i <= 15; i++) {
 loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
-gameLoop();
+// gameLoop será chamado automaticamente pelo document.fonts.ready
 
 console.log('🎮 Mad Night Versão: 1.9.95 - Correção dos carros');
 console.log('🚇 AJUSTE: Corredor horizontal vai até X=2906 agora');
