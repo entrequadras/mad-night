@@ -221,28 +221,31 @@ const audio = {
     initSFX: function(name, loop = false) {
         console.log(`🎧 Inicializando SFX: ${name}`);
         try {
-            this[name] = new Audio(`assets/audio/${name}.mp3`);
+            const audioPath = `assets/audio/${name}.mp3`;
+            this[name] = new Audio(audioPath);
             this[name].volume = this.sfxVolume;
             this[name].loop = loop;
             
-            // Preload do áudio
-            this[name].load();
-            
-            this[name].onerror = () => {
+            // Verificar se o arquivo existe tentando carregá-lo
+            this[name].addEventListener('error', (e) => {
                 console.error(`❌ Erro ao carregar SFX: ${name}`);
-                console.error(`📁 Verifique se existe: assets/audio/${name}.mp3`);
+                console.error(`📁 Caminho tentado: ${audioPath}`);
+                console.error(`🔍 Detalhes do erro:`, e);
+                console.error(`💡 Possíveis causas:`);
+                console.error(`   1. Arquivo não existe em: ${audioPath}`);
+                console.error(`   2. Nome do arquivo está errado (case sensitive!)`);
+                console.error(`   3. Extensão diferente (.ogg, .wav ao invés de .mp3)`);
                 this[name] = null;
-            };
-            
-            // Garantir que o áudio está pronto
-            this[name].addEventListener('canplaythrough', () => {
-                console.log(`✅ SFX carregado: ${name}`);
             });
             
-            // Verificar se pode tocar
+            // Quando carregar com sucesso
             this[name].addEventListener('loadeddata', () => {
-                console.log(`📊 ${name} - duração: ${this[name].duration}s`);
+                console.log(`✅ SFX carregado: ${name}`);
+                console.log(`📊 Detalhes: duração=${this[name].duration}s, src=${this[name].src}`);
             });
+            
+            // Forçar o carregamento
+            this[name].load();
             
         } catch (e) {
             console.error(`❌ Falha crítica ao criar SFX ${name}:`, e);
@@ -252,16 +255,43 @@ const audio = {
     
     // Inicializar todos os SFX
     initAllSFX: function() {
-        this.initSFX('ataque_janis');
-        this.initSFX('dash');
-        this.initSFX('mobilete', true); // Som em loop
-        this.initSFX('morte_caveira');
-        this.initSFX('morte_chacal');
-        this.initSFX('morte_janis');
-        this.initSFX('morte_faquinha');
-        this.initSFX('morte_madmax');
-        this.initSFX('morte_morcego');
-        this.initSFX('phone_ring');
+        // Lista de todos os SFX com possíveis variações de nome
+        const sfxFiles = {
+            'ataque_janis': ['ataque_janis', 'ataque-janis', 'ataquejanis'],
+            'dash': ['dash'],
+            'mobilete': ['mobilete'],
+            'morte_caveira': ['morte_caveira', 'morte-caveira', 'mortecaveira'],
+            'morte_chacal': ['morte_chacal', 'morte-chacal', 'mortechacal'],
+            'morte_janis': ['morte_janis', 'morte-janis', 'mortejanis'],
+            'morte_faquinha': ['morte_faquinha', 'morte-faquinha', 'mortefaquinha'],
+            'morte_madmax': ['morte_madmax', 'morte-madmax', 'mortemadmax'],
+            'morte_morcego': ['morte_morcego', 'morte-morcego', 'mortemorcego'],
+            'phone_ring': ['phone_ring', 'phone-ring', 'phonering']
+        };
+        
+        // Tentar diferentes caminhos e nomes
+        Object.keys(sfxFiles).forEach(sfxKey => {
+            const possibleNames = sfxFiles[sfxKey];
+            let loaded = false;
+            
+            for (let name of possibleNames) {
+                if (!loaded) {
+                    // Tentar com .mp3
+                    this.initSFX(sfxKey, sfxKey === 'mobilete');
+                    
+                    // Se falhar, podemos tentar outras extensões no futuro
+                    loaded = true;
+                }
+            }
+        });
+        
+        console.log('\n📂 Verificando caminhos dos arquivos de áudio:');
+        console.log('Por favor, verifique se os arquivos existem em:');
+        console.log('  assets/audio/morte_madmax.mp3');
+        console.log('  assets/audio/morte_faquinha.mp3');
+        console.log('  assets/audio/dash.mp3');
+        console.log('  ... etc');
+        console.log('\n💡 Os nomes dos arquivos são case-sensitive!');
     },
     
     // Função para tocar SFX
@@ -1809,20 +1839,62 @@ window.addEventListener('keydown', (e) => {
     // Tecla T para testar todos os sons
     if (e.key === 't' || e.key === 'T') {
         console.log('🎵 Testando todos os SFX...');
+        console.log('Estado do contexto de áudio:', audioContextStarted ? '✅ Ativado' : '❌ Não ativado');
+        
+        // Primeiro, verificar se os arquivos estão carregados
+        console.log('\n📁 Status dos arquivos:');
         const sfxList = [
             'morte_madmax', 'morte_faquinha', 'morte_morcego', 
             'morte_caveira', 'morte_janis', 'morte_chacal',
             'dash', 'ataque_janis'
         ];
         
+        sfxList.forEach(sfx => {
+            if (audio[sfx]) {
+                console.log(`${sfx}: ✅ Objeto existe`);
+                console.log(`  - src: ${audio[sfx].src}`);
+                console.log(`  - readyState: ${audio[sfx].readyState}`);
+                console.log(`  - duration: ${audio[sfx].duration || 'não carregado'}`);
+                console.log(`  - volume: ${audio[sfx].volume}`);
+            } else {
+                console.log(`${sfx}: ❌ Objeto não existe`);
+            }
+        });
+        
+        console.log('\n🔊 Tentando tocar cada som...');
         let delay = 0;
         sfxList.forEach(sfx => {
             setTimeout(() => {
-                console.log(`🔊 Testando: ${sfx}`);
+                console.log(`\n🎶 Tocando: ${sfx}`);
                 audio.playSFX(sfx, 0.5);
             }, delay);
-            delay += 1000;
+            delay += 1500;
         });
+    }
+    
+    // Tecla D para debug detalhado
+    if (e.key === 'd' || e.key === 'D') {
+        console.log('\n=== 🔍 DEBUG COMPLETO DO ÁUDIO ===');
+        console.log('audioContextStarted:', audioContextStarted);
+        console.log('audio.failedToLoad:', audio.failedToLoad);
+        console.log('audio.sfxVolume:', audio.sfxVolume);
+        console.log('audio.musicVolume:', audio.musicVolume);
+        console.log('\nObjetos de áudio carregados:');
+        
+        // Listar todos os áudios
+        Object.keys(audio).forEach(key => {
+            if (audio[key] instanceof Audio) {
+                console.log(`\n${key}:`);
+                console.log(`  src: ${audio[key].src}`);
+                console.log(`  readyState: ${audio[key].readyState} (4=carregado)`);
+                console.log(`  networkState: ${audio[key].networkState}`);
+                console.log(`  error: ${audio[key].error}`);
+                console.log(`  duration: ${audio[key].duration}`);
+                console.log(`  paused: ${audio[key].paused}`);
+                console.log(`  volume: ${audio[key].volume}`);
+            }
+        });
+        console.log('===================================\n');
     }
 });
 
@@ -2631,9 +2703,19 @@ console.log('🔊 FIX: Sons agora funcionam mesmo com bloqueio de autoplay');
 console.log('🎵 NOVO: Sistema de sons pendentes para política de navegadores');
 console.log('🐛 FIX: Múltiplos eventos para ativar áudio (click, tecla, touch)');
 console.log('📢 Teste os sons: K=morte, Espaço=dash, T=testar todos!');
+console.log('🔍 NOVA TECLA: D=debug completo do sistema de áudio');
 console.log('🎯 Dica: Qualquer interação (clique/tecla) ativa o áudio!');
 console.log('');
 console.log('⚡ IMPORTANTE: Pressione qualquer tecla ou clique para ativar sons!');
+
+// Verificar suporte a MP3
+const testAudio = new Audio();
+const canPlayMP3 = testAudio.canPlayType('audio/mpeg');
+console.log(`\n🎵 Suporte MP3: ${canPlayMP3 || 'não suportado'}`);
+if (!canPlayMP3) {
+    console.error('❌ PROBLEMA: Seu navegador não suporta MP3!');
+    console.error('💡 Tente usar arquivos .ogg ou .wav');
+}
 
 // Diagnóstico de áudio após 2 segundos
 setTimeout(() => {
