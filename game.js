@@ -1,4 +1,4 @@
-console.log('Mad Night v1.12 - Correção de Autoplay');
+console.log('Mad Night v1.13 - Sistema de Áudio Simplificado');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -37,7 +37,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'Versão: v1.12 - Correção de Autoplay'
+    version: 'v1.13'
 };
 
 // Player
@@ -194,14 +194,14 @@ assets.carro004frente.img.onload = () => { assets.carro004frente.loaded = true; 
 assets.carro004fundos.img.src = 'assets/scenary/carro004-fundos.png';
 assets.carro004fundos.img.onload = () => { assets.carro004fundos.loaded = true; };
 
-// Audio com sistema aprimorado
+// Sistema de áudio simplificado
 const audio = {
     // Músicas
     inicio: null,
     fuga: null,
     creditos: null,
     
-    // SFX - Efeitos sonoros
+    // SFX
     ataque_janis: null,
     dash: null,
     mobilete: null,
@@ -213,157 +213,32 @@ const audio = {
     morte_morcego: null,
     phone_ring: null,
     
-    failedToLoad: false,
     sfxVolume: 0.7,
     musicVolume: 0.5,
     
-    // Inicializar um SFX
-    initSFX: function(name, loop = false) {
-        console.log(`🎧 Inicializando SFX: ${name}`);
+    // Carregar um SFX
+    loadSFX: function(name, loop = false) {
         try {
-            const audioPath = `assets/audio/${name}.mp3`;
-            this[name] = new Audio(audioPath);
+            this[name] = new Audio(`assets/audio/${name}.mp3`);
             this[name].volume = this.sfxVolume;
             this[name].loop = loop;
-            
-            // Verificar se o arquivo existe tentando carregá-lo
-            this[name].addEventListener('error', (e) => {
-                console.error(`❌ Erro ao carregar SFX: ${name}`);
-                console.error(`📁 Caminho tentado: ${audioPath}`);
-                console.error(`🔍 Detalhes do erro:`, e);
-                console.error(`💡 Possíveis causas:`);
-                console.error(`   1. Arquivo não existe em: ${audioPath}`);
-                console.error(`   2. Nome do arquivo está errado (case sensitive!)`);
-                console.error(`   3. Extensão diferente (.ogg, .wav ao invés de .mp3)`);
-                this[name] = null;
-            });
-            
-            // Quando carregar com sucesso
-            this[name].addEventListener('loadeddata', () => {
-                console.log(`✅ SFX carregado: ${name}`);
-                console.log(`📊 Detalhes: duração=${this[name].duration}s, src=${this[name].src}`);
-            });
-            
-            // Forçar o carregamento
             this[name].load();
-            
         } catch (e) {
-            console.error(`❌ Falha crítica ao criar SFX ${name}:`, e);
-            this[name] = null;
+            console.error(`Erro ao carregar ${name}:`, e);
         }
     },
     
-    // Inicializar todos os SFX
-    initAllSFX: function() {
-        // Lista de todos os SFX com possíveis variações de nome
-        const sfxFiles = {
-            'ataque_janis': ['ataque_janis', 'ataque-janis', 'ataquejanis'],
-            'dash': ['dash'],
-            'mobilete': ['mobilete'],
-            'morte_caveira': ['morte_caveira', 'morte-caveira', 'mortecaveira'],
-            'morte_chacal': ['morte_chacal', 'morte-chacal', 'mortechacal'],
-            'morte_janis': ['morte_janis', 'morte-janis', 'mortejanis'],
-            'morte_faquinha': ['morte_faquinha', 'morte-faquinha', 'mortefaquinha'],
-            'morte_madmax': ['morte_madmax', 'morte-madmax', 'mortemadmax'],
-            'morte_morcego': ['morte_morcego', 'morte-morcego', 'mortemorcego'],
-            'phone_ring': ['phone_ring', 'phone-ring', 'phonering']
-        };
-        
-        // Tentar diferentes caminhos e nomes
-        Object.keys(sfxFiles).forEach(sfxKey => {
-            const possibleNames = sfxFiles[sfxKey];
-            let loaded = false;
-            
-            for (let name of possibleNames) {
-                if (!loaded) {
-                    // Tentar com .mp3
-                    this.initSFX(sfxKey, sfxKey === 'mobilete');
-                    
-                    // Se falhar, podemos tentar outras extensões no futuro
-                    loaded = true;
-                }
-            }
-        });
-        
-        console.log('\n📂 Verificando caminhos dos arquivos de áudio:');
-        console.log('Por favor, verifique se os arquivos existem em:');
-        console.log('  assets/audio/morte_madmax.mp3');
-        console.log('  assets/audio/morte_faquinha.mp3');
-        console.log('  assets/audio/dash.mp3');
-        console.log('  ... etc');
-        console.log('\n💡 Os nomes dos arquivos são case-sensitive!');
-    },
-    
-    // Função para tocar SFX
+    // Tocar SFX
     playSFX: function(soundName, volume = null) {
-        console.log(`🔊 Tentando tocar SFX: ${soundName}`);
-        
-        if (this.failedToLoad) {
-            console.warn(`❌ Sistema de áudio falhou ao carregar`);
-            return;
-        }
-        
-        if (!this[soundName]) {
-            console.warn(`❌ SFX não encontrado: ${soundName}`);
-            return;
-        }
+        if (!this[soundName]) return;
         
         try {
-            // Criar novo Audio a cada vez (mais compatível)
-            const sound = new Audio(this[soundName].src);
+            // Clonar o áudio para permitir múltiplas reproduções
+            const sound = this[soundName].cloneNode();
             sound.volume = volume !== null ? volume : this.sfxVolume;
-            
-            console.log(`🎵 Tocando ${soundName} com volume ${sound.volume}`);
-            
-            // Tentar tocar imediatamente
-            sound.play().catch(e => {
-                // Se falhar, tentar novamente no próximo clique/interação
-                console.warn(`⚠️ Primeira tentativa falhou para ${soundName}, aguardando interação...`);
-                
-                // Armazenar para tocar na próxima interação
-                if (!this.pendingSounds) this.pendingSounds = [];
-                this.pendingSounds.push({ sound, name: soundName });
-                
-                // Limpar sons pendentes após 5 segundos
-                setTimeout(() => {
-                    this.pendingSounds = this.pendingSounds?.filter(ps => ps.name !== soundName);
-                }, 5000);
-            });
-            
+            sound.play().catch(() => {});
         } catch (e) {
-            console.error(`❌ Erro crítico ao tocar SFX ${soundName}:`, e);
-        }
-    },
-    
-    // Nova função para tocar sons pendentes
-    playPendingSounds: function() {
-        if (!this.pendingSounds || this.pendingSounds.length === 0) return;
-        
-        console.log(`🔔 Tocando ${this.pendingSounds.length} sons pendentes...`);
-        
-        this.pendingSounds.forEach(({ sound, name }) => {
-            sound.play().then(() => {
-                console.log(`✅ ${name} tocado com sucesso (pendente)`);
-            }).catch(e => {
-                console.warn(`❌ Ainda não foi possível tocar ${name}`);
-            });
-        });
-        
-        this.pendingSounds = [];
-    },
-    
-    // Função especial para sons em loop (como mobilete)
-    playLoopSFX: function(soundName, volume = null) {
-        if (this.failedToLoad || !this[soundName]) return;
-        
-        try {
-            this[soundName].volume = volume !== null ? volume : this.sfxVolume;
-            this[soundName].currentTime = 0;
-            this[soundName].play().catch(e => {
-                console.warn(`Não foi possível tocar loop ${soundName}:`, e);
-            });
-        } catch (e) {
-            console.warn(`Erro ao tocar loop ${soundName}:`, e);
+            // Falha silenciosa
         }
     },
     
@@ -456,14 +331,12 @@ const trafficSystem = {
     update: function() {
         const now = Date.now();
         
-        // MELHORIA 1: Remover carros fora da tela ANTES de verificar spawns
-        // Isso evita acúmulo desnecessário
+        // Remover carros fora da tela
         this.cars = this.cars.filter(car => 
             car.y >= -200 && car.y <= 1068
         );
         
-        // MELHORIA 2: Só spawnar se tiver menos de 10 carros (antes era 15)
-        // E verificar o limite ANTES de tentar spawnar
+        // Só spawnar se tiver menos de 10 carros
         if (this.cars.length < 10) {
             // Spawn nas pistas principais norte-sul
             if (now - this.lastSpawn.mainNorthSouth > this.getNextSpawnTime('main')) {
@@ -477,10 +350,8 @@ const trafficSystem = {
             }
         }
         
-        // MELHORIA 3: Atualizar movimento dos carros de forma mais eficiente
-        // Usando forEach em vez de loop reverso (já que filtramos acima)
+        // Atualizar movimento dos carros
         this.cars.forEach(car => {
-            // Movimento reto nas pistas principais
             car.y += car.vy;
         });
     },
@@ -606,7 +477,7 @@ const trafficSystem = {
             ctx.restore();
         });
     }
-};  // ← Fim do trafficSystem
+};
 
 // Função para gerar tiles de grama (apenas para mapa 1)
 function generateGrassTiles(mapWidth, mapHeight, tileSize) {
@@ -625,240 +496,6 @@ function generateGrassTiles(mapWidth, mapHeight, tileSize) {
     }
     
     return tiles;
-}
-
-// Função para exportar mapa completo do Maconhão
-function exportMapImage() {
-    if (gameState.currentMap !== 0) {
-        console.log('❌ Vá para o Maconhão (Mapa 0) primeiro!');
-        return;
-    }
-    
-    console.log('📸 Exportando Maconhão em resolução nativa...');
-    
-    // Criar canvas temporário com resolução do mapa
-    const exportCanvas = document.createElement('canvas');
-    const exportCtx = exportCanvas.getContext('2d');
-    exportCanvas.width = 1920;
-    exportCanvas.height = 1080;
-    exportCtx.imageSmoothingEnabled = false;
-    
-    const map = maps[0]; // Maconhão
-    
-    // Fundo escuro
-    exportCtx.fillStyle = '#1a1a1a';
-    exportCtx.fillRect(0, 0, 1920, 1080);
-    
-    // Renderizar campo
-    if (assets.campo.loaded) {
-        const campoX = (1920 - 800) / 2;
-        const campoY = (1080 - 462) / 2;
-        exportCtx.drawImage(assets.campo.img, campoX, campoY);
-    }
-    
-    // Renderizar sombras das árvores
-    if (map.trees) {
-        map.trees.forEach(tree => {
-            const treeAsset = assets[tree.type];
-            if (treeAsset && treeAsset.loaded) {
-                let shadowRadius = tree.type === 'arvorebloco001' ? 
-                    treeAsset.width * 0.35 : treeAsset.width * 0.5;
-                
-                const shadowX = tree.x + treeAsset.width * 0.5;
-                const shadowY = tree.y + treeAsset.height * 0.85;
-                
-                const gradient = exportCtx.createRadialGradient(
-                    shadowX, shadowY, 0,
-                    shadowX, shadowY, shadowRadius
-                );
-                gradient.addColorStop(0, 'rgba(0, 0, 0, 0.72)');  // Sombras das árvores também +20%
-                gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
-                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-                exportCtx.fillStyle = gradient;
-                exportCtx.fillRect(
-                    shadowX - shadowRadius,
-                    shadowY - shadowRadius,
-                    shadowRadius * 2,
-                    shadowRadius * 2
-                );
-            }
-        });
-    }
-    
-    // Renderizar troncos das árvores (parte de baixo)
-    if (map.trees) {
-        map.trees.forEach(tree => {
-            const treeAsset = assets[tree.type];
-            if (treeAsset && treeAsset.loaded) {
-                exportCtx.save();
-                exportCtx.beginPath();
-                exportCtx.rect(tree.x, tree.y + treeAsset.height * 0.7, treeAsset.width, treeAsset.height * 0.3);
-                exportCtx.clip();
-                exportCtx.drawImage(treeAsset.img, tree.x, tree.y);
-                exportCtx.restore();
-            }
-        });
-    }
-    
-    // Renderizar objetos (caixa de luz)
-    if (map.objects) {
-        map.objects.forEach(obj => {
-            const objAsset = assets[obj.type];
-            if (objAsset && objAsset.loaded) {
-                exportCtx.save();
-                const centerX = obj.x + objAsset.width / 2;
-                const centerY = obj.y + objAsset.height / 2;
-                exportCtx.translate(centerX, centerY);
-                exportCtx.rotate((obj.rotation || 0) * Math.PI / 180);
-                exportCtx.drawImage(
-                    objAsset.img,
-                    -objAsset.width / 2,
-                    -objAsset.height / 2,
-                    objAsset.width,
-                    objAsset.height
-                );
-                exportCtx.restore();
-            }
-        });
-    }
-    
-    // Renderizar campo com traves (por cima)
-    if (assets.campoTraves.loaded) {
-        const campoX = (1920 - 800) / 2;
-        const campoY = (1080 - 462) / 2;
-        exportCtx.drawImage(assets.campoTraves.img, campoX, campoY);
-    }
-    
-    // Renderizar sombra do campo
-    const campoX = (1920 - 800) / 2;
-    const campoY = (1080 - 462) / 2;
-    const centerX = campoX + 400;
-    const centerY = campoY + 231;
-    
-    const gradient = exportCtx.createRadialGradient(
-        centerX, centerY, 0,
-        centerX, centerY, 450
-    );
-    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');   // Sombra do campo também +20%
-    gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.54)');
-    gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.42)');
-    gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.24)');
-    gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.12)');  
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    
-    exportCtx.fillStyle = gradient;
-    exportCtx.fillRect(
-        centerX - 450,
-        centerY - 450,
-        900,
-        900
-    );
-    
-    // Sombras dos cantos também mais escuras
-    const cornerGradient1 = exportCtx.createRadialGradient(0, 0, 0, 0, 0, 400);
-    cornerGradient1.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
-    cornerGradient1.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
-    cornerGradient1.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    exportCtx.fillStyle = cornerGradient1;
-    exportCtx.fillRect(0, 0, 400, 400);
-    
-    const cornerGradient2 = exportCtx.createRadialGradient(1920, 0, 0, 1920, 0, 400);
-    cornerGradient2.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
-    cornerGradient2.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
-    cornerGradient2.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    exportCtx.fillStyle = cornerGradient2;
-    exportCtx.fillRect(1920 - 400, 0, 400, 400);
-    
-    const cornerGradient3 = exportCtx.createRadialGradient(0, 1080, 0, 0, 1080, 400);
-    cornerGradient3.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
-    cornerGradient3.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
-    cornerGradient3.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    exportCtx.fillStyle = cornerGradient3;
-    exportCtx.fillRect(0, 1080 - 400, 400, 400);
-    
-    const cornerGradient4 = exportCtx.createRadialGradient(1920, 1080, 0, 1920, 1080, 400);
-    cornerGradient4.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
-    cornerGradient4.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
-    cornerGradient4.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    exportCtx.fillStyle = cornerGradient4;
-    exportCtx.fillRect(1920 - 400, 1080 - 400, 400, 400);
-    
-    // Renderizar postes
-    if (map.streetLights) {
-        map.streetLights.forEach(light => {
-            const lightAsset = assets[light.type];
-            if (lightAsset && lightAsset.loaded) {
-                exportCtx.save();
-                const centerX = light.x + lightAsset.width / 2;
-                const centerY = light.y + lightAsset.height / 2;
-                exportCtx.translate(centerX, centerY);
-                exportCtx.rotate((light.rotation || 0) * Math.PI / 180);
-                exportCtx.drawImage(
-                    lightAsset.img,
-                    -lightAsset.width / 2,
-                    -lightAsset.height / 2,
-                    lightAsset.width,
-                    lightAsset.height
-                );
-                exportCtx.restore();
-            }
-        });
-    }
-    
-    // Renderizar copas das árvores (por cima)
-    if (map.trees) {
-        map.trees.forEach(tree => {
-            const treeAsset = assets[tree.type];
-            if (treeAsset && treeAsset.loaded) {
-                exportCtx.save();
-                exportCtx.beginPath();
-                exportCtx.rect(tree.x, tree.y, treeAsset.width, treeAsset.height * 0.75);
-                exportCtx.clip();
-                exportCtx.drawImage(treeAsset.img, tree.x, tree.y);
-                exportCtx.restore();
-            }
-        });
-    }
-    
-    // Filtro noturno
-    exportCtx.fillStyle = 'rgba(0, 0, 40, 0.4)';
-    exportCtx.fillRect(0, 0, 1920, 1080);
-    
-    // Luzes dos postes
-    if (map.streetLights) {
-        exportCtx.save();
-        exportCtx.globalCompositeOperation = 'lighter';
-        
-        map.streetLights.forEach(light => {
-            const gradient = exportCtx.createRadialGradient(
-                light.x + 20, light.y + 45, 0,
-                light.x + 20, light.y + 45, 100
-            );
-            gradient.addColorStop(0, 'rgba(255, 200, 100, 0.4)');
-            gradient.addColorStop(0.5, 'rgba(255, 180, 80, 0.2)');
-            gradient.addColorStop(1, 'rgba(255, 160, 60, 0)');
-            
-            exportCtx.fillStyle = gradient;
-            exportCtx.beginPath();
-            exportCtx.arc(light.x + 20, light.y + 45, 100, 0, Math.PI * 2);
-            exportCtx.fill();
-        });
-        
-        exportCtx.restore();
-    }
-    
-    // Download da imagem
-    exportCanvas.toBlob(function(blob) {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'maconhao_completo_1920x1080.png';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        console.log('✅ Mapa exportado com sucesso!');
-    }, 'image/png');
 }
 
 // Sistema de Mapas
@@ -1566,12 +1203,19 @@ class Enemy {
 
 // Funções do jogo
 function loadAudio() {
-    console.log('Iniciando carregamento de áudio...');
+    // Carregar todos os SFX
+    audio.loadSFX('ataque_janis');
+    audio.loadSFX('dash');
+    audio.loadSFX('mobilete', true); // Loop
+    audio.loadSFX('morte_caveira');
+    audio.loadSFX('morte_chacal');
+    audio.loadSFX('morte_janis');
+    audio.loadSFX('morte_faquinha');
+    audio.loadSFX('morte_madmax');
+    audio.loadSFX('morte_morcego');
+    audio.loadSFX('phone_ring', true); // Loop
     
-    // Primeiro inicializar todos os SFX
-    audio.initAllSFX();
-    
-    // Depois carregar as músicas
+    // Carregar músicas
     audio.inicio = new Audio('assets/audio/musica_etqgame_tema_inicio.mp3');
     audio.fuga = new Audio('assets/audio/musica_etqgame_fuga.mp3');
     audio.creditos = new Audio('assets/audio/musica_etqgame_end_credits.mp3');
@@ -1582,51 +1226,24 @@ function loadAudio() {
     audio.fuga.volume = audio.musicVolume;
     audio.creditos.volume = audio.musicVolume;
     
-    audio.inicio.onerror = () => {
-        console.error('Erro ao carregar música de início');
-        audio.failedToLoad = true;
-    };
-    
-    audio.fuga.onerror = () => {
-        console.error('Erro ao carregar música de fuga');
-        audio.failedToLoad = true;
-    };
-    
-    audio.creditos.onerror = () => {
-        console.error('Erro ao carregar música de créditos');
-    };
-    
     // Preload das músicas
     audio.inicio.load();
     audio.fuga.load();
     audio.creditos.load();
-    
-    console.log('Áudio configurado!');
 }
 
 function playMusic(phase) {
-    if (audio.failedToLoad) {
-        console.warn('Áudio falhou ao carregar - continuando sem música');
-        return;
-    }
-    
     if (gameState.currentMusic) {
         gameState.currentMusic.pause();
         gameState.currentMusic.currentTime = 0;
     }
     
     if (phase === 'inicio' && audio.inicio) {
-        audio.inicio.play().catch(e => {
-            console.warn('Não foi possível tocar música:', e);
-            audio.failedToLoad = true;
-        });
+        audio.inicio.play().catch(() => {});
         gameState.currentMusic = audio.inicio;
         gameState.musicPhase = 'inicio';
     } else if (phase === 'fuga' && audio.fuga) {
-        audio.fuga.play().catch(e => {
-            console.warn('Não foi possível tocar música:', e);
-            audio.failedToLoad = true;
-        });
+        audio.fuga.play().catch(() => {});
         gameState.currentMusic = audio.fuga;
         gameState.musicPhase = 'fuga';
     }
@@ -1782,42 +1399,10 @@ function updateProjectiles() {
 // Input
 const keys = {};
 
-// Adicionar handler de clique para ativar áudio
-let audioContextStarted = false;
-
-// Função global para ativar áudio
-function activateAudio() {
-    if (!audioContextStarted) {
-        console.log('🔊 Ativando contexto de áudio...');
-        audioContextStarted = true;
-        
-        // Tocar sons pendentes
-        audio.playPendingSounds();
-        
-        // Tentar iniciar música se estiver pausada
-        if (gameState.currentMusic && gameState.currentMusic.paused) {
-            gameState.currentMusic.play().catch(e => {
-                console.log('⚠️ Música ainda não pode tocar:', e);
-            });
-        }
-        
-        // Criar e tocar um som silencioso para garantir ativação
-        const silentSound = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEA');
-        silentSound.volume = 0.01;
-        silentSound.play().catch(() => {});
-    }
-}
-
-// Múltiplos eventos para garantir ativação
-window.addEventListener('click', activateAudio);
-window.addEventListener('keydown', activateAudio);
-window.addEventListener('touchstart', activateAudio);
-
 window.addEventListener('keydown', (e) => {
     keys[e.key] = true;
     
     if (e.key === 'k' || e.key === 'K') {
-        console.log('🎮 Tecla K pressionada - matando player');
         killPlayer();
     }
     
@@ -1835,81 +1420,10 @@ window.addEventListener('keydown', (e) => {
         gameState.currentMap = (gameState.currentMap + 1) % maps.length;
         loadMap(gameState.currentMap);
     }
-    
-    // Tecla T para testar todos os sons
-    if (e.key === 't' || e.key === 'T') {
-        console.log('🎵 Testando todos os SFX...');
-        console.log('Estado do contexto de áudio:', audioContextStarted ? '✅ Ativado' : '❌ Não ativado');
-        
-        // Primeiro, verificar se os arquivos estão carregados
-        console.log('\n📁 Status dos arquivos:');
-        const sfxList = [
-            'morte_madmax', 'morte_faquinha', 'morte_morcego', 
-            'morte_caveira', 'morte_janis', 'morte_chacal',
-            'dash', 'ataque_janis'
-        ];
-        
-        sfxList.forEach(sfx => {
-            if (audio[sfx]) {
-                console.log(`${sfx}: ✅ Objeto existe`);
-                console.log(`  - src: ${audio[sfx].src}`);
-                console.log(`  - readyState: ${audio[sfx].readyState}`);
-                console.log(`  - duration: ${audio[sfx].duration || 'não carregado'}`);
-                console.log(`  - volume: ${audio[sfx].volume}`);
-            } else {
-                console.log(`${sfx}: ❌ Objeto não existe`);
-            }
-        });
-        
-        console.log('\n🔊 Tentando tocar cada som...');
-        let delay = 0;
-        sfxList.forEach(sfx => {
-            setTimeout(() => {
-                console.log(`\n🎶 Tocando: ${sfx}`);
-                audio.playSFX(sfx, 0.5);
-            }, delay);
-            delay += 1500;
-        });
-    }
-    
-    // Tecla D para debug detalhado
-    if (e.key === 'd' || e.key === 'D') {
-        console.log('\n=== 🔍 DEBUG COMPLETO DO ÁUDIO ===');
-        console.log('audioContextStarted:', audioContextStarted);
-        console.log('audio.failedToLoad:', audio.failedToLoad);
-        console.log('audio.sfxVolume:', audio.sfxVolume);
-        console.log('audio.musicVolume:', audio.musicVolume);
-        console.log('\nObjetos de áudio carregados:');
-        
-        // Listar todos os áudios
-        Object.keys(audio).forEach(key => {
-            if (audio[key] instanceof Audio) {
-                console.log(`\n${key}:`);
-                console.log(`  src: ${audio[key].src}`);
-                console.log(`  readyState: ${audio[key].readyState} (4=carregado)`);
-                console.log(`  networkState: ${audio[key].networkState}`);
-                console.log(`  error: ${audio[key].error}`);
-                console.log(`  duration: ${audio[key].duration}`);
-                console.log(`  paused: ${audio[key].paused}`);
-                console.log(`  volume: ${audio[key].volume}`);
-            }
-        });
-        console.log('===================================\n');
-    }
 });
 
 window.addEventListener('keyup', (e) => {
     keys[e.key] = false;
-});
-
-canvas.addEventListener('click', () => {
-    console.log('🖱️ Canvas clicado');
-    if (gameState.currentMusic && gameState.currentMusic.paused) {
-        console.log('🎵 Tentando tocar música...');
-        gameState.currentMusic.play().catch(e => {
-            console.log('⚠️ Erro ao tocar música:', e);
-        });
-    }
 });
 
 // Função para obter sprite do player
@@ -2030,11 +1544,11 @@ function update() {
         );
         
         // Tocar telefone quando estiver próximo (raio de 150 pixels)
-        if (distance < 150 && audio.phone_ring.paused) {
-            audio.playSFX('phone_ring', 0.7);
+        if (distance < 150 && audio.phone_ring && audio.phone_ring.paused) {
+            audio.phone_ring.play().catch(() => {});
         }
         // Parar de tocar se se afastar muito
-        else if (distance > 200 && !audio.phone_ring.paused) {
+        else if (distance > 200 && audio.phone_ring && !audio.phone_ring.paused) {
             audio.phone_ring.pause();
         }
     }
@@ -2043,7 +1557,7 @@ function update() {
     if (map.orelhao && checkRectCollision(player, map.orelhao)) {
         if (!gameState.dashUnlocked) {
             gameState.dashUnlocked = true;
-            audio.phone_ring.pause(); // Para o toque quando atende
+            if (audio.phone_ring) audio.phone_ring.pause(); // Para o toque quando atende
         }
     }
     
@@ -2516,13 +2030,6 @@ function renderUI(map) {
         ctx.fillText('█', 200 + i * 20, 100);
     }
     
-    // Aviso de áudio
-    if (audio.failedToLoad) {
-        ctx.fillStyle = '#f00';
-        setPixelFont(8);
-        ctx.fillText('! clique na tela e ative o som', 20, 140);
-    }
-    
     // Mensagem de morte
     if (player.isDead) {
         ctx.fillStyle = '#f00';
@@ -2537,14 +2044,6 @@ function renderUI(map) {
 function draw() {
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.save();
-    ctx.fillStyle = '#fff';
-    ctx.font = '24px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(gameState.version, canvas.width/2, 30);
-    ctx.textAlign = 'left';
-    ctx.restore();
     
     try {
         const map = maps[gameState.currentMap];
@@ -2698,52 +2197,6 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night Versão: v1.12 - Correção de Autoplay');
-console.log('🔊 FIX: Sons agora funcionam mesmo com bloqueio de autoplay');
-console.log('🎵 NOVO: Sistema de sons pendentes para política de navegadores');
-console.log('🐛 FIX: Múltiplos eventos para ativar áudio (click, tecla, touch)');
-console.log('📢 Teste os sons: K=morte, Espaço=dash, T=testar todos!');
-console.log('🔍 NOVA TECLA: D=debug completo do sistema de áudio');
-console.log('🎯 Dica: Qualquer interação (clique/tecla) ativa o áudio!');
-console.log('');
-console.log('⚡ IMPORTANTE: Pressione qualquer tecla ou clique para ativar sons!');
-
-// Verificar suporte a MP3
-const testAudio = new Audio();
-const canPlayMP3 = testAudio.canPlayType('audio/mpeg');
-console.log(`\n🎵 Suporte MP3: ${canPlayMP3 || 'não suportado'}`);
-if (!canPlayMP3) {
-    console.error('❌ PROBLEMA: Seu navegador não suporta MP3!');
-    console.error('💡 Tente usar arquivos .ogg ou .wav');
-}
-
-// Diagnóstico de áudio após 2 segundos
-setTimeout(() => {
-    console.log('');
-    console.log('=== 🔍 DIAGNÓSTICO DE ÁUDIO ===');
-    console.log('Música início:', audio.inicio ? '✅ Carregada' : '❌ Falhou');
-    console.log('Música fuga:', audio.fuga ? '✅ Carregada' : '❌ Falhou');
-    console.log('');
-    console.log('SFX Status:');
-    const sfxList = [
-        'morte_madmax', 'morte_faquinha', 'morte_morcego', 
-        'morte_caveira', 'morte_janis', 'morte_chacal',
-        'dash', 'ataque_janis', 'phone_ring', 'mobilete'
-    ];
-    
-    sfxList.forEach(sfx => {
-        if (audio[sfx]) {
-            console.log(`${sfx}: ✅ (duração: ${audio[sfx].duration || '?'}s)`);
-        } else {
-            console.log(`${sfx}: ❌ Não carregado`);
-        }
-    });
-    console.log('================================');
-    console.log('');
-    console.log('📝 INSTRUÇÕES DE DEBUG:');
-    console.log('1. Abra o Console (F12)');
-    console.log('2. Clique na tela do jogo');
-    console.log('3. Pressione K para matar o player');
-    console.log('4. Pressione T para testar todos os sons');
-    console.log('5. Verifique as mensagens no console');
-}, 2000);
+console.log('🎮 Mad Night v1.13 - Sistema de Áudio Simplificado');
+console.log('📢 Controles: Setas=mover, K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
+console.log('💡 Clique ou pressione qualquer tecla para ativar o áudio!');
