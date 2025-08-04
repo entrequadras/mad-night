@@ -1,4 +1,4 @@
-console.log('Mad Night v1.10 - revisão do som');
+console.log('Mad Night v1.11 - Sistema de Som Aprimorado');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -37,7 +37,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'Versão: v1.10 - revisão do som'
+    version: 'Versão: v1.11 - Sistema de Som Aprimorado'
 };
 
 // Player
@@ -194,6 +194,123 @@ assets.carro004frente.img.onload = () => { assets.carro004frente.loaded = true; 
 assets.carro004fundos.img.src = 'assets/scenary/carro004-fundos.png';
 assets.carro004fundos.img.onload = () => { assets.carro004fundos.loaded = true; };
 
+// Audio com sistema aprimorado
+const audio = {
+    // Músicas
+    inicio: null,
+    fuga: null,
+    creditos: null,
+    
+    // SFX - Efeitos sonoros
+    ataque_janis: null,
+    dash: null,
+    mobilete: null,
+    morte_caveira: null,
+    morte_chacal: null,
+    morte_janis: null,
+    morte_faquinha: null,
+    morte_madmax: null,
+    morte_morcego: null,
+    phone_ring: null,
+    
+    failedToLoad: false,
+    sfxVolume: 0.7,
+    musicVolume: 0.5,
+    
+    // Inicializar um SFX
+    initSFX: function(name, loop = false) {
+        try {
+            this[name] = new Audio(`assets/audio/${name}.mp3`);
+            this[name].volume = this.sfxVolume;
+            this[name].loop = loop;
+            
+            // Preload do áudio
+            this[name].load();
+            
+            this[name].onerror = () => {
+                console.warn(`Erro ao carregar SFX: ${name}`);
+                this[name] = null;
+            };
+            
+            // Garantir que o áudio está pronto
+            this[name].addEventListener('canplaythrough', () => {
+                console.log(`SFX carregado: ${name}`);
+            });
+            
+        } catch (e) {
+            console.error(`Falha ao criar SFX ${name}:`, e);
+            this[name] = null;
+        }
+    },
+    
+    // Inicializar todos os SFX
+    initAllSFX: function() {
+        this.initSFX('ataque_janis');
+        this.initSFX('dash');
+        this.initSFX('mobilete', true); // Som em loop
+        this.initSFX('morte_caveira');
+        this.initSFX('morte_chacal');
+        this.initSFX('morte_janis');
+        this.initSFX('morte_faquinha');
+        this.initSFX('morte_madmax');
+        this.initSFX('morte_morcego');
+        this.initSFX('phone_ring');
+    },
+    
+    // Função para tocar SFX
+    playSFX: function(soundName, volume = null) {
+        if (this.failedToLoad || !this[soundName]) {
+            console.warn(`SFX não disponível: ${soundName}`);
+            return;
+        }
+        
+        try {
+            // Clonar o áudio para permitir múltiplas instâncias simultâneas
+            const sound = this[soundName].cloneNode();
+            sound.volume = volume !== null ? volume : this.sfxVolume;
+            
+            // Tocar o som
+            const playPromise = sound.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.catch(e => {
+                    console.warn(`Não foi possível tocar SFX ${soundName}:`, e);
+                });
+            }
+            
+            // Limpar o clone após tocar
+            sound.addEventListener('ended', () => {
+                sound.remove();
+            });
+            
+        } catch (e) {
+            console.warn(`Erro ao tocar SFX ${soundName}:`, e);
+        }
+    },
+    
+    // Função especial para sons em loop (como mobilete)
+    playLoopSFX: function(soundName, volume = null) {
+        if (this.failedToLoad || !this[soundName]) return;
+        
+        try {
+            this[soundName].volume = volume !== null ? volume : this.sfxVolume;
+            this[soundName].currentTime = 0;
+            this[soundName].play().catch(e => {
+                console.warn(`Não foi possível tocar loop ${soundName}:`, e);
+            });
+        } catch (e) {
+            console.warn(`Erro ao tocar loop ${soundName}:`, e);
+        }
+    },
+    
+    // Parar som em loop
+    stopLoopSFX: function(soundName) {
+        if (this[soundName] && !this[soundName].paused) {
+            this[soundName].pause();
+            this[soundName].currentTime = 0;
+        }
+    }
+};
 
 // Sistema de flicker para postes
 const flickerSystem = {
@@ -273,37 +390,36 @@ const trafficSystem = {
     },
     
     update: function() {
-    const now = Date.now();
-    
-    // MELHORIA 1: Remover carros fora da tela ANTES de verificar spawns
-    // Isso evita acúmulo desnecessário
-    this.cars = this.cars.filter(car => 
-        car.y >= -200 && car.y <= 1068
-    );
-    
-    // MELHORIA 2: Só spawnar se tiver menos de 10 carros (antes era 15)
-    // E verificar o limite ANTES de tentar spawnar
-    if (this.cars.length < 10) {
-        // Spawn nas pistas principais norte-sul
-        if (now - this.lastSpawn.mainNorthSouth > this.getNextSpawnTime('main')) {
-            this.spawnMainLanes('northSouth');
-            this.lastSpawn.mainNorthSouth = now;
+        const now = Date.now();
+        
+        // MELHORIA 1: Remover carros fora da tela ANTES de verificar spawns
+        // Isso evita acúmulo desnecessário
+        this.cars = this.cars.filter(car => 
+            car.y >= -200 && car.y <= 1068
+        );
+        
+        // MELHORIA 2: Só spawnar se tiver menos de 10 carros (antes era 15)
+        // E verificar o limite ANTES de tentar spawnar
+        if (this.cars.length < 10) {
+            // Spawn nas pistas principais norte-sul
+            if (now - this.lastSpawn.mainNorthSouth > this.getNextSpawnTime('main')) {
+                this.spawnMainLanes('northSouth');
+                this.lastSpawn.mainNorthSouth = now;
+            }
+            
+            if (now - this.lastSpawn.mainSouthNorth > this.getNextSpawnTime('main')) {
+                this.spawnMainLanes('southNorth');
+                this.lastSpawn.mainSouthNorth = now;
+            }
         }
         
-        if (now - this.lastSpawn.mainSouthNorth > this.getNextSpawnTime('main')) {
-            this.spawnMainLanes('southNorth');
-            this.lastSpawn.mainSouthNorth = now;
-        }
-    }
-    
-    // MELHORIA 3: Atualizar movimento dos carros de forma mais eficiente
-    // Usando forEach em vez de loop reverso (já que filtramos acima)
-    this.cars.forEach(car => {
-        // Movimento reto nas pistas principais
-        car.y += car.vy;
-    });
-
-},
+        // MELHORIA 3: Atualizar movimento dos carros de forma mais eficiente
+        // Usando forEach em vez de loop reverso (já que filtramos acima)
+        this.cars.forEach(car => {
+            // Movimento reto nas pistas principais
+            car.y += car.vy;
+        });
+    },
     
     getNextSpawnTime: function(laneType) {
         const config = this.spawnConfig.mainLanes;
@@ -759,88 +875,88 @@ const maps = [
         direction: 'right'
     },
     // Substitua o mapa 1 (Eixão da Morte) no array maps por este:
-{
-    name: "Eixão da Morte",
-    subtitle: "Túnel sob as pistas",
-    width: 3000,
-    height: 868,
-    enemies: [],
-    trees: [],
-    streetLights: [],
-    objects: [],
-    walls: [
-    // ============ TÚNEL EM FORMATO U - TODAS AS PAREDES INVISÍVEIS ============
-    
-    // ÁREA 1: Entrada livre (X: 0-380)
-    // Player pode andar livre até chegar na entrada do túnel
-    
-    // ÁREA 2: Rampa de descida (X: 380-420)
-    // Paredes que forçam descida em diagonal - ESTENDIDAS +32px
-    {x: 415, y: 80, w: 40, h: 182, invisible: true},  // Parede superior da rampa
-    {x: 380, y: 632, w: 40, h: 188, invisible: true}, // Parede inferior da rampa
-    
-    // PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel - DESCIDA +32px
-    {x: 0, y: 222, w: 335, h: 340, invisible: true},  // Parede esquerda
-    
-    // ÁREA 3: Túnel horizontal inferior (X: 420-2780) - DESCIDO +32px
-    // Corredor horizontal no fundo - agora 32px mais baixo e até 2906!
-    {x: 445, y: 80, w: 2335, h: 412, invisible: true},   // Parede superior
-    {x: 0, y: 562, w: 3000, h: 226, invisible: true},    // Parede inferior
-    
-    // PAREDE VERTICAL DIREITA - AJUSTADA E DESCIDA +32px
-    {x: 2865, y: 222, w: 135, h: 340, invisible: true},  // Parede direita
-    
-    // ÁREA 4: Rampa de subida (X: 2780-2820) - AJUSTADA +32px
-    // Paredes que forçam subida em diagonal
-    {x: 2745, y: 80, w: 40, h: 182, invisible: true},    // Parede superior da rampa
-    {x: 2780, y: 632, w: 40, h: 188, invisible: true},   // Parede inferior da rampa
-    
-    // ÁREA 5: Saída livre (X: 2820-3000)
-    // Player pode andar livre após sair do túnel (180 pixels de espaço)
-    
-    // Bordas do mapa (já eram invisíveis)
-    {x: 0, y: 0, w: 3000, h: 80, invisible: true},
-    {x: 0, y: 788, w: 3000, h: 80, invisible: true},
-    {x: 0, y: 0, w: 20, h: 868, invisible: true},
-    {x: 2980, y: 0, w: 20, h: 868, invisible: true}
-],
-    lights: [
-    // Grupo 1 - Entrada
-    {x: 448, y: 185, radius: 100, id: 'eixao1'},
-    {x: 690, y: 165, radius: 100, id: 'eixao2'},
-    {x: 605, y: 348, radius: 100, id: 'eixao3'},
-    
-    // Grupo 2 - Meio esquerdo
-    {x: 647, y: 611, radius: 100, id: 'eixao4'},
-    {x: 923, y: 245, radius: 100, id: 'eixao5'},
-    {x: 1106, y: 569, radius: 100, id: 'eixao6'},  // Corrigido de 1118,578 para 1106,569
-    {x: 1120, y: 245, radius: 100, id: 'eixao7'},
-    
-    // Grupo 3 - Meio direito
-    {x: 2125, y: 584, radius: 100, id: 'eixao8'},
-    {x: 2322, y: 581, radius: 100, id: 'eixao9'},
-    {x: 2114, y: 249, radius: 100, id: 'eixao10'},
-    {x: 2310, y: 245, radius: 100, id: 'eixao11'},
-    
-    // Grupo 4 - Saída
-    {x: 2541, y: 171, radius: 100, id: 'eixao12'},
-    {x: 2793, y: 197, radius: 100, id: 'eixao13'},
-    {x: 2628, y: 350, radius: 100, id: 'eixao14'},
-    {x: 2585, y: 102, radius: 100, id: 'eixao15'},
-    
-    // Novas luzes adicionadas
-    {x: 2584, y: 605, radius: 100, id: 'eixao16'},  // 2564,560 + offset
-    {x: 2669, y: 828, radius: 100, id: 'eixao17'},  // 2649,783 + offset
-    {x: 910, y: 574, radius: 100, id: 'eixao18'},   // 890,529 + offset
-    {x: 563, y: 834, radius: 100, id: 'eixao19'}    // 543,789 + offset
-],
-    shadows: [],
-    playerStart: {x: 100, y: 100},
-    playerStartEscape: {x: 2900, y: 190},
-    exit: {x: 2950, y: 80, w: 50, h: 100},
-    direction: 'right',
-    hasLayers: true
-},
+    {
+        name: "Eixão da Morte",
+        subtitle: "Túnel sob as pistas",
+        width: 3000,
+        height: 868,
+        enemies: [],
+        trees: [],
+        streetLights: [],
+        objects: [],
+        walls: [
+            // ============ TÚNEL EM FORMATO U - TODAS AS PAREDES INVISÍVEIS ============
+            
+            // ÁREA 1: Entrada livre (X: 0-380)
+            // Player pode andar livre até chegar na entrada do túnel
+            
+            // ÁREA 2: Rampa de descida (X: 380-420)
+            // Paredes que forçam descida em diagonal - ESTENDIDAS +32px
+            {x: 415, y: 80, w: 40, h: 182, invisible: true},  // Parede superior da rampa
+            {x: 380, y: 632, w: 40, h: 188, invisible: true}, // Parede inferior da rampa
+            
+            // PAREDE VERTICAL ESQUERDA - bloqueia entrada lateral do túnel - DESCIDA +32px
+            {x: 0, y: 222, w: 335, h: 340, invisible: true},  // Parede esquerda
+            
+            // ÁREA 3: Túnel horizontal inferior (X: 420-2780) - DESCIDO +32px
+            // Corredor horizontal no fundo - agora 32px mais baixo e até 2906!
+            {x: 445, y: 80, w: 2335, h: 412, invisible: true},   // Parede superior
+            {x: 0, y: 562, w: 3000, h: 226, invisible: true},    // Parede inferior
+            
+            // PAREDE VERTICAL DIREITA - AJUSTADA E DESCIDA +32px
+            {x: 2865, y: 222, w: 135, h: 340, invisible: true},  // Parede direita
+            
+            // ÁREA 4: Rampa de subida (X: 2780-2820) - AJUSTADA +32px
+            // Paredes que forçam subida em diagonal
+            {x: 2745, y: 80, w: 40, h: 182, invisible: true},    // Parede superior da rampa
+            {x: 2780, y: 632, w: 40, h: 188, invisible: true},   // Parede inferior da rampa
+            
+            // ÁREA 5: Saída livre (X: 2820-3000)
+            // Player pode andar livre após sair do túnel (180 pixels de espaço)
+            
+            // Bordas do mapa (já eram invisíveis)
+            {x: 0, y: 0, w: 3000, h: 80, invisible: true},
+            {x: 0, y: 788, w: 3000, h: 80, invisible: true},
+            {x: 0, y: 0, w: 20, h: 868, invisible: true},
+            {x: 2980, y: 0, w: 20, h: 868, invisible: true}
+        ],
+        lights: [
+            // Grupo 1 - Entrada
+            {x: 448, y: 185, radius: 100, id: 'eixao1'},
+            {x: 690, y: 165, radius: 100, id: 'eixao2'},
+            {x: 605, y: 348, radius: 100, id: 'eixao3'},
+            
+            // Grupo 2 - Meio esquerdo
+            {x: 647, y: 611, radius: 100, id: 'eixao4'},
+            {x: 923, y: 245, radius: 100, id: 'eixao5'},
+            {x: 1106, y: 569, radius: 100, id: 'eixao6'},  // Corrigido de 1118,578 para 1106,569
+            {x: 1120, y: 245, radius: 100, id: 'eixao7'},
+            
+            // Grupo 3 - Meio direito
+            {x: 2125, y: 584, radius: 100, id: 'eixao8'},
+            {x: 2322, y: 581, radius: 100, id: 'eixao9'},
+            {x: 2114, y: 249, radius: 100, id: 'eixao10'},
+            {x: 2310, y: 245, radius: 100, id: 'eixao11'},
+            
+            // Grupo 4 - Saída
+            {x: 2541, y: 171, radius: 100, id: 'eixao12'},
+            {x: 2793, y: 197, radius: 100, id: 'eixao13'},
+            {x: 2628, y: 350, radius: 100, id: 'eixao14'},
+            {x: 2585, y: 102, radius: 100, id: 'eixao15'},
+            
+            // Novas luzes adicionadas
+            {x: 2584, y: 605, radius: 100, id: 'eixao16'},  // 2564,560 + offset
+            {x: 2669, y: 828, radius: 100, id: 'eixao17'},  // 2649,783 + offset
+            {x: 910, y: 574, radius: 100, id: 'eixao18'},   // 890,529 + offset
+            {x: 563, y: 834, radius: 100, id: 'eixao19'}    // 543,789 + offset
+        ],
+        shadows: [],
+        playerStart: {x: 100, y: 100},
+        playerStartEscape: {x: 2900, y: 190},
+        exit: {x: 2950, y: 80, w: 50, h: 100},
+        direction: 'right',
+        hasLayers: true
+    },
     {
         name: "Fronteira com o Komando Satânico",
         subtitle: "Primeira superquadra",
@@ -980,48 +1096,6 @@ const spritesLoaded = {
     janis: 0,
     chacal: 0
 };
-
-// Audio com melhor tratamento de erro
-const audio = {
-    // Músicas
-    inicio: null,
-    fuga: null,
-    creditos: null,
-    
-    // SFX - Efeitos sonoros
-    ataque_janis: new Audio('assets/audio/ataque_janis.mp3'),
-    dash: new Audio('assets/audio/dash.mp3'),
-    mobilete: new Audio('assets/audio/mobilete.mp3'),
-    morte_caveira: new Audio('assets/audio/morte_caveira.mp3'),
-    morte_chacal: new Audio('assets/audio/morte_chacal.mp3'),
-    morte_janis: new Audio('assets/audio/morte_janis.mp3'),
-    morte_faquinha: new Audio('assets/audio/morte_faquinha.mp3'),
-    morte_madmax: new Audio('assets/audio/morte_madmax.mp3'),
-    morte_morcego: new Audio('assets/audio/morte_morcego.mp3'),
-    phone_ring: new Audio('assets/audio/phone_ring.mp3'),
-    
-    failedToLoad: false,
-    
-    // Função para tocar SFX
-    playSFX: function(soundName, volume = 0.7) {
-        if (this.failedToLoad || !this[soundName]) return;
-        
-        try {
-            this[soundName].volume = volume;
-            this[soundName].currentTime = 0; // Reinicia do início
-            this[soundName].play().catch(e => {
-                console.warn(`Não foi possível tocar SFX ${soundName}:`, e);
-            });
-        } catch (e) {
-            console.warn(`Erro ao tocar SFX ${soundName}:`, e);
-        }
-    }
-};
-
-// Configurar propriedades dos SFX
-audio.mobilete.loop = true; // Som da mobilete fica em loop
-audio.mobilete.volume = 0.5; // Volume mais baixo para não cansar
-audio.phone_ring.loop = false;
 
 // Funções auxiliares
 function isInShadow(x, y) {
@@ -1428,12 +1502,21 @@ class Enemy {
 
 // Funções do jogo
 function loadAudio() {
+    console.log('Iniciando carregamento de áudio...');
+    
+    // Primeiro inicializar todos os SFX
+    audio.initAllSFX();
+    
+    // Depois carregar as músicas
     audio.inicio = new Audio('assets/audio/musica_etqgame_tema_inicio.mp3');
     audio.fuga = new Audio('assets/audio/musica_etqgame_fuga.mp3');
     audio.creditos = new Audio('assets/audio/musica_etqgame_end_credits.mp3');
     
     audio.inicio.loop = true;
     audio.fuga.loop = true;
+    audio.inicio.volume = audio.musicVolume;
+    audio.fuga.volume = audio.musicVolume;
+    audio.creditos.volume = audio.musicVolume;
     
     audio.inicio.onerror = () => {
         console.error('Erro ao carregar música de início');
@@ -1444,6 +1527,17 @@ function loadAudio() {
         console.error('Erro ao carregar música de fuga');
         audio.failedToLoad = true;
     };
+    
+    audio.creditos.onerror = () => {
+        console.error('Erro ao carregar música de créditos');
+    };
+    
+    // Preload das músicas
+    audio.inicio.load();
+    audio.fuga.load();
+    audio.creditos.load();
+    
+    console.log('Áudio configurado!');
 }
 
 function playMusic(phase) {
@@ -1748,7 +1842,8 @@ function update() {
             gameState.pedalPower--;
             audio.playSFX('dash', 0.6); // Som do dash
         }
-     }
+    }
+    
     // Atualizar câmera
     camera.x = player.x + player.width/2 - camera.width/2;
     camera.y = player.y + player.height/2 - camera.height/2;
@@ -1937,7 +2032,6 @@ function renderStreetLights(map, visibleArea) {
     });
 }
 
-// NOVA FUNÇÃO ADICIONADA AQUI
 function renderLightsOnly(map, visibleArea) {
     if (!map.lights || map.lights.length === 0) return;
     
@@ -1957,7 +2051,7 @@ function renderLightsOnly(map, visibleArea) {
                 light.x, light.y, 0,
                 light.x, light.y, light.radius
             );
-            // MUDANÇA AQUI - Intensidade reduzida em 30%
+            // Intensidade reduzida em 30%
             gradient.addColorStop(0, `rgba(255, 200, 100, ${0.28 * intensity})`);
             gradient.addColorStop(0.5, `rgba(255, 180, 80, ${0.14 * intensity})`);
             gradient.addColorStop(1, 'rgba(255, 160, 60, 0)');
@@ -1991,11 +2085,11 @@ function renderFieldShadow(map) {
             centerX, centerY, 0,
             centerX, centerY, 450
         );
-        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');   // Era 0.5, agora 0.6 (+20%)
-        gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.54)'); // Era 0.45, agora 0.54 (+20%)
-        gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.42)'); // Era 0.35, agora 0.42 (+20%)
-        gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.24)'); // Era 0.2, agora 0.24 (+20%)
-        gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.12)'); // Era 0.1, agora 0.12 (+20%)  
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+        gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.54)');
+        gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.42)');
+        gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.24)');
+        gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.12)');  
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
         
         ctx.fillStyle = gradient;
@@ -2007,8 +2101,8 @@ function renderFieldShadow(map) {
         );
         
         const cornerGradient1 = ctx.createRadialGradient(0, 0, 0, 0, 0, 400);
-        cornerGradient1.addColorStop(0, 'rgba(0, 0, 0, 0.72)');    // Era 0.6, agora 0.72 (+20%)
-        cornerGradient1.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');  // Era 0.3, agora 0.36 (+20%)
+        cornerGradient1.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
+        cornerGradient1.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
         cornerGradient1.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = cornerGradient1;
         ctx.fillRect(0, 0, 400, 400);
@@ -2056,8 +2150,8 @@ function renderShadows(map, visibleArea) {
                         shadowX, shadowY, 0,
                         shadowX, shadowY, shadowRadius
                     );
-                    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.72)');  // Era 0.6, agora 0.72 (+20%)
-                    gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)'); // Era 0.3, agora 0.36 (+20%)
+                    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
+                    gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
                     gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
                     ctx.fillStyle = gradient;
                     ctx.fillRect(
@@ -2093,7 +2187,7 @@ function renderSpecialObjects(map) {
         ctx.fillStyle = '#00f';
         ctx.fillRect(map.orelhao.x, map.orelhao.y, map.orelhao.w, map.orelhao.h);
         ctx.fillStyle = '#fff';
-       setPixelFont(8);
+        setPixelFont(8);
         ctx.fillText('TEL', map.orelhao.x + 5, map.orelhao.y + 30);
     }
     
@@ -2101,7 +2195,7 @@ function renderSpecialObjects(map) {
         ctx.fillStyle = gameState.bombPlaced ? '#f00' : '#080';
         ctx.fillRect(map.lixeira.x, map.lixeira.y, map.lixeira.w, map.lixeira.h);
         ctx.fillStyle = '#fff';
-       setPixelFont(8);
+        setPixelFont(8);
         ctx.fillText(gameState.bombPlaced ? 'BOOM!' : 'LIXO', map.lixeira.x + 2, map.lixeira.y + 25);
     }
     
@@ -2202,33 +2296,33 @@ function renderPlayer() {
 function renderUI(map) {
     // Título do mapa
     ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#ff0';
-    setPixelFont(20); // Era 48px
+    setPixelFont(20);
     ctx.textAlign = 'center';
-    ctx.fillText(map.name, canvas.width/2, 60); // Ajustei Y
+    ctx.fillText(map.name, canvas.width/2, 60);
     
     // Subtítulo
-    setPixelFont(10); // Era 32px
-    ctx.fillText(map.subtitle, canvas.width/2, 90); // Ajustei Y
+    setPixelFont(10);
+    ctx.fillText(map.subtitle, canvas.width/2, 90);
     
     // Versão
     ctx.fillStyle = '#666';
-    setPixelFont(8); // Era 24px
-    ctx.fillText(gameState.version, canvas.width/2, 115); // Ajustei Y
+    setPixelFont(8);
+    ctx.fillText(gameState.version, canvas.width/2, 115);
     ctx.textAlign = 'left';
     
     // Status do jogo
     ctx.fillStyle = '#fff';
-    setPixelFont(10); // Era 28px
+    setPixelFont(10);
     ctx.fillText(`Mapa: ${gameState.currentMap + 1}/6`, 20, canvas.height - 80);
     ctx.fillText(`Inimigos: ${enemies.filter(e => !e.isDead).length}`, 20, canvas.height - 50);
     
     // Vidas
     ctx.fillText('Vidas: ', 20, 40);
-    setPixelFont(16); // Era 40px para o emoji
+    setPixelFont(16);
     for (let i = 0; i < 5; i++) {
         if (i >= gameState.deaths) {
             ctx.fillStyle = '#f00';
-            ctx.fillText('💀', 100 + i * 40, 35); // Ajustei espaçamento
+            ctx.fillText('💀', 100 + i * 40, 35);
         }
     }
     
@@ -2256,7 +2350,7 @@ function renderUI(map) {
     ctx.fillText('Força de Pedal: ', 20, 100);
     for (let i = 0; i < gameState.maxPedalPower; i++) {
         ctx.fillStyle = i < gameState.pedalPower ? '#0f0' : '#333';
-        ctx.fillText('█', 200 + i * 20, 100); // Ajustei espaçamento
+        ctx.fillText('█', 200 + i * 20, 100);
     }
     
     // Aviso de áudio
@@ -2269,7 +2363,7 @@ function renderUI(map) {
     // Mensagem de morte
     if (player.isDead) {
         ctx.fillStyle = '#f00';
-        setPixelFont(24); // Era 64px
+        setPixelFont(24);
         ctx.textAlign = 'center';
         const msg = gameState.deaths < 5 ? "Ah véi, se liga carái!" : "SIFUDEU";
         ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
@@ -2325,10 +2419,12 @@ function draw() {
         if (map.hasLayers && gameState.currentMap === 1) {
             renderEixaoLayer2(map);
         }
+        
         // Renderizar carros APÓS a camada 2 do Eixão
-if (gameState.currentMap === 1) {
-    trafficSystem.render(ctx, visibleArea);
-}
+        if (gameState.currentMap === 1) {
+            trafficSystem.render(ctx, visibleArea);
+        }
+        
         renderCampoTraves();
         renderFieldShadow(map);
         renderStreetLights(map, visibleArea);
@@ -2361,7 +2457,6 @@ if (gameState.currentMap === 1) {
             ctx.restore();
         }
         
-        // CHAMADA ADICIONADA AQUI
         renderLightsOnly(map, visibleArea);
         
         ctx.restore();
@@ -2387,14 +2482,13 @@ document.fonts.ready.then(() => {
     gameLoop();
 });
 
-// REMOVA a chamada direta:
-// gameLoop(); // Comentar ou remover esta linha
 function gameLoop() {
     update();
     draw();
     requestAnimationFrame(gameLoop);
 }
 
+// Carregar sprites
 for (let i = 0; i <= 15; i++) {
     const img = new Image();
     img.src = `assets/sprites/madmax${String(i).padStart(3, '0')}.png`;
@@ -2440,10 +2534,10 @@ for (let i = 0; i <= 15; i++) {
 loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
-// gameLoop será chamado automaticamente pelo document.fonts.ready
 
-console.log('🎮 Mad Night Versão: 1.9.95 - Correção dos carros');
-console.log('🚇 AJUSTE: Corredor horizontal vai até X=2906 agora');
-console.log('📐 AJUSTE: Parede direita reposicionada para X=2906');
-console.log('🎯 Agora o player percorre mais túnel antes de subir!');
-console.log('✨ Teste no Eixão da Morte (Mapa 1)!');
+console.log('🎮 Mad Night Versão: v1.11 - Sistema de Som Aprimorado');
+console.log('🔊 NOVO: Sistema de SFX reescrito com preload e clonagem');
+console.log('🎵 NOVO: Controle separado de volume para música e SFX');
+console.log('🐛 FIX: Correção no carregamento dos efeitos sonoros');
+console.log('📢 Teste os sons: K=morte, Espaço=dash, Inimigos têm sons únicos!');
+console.log('🎯 Dica: Clique na tela se o áudio não iniciar automaticamente');
