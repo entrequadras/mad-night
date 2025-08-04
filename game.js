@@ -1,4 +1,4 @@
-console.log('Mad Night v1.11 - Sistema de Som Aprimorado');
+console.log('Mad Night v1.12 - Correção de Autoplay');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -37,7 +37,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'Versão: v1.11 - Sistema de Som Aprimorado'
+    version: 'Versão: v1.12 - Correção de Autoplay'
 };
 
 // Player
@@ -219,6 +219,7 @@ const audio = {
     
     // Inicializar um SFX
     initSFX: function(name, loop = false) {
+        console.log(`🎧 Inicializando SFX: ${name}`);
         try {
             this[name] = new Audio(`assets/audio/${name}.mp3`);
             this[name].volume = this.sfxVolume;
@@ -228,17 +229,23 @@ const audio = {
             this[name].load();
             
             this[name].onerror = () => {
-                console.warn(`Erro ao carregar SFX: ${name}`);
+                console.error(`❌ Erro ao carregar SFX: ${name}`);
+                console.error(`📁 Verifique se existe: assets/audio/${name}.mp3`);
                 this[name] = null;
             };
             
             // Garantir que o áudio está pronto
             this[name].addEventListener('canplaythrough', () => {
-                console.log(`SFX carregado: ${name}`);
+                console.log(`✅ SFX carregado: ${name}`);
+            });
+            
+            // Verificar se pode tocar
+            this[name].addEventListener('loadeddata', () => {
+                console.log(`📊 ${name} - duração: ${this[name].duration}s`);
             });
             
         } catch (e) {
-            console.error(`Falha ao criar SFX ${name}:`, e);
+            console.error(`❌ Falha crítica ao criar SFX ${name}:`, e);
             this[name] = null;
         }
     },
@@ -259,33 +266,60 @@ const audio = {
     
     // Função para tocar SFX
     playSFX: function(soundName, volume = null) {
-        if (this.failedToLoad || !this[soundName]) {
-            console.warn(`SFX não disponível: ${soundName}`);
+        console.log(`🔊 Tentando tocar SFX: ${soundName}`);
+        
+        if (this.failedToLoad) {
+            console.warn(`❌ Sistema de áudio falhou ao carregar`);
+            return;
+        }
+        
+        if (!this[soundName]) {
+            console.warn(`❌ SFX não encontrado: ${soundName}`);
             return;
         }
         
         try {
-            // Clonar o áudio para permitir múltiplas instâncias simultâneas
-            const sound = this[soundName].cloneNode();
+            // Criar novo Audio a cada vez (mais compatível)
+            const sound = new Audio(this[soundName].src);
             sound.volume = volume !== null ? volume : this.sfxVolume;
             
-            // Tocar o som
-            const playPromise = sound.play();
+            console.log(`🎵 Tocando ${soundName} com volume ${sound.volume}`);
             
-            if (playPromise !== undefined) {
-                playPromise.catch(e => {
-                    console.warn(`Não foi possível tocar SFX ${soundName}:`, e);
-                });
-            }
-            
-            // Limpar o clone após tocar
-            sound.addEventListener('ended', () => {
-                sound.remove();
+            // Tentar tocar imediatamente
+            sound.play().catch(e => {
+                // Se falhar, tentar novamente no próximo clique/interação
+                console.warn(`⚠️ Primeira tentativa falhou para ${soundName}, aguardando interação...`);
+                
+                // Armazenar para tocar na próxima interação
+                if (!this.pendingSounds) this.pendingSounds = [];
+                this.pendingSounds.push({ sound, name: soundName });
+                
+                // Limpar sons pendentes após 5 segundos
+                setTimeout(() => {
+                    this.pendingSounds = this.pendingSounds?.filter(ps => ps.name !== soundName);
+                }, 5000);
             });
             
         } catch (e) {
-            console.warn(`Erro ao tocar SFX ${soundName}:`, e);
+            console.error(`❌ Erro crítico ao tocar SFX ${soundName}:`, e);
         }
+    },
+    
+    // Nova função para tocar sons pendentes
+    playPendingSounds: function() {
+        if (!this.pendingSounds || this.pendingSounds.length === 0) return;
+        
+        console.log(`🔔 Tocando ${this.pendingSounds.length} sons pendentes...`);
+        
+        this.pendingSounds.forEach(({ sound, name }) => {
+            sound.play().then(() => {
+                console.log(`✅ ${name} tocado com sucesso (pendente)`);
+            }).catch(e => {
+                console.warn(`❌ Ainda não foi possível tocar ${name}`);
+            });
+        });
+        
+        this.pendingSounds = [];
     },
     
     // Função especial para sons em loop (como mobilete)
@@ -1718,10 +1752,44 @@ function updateProjectiles() {
 // Input
 const keys = {};
 
+// Adicionar handler de clique para ativar áudio
+let audioContextStarted = false;
+
+// Função global para ativar áudio
+function activateAudio() {
+    if (!audioContextStarted) {
+        console.log('🔊 Ativando contexto de áudio...');
+        audioContextStarted = true;
+        
+        // Tocar sons pendentes
+        audio.playPendingSounds();
+        
+        // Tentar iniciar música se estiver pausada
+        if (gameState.currentMusic && gameState.currentMusic.paused) {
+            gameState.currentMusic.play().catch(e => {
+                console.log('⚠️ Música ainda não pode tocar:', e);
+            });
+        }
+        
+        // Criar e tocar um som silencioso para garantir ativação
+        const silentSound = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEA');
+        silentSound.volume = 0.01;
+        silentSound.play().catch(() => {});
+    }
+}
+
+// Múltiplos eventos para garantir ativação
+window.addEventListener('click', activateAudio);
+window.addEventListener('keydown', activateAudio);
+window.addEventListener('touchstart', activateAudio);
+
 window.addEventListener('keydown', (e) => {
     keys[e.key] = true;
     
-    if (e.key === 'k' || e.key === 'K') killPlayer();
+    if (e.key === 'k' || e.key === 'K') {
+        console.log('🎮 Tecla K pressionada - matando player');
+        killPlayer();
+    }
     
     if (e.key === 'e' || e.key === 'E') {
         const enemy = new Enemy(player.x + 150, player.y);
@@ -1737,6 +1805,25 @@ window.addEventListener('keydown', (e) => {
         gameState.currentMap = (gameState.currentMap + 1) % maps.length;
         loadMap(gameState.currentMap);
     }
+    
+    // Tecla T para testar todos os sons
+    if (e.key === 't' || e.key === 'T') {
+        console.log('🎵 Testando todos os SFX...');
+        const sfxList = [
+            'morte_madmax', 'morte_faquinha', 'morte_morcego', 
+            'morte_caveira', 'morte_janis', 'morte_chacal',
+            'dash', 'ataque_janis'
+        ];
+        
+        let delay = 0;
+        sfxList.forEach(sfx => {
+            setTimeout(() => {
+                console.log(`🔊 Testando: ${sfx}`);
+                audio.playSFX(sfx, 0.5);
+            }, delay);
+            delay += 1000;
+        });
+    }
 });
 
 window.addEventListener('keyup', (e) => {
@@ -1744,8 +1831,12 @@ window.addEventListener('keyup', (e) => {
 });
 
 canvas.addEventListener('click', () => {
+    console.log('🖱️ Canvas clicado');
     if (gameState.currentMusic && gameState.currentMusic.paused) {
-        gameState.currentMusic.play();
+        console.log('🎵 Tentando tocar música...');
+        gameState.currentMusic.play().catch(e => {
+            console.log('⚠️ Erro ao tocar música:', e);
+        });
     }
 });
 
@@ -2535,9 +2626,42 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night Versão: v1.11 - Sistema de Som Aprimorado');
-console.log('🔊 NOVO: Sistema de SFX reescrito com preload e clonagem');
-console.log('🎵 NOVO: Controle separado de volume para música e SFX');
-console.log('🐛 FIX: Correção no carregamento dos efeitos sonoros');
-console.log('📢 Teste os sons: K=morte, Espaço=dash, Inimigos têm sons únicos!');
-console.log('🎯 Dica: Clique na tela se o áudio não iniciar automaticamente');
+console.log('🎮 Mad Night Versão: v1.12 - Correção de Autoplay');
+console.log('🔊 FIX: Sons agora funcionam mesmo com bloqueio de autoplay');
+console.log('🎵 NOVO: Sistema de sons pendentes para política de navegadores');
+console.log('🐛 FIX: Múltiplos eventos para ativar áudio (click, tecla, touch)');
+console.log('📢 Teste os sons: K=morte, Espaço=dash, T=testar todos!');
+console.log('🎯 Dica: Qualquer interação (clique/tecla) ativa o áudio!');
+console.log('');
+console.log('⚡ IMPORTANTE: Pressione qualquer tecla ou clique para ativar sons!');
+
+// Diagnóstico de áudio após 2 segundos
+setTimeout(() => {
+    console.log('');
+    console.log('=== 🔍 DIAGNÓSTICO DE ÁUDIO ===');
+    console.log('Música início:', audio.inicio ? '✅ Carregada' : '❌ Falhou');
+    console.log('Música fuga:', audio.fuga ? '✅ Carregada' : '❌ Falhou');
+    console.log('');
+    console.log('SFX Status:');
+    const sfxList = [
+        'morte_madmax', 'morte_faquinha', 'morte_morcego', 
+        'morte_caveira', 'morte_janis', 'morte_chacal',
+        'dash', 'ataque_janis', 'phone_ring', 'mobilete'
+    ];
+    
+    sfxList.forEach(sfx => {
+        if (audio[sfx]) {
+            console.log(`${sfx}: ✅ (duração: ${audio[sfx].duration || '?'}s)`);
+        } else {
+            console.log(`${sfx}: ❌ Não carregado`);
+        }
+    });
+    console.log('================================');
+    console.log('');
+    console.log('📝 INSTRUÇÕES DE DEBUG:');
+    console.log('1. Abra o Console (F12)');
+    console.log('2. Clique na tela do jogo');
+    console.log('3. Pressione K para matar o player');
+    console.log('4. Pressione T para testar todos os sons');
+    console.log('5. Verifique as mensagens no console');
+}, 2000);
