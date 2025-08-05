@@ -1155,9 +1155,141 @@ class Enemy {
                 
                 if (dist < 30) killPlayer();
             }
-        } else if (phase === 'fuga' && audio.fuga) {
-        audio.fuga.play().catch(() => {});
-        gameState.currentMusic = audio.fuga;
+        } else if (this.type !== 'janis' || this.state !== 'attack') {
+            this.state = 'patrol';
+            
+            if (Date.now() - this.lastDirectionChange > this.directionChangeInterval) {
+                this.patrolDirection = this.getRandomDirection();
+                this.lastDirectionChange = Date.now();
+                this.directionChangeInterval = 2000 + Math.random() * 2000;
+                this.direction = this.patrolDirection;
+            }
+            
+            const distFromOrigin = Math.sqrt(
+                Math.pow(this.x - this.originX, 2) + 
+                Math.pow(this.y - this.originY, 2)
+            );
+            
+            if (distFromOrigin > this.patrolRadius) {
+                const backDx = this.originX - this.x;
+                const backDy = this.originY - this.y;
+                this.patrolDirection = Math.abs(backDx) > Math.abs(backDy) ?
+                    (backDx > 0 ? 'right' : 'left') :
+                    (backDy > 0 ? 'down' : 'up');
+                this.direction = this.patrolDirection;
+                this.lastDirectionChange = Date.now();
+            }
+            
+            let pdx = 0, pdy = 0;
+            switch(this.patrolDirection) {
+                case 'up': pdy = -this.patrolSpeed; break;
+                case 'down': pdy = this.patrolSpeed; break;
+                case 'left': pdx = -this.patrolSpeed; break;
+                case 'right': pdx = this.patrolSpeed; break;
+            }
+            
+            if (!checkWallCollision(this, this.x + pdx, this.y + pdy)) {
+                this.x += pdx;
+                this.y += pdy;
+            } else {
+                this.patrolDirection = this.getRandomDirection();
+                this.lastDirectionChange = Date.now();
+                this.direction = this.patrolDirection;
+            }
+        }
+        
+        if (player.isDashing && dist < 40 && !this.isInvulnerable) {
+            if (this.type === 'chacal') {
+                this.takeDamage();
+            } else {
+                this.die();
+            }
+        }
+        
+        this.frame = Date.now() % 400 < 200 ? 0 : 1;
+    }
+    
+    takeDamage() {
+        if (this.isInvulnerable) return;
+        
+        this.health--;
+        this.isInvulnerable = true;
+        this.invulnerableTime = Date.now();
+        
+        if (this.health <= 0) {
+            this.die();
+        }
+    }
+    
+    die() {
+        if (this.isDead) return;
+        this.isDead = true;
+        this.deathFrame = Math.floor(Math.random() * 4) + 12;
+        
+        // Som de morte baseado no tipo
+        const deathSounds = {
+            'faquinha': 'morte_faquinha',
+            'morcego': 'morte_morcego', 
+            'caveirinha': 'morte_caveira',
+            'janis': 'morte_janis',
+            'chacal': 'morte_chacal'
+        };
+        
+        if (deathSounds[this.type]) {
+            audio.playSFX(deathSounds[this.type], 0.6);
+        }
+    }
+    
+    getSprite() {
+        if (this.isDead) return this.sprites[this.deathFrame];
+        
+        const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
+        const base = dirMap[this.direction];
+        const offset = (this.state === 'chase' || this.state === 'attack') ? 8 : this.frame * 4;
+        return this.sprites[base + offset];
+    }
+}
+
+// Funções do jogo
+function loadAudio() {
+    // Carregar todos os SFX
+    audio.loadSFX('ataque_janis');
+    audio.loadSFX('dash');
+    audio.loadSFX('mobilete', true); // Loop
+    audio.loadSFX('morte_caveira');
+    audio.loadSFX('morte_chacal');
+    audio.loadSFX('morte_janis');
+    audio.loadSFX('morte_faquinha');
+    audio.loadSFX('morte_madmax');
+    audio.loadSFX('morte_morcego');
+    audio.loadSFX('phone_ring', true); // Loop
+    
+    // Carregar músicas
+    audio.inicio = new Audio('assets/audio/musica_etqgame_tema_inicio.mp3');
+    audio.fuga = new Audio('assets/audio/musica_etqgame_fuga.mp3');
+    audio.creditos = new Audio('assets/audio/musica_etqgame_end_credits.mp3');
+    
+    audio.inicio.loop = true;
+    audio.fuga.loop = true;
+    audio.inicio.volume = audio.musicVolume;
+    audio.fuga.volume = audio.musicVolume;
+    audio.creditos.volume = audio.musicVolume;
+    
+    // Preload das músicas
+    audio.inicio.load();
+    audio.fuga.load();
+    audio.creditos.load();
+}
+
+function playMusic(phase) {
+    if (gameState.currentMusic) {
+        gameState.currentMusic.pause();
+        gameState.currentMusic.currentTime = 0;
+    }
+    
+    if (phase === 'inicio' && audio.inicio) {
+        audio.inicio.play().catch(() => {});
+        gameState.currentMusic = audio.inicio;
         gameState.musicPhase = 'fuga';
     }
 }
@@ -2112,156 +2244,8 @@ setTimeout(() => playMusic('inicio'), 1000);
 
 console.log('🎮 Mad Night v1.14 - Tiles de Asfalto');
 console.log('📢 Controles: Setas=mover, K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
-console.log('💡 Clique ou pressione qualquer tecla para ativar o áudio!');this.type !== 'janis' || this.state !== 'attack') {
-            this.state = 'patrol';
-            
-            if (Date.now() - this.lastDirectionChange > this.directionChangeInterval) {
-                this.patrolDirection = this.getRandomDirection();
-                this.lastDirectionChange = Date.now();
-                this.directionChangeInterval = 2000 + Math.random() * 2000;
-                this.direction = this.patrolDirection;
-            }
-            
-            const distFromOrigin = Math.sqrt(
-                Math.pow(this.x - this.originX, 2) + 
-                Math.pow(this.y - this.originY, 2)
-            );
-            
-            if (distFromOrigin > this.patrolRadius) {
-                const backDx = this.originX - this.x;
-                const backDy = this.originY - this.y;
-                this.patrolDirection = Math.abs(backDx) > Math.abs(backDy) ?
-                    (backDx > 0 ? 'right' : 'left') :
-                    (backDy > 0 ? 'down' : 'up');
-                this.direction = this.patrolDirection;
-                this.lastDirectionChange = Date.now();
-            }
-            
-            let pdx = 0, pdy = 0;
-            switch(this.patrolDirection) {
-                case 'up': pdy = -this.patrolSpeed; break;
-                case 'down': pdy = this.patrolSpeed; break;
-                case 'left': pdx = -this.patrolSpeed; break;
-                case 'right': pdx = this.patrolSpeed; break;
-            }
-            
-            if (!checkWallCollision(this, this.x + pdx, this.y + pdy)) {
-                this.x += pdx;
-                this.y += pdy;
-            } else {
-                this.patrolDirection = this.getRandomDirection();
-                this.lastDirectionChange = Date.now();
-                this.direction = this.patrolDirection;
-            }
-        }
-        
-        if (player.isDashing && dist < 40 && !this.isInvulnerable) {
-            if (this.type === 'chacal') {
-                this.takeDamage();
-            } else {
-                this.die();
-            }
-        }
-        
-        this.frame = Date.now() % 400 < 200 ? 0 : 1;
-    }
-    
-    takeDamage() {
-        if (this.isInvulnerable) return;
-        
-        this.health--;
-        this.isInvulnerable = true;
-        this.invulnerableTime = Date.now();
-        
-        if (this.health <= 0) {
-            this.die();
-        }
-    }
-    
-    die() {
-        if (this.isDead) return;
-        this.isDead = true;
-        this.deathFrame = Math.floor(Math.random() * 4) + 12;
-        
-        // Som de morte baseado no tipo
-        const deathSounds = {
-            'faquinha': 'morte_faquinha',
-            'morcego': 'morte_morcego', 
-            'caveirinha': 'morte_caveira',
-            'janis': 'morte_janis',
-            'chacal': 'morte_chacal'
-        };
-        
-        if (deathSounds[this.type]) {
-            audio.playSFX(deathSounds[this.type], 0.6);
-        }
-    }
-    
-    getSprite() {
-        if (this.isDead) return this.sprites[this.deathFrame];
-        
-        const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
-        const base = dirMap[this.direction];
-        const offset = (this.state === 'chase' || this.state === 'attack') ? 8 : this.frame * 4;
-        return this.sprites[base + offset];
-    }
-}
-
-// Funções do jogo
-function loadAudio() {
-    // Carregar todos os SFX
-    audio.loadSFX('ataque_janis');
-    audio.loadSFX('dash');
-    audio.loadSFX('mobilete', true); // Loop
-    audio.loadSFX('morte_caveira');
-    audio.loadSFX('morte_chacal');
-    audio.loadSFX('morte_janis');
-    audio.loadSFX('morte_faquinha');
-    audio.loadSFX('morte_madmax');
-    audio.loadSFX('morte_morcego');
-    audio.loadSFX('phone_ring', true); // Loop
-    
-    // Carregar músicas
-    audio.inicio = new Audio('assets/audio/musica_etqgame_tema_inicio.mp3');
-    audio.fuga = new Audio('assets/audio/musica_etqgame_fuga.mp3');
-    audio.creditos = new Audio('assets/audio/musica_etqgame_end_credits.mp3');
-    
-    audio.inicio.loop = true;
-    audio.fuga.loop = true;
-    audio.inicio.volume = audio.musicVolume;
-    audio.fuga.volume = audio.musicVolume;
-    audio.creditos.volume = audio.musicVolume;
-    
-   // Preload das músicas
-    audio.inicio.load();
-    audio.fuga.load();
-    audio.creditos.load();
-}
-
-function playMusic(phase) {
-    if (gameState.currentMusic) {
-        gameState.currentMusic.pause();
-        gameState.currentMusic.currentTime = 0;
-    }
-    
-    if (phase === 'inicio' && audio.inicio) {
-        audio.inicio.play().catch(() => {});
-        gameState.currentMusic = audio.inicio;
-        gameState.musicPhase = 'inicio';
+console.log('💡 Clique ou pressione qualquer tecla para ativar o áudio!');inicio';
     } else if (phase === 'fuga' && audio.fuga) {
         audio.fuga.play().catch(() => {});
         gameState.currentMusic = audio.fuga;
-        gameState.musicPhase = 'fuga';
-    }
-}
-
-// ... (continua com todas as outras funções até o final)
-
-// No final do arquivo:
-loadAudio();
-loadMap(0);
-setTimeout(() => playMusic('inicio'), 1000);
-
-console.log('🎮 Mad Night v1.14 - Tiles de Asfalto');
-console.log('📢 Controles: Setas=mover, K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
-console.log('💡 Clique ou pressione qualquer tecla para ativar o áudio!');
+        gameState.musicPhase = '
