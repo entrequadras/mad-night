@@ -1,4 +1,4 @@
-console.log('Mad Night v1.13 - Sistema de Áudio Simplificado');
+console.log('Mad Night v1.14 - Tiles de Asfalto');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -37,7 +37,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.13'
+    version: 'v1.14'
 };
 
 // Player
@@ -84,6 +84,12 @@ const assets = {
     grama002: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama003: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama004: { img: new Image(), loaded: false, width: 120, height: 120 },
+    // Novos tiles de asfalto
+    asfaltosujo001: { img: new Image(), loaded: false, width: 120, height: 120 },
+    asfaltosujo002: { img: new Image(), loaded: false, width: 120, height: 120 },
+    asfaltosujo003: { img: new Image(), loaded: false, width: 120, height: 120 },
+    asfaltosujo004: { img: new Image(), loaded: false, width: 120, height: 120 },
+    asfaltosujo005: { img: new Image(), loaded: false, width: 120, height: 120 },
     caixadeluz: { img: new Image(), loaded: false, width: 45, height: 45 },
     banco03: { img: new Image(), loaded: false, width: 53, height: 43 },
     banco04: { img: new Image(), loaded: false, width: 53, height: 45 },
@@ -130,7 +136,7 @@ assets.poste000.img.onload = () => { assets.poste000.loaded = true; };
 assets.poste001.img.src = 'assets/scenary/poste001.png';
 assets.poste001.img.onload = () => { assets.poste001.loaded = true; };
 
-// Carregar tiles de grama apenas para o mapa 1
+// Carregar tiles de grama
 assets.grama000.img.src = 'assets/tiles/grama000.png';
 assets.grama000.img.onload = () => { assets.grama000.loaded = true; };
 
@@ -145,6 +151,22 @@ assets.grama003.img.onload = () => { assets.grama003.loaded = true; };
 
 assets.grama004.img.src = 'assets/tiles/grama004.png';
 assets.grama004.img.onload = () => { assets.grama004.loaded = true; };
+
+// Carregar tiles de asfalto sujo
+assets.asfaltosujo001.img.src = 'assets/tiles/asfaltosujo001.png';
+assets.asfaltosujo001.img.onload = () => { assets.asfaltosujo001.loaded = true; };
+
+assets.asfaltosujo002.img.src = 'assets/tiles/asfaltosujo002.png';
+assets.asfaltosujo002.img.onload = () => { assets.asfaltosujo002.loaded = true; };
+
+assets.asfaltosujo003.img.src = 'assets/tiles/asfaltosujo003.png';
+assets.asfaltosujo003.img.onload = () => { assets.asfaltosujo003.loaded = true; };
+
+assets.asfaltosujo004.img.src = 'assets/tiles/asfaltosujo004.png';
+assets.asfaltosujo004.img.onload = () => { assets.asfaltosujo004.loaded = true; };
+
+assets.asfaltosujo005.img.src = 'assets/tiles/asfaltosujo005.png';
+assets.asfaltosujo005.img.onload = () => { assets.asfaltosujo005.loaded = true; };
 
 // Carregar objetos
 assets.caixadeluz.img.src = 'assets/objects/caixadeluz.png';
@@ -479,10 +501,29 @@ const trafficSystem = {
     }
 };
 
-// Função para gerar tiles de grama (apenas para mapa 1)
+// Função para gerar tiles de grama (apenas para mapa 0)
 function generateGrassTiles(mapWidth, mapHeight, tileSize) {
     const tiles = []
     const types = ['grama000', 'grama001', 'grama002', 'grama003', 'grama004'];
+    
+    for (let y = 0; y < mapHeight; y += tileSize) {
+        for (let x = 0; x < mapWidth; x += tileSize) {
+            const randomType = types[Math.floor(Math.random() * types.length)];
+            tiles.push({
+                type: randomType,
+                x: x,
+                y: y
+            });
+        }
+    }
+    
+    return tiles;
+}
+
+// Função para gerar tiles de asfalto (para mapas urbanos)
+function generateAsphaltTiles(mapWidth, mapHeight, tileSize) {
+    const tiles = []
+    const types = ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005'];
     
     for (let y = 0; y < mapHeight; y += tileSize) {
         for (let x = 0; x < mapWidth; x += tileSize) {
@@ -575,7 +616,7 @@ const maps = [
         exit: {x: 1800, y: 490, w: 80, h: 100},
         direction: 'right'
     },
-    // Substitua o mapa 1 (Eixão da Morte) no array maps por este:
+    // Mapa 1 - Eixão da Morte
     {
         name: "Eixão da Morte",
         subtitle: "Túnel sob as pistas",
@@ -658,6 +699,7 @@ const maps = [
         direction: 'right',
         hasLayers: true
     },
+    // Mapa 2 - Fronteira com o Komando Satânico (com tiles de asfalto)
     {
         name: "Fronteira com o Komando Satânico",
         subtitle: "Primeira superquadra",
@@ -672,6 +714,7 @@ const maps = [
             {x: 200, y: 200, type: 'caveirinha'},
             {x: 600, y: 400, type: 'caveirinha'}
         ],
+        tiles: generateAsphaltTiles(800, 600, 120), // Usando tiles de asfalto
         trees: [],
         streetLights: [],
         objects: [],
@@ -688,6 +731,7 @@ const maps = [
         orelhao: {x: 680, y: 480, w: 40, h: 60},
         direction: 'right'
     },
+    // Mapa 3 - Na área da KS (com tiles de asfalto)
     {
         name: "Na área da KS",
         subtitle: "Estacionamento estreito",
@@ -702,6 +746,7 @@ const maps = [
             {x: 450, y: 250, type: 'caveirinha'},
             {x: 300, y: 600, type: 'faquinha'}
         ],
+        tiles: generateAsphaltTiles(600, 800, 120), // Usando tiles de asfalto
         trees: [],
         streetLights: [],
         objects: [],
@@ -720,6 +765,7 @@ const maps = [
         exit: {x: 250, y: 10, w: 100, h: 30},
         direction: 'up'
     },
+    // Mapa 4 - Entre Prédios (com tiles de asfalto)
     {
         name: "Entre Prédios",
         subtitle: "Muitas sombras",
@@ -734,6 +780,7 @@ const maps = [
             {x: 200, y: 600, type: 'caveirinha'},
             {x: 400, y: 350, type: 'caveirinha'}
         ],
+        tiles: generateAsphaltTiles(600, 800, 120), // Usando tiles de asfalto
         trees: [],
         streetLights: [],
         objects: [],
@@ -750,6 +797,7 @@ const maps = [
         exit: {x: 250, y: 10, w: 100, h: 30},
         direction: 'up'
     },
+    // Mapa 5 - Ninho dos Ratos (com tiles de asfalto)
     {
         name: "Ninho dos Ratos",
         subtitle: "Estacionamento da bomba",
@@ -760,6 +808,7 @@ const maps = [
             {x: 400, y: 300, type: 'faquinha'},
             {x: 300, y: 500, type: 'janis'}
         ],
+        tiles: generateAsphaltTiles(600, 800, 120), // Usando tiles de asfalto
         trees: [],
         streetLights: [],
         objects: [],
@@ -1106,143 +1155,7 @@ class Enemy {
                 
                 if (dist < 30) killPlayer();
             }
-        } else if (this.type !== 'janis' || this.state !== 'attack') {
-            this.state = 'patrol';
-            
-            if (Date.now() - this.lastDirectionChange > this.directionChangeInterval) {
-                this.patrolDirection = this.getRandomDirection();
-                this.lastDirectionChange = Date.now();
-                this.directionChangeInterval = 2000 + Math.random() * 2000;
-                this.direction = this.patrolDirection;
-            }
-            
-            const distFromOrigin = Math.sqrt(
-                Math.pow(this.x - this.originX, 2) + 
-                Math.pow(this.y - this.originY, 2)
-            );
-            
-            if (distFromOrigin > this.patrolRadius) {
-                const backDx = this.originX - this.x;
-                const backDy = this.originY - this.y;
-                this.patrolDirection = Math.abs(backDx) > Math.abs(backDy) ?
-                    (backDx > 0 ? 'right' : 'left') :
-                    (backDy > 0 ? 'down' : 'up');
-                this.direction = this.patrolDirection;
-                this.lastDirectionChange = Date.now();
-            }
-            
-            let pdx = 0, pdy = 0;
-            switch(this.patrolDirection) {
-                case 'up': pdy = -this.patrolSpeed; break;
-                case 'down': pdy = this.patrolSpeed; break;
-                case 'left': pdx = -this.patrolSpeed; break;
-                case 'right': pdx = this.patrolSpeed; break;
-            }
-            
-            if (!checkWallCollision(this, this.x + pdx, this.y + pdy)) {
-                this.x += pdx;
-                this.y += pdy;
-            } else {
-                this.patrolDirection = this.getRandomDirection();
-                this.lastDirectionChange = Date.now();
-                this.direction = this.patrolDirection;
-            }
-        }
-        
-        if (player.isDashing && dist < 40 && !this.isInvulnerable) {
-            if (this.type === 'chacal') {
-                this.takeDamage();
-            } else {
-                this.die();
-            }
-        }
-        
-        this.frame = Date.now() % 400 < 200 ? 0 : 1;
-    }
-    
-    takeDamage() {
-        if (this.isInvulnerable) return;
-        
-        this.health--;
-        this.isInvulnerable = true;
-        this.invulnerableTime = Date.now();
-        
-        if (this.health <= 0) {
-            this.die();
-        }
-    }
-    
-    die() {
-        if (this.isDead) return;
-        this.isDead = true;
-        this.deathFrame = Math.floor(Math.random() * 4) + 12;
-        
-        // Som de morte baseado no tipo
-        const deathSounds = {
-            'faquinha': 'morte_faquinha',
-            'morcego': 'morte_morcego', 
-            'caveirinha': 'morte_caveira',
-            'janis': 'morte_janis',
-            'chacal': 'morte_chacal'
-        };
-        
-        if (deathSounds[this.type]) {
-            audio.playSFX(deathSounds[this.type], 0.6);
-        }
-    }
-    
-    getSprite() {
-        if (this.isDead) return this.sprites[this.deathFrame];
-        
-        const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
-        const base = dirMap[this.direction];
-        const offset = (this.state === 'chase' || this.state === 'attack') ? 8 : this.frame * 4;
-        return this.sprites[base + offset];
-    }
-}
-
-// Funções do jogo
-function loadAudio() {
-    // Carregar todos os SFX
-    audio.loadSFX('ataque_janis');
-    audio.loadSFX('dash');
-    audio.loadSFX('mobilete', true); // Loop
-    audio.loadSFX('morte_caveira');
-    audio.loadSFX('morte_chacal');
-    audio.loadSFX('morte_janis');
-    audio.loadSFX('morte_faquinha');
-    audio.loadSFX('morte_madmax');
-    audio.loadSFX('morte_morcego');
-    audio.loadSFX('phone_ring', true); // Loop
-    
-    // Carregar músicas
-    audio.inicio = new Audio('assets/audio/musica_etqgame_tema_inicio.mp3');
-    audio.fuga = new Audio('assets/audio/musica_etqgame_fuga.mp3');
-    audio.creditos = new Audio('assets/audio/musica_etqgame_end_credits.mp3');
-    
-    audio.inicio.loop = true;
-    audio.fuga.loop = true;
-    audio.inicio.volume = audio.musicVolume;
-    audio.fuga.volume = audio.musicVolume;
-    audio.creditos.volume = audio.musicVolume;
-    
-    // Preload das músicas
-    audio.inicio.load();
-    audio.fuga.load();
-    audio.creditos.load();
-}
-
-function playMusic(phase) {
-    if (gameState.currentMusic) {
-        gameState.currentMusic.pause();
-        gameState.currentMusic.currentTime = 0;
-    }
-    
-    if (phase === 'inicio' && audio.inicio) {
-        audio.inicio.play().catch(() => {});
-        gameState.currentMusic = audio.inicio;
-        gameState.musicPhase = 'inicio';
-    } else if (phase === 'fuga' && audio.fuga) {
+        } else if (phase === 'fuga' && audio.fuga) {
         audio.fuga.play().catch(() => {});
         gameState.currentMusic = audio.fuga;
         gameState.musicPhase = 'fuga';
@@ -2197,6 +2110,158 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.13 - Sistema de Áudio Simplificado');
+console.log('🎮 Mad Night v1.14 - Tiles de Asfalto');
+console.log('📢 Controles: Setas=mover, K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
+console.log('💡 Clique ou pressione qualquer tecla para ativar o áudio!');this.type !== 'janis' || this.state !== 'attack') {
+            this.state = 'patrol';
+            
+            if (Date.now() - this.lastDirectionChange > this.directionChangeInterval) {
+                this.patrolDirection = this.getRandomDirection();
+                this.lastDirectionChange = Date.now();
+                this.directionChangeInterval = 2000 + Math.random() * 2000;
+                this.direction = this.patrolDirection;
+            }
+            
+            const distFromOrigin = Math.sqrt(
+                Math.pow(this.x - this.originX, 2) + 
+                Math.pow(this.y - this.originY, 2)
+            );
+            
+            if (distFromOrigin > this.patrolRadius) {
+                const backDx = this.originX - this.x;
+                const backDy = this.originY - this.y;
+                this.patrolDirection = Math.abs(backDx) > Math.abs(backDy) ?
+                    (backDx > 0 ? 'right' : 'left') :
+                    (backDy > 0 ? 'down' : 'up');
+                this.direction = this.patrolDirection;
+                this.lastDirectionChange = Date.now();
+            }
+            
+            let pdx = 0, pdy = 0;
+            switch(this.patrolDirection) {
+                case 'up': pdy = -this.patrolSpeed; break;
+                case 'down': pdy = this.patrolSpeed; break;
+                case 'left': pdx = -this.patrolSpeed; break;
+                case 'right': pdx = this.patrolSpeed; break;
+            }
+            
+            if (!checkWallCollision(this, this.x + pdx, this.y + pdy)) {
+                this.x += pdx;
+                this.y += pdy;
+            } else {
+                this.patrolDirection = this.getRandomDirection();
+                this.lastDirectionChange = Date.now();
+                this.direction = this.patrolDirection;
+            }
+        }
+        
+        if (player.isDashing && dist < 40 && !this.isInvulnerable) {
+            if (this.type === 'chacal') {
+                this.takeDamage();
+            } else {
+                this.die();
+            }
+        }
+        
+        this.frame = Date.now() % 400 < 200 ? 0 : 1;
+    }
+    
+    takeDamage() {
+        if (this.isInvulnerable) return;
+        
+        this.health--;
+        this.isInvulnerable = true;
+        this.invulnerableTime = Date.now();
+        
+        if (this.health <= 0) {
+            this.die();
+        }
+    }
+    
+    die() {
+        if (this.isDead) return;
+        this.isDead = true;
+        this.deathFrame = Math.floor(Math.random() * 4) + 12;
+        
+        // Som de morte baseado no tipo
+        const deathSounds = {
+            'faquinha': 'morte_faquinha',
+            'morcego': 'morte_morcego', 
+            'caveirinha': 'morte_caveira',
+            'janis': 'morte_janis',
+            'chacal': 'morte_chacal'
+        };
+        
+        if (deathSounds[this.type]) {
+            audio.playSFX(deathSounds[this.type], 0.6);
+        }
+    }
+    
+    getSprite() {
+        if (this.isDead) return this.sprites[this.deathFrame];
+        
+        const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
+        const base = dirMap[this.direction];
+        const offset = (this.state === 'chase' || this.state === 'attack') ? 8 : this.frame * 4;
+        return this.sprites[base + offset];
+    }
+}
+
+// Funções do jogo
+function loadAudio() {
+    // Carregar todos os SFX
+    audio.loadSFX('ataque_janis');
+    audio.loadSFX('dash');
+    audio.loadSFX('mobilete', true); // Loop
+    audio.loadSFX('morte_caveira');
+    audio.loadSFX('morte_chacal');
+    audio.loadSFX('morte_janis');
+    audio.loadSFX('morte_faquinha');
+    audio.loadSFX('morte_madmax');
+    audio.loadSFX('morte_morcego');
+    audio.loadSFX('phone_ring', true); // Loop
+    
+    // Carregar músicas
+    audio.inicio = new Audio('assets/audio/musica_etqgame_tema_inicio.mp3');
+    audio.fuga = new Audio('assets/audio/musica_etqgame_fuga.mp3');
+    audio.creditos = new Audio('assets/audio/musica_etqgame_end_credits.mp3');
+    
+    audio.inicio.loop = true;
+    audio.fuga.loop = true;
+    audio.inicio.volume = audio.musicVolume;
+    audio.fuga.volume = audio.musicVolume;
+    audio.creditos.volume = audio.musicVolume;
+    
+   // Preload das músicas
+    audio.inicio.load();
+    audio.fuga.load();
+    audio.creditos.load();
+}
+
+function playMusic(phase) {
+    if (gameState.currentMusic) {
+        gameState.currentMusic.pause();
+        gameState.currentMusic.currentTime = 0;
+    }
+    
+    if (phase === 'inicio' && audio.inicio) {
+        audio.inicio.play().catch(() => {});
+        gameState.currentMusic = audio.inicio;
+        gameState.musicPhase = 'inicio';
+    } else if (phase === 'fuga' && audio.fuga) {
+        audio.fuga.play().catch(() => {});
+        gameState.currentMusic = audio.fuga;
+        gameState.musicPhase = 'fuga';
+    }
+}
+
+// ... (continua com todas as outras funções até o final)
+
+// No final do arquivo:
+loadAudio();
+loadMap(0);
+setTimeout(() => playMusic('inicio'), 1000);
+
+console.log('🎮 Mad Night v1.14 - Tiles de Asfalto');
 console.log('📢 Controles: Setas=mover, K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
 console.log('💡 Clique ou pressione qualquer tecla para ativar o áudio!');
