@@ -2244,8 +2244,4 @@ setTimeout(() => playMusic('inicio'), 1000);
 
 console.log('🎮 Mad Night v1.14 - Tiles de Asfalto');
 console.log('📢 Controles: Setas=mover, K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
-console.log('💡 Clique ou pressione qualquer tecla para ativar o áudio!');inicio';
-    } else if (phase === 'fuga' && audio.fuga) {
-        audio.fuga.play().catch(() => {});
-        gameState.currentMusic = audio.fuga;
-        gameState.musicPhase = '
+console.log('💡 Clique ou pressione qualquer tecla para ativar o áudio!');
