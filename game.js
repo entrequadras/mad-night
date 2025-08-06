@@ -1,4 +1,4 @@
-console.log('Mad Night v1.15 - Visual do mapa Fronteira com KS');
+console.log('Mad Night v1.17 - Correção posição inicial mapa KS');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -37,7 +37,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.15'
+    version: 'v1.17'
 };
 
 // Player
@@ -108,7 +108,12 @@ const assets = {
     carro004fundos: { img: new Image(), loaded: false, width: 93, height: 140 },
     // Novos assets do mapa 2
     entradaKS01: { img: new Image(), loaded: false, width: 1920, height: 1610 },
-    orelhao001: { img: new Image(), loaded: false, width: 40, height: 60 }
+    orelhao001: { img: new Image(), loaded: false, width: 40, height: 60 },
+    // Setas direcionais
+    setaesquerda: { img: new Image(), loaded: false, width: 50, height: 59 },
+    setadireita: { img: new Image(), loaded: false, width: 50, height: 59 },
+    setasul: { img: new Image(), loaded: false, width: 50, height: 59 },
+    setanorte: { img: new Image(), loaded: false, width: 50, height: 59 }
 };
 
 // Carregar assets
@@ -225,6 +230,19 @@ assets.entradaKS01.img.onload = () => { assets.entradaKS01.loaded = true; };
 
 assets.orelhao001.img.src = 'assets/objects/orelhao001.png';
 assets.orelhao001.img.onload = () => { assets.orelhao001.loaded = true; };
+
+// Carregar setas direcionais
+assets.setaesquerda.img.src = 'assets/icons/setaesquerda.png';
+assets.setaesquerda.img.onload = () => { assets.setaesquerda.loaded = true; };
+
+assets.setadireita.img.src = 'assets/icons/setadireita.png';
+assets.setadireita.img.onload = () => { assets.setadireita.loaded = true; };
+
+assets.setasul.img.src = 'assets/icons/setasul.png';
+assets.setasul.img.onload = () => { assets.setasul.loaded = true; };
+
+assets.setanorte.img.src = 'assets/icons/setanorte.png';
+assets.setanorte.img.onload = () => { assets.setanorte.loaded = true; };
 
 // Sistema de áudio simplificado
 const audio = {
@@ -739,7 +757,7 @@ const maps = [
         ],
         lights: [],
         shadows: [],
-        playerStart: {x: 1440, y: 1550},       // Entrada do mapa
+        playerStart: {x: 1440, y: 1520},       // Entrada do mapa - corrigido para não colidir
         playerStartEscape: {x: 70, y: 70},     // Posição na fuga
         exit: {x: 70, y: 70, w: 60, h: 60},    // Saída no canto superior esquerdo
         orelhao: {x: 1000, y: 412, w: 40, h: 60}, // Orelhão com sprite real
@@ -1956,11 +1974,39 @@ function renderSpecialObjects(map) {
     }
     
     if (map.exit) {
-        ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#0f0';
-        ctx.fillRect(map.exit.x, map.exit.y, map.exit.w, map.exit.h);
-        ctx.fillStyle = '#fff';
-        ctx.font = '12px Arial';
-        ctx.fillText(gameState.phase === 'escape' ? 'VOLTA' : 'SAÍDA', map.exit.x + 5, map.exit.y + 30);
+        // Determinar qual seta usar baseado na direção do mapa
+        let arrowAssetName = '';
+        switch(map.direction) {
+            case 'right': arrowAssetName = 'setadireita'; break;
+            case 'left': arrowAssetName = 'setaesquerda'; break;
+            case 'up': arrowAssetName = 'setanorte'; break;
+            case 'down': arrowAssetName = 'setasul'; break;
+            default: arrowAssetName = 'setadireita'; break;
+        }
+        
+        const arrowAsset = assets[arrowAssetName];
+        if (arrowAsset && arrowAsset.loaded) {
+            ctx.save();
+            
+            // Aplicar filtro vermelho se estiver na fuga
+            if (gameState.phase === 'escape') {
+                ctx.filter = 'hue-rotate(0deg) saturate(2) brightness(0.8) sepia(1) saturate(3) hue-rotate(0deg)';
+            }
+            
+            // Centralizar a seta na área de saída
+            const centerX = map.exit.x + (map.exit.w - arrowAsset.width) / 2;
+            const centerY = map.exit.y + (map.exit.h - arrowAsset.height) / 2;
+            
+            ctx.drawImage(arrowAsset.img, centerX, centerY);
+            ctx.restore();
+        } else {
+            // Fallback para retângulo colorido
+            ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#0f0';
+            ctx.fillRect(map.exit.x, map.exit.y, map.exit.w, map.exit.h);
+            ctx.fillStyle = '#fff';
+            ctx.font = '12px Arial';
+            ctx.fillText(gameState.phase === 'escape' ? 'VOLTA' : 'SAÍDA', map.exit.x + 5, map.exit.y + 30);
+        }
     }
 }
 
@@ -2279,6 +2325,6 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.15 - Visual do mapa Fronteira com KS');
+console.log('🎮 Mad Night v1.17 - Correção posição inicial mapa KS');
 console.log('📢 Controles: Setas=mover, K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
 console.log('💡 Clique ou pressione qualquer tecla para ativar o áudio!');
