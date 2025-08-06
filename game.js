@@ -1,4 +1,4 @@
-console.log('Mad Night v1.19 - Adiciona prédios no mapa KS');
+console.log('Mad Night v1.20 - Corrige erros de referência');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -16,9 +16,7 @@ const camera = {
     width: 960,
     height: 540,
     zoom: 2
-}
-
-function renderObjects(map, visibleArea) {;
+};
 
 // Configurar canvas
 canvas.width = camera.width * camera.zoom;
@@ -39,7 +37,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.19'
+    version: 'v1.20'
 };
 
 // Player
@@ -747,7 +745,7 @@ const maps = [
         direction: 'right',
         hasLayers: true
     },
-    // Mapa 2 - Fronteira com o Komando Satânico (ATUALIZADO v1.15)
+    // Mapa 2 - Fronteira com o Komando Satânico (ATUALIZADO v1.20)
     {
         name: "Fronteira com o Komando Satânico",
         subtitle: "Primeira superquadra",
@@ -1746,6 +1744,23 @@ function renderBackground(map) {
     }
 }
 
+function renderBuildings(map, visibleArea) {
+    if (!map.buildings) return;
+    
+    map.buildings.forEach(building => {
+        const buildingAsset = assets[building.type];
+        if (buildingAsset && buildingAsset.loaded) {
+            if (building.x + buildingAsset.width > visibleArea.left && 
+                building.x < visibleArea.right &&
+                building.y + buildingAsset.height > visibleArea.top && 
+                building.y < visibleArea.bottom) {
+                
+                ctx.drawImage(buildingAsset.img, building.x, building.y);
+            }
+        }
+    });
+}
+
 function renderEixaoLayer1(map) {
     if (gameState.currentMap === 1 && assets.eixaoCamada1.loaded) {
         ctx.drawImage(assets.eixaoCamada1.img, 0, 0);
@@ -1857,22 +1872,7 @@ function renderLightsOnly(map, visibleArea) {
     ctx.restore();
 }
 
-function renderBuildings(map, visibleArea) {
-    if (!map.buildings) return;
-    
-    map.buildings.forEach(building => {
-        const buildingAsset = assets[building.type];
-        if (buildingAsset && buildingAsset.loaded) {
-            if (building.x + buildingAsset.width > visibleArea.left && 
-                building.x < visibleArea.right &&
-                building.y + buildingAsset.height > visibleArea.top && 
-                building.y < visibleArea.bottom) {
-                
-                ctx.drawImage(buildingAsset.img, building.x, building.y);
-            }
-        }
-    });
-}
+function renderObjects(map, visibleArea) {
     if (!map.objects) return;
     
     map.objects.forEach(obj => {
@@ -2364,6 +2364,6 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.19 - Adiciona prédios no mapa KS');
+console.log('🎮 Mad Night v1.20 - Corrige erros de referência');
 console.log('📢 Controles: Setas=mover, K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
 console.log('💡 Clique ou pressione qualquer tecla para ativar o áudio!');
