@@ -1,4 +1,4 @@
-console.log('Mad Night v1.17 - Correção posição inicial mapa KS');
+console.log('Mad Night v1.18 - Remove paredes do mapa KS');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -37,7 +37,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.17'
+    version: 'v1.18'
 };
 
 // Player
@@ -749,15 +749,11 @@ const maps = [
         streetLights: [],
         objects: [],
         walls: [
-            // Apenas bordas invisíveis para colisão
-            {x: 0, y: 0, w: 1920, h: 20, invisible: true},         // Topo
-            {x: 0, y: 1590, w: 1920, h: 20, invisible: true},      // Base
-            {x: 0, y: 20, w: 20, h: 1570, invisible: true},        // Esquerda
-            {x: 1900, y: 20, w: 20, h: 1570, invisible: true}      // Direita
+            // Sem paredes ainda - mapa em desenvolvimento visual
         ],
         lights: [],
         shadows: [],
-        playerStart: {x: 1440, y: 1520},       // Entrada do mapa - corrigido para não colidir
+        playerStart: {x: 1440, y: 1550},       // Entrada do mapa
         playerStartEscape: {x: 70, y: 70},     // Posição na fuga
         exit: {x: 70, y: 70, w: 60, h: 60},    // Saída no canto superior esquerdo
         orelhao: {x: 1000, y: 412, w: 40, h: 60}, // Orelhão com sprite real
@@ -2325,6 +2321,6 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.17 - Correção posição inicial mapa KS');
+console.log('🎮 Mad Night v1.18 - Remove paredes do mapa KS');
 console.log('📢 Controles: Setas=mover, K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
 console.log('💡 Clique ou pressione qualquer tecla para ativar o áudio!');
