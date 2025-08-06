@@ -1,4 +1,4 @@
-console.log('Mad Night v1.14 - Tiles de Asfalto');
+console.log('Mad Night v1.15 - Visual do mapa Fronteira com KS');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -37,7 +37,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.14'
+    version: 'v1.15'
 };
 
 // Player
@@ -84,7 +84,7 @@ const assets = {
     grama002: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama003: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama004: { img: new Image(), loaded: false, width: 120, height: 120 },
-    // Novos tiles de asfalto
+    // Tiles de asfalto
     asfaltosujo001: { img: new Image(), loaded: false, width: 120, height: 120 },
     asfaltosujo002: { img: new Image(), loaded: false, width: 120, height: 120 },
     asfaltosujo003: { img: new Image(), loaded: false, width: 120, height: 120 },
@@ -106,6 +106,9 @@ const assets = {
     carro003fundos: { img: new Image(), loaded: false, width: 102, height: 130 },
     carro004frente: { img: new Image(), loaded: false, width: 102, height: 130 },
     carro004fundos: { img: new Image(), loaded: false, width: 93, height: 140 },
+    // Novos assets do mapa 2
+    entradaKS01: { img: new Image(), loaded: false, width: 1920, height: 1610 },
+    orelhao001: { img: new Image(), loaded: false, width: 40, height: 60 }
 };
 
 // Carregar assets
@@ -215,6 +218,13 @@ assets.carro004frente.img.onload = () => { assets.carro004frente.loaded = true; 
 
 assets.carro004fundos.img.src = 'assets/scenary/carro004-fundos.png';
 assets.carro004fundos.img.onload = () => { assets.carro004fundos.loaded = true; };
+
+// Carregar novos assets do mapa 2
+assets.entradaKS01.img.src = 'assets/floors/entrada_ks_01.png';
+assets.entradaKS01.img.onload = () => { assets.entradaKS01.loaded = true; };
+
+assets.orelhao001.img.src = 'assets/objects/orelhao001.png';
+assets.orelhao001.img.onload = () => { assets.orelhao001.loaded = true; };
 
 // Sistema de áudio simplificado
 const audio = {
@@ -699,37 +709,41 @@ const maps = [
         direction: 'right',
         hasLayers: true
     },
-    // Mapa 2 - Fronteira com o Komando Satânico (com tiles de asfalto)
+    // Mapa 2 - Fronteira com o Komando Satânico (ATUALIZADO v1.15)
     {
         name: "Fronteira com o Komando Satânico",
         subtitle: "Primeira superquadra",
-        width: 800,
-        height: 600,
+        width: 1920,
+        height: 1610,
         enemies: [
-            {x: 400, y: 200, type: 'faquinha'},
-            {x: 500, y: 400, type: 'janis'}
+            {x: 267, y: 1524, type: 'faquinha'},  // Convertendo de centro para posição
+            {x: 444, y: 820, type: 'janis'}
         ],
         escapeEnemies: [
             {x: 400, y: 300, type: 'chacal'},
             {x: 200, y: 200, type: 'caveirinha'},
             {x: 600, y: 400, type: 'caveirinha'}
         ],
-        tiles: generateAsphaltTiles(800, 600, 120), // Usando tiles de asfalto
+        tiles: generateAsphaltTiles(1920, 1610, 120), // Mantendo tiles de asfalto
+        hasBackground: true, // Indicador de que tem background
+        backgroundAsset: 'entradaKS01', // Nome do asset do background
         trees: [],
         streetLights: [],
         objects: [],
         walls: [
-            {x: 150, y: 100, w: 120, h: 150},
-            {x: 350, y: 350, w: 120, h: 150},
-            {x: 550, y: 150, w: 120, h: 100}
+            // Apenas bordas invisíveis para colisão
+            {x: 0, y: 0, w: 1920, h: 20, invisible: true},         // Topo
+            {x: 0, y: 1590, w: 1920, h: 20, invisible: true},      // Base
+            {x: 0, y: 20, w: 20, h: 1570, invisible: true},        // Esquerda
+            {x: 1900, y: 20, w: 20, h: 1570, invisible: true}      // Direita
         ],
         lights: [],
         shadows: [],
-        playerStart: {x: 80, y: 300},
-        playerStartEscape: {x: 700, y: 300},
-        exit: {x: 600, y: 480, w: 60, h: 60},
-        orelhao: {x: 680, y: 480, w: 40, h: 60},
-        direction: 'right'
+        playerStart: {x: 1440, y: 1550},       // Entrada do mapa
+        playerStartEscape: {x: 70, y: 70},     // Posição na fuga
+        exit: {x: 70, y: 70, w: 60, h: 60},    // Saída no canto superior esquerdo
+        orelhao: {x: 1000, y: 412, w: 40, h: 60}, // Orelhão com sprite real
+        direction: 'left'
     },
     // Mapa 3 - Na área da KS (com tiles de asfalto)
     {
@@ -1357,7 +1371,11 @@ function loadMap(mapIndex, isEscape = false) {
     const enemyList = (isEscape && map.escapeEnemies) ? map.escapeEnemies : map.enemies;
     
     enemyList.forEach(enemyData => {
-        const validPos = findValidSpawnPosition(enemyData.x, enemyData.y, 46, 46);
+        // Os valores x,y são o centro do inimigo, converter para posição
+        const enemyX = enemyData.x - 23; // 46/2 = 23 (metade da largura)
+        const enemyY = enemyData.y - 23; // 46/2 = 23 (metade da altura)
+        
+        const validPos = findValidSpawnPosition(enemyX, enemyY, 46, 46);
         const enemy = new Enemy(validPos.x, validPos.y, enemyData.type || 'faquinha');
         
         switch(enemy.type) {
@@ -1677,6 +1695,16 @@ function renderTiles(map, visibleArea) {
     });
 }
 
+function renderBackground(map) {
+    // Renderizar background específico do mapa se houver
+    if (map.hasBackground && map.backgroundAsset) {
+        const bgAsset = assets[map.backgroundAsset];
+        if (bgAsset && bgAsset.loaded) {
+            ctx.drawImage(bgAsset.img, 0, 0);
+        }
+    }
+}
+
 function renderEixaoLayer1(map) {
     if (gameState.currentMap === 1 && assets.eixaoCamada1.loaded) {
         ctx.drawImage(assets.eixaoCamada1.img, 0, 0);
@@ -1906,11 +1934,17 @@ function renderWalls(map, visibleArea) {
 
 function renderSpecialObjects(map) {
     if (map.orelhao) {
-        ctx.fillStyle = '#00f';
-        ctx.fillRect(map.orelhao.x, map.orelhao.y, map.orelhao.w, map.orelhao.h);
-        ctx.fillStyle = '#fff';
-        setPixelFont(8);
-        ctx.fillText('TEL', map.orelhao.x + 5, map.orelhao.y + 30);
+        // Verificar se tem sprite do orelhão
+        if (assets.orelhao001 && assets.orelhao001.loaded) {
+            ctx.drawImage(assets.orelhao001.img, map.orelhao.x, map.orelhao.y);
+        } else {
+            // Fallback para o desenho azul
+            ctx.fillStyle = '#00f';
+            ctx.fillRect(map.orelhao.x, map.orelhao.y, map.orelhao.w, map.orelhao.h);
+            ctx.fillStyle = '#fff';
+            setPixelFont(8);
+            ctx.fillText('TEL', map.orelhao.x + 5, map.orelhao.y + 30);
+        }
     }
     
     if (map.lixeira) {
@@ -2113,6 +2147,9 @@ function draw() {
             renderTiles(map, visibleArea);
         }
         
+        // Renderizar background do mapa (se houver)
+        renderBackground(map);
+        
         renderCampo(map);
         renderShadows(map, visibleArea);
         renderTrees(map, visibleArea, 'bottom');
@@ -2242,6 +2279,6 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.14 - Tiles de Asfalto');
+console.log('🎮 Mad Night v1.15 - Visual do mapa Fronteira com KS');
 console.log('📢 Controles: Setas=mover, K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
 console.log('💡 Clique ou pressione qualquer tecla para ativar o áudio!');
