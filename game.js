@@ -1,4 +1,4 @@
-console.log('Mad Night v1.18 - Remove paredes do mapa KS');
+console.log('Mad Night v1.19 - Adiciona prédios no mapa KS');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -16,7 +16,9 @@ const camera = {
     width: 960,
     height: 540,
     zoom: 2
-};
+}
+
+function renderObjects(map, visibleArea) {;
 
 // Configurar canvas
 canvas.width = camera.width * camera.zoom;
@@ -37,7 +39,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.18'
+    version: 'v1.19'
 };
 
 // Player
@@ -109,6 +111,11 @@ const assets = {
     // Novos assets do mapa 2
     entradaKS01: { img: new Image(), loaded: false, width: 1920, height: 1610 },
     orelhao001: { img: new Image(), loaded: false, width: 40, height: 60 },
+    // Prédios do mapa KS
+    predio0002: { img: new Image(), loaded: false, width: 520, height: 592 },
+    predio0003: { img: new Image(), loaded: false, width: 520, height: 592 },
+    predio0006: { img: new Image(), loaded: false, width: 400, height: 500 },
+    predio0008: { img: new Image(), loaded: false, width: 520, height: 479 },
     // Setas direcionais
     setaesquerda: { img: new Image(), loaded: false, width: 50, height: 59 },
     setadireita: { img: new Image(), loaded: false, width: 50, height: 59 },
@@ -230,6 +237,19 @@ assets.entradaKS01.img.onload = () => { assets.entradaKS01.loaded = true; };
 
 assets.orelhao001.img.src = 'assets/objects/orelhao001.png';
 assets.orelhao001.img.onload = () => { assets.orelhao001.loaded = true; };
+
+// Carregar prédios do mapa KS
+assets.predio0002.img.src = 'assets/buildings/predio0002.png';
+assets.predio0002.img.onload = () => { assets.predio0002.loaded = true; };
+
+assets.predio0003.img.src = 'assets/buildings/predio0003.png';
+assets.predio0003.img.onload = () => { assets.predio0003.loaded = true; };
+
+assets.predio0006.img.src = 'assets/buildings/predio0006.png';
+assets.predio0006.img.onload = () => { assets.predio0006.loaded = true; };
+
+assets.predio0008.img.src = 'assets/buildings/predio0008.png';
+assets.predio0008.img.onload = () => { assets.predio0008.loaded = true; };
 
 // Carregar setas direcionais
 assets.setaesquerda.img.src = 'assets/icons/setaesquerda.png';
@@ -745,6 +765,13 @@ const maps = [
         tiles: generateAsphaltTiles(1920, 1610, 120), // Mantendo tiles de asfalto
         hasBackground: true, // Indicador de que tem background
         backgroundAsset: 'entradaKS01', // Nome do asset do background
+        buildings: [
+            {type: 'predio0002', x: 1550, y: 700},
+            {type: 'predio0006', x: 0, y: 1280},
+            {type: 'predio0003', x: 1300, y: -60},
+            {type: 'predio0008', x: 550, y: 50},
+            {type: 'predio0008', x: 201, y: -90}  // Segundo prédio0008 encavalado
+        ],
         trees: [],
         streetLights: [],
         objects: [],
@@ -1830,7 +1857,22 @@ function renderLightsOnly(map, visibleArea) {
     ctx.restore();
 }
 
-function renderObjects(map, visibleArea) {
+function renderBuildings(map, visibleArea) {
+    if (!map.buildings) return;
+    
+    map.buildings.forEach(building => {
+        const buildingAsset = assets[building.type];
+        if (buildingAsset && buildingAsset.loaded) {
+            if (building.x + buildingAsset.width > visibleArea.left && 
+                building.x < visibleArea.right &&
+                building.y + buildingAsset.height > visibleArea.top && 
+                building.y < visibleArea.bottom) {
+                
+                ctx.drawImage(buildingAsset.img, building.x, building.y);
+            }
+        }
+    });
+}
     if (!map.objects) return;
     
     map.objects.forEach(obj => {
@@ -2195,6 +2237,7 @@ function draw() {
         renderCampo(map);
         renderShadows(map, visibleArea);
         renderTrees(map, visibleArea, 'bottom');
+        renderBuildings(map, visibleArea);
         renderObjects(map, visibleArea);
         renderWalls(map, visibleArea);
         renderSpecialObjects(map);
@@ -2321,6 +2364,6 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.18 - Remove paredes do mapa KS');
+console.log('🎮 Mad Night v1.19 - Adiciona prédios no mapa KS');
 console.log('📢 Controles: Setas=mover, K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
 console.log('💡 Clique ou pressione qualquer tecla para ativar o áudio!');
