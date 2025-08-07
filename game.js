@@ -745,7 +745,7 @@ const maps = [
         direction: 'right',
         hasLayers: true
     },
-    // Mapa 2 - Fronteira com o Komando Satânico (ATUALIZADO v1.20)
+    // Mapa 2 - Fronteira com o Komando Satânico (ATUALIZADO v1.22)
     {
         name: "Fronteira com o Komando Satânico",
         subtitle: "Primeira superquadra",
