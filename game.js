@@ -1,4 +1,4 @@
-console.log('Mad Night v1.21 - Sistema de debug para colisões');
+console.log('Mad Night v1.22 - Ajusta posições e colisão predio0002');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -37,7 +37,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.21'
+    version: 'v1.22'
 };
 
 // Player
@@ -767,32 +767,37 @@ const maps = [
             {
                 type: 'predio0002', 
                 x: 1550, 
-                y: 700,
-                collisions: [] // Array de retângulos de colisão - será preenchido depois
+                y: 695,  // Corrigido de 700 para 695
+                collisions: [
+                    // Áreas de colisão baseadas nos pontos fornecidos
+                    {x: 0, y: 215, w: 186, h: 325},    // Área esquerda-baixo
+                    {x: 186, y: 32, w: 181, h: 508},   // Área direita
+                    {x: 0, y: 32, w: 367, h: 183}      // Área superior
+                ]
             },
             {
                 type: 'predio0006', 
                 x: 0, 
-                y: 1280,
-                collisions: [] // Array de retângulos de colisão - será preenchido depois
+                y: 970,  // Corrigido de 1280 para 970
+                collisions: [] // Será preenchido depois
             },
             {
                 type: 'predio0003', 
                 x: 1300, 
                 y: -60,
-                collisions: [] // Array de retângulos de colisão - será preenchido depois
-            },
-            {
-                type: 'predio0008', 
-                x: 550, 
-                y: 50,
-                collisions: [] // Array de retângulos de colisão - será preenchido depois
+                collisions: [] // Será preenchido depois
             },
             {
                 type: 'predio0008', 
                 x: 201, 
-                y: -90,
-                collisions: [] // Array de retângulos de colisão - será preenchido depois
+                y: -90,  // Primeiro predio0008 (agora renderiza por baixo)
+                collisions: [] // Será preenchido depois
+            },
+            {
+                type: 'predio0008', 
+                x: 550, 
+                y: 50,   // Segundo predio0008 (agora renderiza por cima)
+                collisions: [] // Será preenchido depois
             }
         ],
         trees: [],
@@ -941,6 +946,26 @@ function isInShadow(x, y) {
                 
                 const dist = Math.sqrt(Math.pow(x - shadowX, 2) + Math.pow(y - shadowY, 2));
                 if (dist < shadowRadius) return true;
+            }
+        }
+    }
+    
+    // Verificar colisão com prédios
+    if (map.buildings) {
+        for (let building of map.buildings) {
+            if (building.collisions && building.collisions.length > 0) {
+                for (let collision of building.collisions) {
+                    const buildingCollision = {
+                        x: building.x + collision.x,
+                        y: building.y + collision.y,
+                        w: collision.w,
+                        h: collision.h
+                    };
+                    
+                    if (checkRectCollision(testEntity, buildingCollision)) {
+                        return true;
+                    }
+                }
             }
         }
     }
@@ -1806,9 +1831,8 @@ function renderDebugCollisions(map, visibleArea) {
     if (!gameState.debugMode || !map.buildings) return;
     
     ctx.save();
-    ctx.globalAlpha = 0.5;
     
-    map.buildings.forEach(building => {
+    map.buildings.forEach((building, index) => {
         const buildingAsset = assets[building.type];
         if (buildingAsset && buildingAsset.loaded) {
             if (building.x + buildingAsset.width > visibleArea.left && 
@@ -1816,12 +1840,14 @@ function renderDebugCollisions(map, visibleArea) {
                 building.y + buildingAsset.height > visibleArea.top && 
                 building.y < visibleArea.bottom) {
                 
-                // Mostrar área total do prédio em azul
+                // Mostrar área total do prédio em azul (transparente)
+                ctx.globalAlpha = 0.3;
                 ctx.fillStyle = '#00f';
                 ctx.fillRect(building.x, building.y, buildingAsset.width, buildingAsset.height);
                 
-                // Mostrar áreas de colisão específicas em vermelho (quando implementadas)
+                // Mostrar áreas de colisão específicas em vermelho
                 if (building.collisions && building.collisions.length > 0) {
+                    ctx.globalAlpha = 0.6;
                     ctx.fillStyle = '#f00';
                     building.collisions.forEach(collision => {
                         ctx.fillRect(
@@ -1833,11 +1859,26 @@ function renderDebugCollisions(map, visibleArea) {
                     });
                 }
                 
-                // Mostrar coordenadas do prédio
+                // Mostrar informações do prédio
+                ctx.globalAlpha = 1.0;
                 ctx.fillStyle = '#fff';
-                setPixelFont(12);
-                ctx.fillText(`${building.type}`, building.x + 10, building.y + 20);
-                ctx.fillText(`(${building.x}, ${building.y})`, building.x + 10, building.y + 35);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                setPixelFont(10);
+                
+                const text1 = `${building.type} #${index}`;
+                const text2 = `(${building.x}, ${building.y})`;
+                const text3 = building.collisions.length > 0 ? `${building.collisions.length} colisões` : 'Sem colisão';
+                
+                // Contorno preto nas letras
+                ctx.strokeText(text1, building.x + 5, building.y + 15);
+                ctx.strokeText(text2, building.x + 5, building.y + 30);
+                ctx.strokeText(text3, building.x + 5, building.y + 45);
+                
+                // Texto branco por cima
+                ctx.fillText(text1, building.x + 5, building.y + 15);
+                ctx.fillText(text2, building.x + 5, building.y + 30);
+                ctx.fillText(text3, building.x + 5, building.y + 45);
             }
         }
     });
@@ -2472,6 +2513,6 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.21 - Sistema de debug para colisões');
+console.log('🎮 Mad Night v1.22 - Ajusta posições e colisão predio0002');
 console.log('📢 Controles: Setas=mover, K=morrer, E=spawn inimigo, M=música, N=próximo mapa, D=debug');
-console.log('💡 Clique ou pressione qualquer tecla para ativar o áudio!');
+console.log('💡 Pressione D para ver colisões dos prédios!');
