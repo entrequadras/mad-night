@@ -1,4 +1,4 @@
-console.log('Mad Night v1.25 - Volta versão estável com prédios ajustados');
+console.log('Mad Night v1.26 - Colisões Isométricas');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -37,7 +37,8 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.25'
+    lastFrameTime: 0, // Movido para dentro do gameState
+    version: 'v1.26' // NOVA VERSÃO!
 };
 
 // Player
@@ -373,7 +374,7 @@ const trafficSystem = {
         }
     },
     
-    // Tipos de carros - dimensões pegadas direto dos assets
+    // Tipos de carros - usando todos os sprites disponíveis
     carTypes: {
         northSouth: [
             { sprite: 'carro001frente' },
@@ -382,6 +383,7 @@ const trafficSystem = {
         ],
         southNorth: [
             { sprite: 'carro001fundos' },
+            { sprite: 'carro002fundos' }, // Adicionado!
             { sprite: 'carro003fundos' },
             { sprite: 'carro004fundos' }
         ]
@@ -547,33 +549,13 @@ const trafficSystem = {
     }
 };
 
-// Função para gerar tiles de grama (apenas para mapa 0)
-function generateGrassTiles(mapWidth, mapHeight, tileSize) {
-    const tiles = []
-    const types = ['grama000', 'grama001', 'grama002', 'grama003', 'grama004'];
+// Função para gerar tiles genéricos
+function generateTiles(mapWidth, mapHeight, tileSize, tileTypes) {
+    const tiles = [];
     
     for (let y = 0; y < mapHeight; y += tileSize) {
         for (let x = 0; x < mapWidth; x += tileSize) {
-            const randomType = types[Math.floor(Math.random() * types.length)];
-            tiles.push({
-                type: randomType,
-                x: x,
-                y: y
-            });
-        }
-    }
-    
-    return tiles;
-}
-
-// Função para gerar tiles de asfalto (para mapas urbanos)
-function generateAsphaltTiles(mapWidth, mapHeight, tileSize) {
-    const tiles = []
-    const types = ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005'];
-    
-    for (let y = 0; y < mapHeight; y += tileSize) {
-        for (let x = 0; x < mapWidth; x += tileSize) {
-            const randomType = types[Math.floor(Math.random() * types.length)];
+            const randomType = tileTypes[Math.floor(Math.random() * tileTypes.length)];
             tiles.push({
                 type: randomType,
                 x: x,
@@ -593,7 +575,7 @@ const maps = [
         width: 1920,
         height: 1080,
         enemies: [],
-        tiles: generateGrassTiles(1920, 1080, 120),
+        tiles: generateTiles(1920, 1080, 120, ['grama000', 'grama001', 'grama002', 'grama003', 'grama004']),
         trees: [
             // Árvores do mapa original
             {type: 'arvore001', x: 300, y: 150},
@@ -717,7 +699,7 @@ const maps = [
             // Grupo 2 - Meio esquerdo
             {x: 647, y: 611, radius: 100, id: 'eixao4'},
             {x: 923, y: 245, radius: 100, id: 'eixao5'},
-            {x: 1106, y: 569, radius: 100, id: 'eixao6'},  // Corrigido de 1118,578 para 1106,569
+            {x: 1106, y: 569, radius: 100, id: 'eixao6'},
             {x: 1120, y: 245, radius: 100, id: 'eixao7'},
             
             // Grupo 3 - Meio direito
@@ -733,10 +715,10 @@ const maps = [
             {x: 2585, y: 102, radius: 100, id: 'eixao15'},
             
             // Novas luzes adicionadas
-            {x: 2584, y: 605, radius: 100, id: 'eixao16'},  // 2564,560 + offset
-            {x: 2669, y: 828, radius: 100, id: 'eixao17'},  // 2649,783 + offset
-            {x: 910, y: 574, radius: 100, id: 'eixao18'},   // 890,529 + offset
-            {x: 563, y: 834, radius: 100, id: 'eixao19'}    // 543,789 + offset
+            {x: 2584, y: 605, radius: 100, id: 'eixao16'},
+            {x: 2669, y: 828, radius: 100, id: 'eixao17'},
+            {x: 910, y: 574, radius: 100, id: 'eixao18'},
+            {x: 563, y: 834, radius: 100, id: 'eixao19'}
         ],
         shadows: [],
         playerStart: {x: 100, y: 100},
@@ -745,14 +727,14 @@ const maps = [
         direction: 'right',
         hasLayers: true
     },
-    // Mapa 2 - Fronteira com o Komando Satânico (POSIÇÕES CORRIGIDAS v1.25)
+    // Mapa 2 - Fronteira com o Komando Satânico (COM COLISÕES v1.26!)
     {
         name: "Fronteira com o Komando Satânico",
         subtitle: "Primeira superquadra",
         width: 1920,
         height: 1610,
         enemies: [
-            {x: 267, y: 1524, type: 'faquinha'},  // Convertendo de centro para posição
+            {x: 267, y: 1524, type: 'faquinha'},
             {x: 444, y: 820, type: 'janis'}
         ],
         escapeEnemies: [
@@ -760,31 +742,83 @@ const maps = [
             {x: 200, y: 200, type: 'caveirinha'},
             {x: 600, y: 400, type: 'caveirinha'}
         ],
-        tiles: generateAsphaltTiles(1920, 1610, 120), // Mantendo tiles de asfalto
-        hasBackground: true, // Indicador de que tem background
-        backgroundAsset: 'entradaKS01', // Nome do asset do background
+        tiles: generateTiles(1920, 1610, 120, ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']),
+        hasBackground: true,
+        backgroundAsset: 'entradaKS01',
         buildings: [
-            {type: 'predio0002', x: 1550, y: 665},    // Subiu 30 pixels de 695 para 665
-            {type: 'predio0006', x: 0, y: 970},       // Corrigido para Y=970
-            {type: 'predio0003', x: 1300, y: -60},    // Mantém posição
-            {type: 'predio0008', x: 201, y: -90},     // Primeiro (renderiza por baixo)
-            {type: 'predio0008', x: 550, y: 50}       // Segundo (renderiza por cima)
+            {
+                type: 'predio0002', 
+                x: 1550, 
+                y: 665,
+                // COLISÕES: Diagonal esquerda-inferior para direita-superior (MAGRO)
+                collisionRects: [
+                    {x: 1650, y: 1100, w: 120, h: 40},  // Base inferior
+                    {x: 1680, y: 1060, w: 100, h: 40},  // Meio-baixo
+                    {x: 1710, y: 1020, w: 80, h: 40},   // Meio
+                    {x: 1740, y: 980, w: 60, h: 40}     // Meio-alto
+                ]
+            },
+            {
+                type: 'predio0006', 
+                x: 0, 
+                y: 970,
+                // COLISÕES: Retangular normal (não diagonal)
+                collisionRects: [
+                    {x: 40, y: 1320, w: 320, h: 100}    // Retângulo único centralizado
+                ]
+            },
+            {
+                type: 'predio0003', 
+                x: 1300, 
+                y: -60,
+                // COLISÕES: Diagonal direita-inferior para esquerda-superior
+                collisionRects: [
+                    {x: 1360, y: 380, w: 60, h: 40},    // Meio-alto
+                    {x: 1340, y: 420, w: 80, h: 40},    // Meio
+                    {x: 1320, y: 460, w: 100, h: 40},   // Meio-baixo
+                    {x: 1300, y: 500, w: 120, h: 40}    // Base inferior
+                ]
+            },
+            {
+                type: 'predio0008', 
+                x: 201, 
+                y: -90,
+                // COLISÕES: Diagonal direita-inferior para esquerda-superior
+                collisionRects: [
+                    {x: 281, y: 250, w: 60, h: 40},     // Meio-alto
+                    {x: 261, y: 290, w: 80, h: 40},     // Meio
+                    {x: 241, y: 330, w: 100, h: 40},    // Meio-baixo
+                    {x: 221, y: 370, w: 120, h: 40}     // Base inferior
+                ]
+            },
+            {
+                type: 'predio0008', 
+                x: 550, 
+                y: 50,
+                // COLISÕES: Diagonal direita-inferior para esquerda-superior
+                collisionRects: [
+                    {x: 630, y: 390, w: 60, h: 40},     // Meio-alto
+                    {x: 610, y: 430, w: 80, h: 40},     // Meio
+                    {x: 590, y: 470, w: 100, h: 40},    // Meio-baixo
+                    {x: 570, y: 510, w: 120, h: 40}     // Base inferior
+                ]
+            }
         ],
         trees: [],
         streetLights: [],
         objects: [],
         walls: [
-            // Sem paredes ainda - mapa em desenvolvimento visual
+            // Sem paredes adicionais - usando colisões dos prédios
         ],
         lights: [],
         shadows: [],
-        playerStart: {x: 1440, y: 1550},       // Entrada do mapa
-        playerStartEscape: {x: 70, y: 70},     // Posição na fuga
-        exit: {x: 70, y: 70, w: 60, h: 60},    // Saída no canto superior esquerdo
-        orelhao: {x: 1000, y: 412, w: 40, h: 60}, // Orelhão com sprite real
+        playerStart: {x: 1440, y: 1550},
+        playerStartEscape: {x: 70, y: 70},
+        exit: {x: 70, y: 70, w: 60, h: 60},
+        orelhao: {x: 1000, y: 412, w: 40, h: 60},
         direction: 'left'
     },
-    // Mapa 3 - Na área da KS (com tiles de asfalto)
+    // Mapa 3 - Na área da KS
     {
         name: "Na área da KS",
         subtitle: "Estacionamento estreito",
@@ -799,7 +833,7 @@ const maps = [
             {x: 450, y: 250, type: 'caveirinha'},
             {x: 300, y: 600, type: 'faquinha'}
         ],
-        tiles: generateAsphaltTiles(600, 800, 120), // Usando tiles de asfalto
+        tiles: generateTiles(600, 800, 120, ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']),
         trees: [],
         streetLights: [],
         objects: [],
@@ -818,7 +852,7 @@ const maps = [
         exit: {x: 250, y: 10, w: 100, h: 30},
         direction: 'up'
     },
-    // Mapa 4 - Entre Prédios (com tiles de asfalto)
+    // Mapa 4 - Entre Prédios
     {
         name: "Entre Prédios",
         subtitle: "Muitas sombras",
@@ -833,7 +867,7 @@ const maps = [
             {x: 200, y: 600, type: 'caveirinha'},
             {x: 400, y: 350, type: 'caveirinha'}
         ],
-        tiles: generateAsphaltTiles(600, 800, 120), // Usando tiles de asfalto
+        tiles: generateTiles(600, 800, 120, ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']),
         trees: [],
         streetLights: [],
         objects: [],
@@ -850,7 +884,7 @@ const maps = [
         exit: {x: 250, y: 10, w: 100, h: 30},
         direction: 'up'
     },
-    // Mapa 5 - Ninho dos Ratos (com tiles de asfalto)
+    // Mapa 5 - Ninho dos Ratos
     {
         name: "Ninho dos Ratos",
         subtitle: "Estacionamento da bomba",
@@ -861,7 +895,7 @@ const maps = [
             {x: 400, y: 300, type: 'faquinha'},
             {x: 300, y: 500, type: 'janis'}
         ],
-        tiles: generateAsphaltTiles(600, 800, 120), // Usando tiles de asfalto
+        tiles: generateTiles(600, 800, 120, ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']),
         trees: [],
         streetLights: [],
         objects: [],
@@ -939,12 +973,27 @@ function checkWallCollision(entity, newX, newY) {
         height: entity.height
     };
     
+    // Verificar colisão com paredes normais
     for (let wall of map.walls) {
         if (checkRectCollision(testEntity, wall)) {
             return true;
         }
     }
     
+    // NOVO: Verificar colisão com prédios (v1.26)
+    if (map.buildings) {
+        for (let building of map.buildings) {
+            if (building.collisionRects) {
+                for (let rect of building.collisionRects) {
+                    if (checkRectCollision(testEntity, rect)) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    
+    // Verificar colisão com árvores
     if (map.trees) {
         for (let tree of map.trees) {
             const treeAsset = assets[tree.type];
@@ -963,6 +1012,7 @@ function checkWallCollision(entity, newX, newY) {
         }
     }
     
+    // Verificar colisão com postes
     if (map.streetLights) {
         for (let light of map.streetLights) {
             const lightAsset = assets[light.type];
@@ -1132,7 +1182,7 @@ class Enemy {
             };
             
             projectiles.push(stone);
-            audio.playSFX('ataque_janis', 0.5); // Som do ataque
+            audio.playSFX('ataque_janis', 0.5);
         }
     }
     
@@ -1501,23 +1551,32 @@ function updateProjectiles() {
 // Input
 const keys = {};
 
+// TECLAS DE DEBUG (documentadas!)
+// K = Kill player (teste de morte)
+// E = Spawn enemy (teste de inimigos)
+// M = Toggle music (alternar música)
+// N = Next map (próximo mapa)
 window.addEventListener('keydown', (e) => {
     keys[e.key] = true;
     
+    // DEBUG: Kill player
     if (e.key === 'k' || e.key === 'K') {
         killPlayer();
     }
     
+    // DEBUG: Spawn enemy
     if (e.key === 'e' || e.key === 'E') {
         const enemy = new Enemy(player.x + 150, player.y);
         enemy.sprites = faquinhaSprites;
         enemies.push(enemy);
     }
     
+    // DEBUG: Toggle music
     if (e.key === 'm' || e.key === 'M') {
         playMusic(gameState.musicPhase === 'inicio' ? 'fuga' : 'inicio');
     }
     
+    // DEBUG: Next map
     if (e.key === 'n' || e.key === 'N') {
         gameState.currentMap = (gameState.currentMap + 1) % maps.length;
         loadMap(gameState.currentMap);
@@ -1540,7 +1599,6 @@ function getPlayerSprite() {
 }
 
 // Update principal
-let lastFrameTime = 0;
 function update() {
     const map = maps[gameState.currentMap];
     
@@ -1619,7 +1677,7 @@ function update() {
             player.isDashing = true;
             player.dashStart = Date.now();
             gameState.pedalPower--;
-            audio.playSFX('dash', 0.6); // Som do dash
+            audio.playSFX('dash', 0.6);
         }
     }
     
@@ -1659,7 +1717,7 @@ function update() {
     if (map.orelhao && checkRectCollision(player, map.orelhao)) {
         if (!gameState.dashUnlocked) {
             gameState.dashUnlocked = true;
-            if (audio.phone_ring) audio.phone_ring.pause(); // Para o toque quando atende
+            if (audio.phone_ring) audio.phone_ring.pause();
         }
     }
     
@@ -1703,9 +1761,9 @@ function update() {
     player.x = Math.max(0, Math.min(map.width - player.width, player.x));
     player.y = Math.max(0, Math.min(map.height - player.height, player.y));
     
-    if (moving && !player.isDashing && Date.now() - lastFrameTime > 150) {
+    if (moving && !player.isDashing && Date.now() - gameState.lastFrameTime > 150) {
         player.frame = (player.frame + 1) % 2;
-        lastFrameTime = Date.now();
+        gameState.lastFrameTime = Date.now();
     }
 }
 
@@ -1744,7 +1802,18 @@ function renderBackground(map) {
     }
 }
 
-function renderBuildings(map, visibleArea) {
+// NOVO: Função para determinar a linha de corte de um prédio (v1.26)
+function getBuildingCutLine(building) {
+    const buildingAsset = assets[building.type];
+    if (!buildingAsset) return building.y + 100;
+    
+    // A linha de corte é onde o player muda de "atrás" para "na frente"
+    // Geralmente em 70-80% da altura do prédio
+    return building.y + buildingAsset.height * 0.75;
+}
+
+// MODIFICADO: Renderizar prédios em duas camadas (v1.26)
+function renderBuildingsLayer(map, visibleArea, layer) {
     if (!map.buildings) return;
     
     map.buildings.forEach(building => {
@@ -1755,10 +1824,47 @@ function renderBuildings(map, visibleArea) {
                 building.y + buildingAsset.height > visibleArea.top && 
                 building.y < visibleArea.bottom) {
                 
-                ctx.drawImage(buildingAsset.img, building.x, building.y);
+                const cutLine = getBuildingCutLine(building);
+                const playerBottom = player.y + player.height;
+                
+                if (layer === 'bottom') {
+                    // Renderizar apenas se o player estiver NA FRENTE do prédio
+                    if (playerBottom > cutLine) {
+                        ctx.drawImage(buildingAsset.img, building.x, building.y);
+                    }
+                } else if (layer === 'top') {
+                    // Renderizar apenas se o player estiver ATRÁS do prédio
+                    if (playerBottom <= cutLine) {
+                        ctx.drawImage(buildingAsset.img, building.x, building.y);
+                    }
+                }
             }
         }
     });
+}
+
+// DEBUG: Renderizar áreas de colisão (v1.26)
+function renderCollisionDebug(map) {
+    if (!map.buildings) return;
+    
+    // Só mostrar se a tecla C estiver pressionada (debug)
+    if (!keys['c'] && !keys['C']) return;
+    
+    ctx.save();
+    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+    ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
+    ctx.lineWidth = 2;
+    
+    map.buildings.forEach(building => {
+        if (building.collisionRects) {
+            building.collisionRects.forEach(rect => {
+                ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+                ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+            });
+        }
+    });
+    
+    ctx.restore();
 }
 
 function renderEixaoLayer1(map) {
@@ -2193,6 +2299,12 @@ function renderUI(map) {
         ctx.fillText('█', 200 + i * 20, 100);
     }
     
+    // Instrução para debug de colisões
+    if (keys['c'] || keys['C']) {
+        ctx.fillStyle = '#f00';
+        ctx.fillText('DEBUG: Mostrando colisões', 20, 140);
+    }
+    
     // Mensagem de morte
     if (player.isDead) {
         ctx.fillStyle = '#f00';
@@ -2225,26 +2337,31 @@ function draw() {
             bottom: camera.y + camera.height + 100
         };
         
+        // Camada 1: Base
         if (map.hasLayers && gameState.currentMap === 1) {
             renderEixaoLayer1(map);
         } else {
             renderTiles(map, visibleArea);
         }
         
-        // Renderizar background do mapa (se houver)
         renderBackground(map);
-        
         renderCampo(map);
         renderShadows(map, visibleArea);
         renderTrees(map, visibleArea, 'bottom');
-        renderBuildings(map, visibleArea);
+        
+        // NOVO: Renderizar prédios - camada inferior (v1.26)
+        renderBuildingsLayer(map, visibleArea, 'bottom');
+        
         renderObjects(map, visibleArea);
         renderWalls(map, visibleArea);
         renderSpecialObjects(map);
+        
+        // Camada 2: Entidades
         renderProjectiles(visibleArea);
         renderEnemies(visibleArea);
         renderPlayer();
         
+        // Camada 3: Sobreposições
         if (map.hasLayers && gameState.currentMap === 1) {
             renderEixaoLayer2(map);
         }
@@ -2254,14 +2371,22 @@ function draw() {
             trafficSystem.render(ctx, visibleArea);
         }
         
+        // NOVO: Renderizar prédios - camada superior (v1.26)
+        renderBuildingsLayer(map, visibleArea, 'top');
+        
         renderCampoTraves();
         renderFieldShadow(map);
         renderStreetLights(map, visibleArea);
         renderTrees(map, visibleArea, 'top');
         
+        // DEBUG: Mostrar colisões (v1.26)
+        renderCollisionDebug(map);
+        
+        // Efeito de noite
         ctx.fillStyle = 'rgba(0, 0, 40, 0.4)';
         ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
         
+        // Iluminação dos postes
         if (map.streetLights) {
             ctx.save();
             ctx.globalCompositeOperation = 'lighter';
@@ -2364,6 +2489,7 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.25 - Volta versão estável com prédios ajustados');
-console.log('📢 Controles: Setas=mover, K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
-console.log('💡 Prédios posicionados corretamente no mapa KS!');
+console.log('🎮 Mad Night v1.26 - Colisões Isométricas');
+console.log('📢 Controles: Setas=mover, Espaço=dash, C=ver colisões');
+console.log('🔧 Debug: K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
+console.log('🏢 Sistema de colisões isométricas implementado!');
