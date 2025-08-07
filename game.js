@@ -1,4 +1,4 @@
-console.log('Mad Night v1.24 - Corrige todas as referências');
+console.log('Mad Night v1.25 - Volta versão estável com prédios ajustados');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -37,7 +37,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.24'
+    version: 'v1.25'
 };
 
 // Player
@@ -745,7 +745,7 @@ const maps = [
         direction: 'right',
         hasLayers: true
     },
-    // Mapa 2 - Fronteira com o Komando Satânico (ATUALIZADO v1.20)
+    // Mapa 2 - Fronteira com o Komando Satânico (POSIÇÕES CORRIGIDAS v1.25)
     {
         name: "Fronteira com o Komando Satânico",
         subtitle: "Primeira superquadra",
@@ -764,41 +764,11 @@ const maps = [
         hasBackground: true, // Indicador de que tem background
         backgroundAsset: 'entradaKS01', // Nome do asset do background
         buildings: [
-            {
-                type: 'predio0002', 
-                x: 1550, 
-                y: 695,  // Corrigido de 700 para 695
-                collisions: [
-                    // Áreas de colisão baseadas nos pontos fornecidos
-                    {x: 0, y: 215, w: 186, h: 325},    // Área esquerda-baixo
-                    {x: 186, y: 32, w: 181, h: 508},   // Área direita
-                    {x: 0, y: 32, w: 367, h: 183}      // Área superior
-                ]
-            },
-            {
-                type: 'predio0006', 
-                x: 0, 
-                y: 970,  // Corrigido de 1280 para 970
-                collisions: [] // Será preenchido depois
-            },
-            {
-                type: 'predio0003', 
-                x: 1300, 
-                y: -60,
-                collisions: [] // Será preenchido depois
-            },
-            {
-                type: 'predio0008', 
-                x: 201, 
-                y: -90,  // Primeiro predio0008 (agora renderiza por baixo)
-                collisions: [] // Será preenchido depois
-            },
-            {
-                type: 'predio0008', 
-                x: 550, 
-                y: 50,   // Segundo predio0008 (agora renderiza por cima)
-                collisions: [] // Será preenchido depois
-            }
+            {type: 'predio0002', x: 1550, y: 665},    // Subiu 30 pixels de 695 para 665
+            {type: 'predio0006', x: 0, y: 970},       // Corrigido para Y=970
+            {type: 'predio0003', x: 1300, y: -60},    // Mantém posição
+            {type: 'predio0008', x: 201, y: -90},     // Primeiro (renderiza por baixo)
+            {type: 'predio0008', x: 550, y: 50}       // Segundo (renderiza por cima)
         ],
         trees: [],
         streetLights: [],
@@ -946,26 +916,6 @@ function isInShadow(x, y) {
                 
                 const dist = Math.sqrt(Math.pow(x - shadowX, 2) + Math.pow(y - shadowY, 2));
                 if (dist < shadowRadius) return true;
-            }
-        }
-    }
-    
-    // Verificar colisão com prédios
-    if (map.buildings) {
-        for (let building of map.buildings) {
-            if (building.collisions && building.collisions.length > 0) {
-                for (let collision of building.collisions) {
-                    const buildingCollision = {
-                        x: building.x + collision.x,
-                        y: building.y + collision.y,
-                        w: collision.w,
-                        h: collision.h
-                    };
-                    
-                    if (checkRectCollision(testEntity, buildingCollision)) {
-                        return true;
-                    }
-                }
             }
         }
     }
@@ -1572,34 +1522,11 @@ window.addEventListener('keydown', (e) => {
         gameState.currentMap = (gameState.currentMap + 1) % maps.length;
         loadMap(gameState.currentMap);
     }
-    
-    if (e.key === 'd' || e.key === 'D') {
-        gameState.debugMode = !gameState.debugMode;
-        console.log('Debug mode:', gameState.debugMode ? 'ON' : 'OFF');
-    }
 });
 
 window.addEventListener('keyup', (e) => {
     keys[e.key] = false;
 });
-
-// Mouse tracking para debug - movido para depois do carregamento
-let mouseTrackingSetup = false;
-
-function setupMouseTracking() {
-    if (mouseTrackingSetup) return;
-    mouseTrackingSetup = true;
-    
-    canvas.addEventListener('mousemove', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        debugSystem.mouseX = e.clientX - rect.left;
-        debugSystem.mouseY = e.clientY - rect.top;
-        
-        // Converter para coordenadas do mundo
-        debugSystem.worldX = Math.floor((debugSystem.mouseX / camera.zoom) + camera.x);
-        debugSystem.worldY = Math.floor((debugSystem.mouseY / camera.zoom) + camera.y);
-    });
-}
 
 // Função para obter sprite do player
 function getPlayerSprite() {
@@ -1640,13 +1567,7 @@ function update() {
     
     const playerCenterX = player.x + player.width/2;
     const playerCenterY = player.y + player.height/2;
-    
-    try {
-        player.inShadow = isInShadow(playerCenterX, playerCenterY);
-    } catch(e) {
-        player.inShadow = false;
-        console.warn('Erro na detecção de sombra:', e);
-    }
+    player.inShadow = isInShadow(playerCenterX, playerCenterY);
     
     let moving = false;
     let dx = 0, dy = 0;
@@ -1838,69 +1759,6 @@ function renderBuildings(map, visibleArea) {
             }
         }
     });
-}
-
-function renderDebugCollisions(map, visibleArea) {
-    if (!gameState.debugMode || !map.buildings) return;
-    
-    ctx.save();
-    
-    try {
-        map.buildings.forEach((building, index) => {
-            const buildingAsset = assets[building.type];
-            if (buildingAsset && buildingAsset.loaded) {
-                if (building.x + buildingAsset.width > visibleArea.left && 
-                    building.x < visibleArea.right &&
-                    building.y + buildingAsset.height > visibleArea.top && 
-                    building.y < visibleArea.bottom) {
-                    
-                    // Mostrar área total do prédio em azul (transparente)
-                    ctx.globalAlpha = 0.3;
-                    ctx.fillStyle = '#00f';
-                    ctx.fillRect(building.x, building.y, buildingAsset.width, buildingAsset.height);
-                    
-                    // Mostrar áreas de colisão específicas em vermelho
-                    if (building.collisions && building.collisions.length > 0) {
-                        ctx.globalAlpha = 0.6;
-                        ctx.fillStyle = '#f00';
-                        building.collisions.forEach(collision => {
-                            ctx.fillRect(
-                                building.x + collision.x,
-                                building.y + collision.y,
-                                collision.w,
-                                collision.h
-                            );
-                        });
-                    }
-                    
-                    // Mostrar informações do prédio
-                    ctx.globalAlpha = 1.0;
-                    ctx.fillStyle = '#fff';
-                    ctx.strokeStyle = '#000';
-                    ctx.lineWidth = 2;
-                    setPixelFont(10);
-                    
-                    const text1 = `${building.type} #${index}`;
-                    const text2 = `(${building.x}, ${building.y})`;
-                    const text3 = building.collisions && building.collisions.length > 0 ? `${building.collisions.length} colisões` : 'Sem colisão';
-                    
-                    // Contorno preto nas letras
-                    ctx.strokeText(text1, building.x + 5, building.y + 15);
-                    ctx.strokeText(text2, building.x + 5, building.y + 30);
-                    ctx.strokeText(text3, building.x + 5, building.y + 45);
-                    
-                    // Texto branco por cima
-                    ctx.fillText(text1, building.x + 5, building.y + 15);
-                    ctx.fillText(text2, building.x + 5, building.y + 30);
-                    ctx.fillText(text3, building.x + 5, building.y + 45);
-                }
-            }
-        });
-    } catch(e) {
-        console.warn('Erro no debug de colisões:', e);
-    }
-    
-    ctx.restore();
 }
 
 function renderEixaoLayer1(map) {
@@ -2218,12 +2076,8 @@ function renderEnemies(visibleArea) {
             if (loadedCheck[enemy.type]) {
                 const sprite = enemy.getSprite();
                 if (sprite) {
-                    try {
-                        if (isInShadow(enemy.x + enemy.width/2, enemy.y + enemy.height/2)) {
-                            ctx.globalAlpha = 0.5;
-                        }
-                    } catch(e) {
-                        // Falha silenciosa na detecção de sombra
+                    if (isInShadow(enemy.x + enemy.width/2, enemy.y + enemy.height/2)) {
+                        ctx.globalAlpha = 0.5;
                     }
                     
                     if (enemy.type === 'chacal' && !enemy.isDead && enemy.health < enemy.maxHealth) {
@@ -2267,21 +2121,13 @@ function renderPlayer() {
     if (spritesLoaded.madmax >= 16) {
         const sprite = getPlayerSprite();
         if (sprite) {
-            try {
-                if (player.inShadow) ctx.globalAlpha = 0.5;
-            } catch(e) {
-                // Falha silenciosa
-            }
+            if (player.inShadow) ctx.globalAlpha = 0.5;
             ctx.drawImage(sprite, player.x, player.y, player.width, player.height);
             ctx.globalAlpha = 1;
         }
     } else {
         ctx.fillStyle = player.isDashing ? '#ff0' : (player.isDead ? '#800' : '#f00');
-        try {
-            if (player.inShadow) ctx.globalAlpha = 0.5;
-        } catch(e) {
-            // Falha silenciosa
-        }
+        if (player.inShadow) ctx.globalAlpha = 0.5;
         ctx.fillRect(player.x, player.y, player.width, player.height);
         ctx.globalAlpha = 1;
     }
@@ -2356,40 +2202,6 @@ function renderUI(map) {
         ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
         ctx.textAlign = 'left';
     }
-    
-    // Debug overlay - coordenadas do mouse
-    if (gameState.debugMode && debugSystem && typeof debugSystem === 'object') {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-        ctx.fillRect(10, canvas.height - 150, 250, 100);
-        
-        ctx.fillStyle = '#0f0';
-        setPixelFont(12);
-        ctx.fillText('DEBUG MODE [D para toggle]', 20, canvas.height - 140);
-        ctx.fillText(`Mouse: ${debugSystem.mouseX || 0}, ${debugSystem.mouseY || 0}`, 20, canvas.height - 120);
-        ctx.fillText(`Mundo: ${debugSystem.worldX || 0}, ${debugSystem.worldY || 0}`, 20, canvas.height - 100);
-        
-        try {
-            ctx.fillText(`Player: ${Math.floor(player.x)}, ${Math.floor(player.y)}`, 20, canvas.height - 80);
-        } catch(e) {
-            ctx.fillText(`Player: erro`, 20, canvas.height - 80);
-        }
-        
-        // Crosshair no mouse (em coordenadas de tela)
-        if (debugSystem.mouseX && debugSystem.mouseY) {
-            try {
-                ctx.strokeStyle = '#0f0';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(debugSystem.mouseX - 10, debugSystem.mouseY);
-                ctx.lineTo(debugSystem.mouseX + 10, debugSystem.mouseY);
-                ctx.moveTo(debugSystem.mouseX, debugSystem.mouseY - 10);
-                ctx.lineTo(debugSystem.mouseX, debugSystem.mouseY + 10);
-                ctx.stroke();
-            } catch(e) {
-                // Falha silenciosa no crosshair
-            }
-        }
-    }
 }
 
 function draw() {
@@ -2426,7 +2238,6 @@ function draw() {
         renderShadows(map, visibleArea);
         renderTrees(map, visibleArea, 'bottom');
         renderBuildings(map, visibleArea);
-        renderDebugCollisions(map, visibleArea);
         renderObjects(map, visibleArea);
         renderWalls(map, visibleArea);
         renderSpecialObjects(map);
@@ -2494,18 +2305,13 @@ function draw() {
 // Aguardar fontes carregarem
 document.fonts.ready.then(() => {
     console.log('Fontes carregadas!');
-    setupMouseTracking(); // Setup do mouse aqui também
     gameLoop();
 }).catch(() => {
     console.log('Erro ao carregar fontes, usando fallback');
-    setupMouseTracking(); // Setup do mouse aqui também
     gameLoop();
 });
 
 function gameLoop() {
-    // Setup mouse tracking na primeira execução
-    setupMouseTracking();
-    
     update();
     draw();
     requestAnimationFrame(gameLoop);
@@ -2558,6 +2364,6 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.24 - Corrige todas as referências');
-console.log('📢 Controles: Setas=mover, K=morrer, E=spawn inimigo, M=música, N=próximo mapa, D=debug');
-console.log('💡 Pressione D para ver colisões dos prédios!');
+console.log('🎮 Mad Night v1.25 - Volta versão estável com prédios ajustados');
+console.log('📢 Controles: Setas=mover, K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
+console.log('💡 Prédios posicionados corretamente no mapa KS!');
