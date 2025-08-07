@@ -1,4 +1,4 @@
-console.log('Mad Night v1.20 - Corrige erros de referência');
+console.log('Mad Night v1.21 - Sistema de debug para colisões');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -37,7 +37,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.20'
+    version: 'v1.21'
 };
 
 // Player
@@ -764,11 +764,36 @@ const maps = [
         hasBackground: true, // Indicador de que tem background
         backgroundAsset: 'entradaKS01', // Nome do asset do background
         buildings: [
-            {type: 'predio0002', x: 1550, y: 700},
-            {type: 'predio0006', x: 0, y: 1280},
-            {type: 'predio0003', x: 1300, y: -60},
-            {type: 'predio0008', x: 550, y: 50},
-            {type: 'predio0008', x: 201, y: -90}  // Segundo prédio0008 encavalado
+            {
+                type: 'predio0002', 
+                x: 1550, 
+                y: 700,
+                collisions: [] // Array de retângulos de colisão - será preenchido depois
+            },
+            {
+                type: 'predio0006', 
+                x: 0, 
+                y: 1280,
+                collisions: [] // Array de retângulos de colisão - será preenchido depois
+            },
+            {
+                type: 'predio0003', 
+                x: 1300, 
+                y: -60,
+                collisions: [] // Array de retângulos de colisão - será preenchido depois
+            },
+            {
+                type: 'predio0008', 
+                x: 550, 
+                y: 50,
+                collisions: [] // Array de retângulos de colisão - será preenchido depois
+            },
+            {
+                type: 'predio0008', 
+                x: 201, 
+                y: -90,
+                collisions: [] // Array de retângulos de colisão - será preenchido depois
+            }
         ],
         trees: [],
         streetLights: [],
@@ -1501,6 +1526,17 @@ function updateProjectiles() {
 // Input
 const keys = {};
 
+// Mouse tracking para debug
+canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    debugSystem.mouseX = e.clientX - rect.left;
+    debugSystem.mouseY = e.clientY - rect.top;
+    
+    // Converter para coordenadas do mundo
+    debugSystem.worldX = Math.floor((debugSystem.mouseX / camera.zoom) + camera.x);
+    debugSystem.worldY = Math.floor((debugSystem.mouseY / camera.zoom) + camera.y);
+});
+
 window.addEventListener('keydown', (e) => {
     keys[e.key] = true;
     
@@ -1521,6 +1557,11 @@ window.addEventListener('keydown', (e) => {
     if (e.key === 'n' || e.key === 'N') {
         gameState.currentMap = (gameState.currentMap + 1) % maps.length;
         loadMap(gameState.currentMap);
+    }
+    
+    if (e.key === 'd' || e.key === 'D') {
+        gameState.debugMode = !gameState.debugMode;
+        console.log('Debug mode:', gameState.debugMode ? 'ON' : 'OFF');
     }
 });
 
@@ -1759,6 +1800,49 @@ function renderBuildings(map, visibleArea) {
             }
         }
     });
+}
+
+function renderDebugCollisions(map, visibleArea) {
+    if (!gameState.debugMode || !map.buildings) return;
+    
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+    
+    map.buildings.forEach(building => {
+        const buildingAsset = assets[building.type];
+        if (buildingAsset && buildingAsset.loaded) {
+            if (building.x + buildingAsset.width > visibleArea.left && 
+                building.x < visibleArea.right &&
+                building.y + buildingAsset.height > visibleArea.top && 
+                building.y < visibleArea.bottom) {
+                
+                // Mostrar área total do prédio em azul
+                ctx.fillStyle = '#00f';
+                ctx.fillRect(building.x, building.y, buildingAsset.width, buildingAsset.height);
+                
+                // Mostrar áreas de colisão específicas em vermelho (quando implementadas)
+                if (building.collisions && building.collisions.length > 0) {
+                    ctx.fillStyle = '#f00';
+                    building.collisions.forEach(collision => {
+                        ctx.fillRect(
+                            building.x + collision.x,
+                            building.y + collision.y,
+                            collision.w,
+                            collision.h
+                        );
+                    });
+                }
+                
+                // Mostrar coordenadas do prédio
+                ctx.fillStyle = '#fff';
+                setPixelFont(12);
+                ctx.fillText(`${building.type}`, building.x + 10, building.y + 20);
+                ctx.fillText(`(${building.x}, ${building.y})`, building.x + 10, building.y + 35);
+            }
+        }
+    });
+    
+    ctx.restore();
 }
 
 function renderEixaoLayer1(map) {
@@ -2202,6 +2286,29 @@ function renderUI(map) {
         ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
         ctx.textAlign = 'left';
     }
+    
+    // Debug overlay - coordenadas do mouse
+    if (gameState.debugMode) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.fillRect(10, canvas.height - 150, 250, 100);
+        
+        ctx.fillStyle = '#0f0';
+        setPixelFont(12);
+        ctx.fillText('DEBUG MODE [D para toggle]', 20, canvas.height - 140);
+        ctx.fillText(`Mouse: ${debugSystem.mouseX}, ${debugSystem.mouseY}`, 20, canvas.height - 120);
+        ctx.fillText(`Mundo: ${debugSystem.worldX}, ${debugSystem.worldY}`, 20, canvas.height - 100);
+        ctx.fillText(`Player: ${Math.floor(player.x)}, ${Math.floor(player.y)}`, 20, canvas.height - 80);
+        
+        // Crosshair no mouse (em coordenadas de tela)
+        ctx.strokeStyle = '#0f0';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(debugSystem.mouseX - 10, debugSystem.mouseY);
+        ctx.lineTo(debugSystem.mouseX + 10, debugSystem.mouseY);
+        ctx.moveTo(debugSystem.mouseX, debugSystem.mouseY - 10);
+        ctx.lineTo(debugSystem.mouseX, debugSystem.mouseY + 10);
+        ctx.stroke();
+    }
 }
 
 function draw() {
@@ -2238,6 +2345,7 @@ function draw() {
         renderShadows(map, visibleArea);
         renderTrees(map, visibleArea, 'bottom');
         renderBuildings(map, visibleArea);
+        renderDebugCollisions(map, visibleArea);
         renderObjects(map, visibleArea);
         renderWalls(map, visibleArea);
         renderSpecialObjects(map);
@@ -2364,6 +2472,6 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.20 - Corrige erros de referência');
-console.log('📢 Controles: Setas=mover, K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
+console.log('🎮 Mad Night v1.21 - Sistema de debug para colisões');
+console.log('📢 Controles: Setas=mover, K=morrer, E=spawn inimigo, M=música, N=próximo mapa, D=debug');
 console.log('💡 Clique ou pressione qualquer tecla para ativar o áudio!');
