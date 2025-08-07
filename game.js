@@ -1,4 +1,4 @@
-console.log('Mad Night v1.22 - Ajusta posições e colisão predio0002');
+console.log('Mad Night v1.23 - Corrige erros de referência');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -37,7 +37,7 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    version: 'v1.22'
+    version: 'v1.23'
 };
 
 // Player
@@ -745,7 +745,7 @@ const maps = [
         direction: 'right',
         hasLayers: true
     },
-    // Mapa 2 - Fronteira com o Komando Satânico (ATUALIZADO v1.22)
+    // Mapa 2 - Fronteira com o Komando Satânico (ATUALIZADO v1.20)
     {
         name: "Fronteira com o Komando Satânico",
         subtitle: "Primeira superquadra",
@@ -1551,17 +1551,6 @@ function updateProjectiles() {
 // Input
 const keys = {};
 
-// Mouse tracking para debug
-canvas.addEventListener('mousemove', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    debugSystem.mouseX = e.clientX - rect.left;
-    debugSystem.mouseY = e.clientY - rect.top;
-    
-    // Converter para coordenadas do mundo
-    debugSystem.worldX = Math.floor((debugSystem.mouseX / camera.zoom) + camera.x);
-    debugSystem.worldY = Math.floor((debugSystem.mouseY / camera.zoom) + camera.y);
-});
-
 window.addEventListener('keydown', (e) => {
     keys[e.key] = true;
     
@@ -1592,6 +1581,17 @@ window.addEventListener('keydown', (e) => {
 
 window.addEventListener('keyup', (e) => {
     keys[e.key] = false;
+});
+
+// Mouse tracking para debug
+canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    debugSystem.mouseX = e.clientX - rect.left;
+    debugSystem.mouseY = e.clientY - rect.top;
+    
+    // Converter para coordenadas do mundo
+    debugSystem.worldX = Math.floor((debugSystem.mouseX / camera.zoom) + camera.x);
+    debugSystem.worldY = Math.floor((debugSystem.mouseY / camera.zoom) + camera.y);
 });
 
 // Função para obter sprite do player
@@ -2329,26 +2329,28 @@ function renderUI(map) {
     }
     
     // Debug overlay - coordenadas do mouse
-    if (gameState.debugMode) {
+    if (gameState.debugMode && debugSystem) {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
         ctx.fillRect(10, canvas.height - 150, 250, 100);
         
         ctx.fillStyle = '#0f0';
         setPixelFont(12);
         ctx.fillText('DEBUG MODE [D para toggle]', 20, canvas.height - 140);
-        ctx.fillText(`Mouse: ${debugSystem.mouseX}, ${debugSystem.mouseY}`, 20, canvas.height - 120);
-        ctx.fillText(`Mundo: ${debugSystem.worldX}, ${debugSystem.worldY}`, 20, canvas.height - 100);
+        ctx.fillText(`Mouse: ${debugSystem.mouseX || 0}, ${debugSystem.mouseY || 0}`, 20, canvas.height - 120);
+        ctx.fillText(`Mundo: ${debugSystem.worldX || 0}, ${debugSystem.worldY || 0}`, 20, canvas.height - 100);
         ctx.fillText(`Player: ${Math.floor(player.x)}, ${Math.floor(player.y)}`, 20, canvas.height - 80);
         
         // Crosshair no mouse (em coordenadas de tela)
-        ctx.strokeStyle = '#0f0';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(debugSystem.mouseX - 10, debugSystem.mouseY);
-        ctx.lineTo(debugSystem.mouseX + 10, debugSystem.mouseY);
-        ctx.moveTo(debugSystem.mouseX, debugSystem.mouseY - 10);
-        ctx.lineTo(debugSystem.mouseX, debugSystem.mouseY + 10);
-        ctx.stroke();
+        if (debugSystem.mouseX && debugSystem.mouseY) {
+            ctx.strokeStyle = '#0f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(debugSystem.mouseX - 10, debugSystem.mouseY);
+            ctx.lineTo(debugSystem.mouseX + 10, debugSystem.mouseY);
+            ctx.moveTo(debugSystem.mouseX, debugSystem.mouseY - 10);
+            ctx.lineTo(debugSystem.mouseX, debugSystem.mouseY + 10);
+            ctx.stroke();
+        }
     }
 }
 
@@ -2513,6 +2515,6 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.22 - Ajusta posições e colisão predio0002');
+console.log('🎮 Mad Night v1.23 - Corrige erros de referência');
 console.log('📢 Controles: Setas=mover, K=morrer, E=spawn inimigo, M=música, N=próximo mapa, D=debug');
 console.log('💡 Pressione D para ver colisões dos prédios!');
