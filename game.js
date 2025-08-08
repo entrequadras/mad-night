@@ -1,4 +1,4 @@
-console.log('Mad Night v1.36 - Carros Finalizados');
+console.log('Mad Night v1.37 - Objetos Visíveis e Colisões 50%');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -38,7 +38,7 @@ const gameState = {
     enemySpawnDelay: 1000,
     spawnCorner: 0,
     lastFrameTime: 0, // Movido para dentro do gameState
-    version: 'v1.36' // Carros Finalizados!
+    version: 'v1.37' // Objetos Visíveis e Colisões 50%!
 };
 
 // Player
@@ -1079,7 +1079,7 @@ function checkWallCollision(entity, newX, newY) {
         }
     }
     
-    // Verificar colisão com objetos (garrafas quebradas não têm colisão)
+    // Verificar colisão com objetos (v1.37 - colisão 50% para parquinho e banco)
     if (map.objects) {
         for (let obj of map.objects) {
             // Pular garrafas quebradas - sem colisão
@@ -1087,40 +1087,54 @@ function checkWallCollision(entity, newX, newY) {
                 continue;
             }
             
-            // Usar collisionBox customizada se existir (v1.28)
-            if (obj.collisionBox) {
-                if (checkRectCollision(testEntity, obj.collisionBox)) {
+            const objAsset = assets[obj.type];
+            if (objAsset && objAsset.loaded) {
+                // Colisão de 50% centralizada para parquinho e banco
+                const fullWidth = objAsset.width;
+                const fullHeight = objAsset.height;
+                const halfWidth = fullWidth * 0.5;
+                const halfHeight = fullHeight * 0.5;
+                
+                const objCollision = {
+                    x: obj.x + (fullWidth - halfWidth) / 2,
+                    y: obj.y + (fullHeight - halfHeight) / 2,
+                    w: halfWidth,
+                    h: halfHeight
+                };
+                
+                if (checkRectCollision(testEntity, objCollision)) {
                     return true;
-                }
-            } else {
-                // Colisão padrão com o objeto inteiro
-                const objAsset = assets[obj.type];
-                if (objAsset && objAsset.loaded) {
-                    const objCollision = {
-                        x: obj.x,
-                        y: obj.y,
-                        w: objAsset.width,
-                        h: objAsset.height
-                    };
-                    
-                    if (checkRectCollision(testEntity, objCollision)) {
-                        return true;
-                    }
                 }
             }
         }
     }
     
-    // NOVO: Verificar colisão com carros estacionados (v1.28)
-    if (map.parkedCars) {
-        for (let car of map.parkedCars) {
+    // NOVO: Verificar colisão com carros estacionados (v1.37 - colisão 50%)
+    if (map.parkedCars || gameState.currentMap === 2) {
+        const carros = gameState.currentMap === 2 ? [
+            {type: 'carro002frente', x: 34, y: 1472},
+            {type: 'carrolateral_04', x: 1770, y: 1210},
+            {type: 'carrolateral_06', x: 602, y: 523},
+            {type: 'carrolateral_02', x: 527, y: 474},
+            {type: 'carrolateral_03', x: 299, y: 378},
+            {type: 'carrolateral_07', x: 89, y: 299},
+            {type: 'carrolateral_08', x: 238, y: 704}
+        ] : (map.parkedCars || []);
+        
+        for (let car of carros) {
             const carAsset = assets[car.type];
-            if (carAsset && carAsset.loaded) {
+            if (carAsset) {
+                // Colisão de 50% centralizada
+                const fullWidth = carAsset.width || 150;
+                const fullHeight = carAsset.height || 100;
+                const halfWidth = fullWidth * 0.5;
+                const halfHeight = fullHeight * 0.5;
+                
                 const carCollision = {
-                    x: car.x,
-                    y: car.y,
-                    w: carAsset.width,
-                    h: carAsset.height
+                    x: car.x + (fullWidth - halfWidth) / 2,  // Centralizar
+                    y: car.y + (fullHeight - halfHeight) / 2,
+                    w: halfWidth,
+                    h: halfHeight
                 };
                 
                 if (checkRectCollision(testEntity, carCollision)) {
@@ -1941,20 +1955,38 @@ function renderCollisionDebug(map) {
         });
     }
     
-    // Colisões customizadas de objetos - VERDE
+    // Colisões customizadas de objetos - VERDE (v1.37 - mostra 50%)
     if (map.objects) {
         ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
         ctx.strokeStyle = 'rgba(0, 255, 0, 0.8)';
         
         map.objects.forEach(obj => {
-            if (obj.collisionBox) {
-                ctx.fillRect(obj.collisionBox.x, obj.collisionBox.y, obj.collisionBox.w, obj.collisionBox.h);
-                ctx.strokeRect(obj.collisionBox.x, obj.collisionBox.y, obj.collisionBox.w, obj.collisionBox.h);
+            if (obj.type !== 'garrafaquebrada01' && obj.type !== 'garrafaquebrada02') {
+                const objAsset = assets[obj.type];
+                if (objAsset) {
+                    const fullWidth = objAsset.width || 100;
+                    const fullHeight = objAsset.height || 100;
+                    const halfWidth = fullWidth * 0.5;
+                    const halfHeight = fullHeight * 0.5;
+                    
+                    ctx.fillRect(
+                        obj.x + (fullWidth - halfWidth) / 2,
+                        obj.y + (fullHeight - halfHeight) / 2,
+                        halfWidth,
+                        halfHeight
+                    );
+                    ctx.strokeRect(
+                        obj.x + (fullWidth - halfWidth) / 2,
+                        obj.y + (fullHeight - halfHeight) / 2,
+                        halfWidth,
+                        halfHeight
+                    );
+                }
             }
         });
     }
     
-    // Colisões dos carros - AZUL
+    // Colisões dos carros - AZUL (v1.37 - mostra 50%)
     if (map.parkedCars || gameState.currentMap === 2) {
         ctx.fillStyle = 'rgba(0, 0, 255, 0.3)';
         ctx.strokeStyle = 'rgba(0, 0, 255, 0.8)';
@@ -1972,8 +2004,23 @@ function renderCollisionDebug(map) {
         carros.forEach(car => {
             const carAsset = assets[car.type];
             if (carAsset) {
-                ctx.fillRect(car.x, car.y, carAsset.width || 150, carAsset.height || 100);
-                ctx.strokeRect(car.x, car.y, carAsset.width || 150, carAsset.height || 100);
+                const fullWidth = carAsset.width || 150;
+                const fullHeight = carAsset.height || 100;
+                const halfWidth = fullWidth * 0.5;
+                const halfHeight = fullHeight * 0.5;
+                
+                ctx.fillRect(
+                    car.x + (fullWidth - halfWidth) / 2,
+                    car.y + (fullHeight - halfHeight) / 2,
+                    halfWidth,
+                    halfHeight
+                );
+                ctx.strokeRect(
+                    car.x + (fullWidth - halfWidth) / 2,
+                    car.y + (fullHeight - halfHeight) / 2,
+                    halfWidth,
+                    halfHeight
+                );
             }
         });
     }
@@ -2156,7 +2203,17 @@ function renderObjects(map, visibleArea) {
     if (!map.objects) return;
     
     map.objects.forEach(obj => {
-        renderRotatedObject(obj, obj.type, visibleArea);
+        const objAsset = assets[obj.type];
+        if (objAsset && objAsset.loaded) {
+            if (obj.x + objAsset.width > visibleArea.left && 
+                obj.x < visibleArea.right &&
+                obj.y + objAsset.height > visibleArea.top && 
+                obj.y < visibleArea.bottom) {
+                
+                // Renderizar direto sem rotação (v1.37)
+                ctx.drawImage(objAsset.img, obj.x, obj.y);
+            }
+        }
     });
 }
 
@@ -2674,11 +2731,11 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.36 - Carros Finalizados');
+console.log('🎮 Mad Night v1.37 - Objetos Visíveis e Colisões 50%');
 console.log('📢 Controles: Setas=mover, Espaço=dash, C=ver colisões');
-console.log('🚗 Carros renderizando normalmente sem debug');
-console.log('✅ Sistema de colisões unificado');
-console.log('🎯 Pronto para ajustes de colisão dos prédios!');
+console.log('🚗 Colisões dos carros reduzidas para 50% (centralizada)');
+console.log('🎪 Parquinho e banco agora visíveis com colisão 50%');
+console.log('🏢 Colisões dos prédios atualizadas!');
 
 // Debug de carregamento dos carros
 setTimeout(() => {
