@@ -752,10 +752,10 @@ const maps = [
                 y: 665,
                 // COLISÕES: Diagonal esquerda-inferior para direita-superior (MAGRO)
                 collisionRects: [
-                    {x: 1650, y: 1100, w: 200, h: 80},  // Base inferior
-                    {x: 1680, y: 1060, w: 180, h: 40},  // Meio-baixo
-                    {x: 1710, y: 1020, w: 160, h: 40},   // Meio
-                    {x: 1740, y: 980, w: 120, h: 80}     // Meio-alto
+                    {x: 1650, y: 1100, w: 200, h: 60},  // Base inferior
+                    {x: 1680, y: 1060, w: 220, h: 40},  // Meio-baixo
+                    {x: 1710, y: 1020, w: 220, h: 40},   // Meio
+                    {x: 1740, y: 980, w: 200, h: 60}     // Meio-alto
                 ]
             },
             {
