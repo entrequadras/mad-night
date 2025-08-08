@@ -1,4 +1,4 @@
-console.log('Mad Night v1.33 - Carros Finalmente Visíveis');
+console.log('Mad Night v1.34 - Carros Forçados');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -38,7 +38,7 @@ const gameState = {
     enemySpawnDelay: 1000,
     spawnCorner: 0,
     lastFrameTime: 0, // Movido para dentro do gameState
-    version: 'v1.33' // Carros Finalmente Visíveis!
+    version: 'v1.34' // Carros Forçados!
 };
 
 // Player
@@ -800,10 +800,10 @@ const maps = [
                 y: 665,
                 // COLISÕES: Diagonal esquerda-inferior para direita-superior (MAGRO)
                 collisionRects: [
-                    {x: 1680, y: 1100, w: 200, h: 60},  // Base inferior
-                    {x: 1680, y: 1060, w: 220, h: 40},  // Meio-baixo
-                    {x: 1710, y: 1020, w: 220, h: 40},   // Meio
-                    {x: 1740, y: 960, w: 200, h: 60}     // Meio-alto
+                    {x: 1650, y: 1100, w: 120, h: 40},  // Base inferior
+                    {x: 1680, y: 1060, w: 100, h: 40},  // Meio-baixo
+                    {x: 1710, y: 1020, w: 80, h: 40},   // Meio
+                    {x: 1740, y: 980, w: 60, h: 40}     // Meio-alto
                 ]
             },
             {
@@ -812,7 +812,7 @@ const maps = [
                 y: 970,
                 // COLISÕES: Retangular normal (não diagonal)
                 collisionRects: [
-                    {x: 40, y: 1255, w: 350, h: 160}    // Retângulo único centralizado
+                    {x: 40, y: 1320, w: 320, h: 100}    // Retângulo único centralizado
                 ]
             },
             {
@@ -821,10 +821,10 @@ const maps = [
                 y: -60,
                 // COLISÕES: Diagonal direita-inferior para esquerda-superior
                 collisionRects: [
-                    {x: 1360, y: 230, w: 210, h: 40},    // Meio-alto
-                    {x: 1440, y: 270, w: 210, h: 40},    // Meio
-                    {x: 1490, y: 310, w: 210, h: 40},   // Meio-baixo
-                    {x: 1540, y: 350, w: 180, h: 40}    // Base inferior
+                    {x: 1360, y: 380, w: 60, h: 40},    // Meio-alto
+                    {x: 1340, y: 420, w: 80, h: 40},    // Meio
+                    {x: 1320, y: 460, w: 100, h: 40},   // Meio-baixo
+                    {x: 1300, y: 500, w: 120, h: 40}    // Base inferior
                 ]
             },
             {
@@ -833,10 +833,10 @@ const maps = [
                 y: -90,
                 // COLISÕES: Diagonal direita-inferior para esquerda-superior
                 collisionRects: [
-                    {x: 220, y: 150, w: 350, h: 40},     // Meio-alto
-                    {x: 250, y: 190, w: 300, h: 40},     // Meio
-                    {x: 304, y: 230, w: 160, h: 40},    // Meio-baixo
-                    {x: 361, y: 270, w: 160, h: 40}     // Base inferior
+                    {x: 281, y: 250, w: 60, h: 40},     // Meio-alto
+                    {x: 261, y: 290, w: 80, h: 40},     // Meio
+                    {x: 241, y: 330, w: 100, h: 40},    // Meio-baixo
+                    {x: 221, y: 370, w: 120, h: 40}     // Base inferior
                 ]
             },
             {
@@ -845,10 +845,10 @@ const maps = [
                 y: 50,
                 // COLISÕES: Diagonal direita-inferior para esquerda-superior
                 collisionRects: [
-                    {x: 540, y: 290, w: 500, h: 40},     // Meio-alto
-                    {x: 640, y: 330, w: 380, h: 40},     // Meio
-                    {x: 690, y: 370, w: 340, h: 40},    // Meio-baixo
-                    {x: 770, y: 410, w: 190, h: 40}     // Base inferior
+                    {x: 630, y: 390, w: 60, h: 40},     // Meio-alto
+                    {x: 610, y: 430, w: 80, h: 40},     // Meio
+                    {x: 590, y: 470, w: 100, h: 40},    // Meio-baixo
+                    {x: 570, y: 510, w: 120, h: 40}     // Base inferior
                 ]
             }
         ],
@@ -1975,76 +1975,71 @@ function renderCarCollisionDebug(map) {
     ctx.restore();
 }
 
-// Renderizar carros estacionados (v1.32 - DEBUG TOTAL)
+// Renderizar carros estacionados (v1.34 - HARDCODED PARA MAPA 2!)
 function renderParkedCars(map, visibleArea) {
-    // Debug: verificar se a função está sendo chamada
+    // FORÇAR carros no mapa 2
     if (gameState.currentMap === 2) {
-        console.log('=== renderParkedCars CHAMADA ===');
-        console.log('Map tem parkedCars?', map.parkedCars ? 'SIM' : 'NÃO');
-        if (map.parkedCars) {
-            console.log('Quantidade de carros:', map.parkedCars.length);
-            console.log('Área visível:', visibleArea);
-        }
-    }
-    
-    if (!map.parkedCars) {
-        console.log('Map não tem parkedCars, saindo...');
-        return;
-    }
-    
-    // FORÇAR desenho de um retângulo VERDE onde a função roda
-    ctx.fillStyle = '#00ff00';
-    ctx.fillRect(100, 100, 200, 50);
-    ctx.fillStyle = '#000';
-    setPixelFont(10);
-    ctx.fillText('CARROS AQUI', 110, 120);
-    
-    let carrosProcessados = 0;
-    
-    map.parkedCars.forEach((car, index) => {
-        carrosProcessados++;
+        console.log('=== FORÇANDO CARROS NO MAPA 2 ===');
         
-        // Log detalhado de CADA carro
-        if (gameState.currentMap === 2) {
-            console.log(`Carro ${index}: tipo=${car.type}, x=${car.x}, y=${car.y}`);
-        }
+        // Array hardcoded de carros
+        const carrosForcados = [
+            {type: 'carro002frente', x: 34, y: 1472},
+            {type: 'carrolateral_04', x: 1770, y: 1210},
+            {type: 'carrolateral_06', x: 602, y: 523},
+            {type: 'carrolateral_02', x: 527, y: 474},
+            {type: 'carrolateral_03', x: 299, y: 378},
+            {type: 'carrolateral_07', x: 89, y: 299},
+            {type: 'carrolateral_08', x: 238, y: 704}
+        ];
         
-        // SEMPRE desenhar um retângulo, independente de visibilidade
-        ctx.fillStyle = '#ff00ff'; // MAGENTA brilhante
-        ctx.strokeStyle = '#00ffff'; // CIANO
-        ctx.lineWidth = 3;
+        // Desenhar TODOS os carros forçados
+        carrosForcados.forEach((car, index) => {
+            // SEMPRE desenhar retângulo colorido primeiro
+            ctx.fillStyle = '#ff00ff'; // MAGENTA
+            ctx.strokeStyle = '#00ffff'; // CIANO
+            ctx.lineWidth = 3;
+            ctx.fillRect(car.x, car.y, 150, 100);
+            ctx.strokeRect(car.x, car.y, 150, 100);
+            
+            // Texto
+            ctx.fillStyle = '#ffffff';
+            setPixelFont(8);
+            ctx.fillText(`CAR${index}`, car.x + 50, car.y + 45);
+            
+            // Tentar desenhar o asset real por cima
+            const carAsset = assets[car.type];
+            if (carAsset && carAsset.loaded) {
+                ctx.globalAlpha = 0.8;
+                ctx.drawImage(carAsset.img, car.x, car.y);
+                ctx.globalAlpha = 1.0;
+            }
+        });
         
-        // Desenhar o retângulo do carro
-        ctx.fillRect(car.x, car.y, 150, 100);
-        ctx.strokeRect(car.x, car.y, 150, 100);
-        
-        // Texto no carro
-        ctx.fillStyle = '#ffffff';
-        setPixelFont(8);
-        ctx.fillText(`CAR${index}`, car.x + 50, car.y + 45);
-        
-        // Tentar desenhar o asset real também
-        const carAsset = assets[car.type];
-        if (carAsset && carAsset.loaded) {
-            // Desenhar com transparência para ver o debug
-            ctx.globalAlpha = 0.7;
-            ctx.drawImage(carAsset.img, car.x, car.y);
-            ctx.globalAlpha = 1.0;
-            console.log(`Asset ${car.type} desenhado!`);
-        }
-    });
-    
-    // Log final
-    if (gameState.currentMap === 2) {
-        console.log(`Total de carros processados: ${carrosProcessados}`);
-        
-        // Desenhar contador na tela
-        ctx.fillStyle = '#ffff00';
-        ctx.fillRect(10, 200, 300, 30);
+        // Debug visual no canto
+        ctx.fillStyle = '#00ff00';
+        ctx.fillRect(10, 150, 250, 30);
         ctx.fillStyle = '#000';
         setPixelFont(10);
-        ctx.fillText(`CARROS: ${carrosProcessados}`, 20, 210);
+        ctx.fillText('7 CARROS FORCADOS!', 20, 160);
+        
+        return; // Sair da função após forçar
     }
+    
+    // Código original para outros mapas
+    if (!map.parkedCars) return;
+    
+    map.parkedCars.forEach(car => {
+        const carAsset = assets[car.type];
+        if (carAsset && carAsset.loaded) {
+            if (car.x + carAsset.width > visibleArea.left && 
+                car.x < visibleArea.right &&
+                car.y + carAsset.height > visibleArea.top && 
+                car.y < visibleArea.bottom) {
+                
+                ctx.drawImage(carAsset.img, car.x, car.y);
+            }
+        }
+    });
 }
 
 function renderEixaoLayer1(map) {
@@ -2681,11 +2676,11 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.33 - Carros Finalmente Visíveis');
+console.log('🎮 Mad Night v1.34 - Carros Forçados');
 console.log('📢 Controles: Setas=mover, Espaço=dash, C=ver colisões');
-console.log('🚗 BUG CORRIGIDO: parkedCars estava no lugar errado!');
-console.log('✅ Agora os carros DEVEM aparecer!');
-console.log('🎯 7 carros estacionados no mapa 2');
+console.log('🚗 CARROS HARDCODED DIRETO NO MAPA 2!');
+console.log('✅ Colisões dos prédios ajustadas!');
+console.log('🎯 Se não aparecer agora, é problema de renderização!');
 
 // Debug de carregamento dos carros
 setTimeout(() => {
