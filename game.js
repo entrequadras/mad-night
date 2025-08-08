@@ -224,27 +224,27 @@ assets.parquinho.img.src = 'assets/objects/parquinho.png';
 assets.parquinho.img.onload = () => { assets.parquinho.loaded = true; };
 
 // NOVO: Carregar carros laterais (CORRIGIDO com underscore)
-assets.carrolateral_02.img.src = 'assets/scenary/carrolateral_02.png';
+assets.carrolateral_02.img.src = 'assets/objects/carrolateral_02.png';
 assets.carrolateral_02.img.onerror = () => { console.log('carrolateral_02 não encontrado'); };
 assets.carrolateral_02.img.onload = () => { assets.carrolateral_02.loaded = true; };
 
-assets.carrolateral_03.img.src = 'assets/scenary/carrolateral_03.png';
+assets.carrolateral_03.img.src = 'assets/objects/carrolateral_03.png';
 assets.carrolateral_03.img.onerror = () => { console.log('carrolateral_03 não encontrado'); };
 assets.carrolateral_03.img.onload = () => { assets.carrolateral_03.loaded = true; };
 
-assets.carrolateral_04.img.src = 'assets/scenary/carrolateral_04.png';
+assets.carrolateral_04.img.src = 'assets/objects/carrolateral_04.png';
 assets.carrolateral_04.img.onerror = () => { console.log('carrolateral_04 não encontrado'); };
 assets.carrolateral_04.img.onload = () => { assets.carrolateral_04.loaded = true; };
 
-assets.carrolateral_06.img.src = 'assets/scenary/carrolateral_06.png';
+assets.carrolateral_06.img.src = 'assets/objects/carrolateral_06.png';
 assets.carrolateral_06.img.onerror = () => { console.log('carrolateral_06 não encontrado'); };
 assets.carrolateral_06.img.onload = () => { assets.carrolateral_06.loaded = true; };
 
-assets.carrolateral_07.img.src = 'assets/scenary/carrolateral_07.png';
+assets.carrolateral_07.img.src = 'assets/objects/carrolateral_07.png';
 assets.carrolateral_07.img.onerror = () => { console.log('carrolateral_07 não encontrado'); };
 assets.carrolateral_07.img.onload = () => { assets.carrolateral_07.loaded = true; };
 
-assets.carrolateral_08.img.src = 'assets/scenary/carrolateral_08.png';
+assets.carrolateral_08.img.src = 'assets/objects/carrolateral_08.png';
 assets.carrolateral_08.img.onerror = () => { console.log('carrolateral_08 não encontrado'); };
 assets.carrolateral_08.img.onload = () => { assets.carrolateral_08.loaded = true; };
 
