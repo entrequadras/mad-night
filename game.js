@@ -1,4 +1,4 @@
-console.log('Mad Night v1.35 - Código Limpo');
+console.log('Mad Night v1.36 - Carros Finalizados');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -38,7 +38,7 @@ const gameState = {
     enemySpawnDelay: 1000,
     spawnCorner: 0,
     lastFrameTime: 0, // Movido para dentro do gameState
-    version: 'v1.35' // Código Limpo!
+    version: 'v1.36' // Carros Finalizados!
 };
 
 // Player
@@ -1918,28 +1918,30 @@ function renderBuildingsLayer(map, visibleArea, layer) {
     });
 }
 
-// DEBUG: Renderizar áreas de colisão (v1.28)
+// DEBUG: Renderizar áreas de colisão (v1.36 - SIMPLIFICADO)
 function renderCollisionDebug(map) {
-    if (!map.buildings) return;
-    
-    // Só mostrar se a tecla C estiver pressionada (debug)
+    // Só mostrar se a tecla C estiver pressionada
     if (!keys['c'] && !keys['C']) return;
     
     ctx.save();
-    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-    ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
-    ctx.lineWidth = 2;
     
-    map.buildings.forEach(building => {
-        if (building.collisionRects) {
-            building.collisionRects.forEach(rect => {
-                ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
-                ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
-            });
-        }
-    });
+    // Colisões dos prédios - VERMELHO
+    if (map.buildings) {
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+        ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
+        ctx.lineWidth = 2;
+        
+        map.buildings.forEach(building => {
+            if (building.collisionRects) {
+                building.collisionRects.forEach(rect => {
+                    ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+                    ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+                });
+            }
+        });
+    }
     
-    // Mostrar colisões customizadas de objetos
+    // Colisões customizadas de objetos - VERDE
     if (map.objects) {
         ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
         ctx.strokeStyle = 'rgba(0, 255, 0, 0.8)';
@@ -1952,36 +1954,39 @@ function renderCollisionDebug(map) {
         });
     }
     
-    ctx.restore();
-}
-
-// DEBUG: Renderizar colisões dos carros (v1.28)
-function renderCarCollisionDebug(map) {
-    if (!map.parkedCars || (!keys['c'] && !keys['C'])) return;
-    
-    ctx.save();
-    ctx.fillStyle = 'rgba(0, 0, 255, 0.3)';
-    ctx.strokeStyle = 'rgba(0, 0, 255, 0.8)';
-    ctx.lineWidth = 2;
-    
-    map.parkedCars.forEach(car => {
-        const carAsset = assets[car.type];
-        if (carAsset && carAsset.loaded) {
-            ctx.fillRect(car.x, car.y, carAsset.width, carAsset.height);
-            ctx.strokeRect(car.x, car.y, carAsset.width, carAsset.height);
-        }
-    });
-    
-    ctx.restore();
-}
-
-// Renderizar carros estacionados (v1.34 - HARDCODED PARA MAPA 2!)
-function renderParkedCars(map, visibleArea) {
-    // FORÇAR carros no mapa 2
-    if (gameState.currentMap === 2) {
-        console.log('=== FORÇANDO CARROS NO MAPA 2 ===');
+    // Colisões dos carros - AZUL
+    if (map.parkedCars || gameState.currentMap === 2) {
+        ctx.fillStyle = 'rgba(0, 0, 255, 0.3)';
+        ctx.strokeStyle = 'rgba(0, 0, 255, 0.8)';
         
-        // Array hardcoded de carros
+        const carros = gameState.currentMap === 2 ? [
+            {type: 'carro002frente', x: 34, y: 1472},
+            {type: 'carrolateral_04', x: 1770, y: 1210},
+            {type: 'carrolateral_06', x: 602, y: 523},
+            {type: 'carrolateral_02', x: 527, y: 474},
+            {type: 'carrolateral_03', x: 299, y: 378},
+            {type: 'carrolateral_07', x: 89, y: 299},
+            {type: 'carrolateral_08', x: 238, y: 704}
+        ] : (map.parkedCars || []);
+        
+        carros.forEach(car => {
+            const carAsset = assets[car.type];
+            if (carAsset) {
+                ctx.fillRect(car.x, car.y, carAsset.width || 150, carAsset.height || 100);
+                ctx.strokeRect(car.x, car.y, carAsset.width || 150, carAsset.height || 100);
+            }
+        });
+    }
+    
+    ctx.restore();
+}
+
+// Função removida: renderCarCollisionDebug (não é mais necessária)
+
+// Renderizar carros estacionados (v1.36 - LIMPO E FUNCIONAL)
+function renderParkedCars(map, visibleArea) {
+    // Renderização especial para mapa 2
+    if (gameState.currentMap === 2) {
         const carrosForcados = [
             {type: 'carro002frente', x: 34, y: 1472},
             {type: 'carrolateral_04', x: 1770, y: 1210},
@@ -1992,40 +1997,34 @@ function renderParkedCars(map, visibleArea) {
             {type: 'carrolateral_08', x: 238, y: 704}
         ];
         
-        // Desenhar TODOS os carros forçados
-        carrosForcados.forEach((car, index) => {
-            // SEMPRE desenhar retângulo colorido primeiro
-            ctx.fillStyle = '#ff00ff'; // MAGENTA
-            ctx.strokeStyle = '#00ffff'; // CIANO
-            ctx.lineWidth = 3;
-            ctx.fillRect(car.x, car.y, 150, 100);
-            ctx.strokeRect(car.x, car.y, 150, 100);
-            
-            // Texto
-            ctx.fillStyle = '#ffffff';
-            setPixelFont(8);
-            ctx.fillText(`CAR${index}`, car.x + 50, car.y + 45);
-            
-            // Tentar desenhar o asset real por cima
+        carrosForcados.forEach(car => {
             const carAsset = assets[car.type];
             if (carAsset && carAsset.loaded) {
-                ctx.globalAlpha = 0.8;
-                ctx.drawImage(carAsset.img, car.x, car.y);
-                ctx.globalAlpha = 1.0;
+                // Só desenhar se estiver na área visível
+                if (car.x + carAsset.width > visibleArea.left && 
+                    car.x < visibleArea.right &&
+                    car.y + carAsset.height > visibleArea.top && 
+                    car.y < visibleArea.bottom) {
+                    
+                    ctx.drawImage(carAsset.img, car.x, car.y);
+                }
+            } else {
+                // Fallback discreto se o asset não carregar
+                if (car.x + 150 > visibleArea.left && 
+                    car.x < visibleArea.right &&
+                    car.y + 100 > visibleArea.top && 
+                    car.y < visibleArea.bottom) {
+                    
+                    ctx.fillStyle = '#444';
+                    ctx.fillRect(car.x, car.y, 150, 100);
+                }
             }
         });
         
-        // Debug visual no canto
-        ctx.fillStyle = '#00ff00';
-        ctx.fillRect(10, 150, 250, 30);
-        ctx.fillStyle = '#000';
-        setPixelFont(10);
-        ctx.fillText('7 CARROS FORCADOS!', 20, 160);
-        
-        return; // Sair da função após forçar
+        return;
     }
     
-    // Código original para outros mapas
+    // Código normal para outros mapas
     if (!map.parkedCars) return;
     
     map.parkedCars.forEach(car => {
@@ -2565,9 +2564,8 @@ function draw() {
         renderStreetLights(map, visibleArea);
         renderTrees(map, visibleArea, 'top');
         
-        // DEBUG: Mostrar colisões (v1.28)
+        // DEBUG: Mostrar colisões (v1.36)
         renderCollisionDebug(map);
-        renderCarCollisionDebug(map);
         
         // Efeito de noite
         ctx.fillStyle = 'rgba(0, 0, 40, 0.4)';
@@ -2676,11 +2674,11 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.35 - Código Limpo');
+console.log('🎮 Mad Night v1.36 - Carros Finalizados');
 console.log('📢 Controles: Setas=mover, Espaço=dash, C=ver colisões');
-console.log('🚗 Array parkedCars restaurado no mapa 2');
-console.log('✅ Sintaxe corrigida e testada');
-console.log('🎯 Carros forçados + array correto');
+console.log('🚗 Carros renderizando normalmente sem debug');
+console.log('✅ Sistema de colisões unificado');
+console.log('🎯 Pronto para ajustes de colisão dos prédios!');
 
 // Debug de carregamento dos carros
 setTimeout(() => {
