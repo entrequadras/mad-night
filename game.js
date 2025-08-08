@@ -812,7 +812,7 @@ const maps = [
                 y: 970,
                 // COLISÕES: Retangular normal (não diagonal)
                 collisionRects: [
-                    {x: 40, y: 1270, w: 350, h: 160}    // Retângulo único centralizado
+                    {x: 40, y: 1255, w: 350, h: 160}    // Retângulo único centralizado
                 ]
             },
             {
