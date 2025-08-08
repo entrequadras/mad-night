@@ -785,10 +785,10 @@ const maps = [
                 y: -90,
                 // COLISÕES: Diagonal direita-inferior para esquerda-superior
                 collisionRects: [
-                    {x: 250, y: 150, w: 310, h: 40},     // Meio-alto
-                    {x: 280, y: 190, w: 270, h: 40},     // Meio
+                    {x: 250, y: 150, w: 340, h: 40},     // Meio-alto
+                    {x: 280, y: 190, w: 300, h: 40},     // Meio
                     {x: 311, y: 230, w: 160, h: 40},    // Meio-baixo
-                    {x: 341, y: 270, w: 140, h: 40}     // Base inferior
+                    {x: 361, y: 270, w: 160, h: 40}     // Base inferior
                 ]
             },
             {
@@ -797,9 +797,9 @@ const maps = [
                 y: 50,
                 // COLISÕES: Diagonal direita-inferior para esquerda-superior
                 collisionRects: [
-                    {x: 630, y: 290, w: 410, h: 40},     // Meio-alto
+                    {x: 540, y: 290, w: 500, h: 40},     // Meio-alto
                     {x: 640, y: 330, w: 380, h: 40},     // Meio
-                    {x: 700, y: 370, w: 300, h: 40},    // Meio-baixo
+                    {x: 710, y: 370, w: 330, h: 40},    // Meio-baixo
                     {x: 770, y: 410, w: 190, h: 40}     // Base inferior
                 ]
             }
