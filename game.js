@@ -1,4 +1,4 @@
-console.log('Mad Night v1.26 - Colisões Isométricas');
+console.log('Mad Night v1.27 - Objetos Urbanos KS');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -37,8 +37,8 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    lastFrameTime: 0, // Movido para dentro do gameState
-    version: 'v1.26' // NOVA VERSÃO!
+    lastFrameTime: 0,
+    version: 'v1.27' // NOVA VERSÃO!
 };
 
 // Player
@@ -77,6 +77,7 @@ const assets = {
     arvore002: { img: new Image(), loaded: false, width: 194, height: 200 },
     arvore003: { img: new Image(), loaded: false, width: 162, height: 200 },
     arvore004: { img: new Image(), loaded: false, width: 150, height: 190 },
+    arvore006: { img: new Image(), loaded: false, width: 169, height: 194 }, // NOVO!
     arvorebloco001: { img: new Image(), loaded: false, width: 354, height: 186 },
     poste000: { img: new Image(), loaded: false, width: 40, height: 120 },
     poste001: { img: new Image(), loaded: false, width: 40, height: 120 },
@@ -92,11 +93,13 @@ const assets = {
     asfaltosujo004: { img: new Image(), loaded: false, width: 120, height: 120 },
     asfaltosujo005: { img: new Image(), loaded: false, width: 120, height: 120 },
     caixadeluz: { img: new Image(), loaded: false, width: 45, height: 45 },
+    banco01: { img: new Image(), loaded: false, width: 61, height: 50 }, // NOVO!
     banco03: { img: new Image(), loaded: false, width: 53, height: 43 },
     banco04: { img: new Image(), loaded: false, width: 53, height: 45 },
     garrafaquebrada01: { img: new Image(), loaded: false, width: 40, height: 24 },
     garrafaquebrada02: { img: new Image(), loaded: false, width: 40, height: 24 },
     cadeiradepraia01: { img: new Image(), loaded: false, width: 29, height: 40 },
+    parquinho: { img: new Image(), loaded: false, width: 199, height: 241 }, // NOVO!
     // Assets do Eixão
     eixaoCamada1: { img: new Image(), loaded: false, width: 3000, height: 868 },
     eixaoCamada2: { img: new Image(), loaded: false, width: 3000, height: 868 },
@@ -140,6 +143,10 @@ assets.arvore003.img.onload = () => { assets.arvore003.loaded = true; };
 
 assets.arvore004.img.src = 'assets/scenary/arvore004.png';
 assets.arvore004.img.onload = () => { assets.arvore004.loaded = true; };
+
+// NOVO: Carregar arvore006
+assets.arvore006.img.src = 'assets/scenary/arvore006.png';
+assets.arvore006.img.onload = () => { assets.arvore006.loaded = true; };
 
 assets.arvorebloco001.img.src = 'assets/scenary/arvorebloco001.png';
 assets.arvorebloco001.img.onload = () => { assets.arvorebloco001.loaded = true; };
@@ -186,6 +193,10 @@ assets.asfaltosujo005.img.onload = () => { assets.asfaltosujo005.loaded = true; 
 assets.caixadeluz.img.src = 'assets/objects/caixadeluz.png';
 assets.caixadeluz.img.onload = () => { assets.caixadeluz.loaded = true; };
 
+// NOVO: Carregar banco01
+assets.banco01.img.src = 'assets/objects/banco01.png';
+assets.banco01.img.onload = () => { assets.banco01.loaded = true; };
+
 assets.banco03.img.src = 'assets/objects/banco03.png';
 assets.banco03.img.onload = () => { assets.banco03.loaded = true; };
 
@@ -200,6 +211,10 @@ assets.garrafaquebrada02.img.onload = () => { assets.garrafaquebrada02.loaded = 
 
 assets.cadeiradepraia01.img.src = 'assets/objects/cadeiradepraia01.png';
 assets.cadeiradepraia01.img.onload = () => { assets.cadeiradepraia01.loaded = true; };
+
+// NOVO: Carregar parquinho
+assets.parquinho.img.src = 'assets/objects/parquinho.png';
+assets.parquinho.img.onload = () => { assets.parquinho.loaded = true; };
 
 // Carregar assets do Eixão
 assets.eixaoCamada1.img.src = 'assets/floors/eixao_da_morte_camada1.png';
@@ -383,7 +398,7 @@ const trafficSystem = {
         ],
         southNorth: [
             { sprite: 'carro001fundos' },
-            { sprite: 'carro002fundos' }, // Adicionado!
+            { sprite: 'carro002fundos' },
             { sprite: 'carro003fundos' },
             { sprite: 'carro004fundos' }
         ]
@@ -727,7 +742,7 @@ const maps = [
         direction: 'right',
         hasLayers: true
     },
-    // Mapa 2 - Fronteira com o Komando Satânico (COM COLISÕES v1.26!)
+    // Mapa 2 - Fronteira com o Komando Satânico (v1.27 - Objetos Urbanos!)
     {
         name: "Fronteira com o Komando Satânico",
         subtitle: "Primeira superquadra",
@@ -804,9 +819,17 @@ const maps = [
                 ]
             }
         ],
-        trees: [],
+        trees: [
+            // NOVA: arvore006 na posição especificada
+            {type: 'arvore006', x: 1095, y: 1077}
+        ],
         streetLights: [],
-        objects: [],
+        objects: [
+            // NOVO: parquinho na posição especificada
+            {type: 'parquinho', x: 1394, y: 668, rotation: 0},
+            // NOVO: banco01 na posição especificada
+            {type: 'banco01', x: 1073, y: 544, rotation: 0}
+        ],
         walls: [
             // Sem paredes adicionais - usando colisões dos prédios
         ],
@@ -815,7 +838,7 @@ const maps = [
         playerStart: {x: 1440, y: 1550},
         playerStartEscape: {x: 70, y: 70},
         exit: {x: 70, y: 70, w: 60, h: 60},
-        orelhao: {x: 1000, y: 412, w: 40, h: 60},
+        orelhao: {x: 1000, y: 422, w: 40, h: 60}, // MODIFICADO: y descido 10 pixels (412 → 422)
         direction: 'left'
     },
     // Mapa 3 - Na área da KS
@@ -980,7 +1003,7 @@ function checkWallCollision(entity, newX, newY) {
         }
     }
     
-    // NOVO: Verificar colisão com prédios (v1.26)
+    // Verificar colisão com prédios
     if (map.buildings) {
         for (let building of map.buildings) {
             if (building.collisionRects) {
@@ -1802,7 +1825,7 @@ function renderBackground(map) {
     }
 }
 
-// NOVO: Função para determinar a linha de corte de um prédio (v1.26)
+// Função para determinar a linha de corte de um prédio
 function getBuildingCutLine(building) {
     const buildingAsset = assets[building.type];
     if (!buildingAsset) return building.y + 100;
@@ -1812,7 +1835,7 @@ function getBuildingCutLine(building) {
     return building.y + buildingAsset.height * 0.75;
 }
 
-// MODIFICADO: Renderizar prédios em duas camadas (v1.26)
+// Renderizar prédios em duas camadas
 function renderBuildingsLayer(map, visibleArea, layer) {
     if (!map.buildings) return;
     
@@ -1843,7 +1866,7 @@ function renderBuildingsLayer(map, visibleArea, layer) {
     });
 }
 
-// DEBUG: Renderizar áreas de colisão (v1.26)
+// DEBUG: Renderizar áreas de colisão
 function renderCollisionDebug(map) {
     if (!map.buildings) return;
     
@@ -2349,7 +2372,7 @@ function draw() {
         renderShadows(map, visibleArea);
         renderTrees(map, visibleArea, 'bottom');
         
-        // NOVO: Renderizar prédios - camada inferior (v1.26)
+        // Renderizar prédios - camada inferior
         renderBuildingsLayer(map, visibleArea, 'bottom');
         
         renderObjects(map, visibleArea);
@@ -2371,7 +2394,7 @@ function draw() {
             trafficSystem.render(ctx, visibleArea);
         }
         
-        // NOVO: Renderizar prédios - camada superior (v1.26)
+        // Renderizar prédios - camada superior
         renderBuildingsLayer(map, visibleArea, 'top');
         
         renderCampoTraves();
@@ -2379,7 +2402,7 @@ function draw() {
         renderStreetLights(map, visibleArea);
         renderTrees(map, visibleArea, 'top');
         
-        // DEBUG: Mostrar colisões (v1.26)
+        // DEBUG: Mostrar colisões
         renderCollisionDebug(map);
         
         // Efeito de noite
@@ -2489,7 +2512,7 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.26 - Colisões Isométricas');
+console.log('🎮 Mad Night v1.27 - Objetos Urbanos KS');
 console.log('📢 Controles: Setas=mover, Espaço=dash, C=ver colisões');
 console.log('🔧 Debug: K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
-console.log('🏢 Sistema de colisões isométricas implementado!');
+console.log('🏞️ Novos objetos adicionados: parquinho, banco01, arvore006!');
