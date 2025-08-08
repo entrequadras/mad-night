@@ -1,4 +1,4 @@
-console.log('Mad Night v1.37 - Objetos Visíveis e Colisões 50%');
+console.log('Mad Night v1.39 - Postes e Iluminação no Mapa KS');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -37,8 +37,8 @@ const gameState = {
     lastEnemySpawn: 0,
     enemySpawnDelay: 1000,
     spawnCorner: 0,
-    lastFrameTime: 0, // Movido para dentro do gameState
-    version: 'v1.37' // Objetos Visíveis e Colisões 50%!
+    lastFrameTime: 0,
+    version: 'v1.39' // Postes e Iluminação no Mapa KS!
 };
 
 // Player
@@ -112,7 +112,7 @@ const assets = {
     carro003fundos: { img: new Image(), loaded: false, width: 102, height: 130 },
     carro004frente: { img: new Image(), loaded: false, width: 102, height: 130 },
     carro004fundos: { img: new Image(), loaded: false, width: 93, height: 140 },
-    // Carros laterais estacionados (v1.28)
+    // Carros laterais estacionados
     carrolateral_01: { img: new Image(), loaded: false, width: 150, height: 100 },
     carrolateral_02: { img: new Image(), loaded: false, width: 165, height: 110 },
     carrolateral_03: { img: new Image(), loaded: false, width: 150, height: 106 },
@@ -253,7 +253,7 @@ assets.carro004frente.img.onload = () => { assets.carro004frente.loaded = true; 
 assets.carro004fundos.img.src = 'assets/scenary/carro004-fundos.png';
 assets.carro004fundos.img.onload = () => { assets.carro004fundos.loaded = true; };
 
-// Carregar carros laterais estacionados (v1.28)
+// Carregar carros laterais estacionados
 assets.carrolateral_01.img.src = 'assets/scenary/carrolateral_01.png';
 assets.carrolateral_01.img.onload = () => { assets.carrolateral_01.loaded = true; };
 
@@ -347,7 +347,676 @@ const audio = {
     
     // Tocar SFX
     playSFX: function(soundName, volume = null) {
-        if (!this[soundName]) return;
+        if (obj.x + asset.width < visibleArea.left || 
+        obj.x > visibleArea.right ||
+        obj.y + asset.height < visibleArea.top || 
+        obj.y > visibleArea.bottom) return;
+    
+    ctx.save();
+    
+    const centerX = obj.x + asset.width / 2;
+    const centerY = obj.y + asset.height / 2;
+    
+    ctx.translate(centerX, centerY);
+    ctx.rotate((obj.rotation || 0) * Math.PI / 180);
+    
+    ctx.drawImage(
+        asset.img,
+        -asset.width / 2,
+        -asset.height / 2,
+        asset.width,
+        asset.height
+    );
+    
+    ctx.restore();
+}
+
+// Classe Enemy
+class Enemy {
+    constructor(x, y, type = 'faquinha') {
+        this.x = x;
+        this.y = y;
+        this.originX = x;
+        this.originY = y;
+        this.type = type;
+        this.width = 46;
+        this.height = 46;
+        this.speed = type === 'caveirinha' ? 2.5 : 2;
+        this.patrolSpeed = 1;
+        this.direction = 'down';
+        this.frame = 0;
+        this.state = 'patrol';
+        this.isDead = false;
+        this.deathFrame = 12;
+        this.sprites = [];
+        this.visionRange = 150;
+        this.alertVisionRange = 200;
+        this.patrolRadius = 150;
+        this.patrolDirection = this.getRandomDirection();
+        this.lastDirectionChange = Date.now();
+        this.directionChangeInterval = 2000 + Math.random() * 2000;
+        
+        this.attackRange = 200;
+        this.lastAttack = 0;
+        this.attackCooldown = 2000;
+        
+        this.health = type === 'chacal' ? 3 : 1;
+        this.maxHealth = this.health;
+        this.isInvulnerable = false;
+        this.invulnerableTime = 0;
+        this.invulnerableDuration = 500;
+    }
+    
+    getRandomDirection() {
+        const dirs = ['up', 'down', 'left', 'right'];
+        return dirs[Math.floor(Math.random() * dirs.length)];
+    }
+    
+    throwStone() {
+        if (this.type !== 'janis' || Date.now() - this.lastAttack < this.attackCooldown) return;
+        
+        const dx = player.x - this.x;
+        const dy = player.y - this.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        
+        if (dist < this.attackRange && !player.isDead) {
+            this.lastAttack = Date.now();
+            
+            const stone = {
+                x: this.x + this.width/2,
+                y: this.y + this.height/2,
+                vx: (dx/dist) * 4,
+                vy: (dy/dist) * 4,
+                width: 10,
+                height: 10,
+                active: true
+            };
+            
+            projectiles.push(stone);
+            audio.playSFX('ataque_janis', 0.5);
+        }
+    }
+    
+    update() {
+        if (this.isDead) return;
+        
+        if (this.isInvulnerable && Date.now() - this.invulnerableTime > this.invulnerableDuration) {
+            this.isInvulnerable = false;
+        }
+        
+        const dx = player.x - this.x;
+        const dy = player.y - this.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        
+        let visionRange = this.state === 'chase' ? this.alertVisionRange : this.visionRange;
+        if (player.inShadow) visionRange *= 0.3;
+        
+        if (this.type === 'janis') {
+            if (dist < this.attackRange && !player.isDead) {
+                this.state = 'attack';
+                this.throwStone();
+                this.direction = Math.abs(dx) > Math.abs(dy) ? 
+                    (dx > 0 ? 'right' : 'left') : 
+                    (dy > 0 ? 'down' : 'up');
+            } else {
+                this.state = 'patrol';
+            }
+        }
+        
+        if (this.type === 'chacal' && dist < 300 && !player.isDead) {
+            this.state = 'chase';
+        }
+        
+        if (this.type !== 'janis' && dist < visionRange && !player.isDead) {
+            let canSee = false;
+            const angleThreshold = 50;
+            
+            switch(this.direction) {
+                case 'up': 
+                    canSee = dy < 0 && Math.abs(dx) < angleThreshold;
+                    break;
+                case 'down': 
+                    canSee = dy > 0 && Math.abs(dx) < angleThreshold;
+                    break;
+                case 'left': 
+                    canSee = dx < 0 && Math.abs(dy) < angleThreshold;
+                    break;
+                case 'right': 
+                    canSee = dx > 0 && Math.abs(dy) < angleThreshold;
+                    break;
+            }
+            
+            if (this.state === 'chase' || canSee || this.type === 'chacal') {
+                this.state = 'chase';
+                
+                const angle = Math.atan2(dy, dx);
+                const moveX = Math.cos(angle) * this.speed;
+                const moveY = Math.sin(angle) * this.speed;
+                
+                if (!checkWallCollision(this, this.x + moveX, this.y)) {
+                    this.x += moveX;
+                }
+                
+                if (!checkWallCollision(this, this.x, this.y + moveY)) {
+                    this.y += moveY;
+                }
+                
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    this.direction = dx > 0 ? 'right' : 'left';
+                } else {
+                    this.direction = dy > 0 ? 'down' : 'up';
+                }
+                
+                if (dist < 30) killPlayer();
+            }
+        } else if (this.type !== 'janis' || this.state !== 'attack') {
+            this.state = 'patrol';
+            
+            if (Date.now() - this.lastDirectionChange > this.directionChangeInterval) {
+                this.patrolDirection = this.getRandomDirection();
+                this.lastDirectionChange = Date.now();
+                this.directionChangeInterval = 2000 + Math.random() * 2000;
+                this.direction = this.patrolDirection;
+            }
+            
+            const distFromOrigin = Math.sqrt(
+                Math.pow(this.x - this.originX, 2) + 
+                Math.pow(this.y - this.originY, 2)
+            );
+            
+            if (distFromOrigin > this.patrolRadius) {
+                const backDx = this.originX - this.x;
+                const backDy = this.originY - this.y;
+                this.patrolDirection = Math.abs(backDx) > Math.abs(backDy) ?
+                    (backDx > 0 ? 'right' : 'left') :
+                    (backDy > 0 ? 'down' : 'up');
+                this.direction = this.patrolDirection;
+                this.lastDirectionChange = Date.now();
+            }
+            
+            let pdx = 0, pdy = 0;
+            switch(this.patrolDirection) {
+                case 'up': pdy = -this.patrolSpeed; break;
+                case 'down': pdy = this.patrolSpeed; break;
+                case 'left': pdx = -this.patrolSpeed; break;
+                case 'right': pdx = this.patrolSpeed; break;
+            }
+            
+            if (!checkWallCollision(this, this.x + pdx, this.y + pdy)) {
+                this.x += pdx;
+                this.y += pdy;
+            } else {
+                this.patrolDirection = this.getRandomDirection();
+                this.lastDirectionChange = Date.now();
+                this.direction = this.patrolDirection;
+            }
+        }
+        
+        if (player.isDashing && dist < 40 && !this.isInvulnerable) {
+            if (this.type === 'chacal') {
+                this.takeDamage();
+            } else {
+                this.die();
+            }
+        }
+        
+        this.frame = Date.now() % 400 < 200 ? 0 : 1;
+    }
+    
+    takeDamage() {
+        if (this.isInvulnerable) return;
+        
+        this.health--;
+        this.isInvulnerable = true;
+        this.invulnerableTime = Date.now();
+        
+        if (this.health <= 0) {
+            this.die();
+        }
+    }
+    
+    die() {
+        if (this.isDead) return;
+        this.isDead = true;
+        this.deathFrame = Math.floor(Math.random() * 4) + 12;
+        
+        // Som de morte baseado no tipo
+        const deathSounds = {
+            'faquinha': 'morte_faquinha',
+            'morcego': 'morte_morcego', 
+            'caveirinha': 'morte_caveira',
+            'janis': 'morte_janis',
+            'chacal': 'morte_chacal'
+        };
+        
+        if (deathSounds[this.type]) {
+            audio.playSFX(deathSounds[this.type], 0.6);
+        }
+    }
+    
+    getSprite() {
+        if (this.isDead) return this.sprites[this.deathFrame];
+        
+        const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
+        const base = dirMap[this.direction];
+        const offset = (this.state === 'chase' || this.state === 'attack') ? 8 : this.frame * 4;
+        return this.sprites[base + offset];
+    }
+}
+
+// Funções do jogo
+function loadAudio() {
+    // Carregar todos os SFX
+    audio.loadSFX('ataque_janis');
+    audio.loadSFX('dash');
+    audio.loadSFX('mobilete', true); // Loop
+    audio.loadSFX('morte_caveira');
+    audio.loadSFX('morte_chacal');
+    audio.loadSFX('morte_janis');
+    audio.loadSFX('morte_faquinha');
+    audio.loadSFX('morte_madmax');
+    audio.loadSFX('morte_morcego');
+    audio.loadSFX('phone_ring', true); // Loop
+    
+    // Carregar músicas
+    audio.inicio = new Audio('assets/audio/musica_etqgame_tema_inicio.mp3');
+    audio.fuga = new Audio('assets/audio/musica_etqgame_fuga.mp3');
+    audio.creditos = new Audio('assets/audio/musica_etqgame_end_credits.mp3');
+    
+    audio.inicio.loop = true;
+    audio.fuga.loop = true;
+    audio.inicio.volume = audio.musicVolume;
+    audio.fuga.volume = audio.musicVolume;
+    audio.creditos.volume = audio.musicVolume;
+    
+    // Preload das músicas
+    audio.inicio.load();
+    audio.fuga.load();
+    audio.creditos.load();
+}
+
+function playMusic(phase) {
+    if (gameState.currentMusic) {
+        gameState.currentMusic.pause();
+        gameState.currentMusic.currentTime = 0;
+    }
+    
+    if (phase === 'inicio' && audio.inicio) {
+        audio.inicio.play().catch(() => {});
+        gameState.currentMusic = audio.inicio;
+        gameState.musicPhase = 'fuga';
+    }
+}
+
+function spawnEscapeEnemy() {
+    const map = maps[gameState.currentMap];
+    const corners = [
+        {x: 50, y: 50, dir: 'down'},
+        {x: map.width - 100, y: 50, dir: 'down'},
+        {x: 50, y: map.height - 100, dir: 'up'},
+        {x: map.width - 100, y: map.height - 100, dir: 'up'}
+    ];
+    
+    const corner = corners[gameState.spawnCorner % 4];
+    gameState.spawnCorner++;
+    
+    const types = ['faquinha', 'morcego', 'caveirinha', 'caveirinha'];
+    const randomType = types[Math.floor(Math.random() * types.length)];
+    
+    const validPos = findValidSpawnPosition(corner.x, corner.y, 46, 46);
+    
+    const enemy = new Enemy(validPos.x, validPos.y, randomType);
+    
+    switch(randomType) {
+        case 'faquinha':
+            enemy.sprites = faquinhaSprites;
+            break;
+        case 'morcego':
+            enemy.sprites = morcegoSprites;
+            break;
+        case 'caveirinha':
+            enemy.sprites = caveirinhaSprites;
+            break;
+    }
+    enemy.state = 'chase';
+    enemy.alertVisionRange = 400;
+    
+    const centerX = map.width / 2;
+    const centerY = map.height / 2;
+    enemy.direction = Math.abs(corner.x - centerX) > Math.abs(corner.y - centerY) ?
+        (corner.x < centerX ? 'right' : 'left') :
+        (corner.y < centerY ? 'down' : 'up');
+    
+    enemies.push(enemy);
+}
+
+function loadMap(mapIndex, isEscape = false) {
+    const map = maps[mapIndex];
+    if (!map) return;
+    
+    enemies.length = 0;
+    projectiles.length = 0;
+    
+    if (isEscape && map.playerStartEscape) {
+        player.x = map.playerStartEscape.x;
+        player.y = map.playerStartEscape.y;
+    } else {
+        player.x = map.playerStart.x;
+        player.y = map.playerStart.y;
+    }
+    
+    player.isDead = false;
+    player.isDashing = false;
+    
+    const enemyList = (isEscape && map.escapeEnemies) ? map.escapeEnemies : map.enemies;
+    
+    enemyList.forEach(enemyData => {
+        // Os valores x,y são o centro do inimigo, converter para posição
+        const enemyX = enemyData.x - 23; // 46/2 = 23 (metade da largura)
+        const enemyY = enemyData.y - 23; // 46/2 = 23 (metade da altura)
+        
+        const validPos = findValidSpawnPosition(enemyX, enemyY, 46, 46);
+        const enemy = new Enemy(validPos.x, validPos.y, enemyData.type || 'faquinha');
+        
+        switch(enemy.type) {
+            case 'faquinha':
+                enemy.sprites = faquinhaSprites;
+                break;
+            case 'morcego':
+                enemy.sprites = morcegoSprites;
+                break;
+            case 'caveirinha':
+                enemy.sprites = caveirinhaSprites;
+                break;
+            case 'janis':
+                enemy.sprites = janisSprites;
+                break;
+            case 'chacal':
+                enemy.sprites = chacalSprites;
+                break;
+        }
+        
+        if (isEscape) enemy.state = 'chase';
+        enemies.push(enemy);
+    });
+}
+
+function killPlayer() {
+    if (player.isDead) return;
+    
+    player.isDead = true;
+    player.isDashing = false;
+    player.deathFrame = Math.floor(Math.random() * 4) + 12;
+    gameState.deaths++;
+    
+    // Som de morte do player
+    audio.playSFX('morte_madmax', 0.8);
+    
+    setTimeout(() => {
+        if (gameState.deaths >= 5) {
+            gameState.deaths = 0;
+            gameState.currentMap = 0;
+            gameState.phase = 'infiltration';
+            gameState.dashUnlocked = false;
+            gameState.bombPlaced = false;
+            loadMap(0);
+            playMusic('inicio');
+        } else {
+            loadMap(gameState.currentMap, gameState.phase === 'escape');
+        }
+    }, 2000);
+}
+
+function updateProjectiles() {
+    projectiles.forEach((stone, index) => {
+        if (!stone.active) return;
+        
+        stone.x += stone.vx;
+        stone.y += stone.vy;
+        
+        if (stone.x < player.x + player.width &&
+            stone.x + stone.width > player.x &&
+            stone.y < player.y + player.height &&
+            stone.y + stone.height > player.y) {
+            killPlayer();
+            stone.active = false;
+        }
+        
+        const map = maps[gameState.currentMap];
+        if (stone.x < 0 || stone.x > map.width || stone.y < 0 || stone.y > map.height) {
+            stone.active = false;
+        }
+        
+        if (checkWallCollision(stone, stone.x, stone.y)) {
+            stone.active = false;
+        }
+    });
+    
+    for (let i = projectiles.length - 1; i >= 0; i--) {
+        if (!projectiles[i].active) {
+            projectiles.splice(i, 1);
+        }
+    }
+}
+
+// Input
+const keys = {};
+
+// TECLAS DE DEBUG (documentadas!)
+// K = Kill player (teste de morte)
+// E = Spawn enemy (teste de inimigos)
+// M = Toggle music (alternar música)
+// N = Next map (próximo mapa)
+window.addEventListener('keydown', (e) => {
+    keys[e.key] = true;
+    
+    // DEBUG: Kill player
+    if (e.key === 'k' || e.key === 'K') {
+        killPlayer();
+    }
+    
+    // DEBUG: Spawn enemy
+    if (e.key === 'e' || e.key === 'E') {
+        const enemy = new Enemy(player.x + 150, player.y);
+        enemy.sprites = faquinhaSprites;
+        enemies.push(enemy);
+    }
+    
+    // DEBUG: Toggle music
+    if (e.key === 'm' || e.key === 'M') {
+        playMusic(gameState.musicPhase === 'inicio' ? 'fuga' : 'inicio');
+    }
+    
+    // DEBUG: Next map
+    if (e.key === 'n' || e.key === 'N') {
+        gameState.currentMap = (gameState.currentMap + 1) % maps.length;
+        loadMap(gameState.currentMap);
+    }
+});
+
+window.addEventListener('keyup', (e) => {
+    keys[e.key] = false;
+});
+
+// Função para obter sprite do player
+function getPlayerSprite() {
+    if (player.isDead) return player.sprites[player.deathFrame];
+    
+    const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
+    const base = dirMap[player.direction];
+    
+    if (player.isDashing) return player.sprites[8 + base];
+    return player.sprites[base + player.frame * 4];
+}
+
+// Update principal
+function update() {
+    const map = maps[gameState.currentMap];
+    
+    enemies.forEach(enemy => enemy.update());
+    updateProjectiles();
+    trafficSystem.update();
+    enemies.forEach((enemy, index) => {
+        if (enemy.isDead && !enemy.removeTime) {
+            enemy.removeTime = Date.now() + 3000;
+        }
+        if (enemy.removeTime && Date.now() > enemy.removeTime) {
+            enemies.splice(index, 1);
+        }
+    });
+    
+    if (gameState.phase === 'escape' && gameState.currentMap === 5 && gameState.bombPlaced) {
+        if (Date.now() - gameState.lastEnemySpawn > gameState.enemySpawnDelay) {
+            spawnEscapeEnemy();
+            gameState.lastEnemySpawn = Date.now();
+        }
+    }
+    
+    if (player.isDead) return;
+    
+    const playerCenterX = player.x + player.width/2;
+    const playerCenterY = player.y + player.height/2;
+    player.inShadow = isInShadow(playerCenterX, playerCenterY);
+    
+    let moving = false;
+    let dx = 0, dy = 0;
+    
+    if (player.isDashing) {
+        const progress = (Date.now() - player.dashStart) / player.dashDuration;
+        
+        if (progress >= 1) {
+            player.isDashing = false;
+        } else {
+            const dashSpeed = player.dashDistance / player.dashDuration * 16;
+            let dashDx = 0, dashDy = 0;
+            
+            switch(player.direction) {
+                case 'up': dashDy = -dashSpeed; break;
+                case 'down': dashDy = dashSpeed; break;
+                case 'left': dashDx = -dashSpeed; break;
+                case 'right': dashDx = dashSpeed; break;
+            }
+            
+            if (!checkWallCollision(player, player.x + dashDx, player.y + dashDy)) {
+                player.x += dashDx;
+                player.y += dashDy;
+            } else {
+                player.isDashing = false;
+            }
+        }
+    } else {
+        if (keys['ArrowUp']) { dy = -1; player.direction = 'up'; moving = true; }
+        if (keys['ArrowDown']) { dy = 1; player.direction = 'down'; moving = true; }
+        if (keys['ArrowLeft']) { dx = -1; player.direction = 'left'; moving = true; }
+        if (keys['ArrowRight']) { dx = 1; player.direction = 'right'; moving = true; }
+        
+        if (dx !== 0) {
+            const newX = player.x + dx * player.speed;
+            if (!checkWallCollision(player, newX, player.y)) {
+                player.x = newX;
+            }
+        }
+        
+        if (dy !== 0) {
+            const newY = player.y + dy * player.speed;
+            if (!checkWallCollision(player, player.x, newY)) {
+                player.y = newY;
+            }
+        }
+        
+        if (keys[' '] && gameState.pedalPower > 0 && !player.isDashing && gameState.dashUnlocked) {
+            player.isDashing = true;
+            player.dashStart = Date.now();
+            gameState.pedalPower--;
+            audio.playSFX('dash', 0.6);
+        }
+    }
+    
+    // Atualizar câmera
+    camera.x = player.x + player.width/2 - camera.width/2;
+    camera.y = player.y + player.height/2 - camera.height/2;
+    camera.x = Math.max(0, Math.min(map.width - camera.width, camera.x));
+    camera.y = Math.max(0, Math.min(map.height - camera.height, camera.y));
+    
+    // Verificar proximidade do orelhão para som do telefone
+    if (map.orelhao && !gameState.dashUnlocked) {
+        const orelhaoCenter = {
+            x: map.orelhao.x + map.orelhao.w / 2,
+            y: map.orelhao.y + map.orelhao.h / 2
+        };
+        const playerCenter = {
+            x: player.x + player.width / 2,
+            y: player.y + player.height / 2
+        };
+        
+        const distance = Math.sqrt(
+            Math.pow(playerCenter.x - orelhaoCenter.x, 2) + 
+            Math.pow(playerCenter.y - orelhaoCenter.y, 2)
+        );
+        
+        // Tocar telefone quando estiver próximo (raio de 150 pixels)
+        if (distance < 150 && audio.phone_ring && audio.phone_ring.paused) {
+            audio.phone_ring.play().catch(() => {});
+        }
+        // Parar de tocar se se afastar muito
+        else if (distance > 200 && audio.phone_ring && !audio.phone_ring.paused) {
+            audio.phone_ring.pause();
+        }
+    }
+    
+    // Atender o telefone (tocar no orelhão)
+    if (map.orelhao && checkRectCollision(player, map.orelhao)) {
+        if (!gameState.dashUnlocked) {
+            gameState.dashUnlocked = true;
+            if (audio.phone_ring) audio.phone_ring.pause();
+        }
+    }
+    
+    if (map.lixeira && checkRectCollision(player, map.lixeira)) {
+        if (!gameState.bombPlaced && enemies.filter(e => !e.isDead).length === 0) {
+            gameState.bombPlaced = true;
+            gameState.phase = 'escape';
+            gameState.lastEnemySpawn = Date.now();
+            playMusic('fuga');
+        }
+    }
+    
+    if (map.exit && checkRectCollision(player, map.exit)) {
+        if (gameState.phase === 'escape') {
+            if (gameState.currentMap === 5) {
+                gameState.currentMap = 4;
+                loadMap(4, true);
+            } else if (gameState.currentMap > 0) {
+                gameState.currentMap--;
+                loadMap(gameState.currentMap, true);
+            } else if (gameState.currentMap === 0) {
+                // TODO: Implementar boss fight
+            }
+        } else if (gameState.phase === 'infiltration') {
+            if (gameState.currentMap < maps.length - 1) {
+                gameState.currentMap++;
+                loadMap(gameState.currentMap);
+            }
+        }
+    }
+    
+    if (moving || player.isDashing) {
+        player.lastMove = Date.now();
+    } else if (Date.now() - player.lastMove > 1000) {
+        if (Date.now() - gameState.lastRecharge > 6000 && gameState.pedalPower < gameState.maxPedalPower) {
+            gameState.pedalPower++;
+            gameState.lastRecharge = Date.now();
+        }
+    }
+    
+    player.x = Math.max(0, Math.min(map.width - player.width, player.x));
+    player.y = Math.max(0, Math.min(map.height - player.height, player.y));
+    
+    if (moving && !player.isDashing && Date.now() - gameState.lastFrameTime > 150) {
+        player.frame = (player.frame + 1) % 2;
+        gameState.lastFrameTime = Date.now();
+    }
+} (!this[soundName]) return;
         
         try {
             // Clonar o áudio para permitir múltiplas reproduções
@@ -431,7 +1100,7 @@ const trafficSystem = {
         ],
         southNorth: [
             { sprite: 'carro001fundos' },
-            { sprite: 'carro002fundos' }, // Adicionado!
+            { sprite: 'carro002fundos' },
             { sprite: 'carro003fundos' },
             { sprite: 'carro004fundos' }
         ]
@@ -775,112 +1444,107 @@ const maps = [
         direction: 'right',
         hasLayers: true
     },
-    // Mapa 2 - Fronteira com o Komando Satânico (v1.39 - Postes e Iluminação)
-{
-    name: "Fronteira com o Komando Satânico",
-    subtitle: "Primeira superquadra",
-    width: 1920,
-    height: 1610,
-    enemies: [
-        {x: 267, y: 1524, type: 'faquinha'},
-        {x: 444, y: 820, type: 'janis'}
-    ],
-    escapeEnemies: [
-        {x: 400, y: 300, type: 'chacal'},
-        {x: 200, y: 200, type: 'caveirinha'},
-        {x: 600, y: 400, type: 'caveirinha'}
-    ],
-    tiles: generateTiles(1920, 1610, 120, ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']),
-    hasBackground: true,
-    backgroundAsset: 'entradaKS01',
-    buildings: [
-        {
-            type: 'predio0002', 
-            x: 1550, 
-            y: 665,
-            // v1.39 - Colisões ajustadas
-            collisionRects: [
-                {x: 1680, y: 1100, w: 200, h: 60},  // Base inferior
-                {x: 1680, y: 1060, w: 220, h: 40},  // Meio-baixo
-                {x: 1710, y: 1020, w: 220, h: 40},  // Meio
-                {x: 1740, y: 960, w: 200, h: 60}    // Meio-alto
-            ]
-        },
-        {
-            type: 'predio0006', 
-            x: 0, 
-            y: 970,
-            // v1.39 - Colisões ajustadas
-            collisionRects: [
-                {x: 40, y: 1220, w: 342, h: 155}    // Retângulo único centralizado
-            ]
-        },
-        {
-            type: 'predio0003', 
-            x: 1300, 
-            y: -60,
-            // v1.39 - Colisões ajustadas
-            collisionRects: [
-                {x: 1360, y: 280, w: 210, h: 40},   // Meio-alto
-                {x: 1440, y: 320, w: 190, h: 40},   // Meio
-                {x: 1490, y: 360, w: 210, h: 40},   // Meio-baixo
-                {x: 1540, y: 400, w: 180, h: 40}    // Base inferior
-            ]
-        },
-        {
-            type: 'predio0008', 
-            x: 201, 
-            y: -90,
-            // v1.39 - Colisões ajustadas
-            collisionRects: [
-                {x: 220, y: 150, w: 350, h: 40},    // Meio-alto
-                {x: 250, y: 190, w: 300, h: 40},    // Meio
-                {x: 304, y: 230, w: 160, h: 40},    // Meio-baixo
-                {x: 361, y: 270, w: 160, h: 40}     // Base inferior
-            ]
-        },
-        {
-            type: 'predio0008', 
-            x: 550, 
-            y: 50,
-            // v1.39 - Colisões ajustadas
-            collisionRects: [
-                {x: 540, y: 290, w: 500, h: 40},    // Meio-alto
-                {x: 640, y: 330, w: 380, h: 40},    // Meio
-                {x: 690, y: 370, w: 340, h: 40},    // Meio-baixo
-                {x: 770, y: 410, w: 190, h: 40}     // Base inferior
-            ]
-        }
-    ],
-    trees: [],
-    streetLights: [
-        // v1.39 - Postes com posições e direções corretas
-        {type: 'poste000', x: 695, y: 350, rotation: 0, lightRadius: 100, id: 'ks_post1'},
-        {type: 'poste000', x: 355, y: 204, rotation: 0, lightRadius: 100, id: 'ks_post2'},
-        {type: 'poste001', x: 1059, y: 170, rotation: 0, lightRadius: 100, id: 'ks_post3'},
-        {type: 'poste001', x: 1317, y: 637, rotation: 0, lightRadius: 100, id: 'ks_post4'},
-        {type: 'poste001', x: 1729, y: 1185, rotation: 0, lightRadius: 100, id: 'ks_post5'},
-        {type: 'poste001', x: 411, y: 1243, rotation: 0, lightRadius: 100, id: 'ks_post6'}
-    ],
-    objects: [
-        // v1.38 - Parquinho e Banco
-        {type: 'parquinho', x: 1394, y: 668, rotation: 0},
-        {type: 'banco01', x: 1073, y: 544, rotation: 0}
-    ],
-    walls: [
-        // Sem paredes adicionais - usando colisões dos prédios
-    ],
-    lights: [
-        // v1.39 - Luz de janela atrás do prédio
-        {x: 360, y: 100, radius: 120, id: 'ks_window1'}
-    ],
-    shadows: [],
-    playerStart: {x: 1440, y: 1550},
-    playerStartEscape: {x: 70, y: 70},
-    exit: {x: 70, y: 70, w: 60, h: 60},
-    orelhao: {x: 1000, y: 412, w: 40, h: 60},
-    direction: 'left'
-},
+    // Mapa 2 - Fronteira com o Komando Satânico (v1.39)
+    {
+        name: "Fronteira com o Komando Satânico",
+        subtitle: "Primeira superquadra",
+        width: 1920,
+        height: 1610,
+        enemies: [
+            {x: 267, y: 1524, type: 'faquinha'},
+            {x: 444, y: 820, type: 'janis'}
+        ],
+        escapeEnemies: [
+            {x: 400, y: 300, type: 'chacal'},
+            {x: 200, y: 200, type: 'caveirinha'},
+            {x: 600, y: 400, type: 'caveirinha'}
+        ],
+        tiles: generateTiles(1920, 1610, 120, ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']),
+        hasBackground: true,
+        backgroundAsset: 'entradaKS01',
+        buildings: [
+            {
+                type: 'predio0002', 
+                x: 1550, 
+                y: 665,
+                collisionRects: [
+                    {x: 1680, y: 1100, w: 200, h: 60},
+                    {x: 1680, y: 1060, w: 220, h: 40},
+                    {x: 1710, y: 1020, w: 220, h: 40},
+                    {x: 1740, y: 960, w: 200, h: 60}
+                ]
+            },
+            {
+                type: 'predio0006', 
+                x: 0, 
+                y: 970,
+                collisionRects: [
+                    {x: 40, y: 1220, w: 342, h: 155}
+                ]
+            },
+            {
+                type: 'predio0003', 
+                x: 1300, 
+                y: -60,
+                collisionRects: [
+                    {x: 1360, y: 280, w: 210, h: 40},
+                    {x: 1440, y: 320, w: 190, h: 40},
+                    {x: 1490, y: 360, w: 210, h: 40},
+                    {x: 1540, y: 400, w: 180, h: 40}
+                ]
+            },
+            {
+                type: 'predio0008', 
+                x: 201, 
+                y: -90,
+                collisionRects: [
+                    {x: 220, y: 150, w: 350, h: 40},
+                    {x: 250, y: 190, w: 300, h: 40},
+                    {x: 304, y: 230, w: 160, h: 40},
+                    {x: 361, y: 270, w: 160, h: 40}
+                ]
+            },
+            {
+                type: 'predio0008', 
+                x: 550, 
+                y: 50,
+                collisionRects: [
+                    {x: 540, y: 290, w: 500, h: 40},
+                    {x: 640, y: 330, w: 380, h: 40},
+                    {x: 690, y: 370, w: 340, h: 40},
+                    {x: 770, y: 410, w: 190, h: 40}
+                ]
+            }
+        ],
+        trees: [],
+        streetLights: [
+            // v1.39 - Postes com posições e direções corretas
+            {type: 'poste000', x: 695, y: 350, rotation: 0, lightRadius: 100, id: 'ks_post1'},
+            {type: 'poste000', x: 355, y: 204, rotation: 0, lightRadius: 100, id: 'ks_post2'},
+            {type: 'poste001', x: 1059, y: 170, rotation: 0, lightRadius: 100, id: 'ks_post3'},
+            {type: 'poste001', x: 1317, y: 637, rotation: 0, lightRadius: 100, id: 'ks_post4'},
+            {type: 'poste001', x: 1729, y: 1185, rotation: 0, lightRadius: 100, id: 'ks_post5'},
+            {type: 'poste001', x: 411, y: 1243, rotation: 0, lightRadius: 100, id: 'ks_post6'}
+        ],
+        objects: [
+            // v1.38 - Parquinho e Banco
+            {type: 'parquinho', x: 1394, y: 668, rotation: 0},
+            {type: 'banco01', x: 1073, y: 544, rotation: 0}
+        ],
+        walls: [
+            // Sem paredes adicionais - usando colisões dos prédios
+        ],
+        lights: [
+            // v1.39 - Luz de janela atrás do prédio
+            {x: 360, y: 100, radius: 120, id: 'ks_window1'}
+        ],
+        shadows: [],
+        playerStart: {x: 1440, y: 1550},
+        playerStartEscape: {x: 70, y: 70},
+        exit: {x: 70, y: 70, w: 60, h: 60},
+        orelhao: {x: 1000, y: 412, w: 40, h: 60},
+        direction: 'left'
+    },
     // Mapa 3 - Na área da KS
     {
         name: "Na área da KS",
@@ -1043,7 +1707,7 @@ function checkWallCollision(entity, newX, newY) {
         }
     }
     
-    // NOVO: Verificar colisão com prédios (v1.26)
+    // Verificar colisão com prédios
     if (map.buildings) {
         for (let building of map.buildings) {
             if (building.collisionRects) {
@@ -1094,7 +1758,7 @@ function checkWallCollision(entity, newX, newY) {
         }
     }
     
-    // Verificar colisão com objetos (v1.37 - colisão 50% para parquinho e banco)
+    // Verificar colisão com objetos (50% para parquinho e banco)
     if (map.objects) {
         for (let obj of map.objects) {
             // Pular garrafas quebradas - sem colisão
@@ -1124,7 +1788,7 @@ function checkWallCollision(entity, newX, newY) {
         }
     }
     
-    // NOVO: Verificar colisão com carros estacionados (v1.37 - colisão 50%)
+    // Verificar colisão com carros estacionados (colisão 50%)
     if (map.parkedCars || gameState.currentMap === 2) {
         const carros = gameState.currentMap === 2 ? [
             {type: 'carro002frente', x: 34, y: 1472},
@@ -1146,7 +1810,7 @@ function checkWallCollision(entity, newX, newY) {
                 const halfHeight = fullHeight * 0.5;
                 
                 const carCollision = {
-                    x: car.x + (fullWidth - halfWidth) / 2,  // Centralizar
+                    x: car.x + (fullWidth - halfWidth) / 2,
                     y: car.y + (fullHeight - halfHeight) / 2,
                     w: halfWidth,
                     h: halfHeight
@@ -1906,7 +2570,7 @@ function renderBackground(map) {
     }
 }
 
-// NOVO: Função para determinar a linha de corte de um prédio (v1.26)
+// Função para determinar a linha de corte de um prédio
 function getBuildingCutLine(building) {
     const buildingAsset = assets[building.type];
     if (!buildingAsset) return building.y + 100;
@@ -1916,7 +2580,7 @@ function getBuildingCutLine(building) {
     return building.y + buildingAsset.height * 0.75;
 }
 
-// MODIFICADO: Renderizar prédios em duas camadas (v1.26)
+// Renderizar prédios em duas camadas
 function renderBuildingsLayer(map, visibleArea, layer) {
     if (!map.buildings) return;
     
@@ -1947,7 +2611,7 @@ function renderBuildingsLayer(map, visibleArea, layer) {
     });
 }
 
-// DEBUG: Renderizar áreas de colisão (v1.36 - SIMPLIFICADO)
+// DEBUG: Renderizar áreas de colisão
 function renderCollisionDebug(map) {
     // Só mostrar se a tecla C estiver pressionada
     if (!keys['c'] && !keys['C']) return;
@@ -1970,7 +2634,7 @@ function renderCollisionDebug(map) {
         });
     }
     
-    // Colisões customizadas de objetos - VERDE (v1.37 - mostra 50%)
+    // Colisões customizadas de objetos - VERDE
     if (map.objects) {
         ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
         ctx.strokeStyle = 'rgba(0, 255, 0, 0.8)';
@@ -2001,7 +2665,7 @@ function renderCollisionDebug(map) {
         });
     }
     
-    // Colisões dos carros - AZUL (v1.37 - mostra 50%)
+    // Colisões dos carros - AZUL
     if (map.parkedCars || gameState.currentMap === 2) {
         ctx.fillStyle = 'rgba(0, 0, 255, 0.3)';
         ctx.strokeStyle = 'rgba(0, 0, 255, 0.8)';
@@ -2043,9 +2707,7 @@ function renderCollisionDebug(map) {
     ctx.restore();
 }
 
-// Função removida: renderCarCollisionDebug (não é mais necessária)
-
-// Renderizar carros estacionados (v1.36 - LIMPO E FUNCIONAL)
+// Renderizar carros estacionados
 function renderParkedCars(map, visibleArea) {
     // Renderização especial para mapa 2
     if (gameState.currentMap === 2) {
@@ -2225,7 +2887,7 @@ function renderObjects(map, visibleArea) {
                 obj.y + objAsset.height > visibleArea.top && 
                 obj.y < visibleArea.bottom) {
                 
-                // Renderizar direto sem rotação (v1.37)
+                // Renderizar direto sem rotação
                 ctx.drawImage(objAsset.img, obj.x, obj.y);
             }
         }
@@ -2583,7 +3245,7 @@ function draw() {
             bottom: camera.y + camera.height + 100
         };
         
-        // Camada 1: Base (v1.31 - ORDEM CORRIGIDA!)
+        // Camada 1: Base
         if (map.hasLayers && gameState.currentMap === 1) {
             renderEixaoLayer1(map);
         } else {
@@ -2598,7 +3260,7 @@ function draw() {
         
         renderCampo(map);
         
-        // Carros ANTES das sombras e árvores (v1.31)
+        // Carros ANTES das sombras e árvores
         renderParkedCars(map, visibleArea);
         
         renderShadows(map, visibleArea);
@@ -2628,7 +3290,7 @@ function draw() {
             trafficSystem.render(ctx, visibleArea);
         }
         
-        // NOVO: Renderizar prédios - camada superior (v1.26)
+        // Renderizar prédios - camada superior
         renderBuildingsLayer(map, visibleArea, 'top');
         
         renderCampoTraves();
@@ -2636,7 +3298,7 @@ function draw() {
         renderStreetLights(map, visibleArea);
         renderTrees(map, visibleArea, 'top');
         
-        // DEBUG: Mostrar colisões (v1.36)
+        // DEBUG: Mostrar colisões
         renderCollisionDebug(map);
         
         // Efeito de noite
@@ -2746,11 +3408,11 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.37 - Objetos Visíveis e Colisões 50%');
+console.log('🎮 Mad Night v1.39 - Postes e Iluminação no Mapa KS');
 console.log('📢 Controles: Setas=mover, Espaço=dash, C=ver colisões');
-console.log('🚗 Colisões dos carros reduzidas para 50% (centralizada)');
-console.log('🎪 Parquinho e banco agora visíveis com colisão 50%');
-console.log('🏢 Colisões dos prédios atualizadas!');
+console.log('💡 6 postes de luz adicionados no mapa KS');
+console.log('🏠 Luz de janela simulada atrás do prédio');
+console.log('🏢 Colisões dos prédios totalmente ajustadas!');
 
 // Debug de carregamento dos carros
 setTimeout(() => {
