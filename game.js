@@ -800,10 +800,10 @@ const maps = [
                 y: 665,
                 // COLISÕES: Diagonal esquerda-inferior para direita-superior (MAGRO)
                 collisionRects: [
-                    {x: 1650, y: 1100, w: 120, h: 40},  // Base inferior
-                    {x: 1680, y: 1060, w: 100, h: 40},  // Meio-baixo
-                    {x: 1710, y: 1020, w: 80, h: 40},   // Meio
-                    {x: 1740, y: 980, w: 60, h: 40}     // Meio-alto
+                    {x: 1680, y: 1100, w: 200, h: 60},  // Base inferior
+                    {x: 1680, y: 1060, w: 220, h: 40},  // Meio-baixo
+                    {x: 1710, y: 1020, w: 220, h: 40},   // Meio
+                    {x: 1740, y: 960, w: 200, h: 60}     // Meio-alto
                 ]
             },
             {
@@ -812,7 +812,7 @@ const maps = [
                 y: 970,
                 // COLISÕES: Retangular normal (não diagonal)
                 collisionRects: [
-                    {x: 40, y: 1320, w: 320, h: 100}    // Retângulo único centralizado
+                    {x: 40, y: 1220, w: 342, h: 155}    // Retângulo único centralizado
                 ]
             },
             {
@@ -821,10 +821,10 @@ const maps = [
                 y: -60,
                 // COLISÕES: Diagonal direita-inferior para esquerda-superior
                 collisionRects: [
-                    {x: 1360, y: 380, w: 60, h: 40},    // Meio-alto
-                    {x: 1340, y: 420, w: 80, h: 40},    // Meio
-                    {x: 1320, y: 460, w: 100, h: 40},   // Meio-baixo
-                    {x: 1300, y: 500, w: 120, h: 40}    // Base inferior
+                    {x: 1360, y: 280, w: 210, h: 40},    // Meio-alto
+                    {x: 1440, y: 320, w: 190, h: 40},    // Meio
+                    {x: 1490, y: 360, w: 210, h: 40},   // Meio-baixo
+                    {x: 1540, y: 400, w: 180, h: 40}    // Base inferior
                 ]
             },
             {
@@ -833,10 +833,10 @@ const maps = [
                 y: -90,
                 // COLISÕES: Diagonal direita-inferior para esquerda-superior
                 collisionRects: [
-                    {x: 281, y: 250, w: 60, h: 40},     // Meio-alto
-                    {x: 261, y: 290, w: 80, h: 40},     // Meio
-                    {x: 241, y: 330, w: 100, h: 40},    // Meio-baixo
-                    {x: 221, y: 370, w: 120, h: 40}     // Base inferior
+                    {x: 220, y: 150, w: 350, h: 40},     // Meio-alto
+                    {x: 250, y: 190, w: 300, h: 40},     // Meio
+                    {x: 304, y: 230, w: 160, h: 40},    // Meio-baixo
+                    {x: 361, y: 270, w: 160, h: 40}     // Base inferior
                 ]
             },
             {
@@ -845,10 +845,10 @@ const maps = [
                 y: 50,
                 // COLISÕES: Diagonal direita-inferior para esquerda-superior
                 collisionRects: [
-                    {x: 630, y: 390, w: 60, h: 40},     // Meio-alto
-                    {x: 610, y: 430, w: 80, h: 40},     // Meio
-                    {x: 590, y: 470, w: 100, h: 40},    // Meio-baixo
-                    {x: 570, y: 510, w: 120, h: 40}     // Base inferior
+                    {x: 540, y: 290, w: 500, h: 40},     // Meio-alto
+                    {x: 640, y: 330, w: 380, h: 40},     // Meio
+                    {x: 690, y: 370, w: 340, h: 40},    // Meio-baixo
+                    {x: 770, y: 410, w: 190, h: 40}     // Base inferior
                 ]
             }
         ],
