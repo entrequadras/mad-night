@@ -776,96 +776,100 @@ const maps = [
         hasLayers: true
     },
     // Mapa 2 - Fronteira com o Komando Satânico (COM COLISÕES v1.26!)
-    {
-        name: "Fronteira com o Komando Satânico",
-        subtitle: "Primeira superquadra",
-        width: 1920,
-        height: 1610,
-        enemies: [
-            {x: 267, y: 1524, type: 'faquinha'},
-            {x: 444, y: 820, type: 'janis'}
-        ],
-        escapeEnemies: [
-            {x: 400, y: 300, type: 'chacal'},
-            {x: 200, y: 200, type: 'caveirinha'},
-            {x: 600, y: 400, type: 'caveirinha'}
-        ],
-        tiles: generateTiles(1920, 1610, 120, ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']),
-        hasBackground: true,
-        backgroundAsset: 'entradaKS01',
-        buildings: [
-            {
-                type: 'predio0002', 
-                x: 1550, 
-                y: 665,
-                // COLISÕES: Diagonal esquerda-inferior para direita-superior (MAGRO)
-                collisionRects: [
-                    {x: 1650, y: 1100, w: 120, h: 40},  // Base inferior
-                    {x: 1680, y: 1060, w: 100, h: 40},  // Meio-baixo
-                    {x: 1710, y: 1020, w: 80, h: 40},   // Meio
-                    {x: 1740, y: 980, w: 60, h: 40}     // Meio-alto
-                ]
-            },
-            {
-                type: 'predio0006', 
-                x: 0, 
-                y: 970,
-                // COLISÕES: Retangular normal (não diagonal)
-                collisionRects: [
-                    {x: 40, y: 1320, w: 320, h: 100}    // Retângulo único centralizado
-                ]
-            },
-            {
-                type: 'predio0003', 
-                x: 1300, 
-                y: -60,
-                // COLISÕES: Diagonal direita-inferior para esquerda-superior
-                collisionRects: [
-                    {x: 1360, y: 380, w: 60, h: 40},    // Meio-alto
-                    {x: 1340, y: 420, w: 80, h: 40},    // Meio
-                    {x: 1320, y: 460, w: 100, h: 40},   // Meio-baixo
-                    {x: 1300, y: 500, w: 120, h: 40}    // Base inferior
-                ]
-            },
-            {
-                type: 'predio0008', 
-                x: 201, 
-                y: -90,
-                // COLISÕES: Diagonal direita-inferior para esquerda-superior
-                collisionRects: [
-                    {x: 281, y: 250, w: 60, h: 40},     // Meio-alto
-                    {x: 261, y: 290, w: 80, h: 40},     // Meio
-                    {x: 241, y: 330, w: 100, h: 40},    // Meio-baixo
-                    {x: 221, y: 370, w: 120, h: 40}     // Base inferior
-                ]
-            },
-            {
-                type: 'predio0008', 
-                x: 550, 
-                y: 50,
-                // COLISÕES: Diagonal direita-inferior para esquerda-superior
-                collisionRects: [
-                    {x: 630, y: 390, w: 60, h: 40},     // Meio-alto
-                    {x: 610, y: 430, w: 80, h: 40},     // Meio
-                    {x: 590, y: 470, w: 100, h: 40},    // Meio-baixo
-                    {x: 570, y: 510, w: 120, h: 40}     // Base inferior
-                ]
-            }
-        ],
-        trees: [],
-        streetLights: [],
-        objects: [],
-        walls: [
-            // Sem paredes adicionais - usando colisões dos prédios
-        ],
-        lights: [],
-        shadows: [],
-        playerStart: {x: 1440, y: 1550},
-        playerStartEscape: {x: 70, y: 70},
-        exit: {x: 70, y: 70, w: 60, h: 60},
-        orelhao: {x: 1000, y: 412, w: 40, h: 60},
-        direction: 'left'
-    },
+{
+    name: "Fronteira com o Komando Satânico",
+    subtitle: "Primeira superquadra",
+    width: 1920,
+    height: 1610,
+    enemies: [
+        {x: 267, y: 1524, type: 'faquinha'},
+        {x: 444, y: 820, type: 'janis'}
+    ],
+    escapeEnemies: [
+        {x: 400, y: 300, type: 'chacal'},
+        {x: 200, y: 200, type: 'caveirinha'},
+        {x: 600, y: 400, type: 'caveirinha'}
+    ],
+    tiles: generateTiles(1920, 1610, 120, ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']),
+    hasBackground: true,
+    backgroundAsset: 'entradaKS01',
+    buildings: [
+        {
+            type: 'predio0002', 
+            x: 1550, 
+            y: 665,
+            // COLISÕES: Diagonal esquerda-inferior para direita-superior (MAGRO)
+            collisionRects: [
+                {x: 1650, y: 1100, w: 120, h: 40},  // Base inferior
+                {x: 1680, y: 1060, w: 100, h: 40},  // Meio-baixo
+                {x: 1710, y: 1020, w: 80, h: 40},   // Meio
+                {x: 1740, y: 980, w: 60, h: 40}     // Meio-alto
+            ]
+        },
+        {
+            type: 'predio0006', 
+            x: 0, 
+            y: 970,
+            // COLISÕES: Retangular normal (não diagonal)
+            collisionRects: [
+                {x: 40, y: 1320, w: 320, h: 100}    // Retângulo único centralizado
+            ]
+        },
+        {
+            type: 'predio0003', 
+            x: 1300, 
+            y: -60,
+            // COLISÕES: Diagonal direita-inferior para esquerda-superior
+            collisionRects: [
+                {x: 1360, y: 380, w: 60, h: 40},    // Meio-alto
+                {x: 1340, y: 420, w: 80, h: 40},    // Meio
+                {x: 1320, y: 460, w: 100, h: 40},   // Meio-baixo
+                {x: 1300, y: 500, w: 120, h: 40}    // Base inferior
+            ]
+        },
+        {
+            type: 'predio0008', 
+            x: 201, 
+            y: -90,
+            // COLISÕES: Diagonal direita-inferior para esquerda-superior
+            collisionRects: [
+                {x: 281, y: 250, w: 60, h: 40},     // Meio-alto
+                {x: 261, y: 290, w: 80, h: 40},     // Meio
+                {x: 241, y: 330, w: 100, h: 40},    // Meio-baixo
+                {x: 221, y: 370, w: 120, h: 40}     // Base inferior
+            ]
+        },
+        {
+            type: 'predio0008', 
+            x: 550, 
+            y: 50,
+            // COLISÕES: Diagonal direita-inferior para esquerda-superior
+            collisionRects: [
+                {x: 630, y: 390, w: 60, h: 40},     // Meio-alto
+                {x: 610, y: 430, w: 80, h: 40},     // Meio
+                {x: 590, y: 470, w: 100, h: 40},    // Meio-baixo
+                {x: 570, y: 510, w: 120, h: 40}     // Base inferior
+            ]
+        }
+    ],
+    trees: [],
+    streetLights: [],
+    objects: [
+        // v1.38 - NOVOS OBJETOS: Parquinho e Banco
+        {type: 'parquinho', x: 1394, y: 668, rotation: 0},
+        {type: 'banco01', x: 1073, y: 544, rotation: 0}
+    ],
+    walls: [
+        // Sem paredes adicionais - usando colisões dos prédios
+    ],
+    lights: [],
+    shadows: [],
+    playerStart: {x: 1440, y: 1550},
+    playerStartEscape: {x: 70, y: 70},
+    exit: {x: 70, y: 70, w: 60, h: 60},
+    orelhao: {x: 1000, y: 412, w: 40, h: 60},
+    direction: 'left'
+},
     // Mapa 3 - Na área da KS
     {
         name: "Na área da KS",
