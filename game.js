@@ -38,7 +38,7 @@ const gameState = {
     enemySpawnDelay: 1000,
     spawnCorner: 0,
     lastFrameTime: 0,
-    version: 'v1.27' // NOVA VERSÃO!
+    version: 'v1.28' // NOVA VERSÃO - Carros Estacionados!
 };
 
 // Player
@@ -77,7 +77,7 @@ const assets = {
     arvore002: { img: new Image(), loaded: false, width: 194, height: 200 },
     arvore003: { img: new Image(), loaded: false, width: 162, height: 200 },
     arvore004: { img: new Image(), loaded: false, width: 150, height: 190 },
-    arvore006: { img: new Image(), loaded: false, width: 169, height: 194 }, // NOVO!
+    arvore006: { img: new Image(), loaded: false, width: 169, height: 194 },
     arvorebloco001: { img: new Image(), loaded: false, width: 354, height: 186 },
     poste000: { img: new Image(), loaded: false, width: 40, height: 120 },
     poste001: { img: new Image(), loaded: false, width: 40, height: 120 },
@@ -93,13 +93,13 @@ const assets = {
     asfaltosujo004: { img: new Image(), loaded: false, width: 120, height: 120 },
     asfaltosujo005: { img: new Image(), loaded: false, width: 120, height: 120 },
     caixadeluz: { img: new Image(), loaded: false, width: 45, height: 45 },
-    banco01: { img: new Image(), loaded: false, width: 61, height: 50 }, // NOVO!
+    banco01: { img: new Image(), loaded: false, width: 61, height: 50 },
     banco03: { img: new Image(), loaded: false, width: 53, height: 43 },
     banco04: { img: new Image(), loaded: false, width: 53, height: 45 },
     garrafaquebrada01: { img: new Image(), loaded: false, width: 40, height: 24 },
     garrafaquebrada02: { img: new Image(), loaded: false, width: 40, height: 24 },
     cadeiradepraia01: { img: new Image(), loaded: false, width: 29, height: 40 },
-    parquinho: { img: new Image(), loaded: false, width: 199, height: 241 }, // NOVO!
+    parquinho: { img: new Image(), loaded: false, width: 199, height: 241 },
     // Assets do Eixão
     eixaoCamada1: { img: new Image(), loaded: false, width: 3000, height: 868 },
     eixaoCamada2: { img: new Image(), loaded: false, width: 3000, height: 868 },
@@ -110,6 +110,13 @@ const assets = {
     carro003fundos: { img: new Image(), loaded: false, width: 102, height: 130 },
     carro004frente: { img: new Image(), loaded: false, width: 102, height: 130 },
     carro004fundos: { img: new Image(), loaded: false, width: 93, height: 140 },
+    // NOVOS CARROS LATERAIS v1.28!
+    carrolateral_02: { img: new Image(), loaded: false, width: 120, height: 100 },
+    carrolateral_03: { img: new Image(), loaded: false, width: 120, height: 100 },
+    carrolateral_04: { img: new Image(), loaded: false, width: 120, height: 100 },
+    carrolateral_06: { img: new Image(), loaded: false, width: 120, height: 100 },
+    carrolateral_07: { img: new Image(), loaded: false, width: 120, height: 100 },
+    carrolateral_08: { img: new Image(), loaded: false, width: 177, height: 127 },
     // Novos assets do mapa 2
     entradaKS01: { img: new Image(), loaded: false, width: 1920, height: 1610 },
     orelhao001: { img: new Image(), loaded: false, width: 40, height: 60 },
@@ -215,6 +222,25 @@ assets.cadeiradepraia01.img.onload = () => { assets.cadeiradepraia01.loaded = tr
 // NOVO: Carregar parquinho
 assets.parquinho.img.src = 'assets/objects/parquinho.png';
 assets.parquinho.img.onload = () => { assets.parquinho.loaded = true; };
+
+// NOVO: Carregar carros laterais
+assets.carrolateral_02.img.src = 'assets/scenary/carrolateral_02.png';
+assets.carrolateral_02.img.onload = () => { assets.carrolateral_02.loaded = true; };
+
+assets.carrolateral_03.img.src = 'assets/scenary/carrolateral_03.png';
+assets.carrolateral_03.img.onload = () => { assets.carrolateral_03.loaded = true; };
+
+assets.carrolateral_04.img.src = 'assets/scenary/carrolateral_04.png';
+assets.carrolateral_04.img.onload = () => { assets.carrolateral_04.loaded = true; };
+
+assets.carrolateral_06.img.src = 'assets/scenary/carrolateral_06.png';
+assets.carrolateral_06.img.onload = () => { assets.carrolateral_06.loaded = true; };
+
+assets.carrolateral_07.img.src = 'assets/scenary/carrolateral_07.png';
+assets.carrolateral_07.img.onload = () => { assets.carrolateral_07.loaded = true; };
+
+assets.carrolateral_08.img.src = 'assets/scenary/carrolateral_08.png';
+assets.carrolateral_08.img.onload = () => { assets.carrolateral_08.loaded = true; };
 
 // Carregar assets do Eixão
 assets.eixaoCamada1.img.src = 'assets/floors/eixao_da_morte_camada1.png';
@@ -527,7 +553,28 @@ const trafficSystem = {
                 );
             }
             
-            ctx.restore(); // Remove o filtro de escurecimento
+            // DEBUG: Mostrar colisões (v1.28)
+    renderCollisionDebug(map);
+    
+    // Mostrar colisões dos carros também
+    if (keys['c'] || keys['C'] && map.parkedCars) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
+        ctx.strokeStyle = 'rgba(0, 255, 0, 0.8)';
+        ctx.lineWidth = 2;
+        
+        map.parkedCars.forEach(car => {
+            const carAsset = assets[car.type];
+            if (carAsset) {
+                ctx.fillRect(car.x, car.y, carAsset.width, carAsset.height);
+                ctx.strokeRect(car.x, car.y, carAsset.width, carAsset.height);
+            }
+        });
+        
+        ctx.restore();
+    }
+    
+    ctx.restore(); // Remove o filtro de escurecimento
             
             // Renderizar faróis (sem escurecimento)
             ctx.save();
@@ -742,7 +789,7 @@ const maps = [
         direction: 'right',
         hasLayers: true
     },
-    // Mapa 2 - Fronteira com o Komando Satânico (v1.27 - Objetos Urbanos!)
+    // Mapa 2 - Fronteira com o Komando Satânico (v1.28 - Carros Estacionados!)
     {
         name: "Fronteira com o Komando Satânico",
         subtitle: "Primeira superquadra",
@@ -820,15 +867,25 @@ const maps = [
             }
         ],
         trees: [
-            // NOVA: arvore006 na posição especificada
+            // arvore006 na posição especificada
             {type: 'arvore006', x: 1095, y: 1077}
         ],
         streetLights: [],
         objects: [
-            // NOVO: parquinho na posição especificada
+            // parquinho na posição especificada
             {type: 'parquinho', x: 1394, y: 668, rotation: 0},
-            // NOVO: banco01 na posição especificada
+            // banco01 na posição especificada
             {type: 'banco01', x: 1073, y: 544, rotation: 0}
+        ],
+        // NOVO v1.28: Carros estacionados!
+        parkedCars: [
+            {type: 'carro002frente', x: 34, y: 1472},
+            {type: 'carrolateral_04', x: 1770, y: 1210},
+            {type: 'carrolateral_06', x: 602, y: 523},
+            {type: 'carrolateral_02', x: 527, y: 474},
+            {type: 'carrolateral_03', x: 299, y: 378},
+            {type: 'carrolateral_07', x: 89, y: 299},
+            {type: 'carrolateral_08', x: 238, y: 704}
         ],
         walls: [
             // Sem paredes adicionais - usando colisões dos prédios
@@ -838,7 +895,7 @@ const maps = [
         playerStart: {x: 1440, y: 1550},
         playerStartEscape: {x: 70, y: 70},
         exit: {x: 70, y: 70, w: 60, h: 60},
-        orelhao: {x: 1000, y: 422, w: 40, h: 60}, // MODIFICADO: y descido 10 pixels (412 → 422)
+        orelhao: {x: 1000, y: 422, w: 40, h: 60}, // y descido 10 pixels
         direction: 'left'
     },
     // Mapa 3 - Na área da KS
@@ -973,6 +1030,25 @@ function isInShadow(x, y) {
                 
                 const dist = Math.sqrt(Math.pow(x - shadowX, 2) + Math.pow(y - shadowY, 2));
                 if (dist < shadowRadius) return true;
+            }
+        }
+    }
+    
+    // Verificar colisão com carros estacionados
+    if (map.parkedCars) {
+        for (let car of map.parkedCars) {
+            const carAsset = assets[car.type];
+            if (carAsset && carAsset.loaded) {
+                const carCollision = {
+                    x: car.x,
+                    y: car.y,
+                    w: carAsset.width,
+                    h: carAsset.height
+                };
+                
+                if (checkRectCollision(testEntity, carCollision)) {
+                    return true;
+                }
             }
         }
     }
@@ -2009,6 +2085,37 @@ function renderObjects(map, visibleArea) {
     });
 }
 
+// NOVO: Renderizar carros estacionados
+function renderParkedCars(map, visibleArea) {
+    if (!map.parkedCars) return;
+    
+    map.parkedCars.forEach(car => {
+        const carAsset = assets[car.type];
+        if (carAsset && carAsset.loaded) {
+            if (car.x + carAsset.width > visibleArea.left && 
+                car.x < visibleArea.right &&
+                car.y + carAsset.height > visibleArea.top && 
+                car.y < visibleArea.bottom) {
+                
+                ctx.drawImage(carAsset.img, car.x, car.y);
+            }
+        } else {
+            // Fallback para retângulo colorido se o asset não carregar
+            if (car.x + 120 > visibleArea.left && 
+                car.x < visibleArea.right &&
+                car.y + 100 > visibleArea.top && 
+                car.y < visibleArea.bottom) {
+                
+                ctx.fillStyle = '#444';
+                ctx.fillRect(car.x, car.y, 
+                    car.type === 'carrolateral_08' ? 177 : 120,
+                    car.type === 'carrolateral_08' ? 127 : 100
+                );
+            }
+        }
+    });
+}
+
 function renderFieldShadow(map) {
     if (gameState.currentMap === 0) {
         const campoX = (map.width - 800) / 2;
@@ -2375,6 +2482,7 @@ function draw() {
         // Renderizar prédios - camada inferior
         renderBuildingsLayer(map, visibleArea, 'bottom');
         
+        renderParkedCars(map, visibleArea); // NOVO: Renderizar carros estacionados
         renderObjects(map, visibleArea);
         renderWalls(map, visibleArea);
         renderSpecialObjects(map);
@@ -2512,7 +2620,7 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.27 - Objetos Urbanos KS');
+console.log('🎮 Mad Night v1.28 - Carros Estacionados KS');
 console.log('📢 Controles: Setas=mover, Espaço=dash, C=ver colisões');
 console.log('🔧 Debug: K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
-console.log('🏞️ Novos objetos adicionados: parquinho, banco01, arvore006!');
+console.log('🚗 7 carros estacionados adicionados com colisão!');
