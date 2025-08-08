@@ -1,4 +1,4 @@
-console.log('Mad Night v1.26 - Colisões Isométricas');
+console.log('Mad Night v1.31 - Camadas Definitivas');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -38,7 +38,7 @@ const gameState = {
     enemySpawnDelay: 1000,
     spawnCorner: 0,
     lastFrameTime: 0, // Movido para dentro do gameState
-    version: 'v1.29' // Renderização Corrigida!
+    version: 'v1.31' // Camadas Definitivas!
 };
 
 // Player
@@ -1975,7 +1975,7 @@ function renderCarCollisionDebug(map) {
     ctx.restore();
 }
 
-// NOVO: Renderizar carros estacionados (v1.29 - com debug)
+// Renderizar carros estacionados (v1.31 - com debug visual)
 function renderParkedCars(map, visibleArea) {
     if (!map.parkedCars) return;
     
@@ -1983,36 +1983,35 @@ function renderParkedCars(map, visibleArea) {
     
     map.parkedCars.forEach(car => {
         const carAsset = assets[car.type];
-        if (carAsset && carAsset.loaded) {
-            if (car.x + carAsset.width > visibleArea.left && 
-                car.x < visibleArea.right &&
-                car.y + carAsset.height > visibleArea.top && 
-                car.y < visibleArea.bottom) {
-                
+        
+        // SEMPRE desenhar algo, mesmo que o asset não carregue
+        if (car.x + 200 > visibleArea.left && 
+            car.x < visibleArea.right &&
+            car.y + 150 > visibleArea.top && 
+            car.y < visibleArea.bottom) {
+            
+            if (carAsset && carAsset.loaded) {
+                // Desenhar o carro real
                 ctx.drawImage(carAsset.img, car.x, car.y);
                 carrosRenderizados++;
-            }
-        } else {
-            // Fallback: desenhar retângulo se o asset não carregar
-            if (car.x + 150 > visibleArea.left && 
-                car.x < visibleArea.right &&
-                car.y + 100 > visibleArea.top && 
-                car.y < visibleArea.bottom) {
-                
-                ctx.fillStyle = '#444';
-                ctx.strokeStyle = '#222';
+            } else {
+                // Fallback VISÍVEL: retângulo colorido
+                ctx.fillStyle = '#ff0000'; // VERMELHO para debug
+                ctx.strokeStyle = '#ffff00'; // AMARELO
+                ctx.lineWidth = 3;
                 ctx.fillRect(car.x, car.y, 150, 100);
                 ctx.strokeRect(car.x, car.y, 150, 100);
                 ctx.fillStyle = '#fff';
-                setPixelFont(8);
-                ctx.fillText('CAR', car.x + 60, car.y + 45);
+                setPixelFont(10);
+                ctx.fillText('CARRO', car.x + 45, car.y + 45);
+                console.log(`Carro ${car.type} em ${car.x},${car.y} - asset não carregado!`);
             }
         }
     });
     
-    // Debug: mostrar quantos carros foram renderizados
-    if (carrosRenderizados > 0 && gameState.currentMap === 2) {
-        console.log(`Carros renderizados: ${carrosRenderizados}`);
+    // Debug: sempre mostrar log no mapa 2
+    if (gameState.currentMap === 2) {
+        console.log(`Mapa 2: ${carrosRenderizados} carros renderizados de ${map.parkedCars.length}`);
     }
 }
 
@@ -2486,23 +2485,28 @@ function draw() {
             bottom: camera.y + camera.height + 100
         };
         
-        // Camada 1: Base
+        // Camada 1: Base (v1.31 - ORDEM CORRIGIDA!)
         if (map.hasLayers && gameState.currentMap === 1) {
             renderEixaoLayer1(map);
-        } else if (map.hasBackground && map.backgroundAsset) {
-            // Renderizar background PRIMEIRO (v1.29)
-            renderBackground(map);
         } else {
-            // Só renderizar tiles se NÃO tiver background
+            // SEMPRE renderizar tiles primeiro
             renderTiles(map, visibleArea);
+            
+            // Depois o background (se houver)
+            if (map.hasBackground && map.backgroundAsset) {
+                renderBackground(map);
+            }
         }
         
         renderCampo(map);
+        
+        // Carros ANTES das sombras e árvores (v1.31)
+        renderParkedCars(map, visibleArea);
+        
         renderShadows(map, visibleArea);
         renderTrees(map, visibleArea, 'bottom');
         
-        // IMPORTANTE: Carros e objetos DEPOIS do background (v1.29)
-        renderParkedCars(map, visibleArea);
+        // Objetos depois das árvores
         renderObjects(map, visibleArea);
         
         // Renderizar prédios - camada inferior
@@ -2645,11 +2649,11 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.29 - Renderização Corrigida');
+console.log('🎮 Mad Night v1.31 - Camadas Definitivas');
 console.log('📢 Controles: Setas=mover, Espaço=dash, C=ver colisões');
 console.log('🔧 Debug: K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
-console.log('🚗 Carros agora renderizam SOBRE o background!');
-console.log('🎯 Ordem de camadas corrigida!');
+console.log('🚗 Ordem de renderização: Tiles → Background → Carros → Sombras');
+console.log('✅ Tiles e carros agora visíveis!');
 
 // Debug de carregamento dos carros
 setTimeout(() => {
