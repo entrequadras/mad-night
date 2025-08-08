@@ -1,4 +1,4 @@
-console.log('Mad Night v1.34 - Carros Forçados');
+console.log('Mad Night v1.35 - Código Limpo');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -38,7 +38,7 @@ const gameState = {
     enemySpawnDelay: 1000,
     spawnCorner: 0,
     lastFrameTime: 0, // Movido para dentro do gameState
-    version: 'v1.34' // Carros Forçados!
+    version: 'v1.35' // Código Limpo!
 };
 
 // Player
@@ -2676,11 +2676,11 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.34 - Carros Forçados');
+console.log('🎮 Mad Night v1.35 - Código Limpo');
 console.log('📢 Controles: Setas=mover, Espaço=dash, C=ver colisões');
-console.log('🚗 CARROS HARDCODED DIRETO NO MAPA 2!');
-console.log('✅ Colisões dos prédios ajustadas!');
-console.log('🎯 Se não aparecer agora, é problema de renderização!');
+console.log('🚗 Array parkedCars restaurado no mapa 2');
+console.log('✅ Sintaxe corrigida e testada');
+console.log('🎯 Carros forçados + array correto');
 
 // Debug de carregamento dos carros
 setTimeout(() => {
