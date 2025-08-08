@@ -2471,12 +2471,10 @@ function draw() {
         }
         
         renderBackground(map);
+        renderParkedCars(map, visibleArea);
         renderCampo(map);
         renderShadows(map, visibleArea);
         renderTrees(map, visibleArea, 'bottom');
-        
-        // NOVO: Renderizar carros estacionados (v1.28)
-        renderParkedCars(map, visibleArea);
         
         // NOVO: Renderizar prédios - camada inferior (v1.26)
         renderBuildingsLayer(map, visibleArea, 'bottom');
