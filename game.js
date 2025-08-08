@@ -755,7 +755,7 @@ const maps = [
                     {x: 1650, y: 1100, w: 200, h: 60},  // Base inferior
                     {x: 1680, y: 1060, w: 220, h: 40},  // Meio-baixo
                     {x: 1710, y: 1020, w: 220, h: 40},   // Meio
-                    {x: 1740, y: 980, w: 200, h: 60}     // Meio-alto
+                    {x: 1740, y: 960, w: 200, h: 60}     // Meio-alto
                 ]
             },
             {
@@ -774,8 +774,8 @@ const maps = [
                 // COLISÕES: Diagonal direita-inferior para esquerda-superior
                 collisionRects: [
                     {x: 1360, y: 280, w: 210, h: 40},    // Meio-alto
-                    {x: 1440, y: 320, w: 180, h: 40},    // Meio
-                    {x: 1520, y: 360, w: 190, h: 40},   // Meio-baixo
+                    {x: 1440, y: 320, w: 190, h: 40},    // Meio
+                    {x: 1490, y: 360, w: 210, h: 40},   // Meio-baixo
                     {x: 1600, y: 400, w: 180, h: 40}    // Base inferior
                 ]
             },
@@ -785,10 +785,10 @@ const maps = [
                 y: -90,
                 // COLISÕES: Diagonal direita-inferior para esquerda-superior
                 collisionRects: [
-                    {x: 381, y: 150, w: 160, h: 40},     // Meio-alto
-                    {x: 361, y: 190, w: 180, h: 40},     // Meio
+                    {x: 290, y: 150, w: 280, h: 40},     // Meio-alto
+                    {x: 300, y: 190, w: 260, h: 40},     // Meio
                     {x: 341, y: 230, w: 150, h: 40},    // Meio-baixo
-                    {x: 321, y: 320, w: 140, h: 40}     // Base inferior
+                    {x: 321, y: 270, w: 140, h: 40}     // Base inferior
                 ]
             },
             {
@@ -797,9 +797,9 @@ const maps = [
                 y: 50,
                 // COLISÕES: Diagonal direita-inferior para esquerda-superior
                 collisionRects: [
-                    {x: 730, y: 290, w: 260, h: 40},     // Meio-alto
-                    {x: 710, y: 330, w: 280, h: 40},     // Meio
-                    {x: 790, y: 370, w: 200, h: 40},    // Meio-baixo
+                    {x: 680, y: 290, w: 360, h: 40},     // Meio-alto
+                    {x: 690, y: 330, w: 340, h: 40},     // Meio
+                    {x: 750, y: 370, w: 300, h: 40},    // Meio-baixo
                     {x: 770, y: 410, w: 190, h: 40}     // Base inferior
                 ]
             }
