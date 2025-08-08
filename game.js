@@ -1,4 +1,4 @@
-console.log('Mad Night v1.37 - Objetos Visíveis e Colisões 50%');
+console.log('Mad Night v1.38 - Parquinho e Banco no Mapa KS');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -2735,7 +2735,7 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.37 - Objetos Visíveis e Colisões 50%');
+console.log('🎮 Mad Night v1.38 - Parquinho e Banco no Mapa KS');
 console.log('📢 Controles: Setas=mover, Espaço=dash, C=ver colisões');
 console.log('🚗 Colisões dos carros reduzidas para 50% (centralizada)');
 console.log('🎪 Parquinho e banco agora visíveis com colisão 50%');
