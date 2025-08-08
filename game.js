@@ -812,7 +812,7 @@ const maps = [
                 y: 970,
                 // COLISÕES: Retangular normal (não diagonal)
                 collisionRects: [
-                    {x: 40, y: 1220, w: 342, h: 155}    // Retângulo único centralizado
+                    {x: 40, y: 1270, w: 350, h: 160}    // Retângulo único centralizado
                 ]
             },
             {
@@ -821,10 +821,10 @@ const maps = [
                 y: -60,
                 // COLISÕES: Diagonal direita-inferior para esquerda-superior
                 collisionRects: [
-                    {x: 1360, y: 280, w: 210, h: 40},    // Meio-alto
-                    {x: 1440, y: 320, w: 190, h: 40},    // Meio
-                    {x: 1490, y: 360, w: 210, h: 40},   // Meio-baixo
-                    {x: 1540, y: 400, w: 180, h: 40}    // Base inferior
+                    {x: 1360, y: 230, w: 210, h: 40},    // Meio-alto
+                    {x: 1440, y: 270, w: 210, h: 40},    // Meio
+                    {x: 1490, y: 310, w: 210, h: 40},   // Meio-baixo
+                    {x: 1540, y: 350, w: 180, h: 40}    // Base inferior
                 ]
             },
             {
