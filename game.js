@@ -38,7 +38,7 @@ const gameState = {
     enemySpawnDelay: 1000,
     spawnCorner: 0,
     lastFrameTime: 0, // Movido para dentro do gameState
-    version: 'v1.28' // Carros Estacionados e Colisões Ajustadas!
+    version: 'v1.29' // Renderização Corrigida!
 };
 
 // Player
@@ -800,10 +800,10 @@ const maps = [
                 y: 665,
                 // COLISÕES: Diagonal esquerda-inferior para direita-superior (MAGRO)
                 collisionRects: [
-                    {x: 1680, y: 1100, w: 200, h: 60},  // Base inferior
-                    {x: 1680, y: 1060, w: 220, h: 40},  // Meio-baixo
-                    {x: 1710, y: 1020, w: 220, h: 40},   // Meio
-                    {x: 1740, y: 960, w: 200, h: 60}     // Meio-alto
+                    {x: 1650, y: 1100, w: 120, h: 40},  // Base inferior
+                    {x: 1680, y: 1060, w: 100, h: 40},  // Meio-baixo
+                    {x: 1710, y: 1020, w: 80, h: 40},   // Meio
+                    {x: 1740, y: 980, w: 60, h: 40}     // Meio-alto
                 ]
             },
             {
@@ -812,7 +812,7 @@ const maps = [
                 y: 970,
                 // COLISÕES: Retangular normal (não diagonal)
                 collisionRects: [
-                    {x: 40, y: 1220, w: 342, h: 155}    // Retângulo único centralizado
+                    {x: 40, y: 1320, w: 320, h: 100}    // Retângulo único centralizado
                 ]
             },
             {
@@ -821,10 +821,10 @@ const maps = [
                 y: -60,
                 // COLISÕES: Diagonal direita-inferior para esquerda-superior
                 collisionRects: [
-                    {x: 1360, y: 280, w: 210, h: 40},    // Meio-alto
-                    {x: 1440, y: 320, w: 190, h: 40},    // Meio
-                    {x: 1490, y: 360, w: 210, h: 40},   // Meio-baixo
-                    {x: 1540, y: 400, w: 180, h: 40}    // Base inferior
+                    {x: 1360, y: 380, w: 60, h: 40},    // Meio-alto
+                    {x: 1340, y: 420, w: 80, h: 40},    // Meio
+                    {x: 1320, y: 460, w: 100, h: 40},   // Meio-baixo
+                    {x: 1300, y: 500, w: 120, h: 40}    // Base inferior
                 ]
             },
             {
@@ -833,10 +833,10 @@ const maps = [
                 y: -90,
                 // COLISÕES: Diagonal direita-inferior para esquerda-superior
                 collisionRects: [
-                    {x: 220, y: 150, w: 350, h: 40},     // Meio-alto
-                    {x: 250, y: 190, w: 300, h: 40},     // Meio
-                    {x: 304, y: 230, w: 160, h: 40},    // Meio-baixo
-                    {x: 361, y: 270, w: 160, h: 40}     // Base inferior
+                    {x: 281, y: 250, w: 60, h: 40},     // Meio-alto
+                    {x: 261, y: 290, w: 80, h: 40},     // Meio
+                    {x: 241, y: 330, w: 100, h: 40},    // Meio-baixo
+                    {x: 221, y: 370, w: 120, h: 40}     // Base inferior
                 ]
             },
             {
@@ -845,10 +845,10 @@ const maps = [
                 y: 50,
                 // COLISÕES: Diagonal direita-inferior para esquerda-superior
                 collisionRects: [
-                    {x: 540, y: 290, w: 500, h: 40},     // Meio-alto
-                    {x: 640, y: 330, w: 380, h: 40},     // Meio
-                    {x: 690, y: 370, w: 340, h: 40},    // Meio-baixo
-                    {x: 770, y: 410, w: 190, h: 40}     // Base inferior
+                    {x: 630, y: 390, w: 60, h: 40},     // Meio-alto
+                    {x: 610, y: 430, w: 80, h: 40},     // Meio
+                    {x: 590, y: 470, w: 100, h: 40},    // Meio-baixo
+                    {x: 570, y: 510, w: 120, h: 40}     // Base inferior
                 ]
             }
         ],
@@ -1975,9 +1975,11 @@ function renderCarCollisionDebug(map) {
     ctx.restore();
 }
 
-// NOVO: Renderizar carros estacionados (v1.28)
+// NOVO: Renderizar carros estacionados (v1.29 - com debug)
 function renderParkedCars(map, visibleArea) {
     if (!map.parkedCars) return;
+    
+    let carrosRenderizados = 0;
     
     map.parkedCars.forEach(car => {
         const carAsset = assets[car.type];
@@ -1988,9 +1990,30 @@ function renderParkedCars(map, visibleArea) {
                 car.y < visibleArea.bottom) {
                 
                 ctx.drawImage(carAsset.img, car.x, car.y);
+                carrosRenderizados++;
+            }
+        } else {
+            // Fallback: desenhar retângulo se o asset não carregar
+            if (car.x + 150 > visibleArea.left && 
+                car.x < visibleArea.right &&
+                car.y + 100 > visibleArea.top && 
+                car.y < visibleArea.bottom) {
+                
+                ctx.fillStyle = '#444';
+                ctx.strokeStyle = '#222';
+                ctx.fillRect(car.x, car.y, 150, 100);
+                ctx.strokeRect(car.x, car.y, 150, 100);
+                ctx.fillStyle = '#fff';
+                setPixelFont(8);
+                ctx.fillText('CAR', car.x + 60, car.y + 45);
             }
         }
     });
+    
+    // Debug: mostrar quantos carros foram renderizados
+    if (carrosRenderizados > 0 && gameState.currentMap === 2) {
+        console.log(`Carros renderizados: ${carrosRenderizados}`);
+    }
 }
 
 function renderEixaoLayer1(map) {
@@ -2466,20 +2489,25 @@ function draw() {
         // Camada 1: Base
         if (map.hasLayers && gameState.currentMap === 1) {
             renderEixaoLayer1(map);
+        } else if (map.hasBackground && map.backgroundAsset) {
+            // Renderizar background PRIMEIRO (v1.29)
+            renderBackground(map);
         } else {
+            // Só renderizar tiles se NÃO tiver background
             renderTiles(map, visibleArea);
         }
         
-        renderBackground(map);
-        renderParkedCars(map, visibleArea);
         renderCampo(map);
         renderShadows(map, visibleArea);
         renderTrees(map, visibleArea, 'bottom');
         
-        // NOVO: Renderizar prédios - camada inferior (v1.26)
+        // IMPORTANTE: Carros e objetos DEPOIS do background (v1.29)
+        renderParkedCars(map, visibleArea);
+        renderObjects(map, visibleArea);
+        
+        // Renderizar prédios - camada inferior
         renderBuildingsLayer(map, visibleArea, 'bottom');
         
-        renderObjects(map, visibleArea);
         renderWalls(map, visibleArea);
         renderSpecialObjects(map);
         
@@ -2617,8 +2645,21 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.28 - Carros Estacionados e Colisões Ajustadas');
+console.log('🎮 Mad Night v1.29 - Renderização Corrigida');
 console.log('📢 Controles: Setas=mover, Espaço=dash, C=ver colisões');
 console.log('🔧 Debug: K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
-console.log('🚗 7 carros estacionados adicionados!');
-console.log('📦 Colisões do parquinho e banco reduzidas em 50%!');
+console.log('🚗 Carros agora renderizam SOBRE o background!');
+console.log('🎯 Ordem de camadas corrigida!');
+
+// Debug de carregamento dos carros
+setTimeout(() => {
+    console.log('Status dos carros:', {
+        'carro002frente': assets.carro002frente ? assets.carro002frente.loaded : false,
+        'carrolateral_02': assets.carrolateral_02 ? assets.carrolateral_02.loaded : false,
+        'carrolateral_03': assets.carrolateral_03 ? assets.carrolateral_03.loaded : false,
+        'carrolateral_04': assets.carrolateral_04 ? assets.carrolateral_04.loaded : false,
+        'carrolateral_06': assets.carrolateral_06 ? assets.carrolateral_06.loaded : false,
+        'carrolateral_07': assets.carrolateral_07 ? assets.carrolateral_07.loaded : false,
+        'carrolateral_08': assets.carrolateral_08 ? assets.carrolateral_08.loaded : false
+    });
+}, 2000);
