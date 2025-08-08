@@ -38,7 +38,7 @@ const gameState = {
     enemySpawnDelay: 1000,
     spawnCorner: 0,
     lastFrameTime: 0,
-    version: 'v1.29' // NOVA VERSÃO - Correção de Bugs!
+    version: 'v1.28' // NOVA VERSÃO - Carros Estacionados!
 };
 
 // Player
@@ -223,29 +223,23 @@ assets.cadeiradepraia01.img.onload = () => { assets.cadeiradepraia01.loaded = tr
 assets.parquinho.img.src = 'assets/objects/parquinho.png';
 assets.parquinho.img.onload = () => { assets.parquinho.loaded = true; };
 
-// NOVO: Carregar carros laterais (CORRIGIDO com underscore)
+// NOVO: Carregar carros laterais
 assets.carrolateral_02.img.src = 'assets/scenary/carrolateral_02.png';
-assets.carrolateral_02.img.onerror = () => { console.log('carrolateral_02 não encontrado'); };
 assets.carrolateral_02.img.onload = () => { assets.carrolateral_02.loaded = true; };
 
 assets.carrolateral_03.img.src = 'assets/scenary/carrolateral_03.png';
-assets.carrolateral_03.img.onerror = () => { console.log('carrolateral_03 não encontrado'); };
 assets.carrolateral_03.img.onload = () => { assets.carrolateral_03.loaded = true; };
 
 assets.carrolateral_04.img.src = 'assets/scenary/carrolateral_04.png';
-assets.carrolateral_04.img.onerror = () => { console.log('carrolateral_04 não encontrado'); };
 assets.carrolateral_04.img.onload = () => { assets.carrolateral_04.loaded = true; };
 
 assets.carrolateral_06.img.src = 'assets/scenary/carrolateral_06.png';
-assets.carrolateral_06.img.onerror = () => { console.log('carrolateral_06 não encontrado'); };
 assets.carrolateral_06.img.onload = () => { assets.carrolateral_06.loaded = true; };
 
 assets.carrolateral_07.img.src = 'assets/scenary/carrolateral_07.png';
-assets.carrolateral_07.img.onerror = () => { console.log('carrolateral_07 não encontrado'); };
 assets.carrolateral_07.img.onload = () => { assets.carrolateral_07.loaded = true; };
 
 assets.carrolateral_08.img.src = 'assets/scenary/carrolateral_08.png';
-assets.carrolateral_08.img.onerror = () => { console.log('carrolateral_08 não encontrado'); };
 assets.carrolateral_08.img.onload = () => { assets.carrolateral_08.loaded = true; };
 
 // Carregar assets do Eixão
@@ -1146,31 +1140,12 @@ function checkWallCollision(entity, newX, newY) {
             
             const objAsset = assets[obj.type];
             if (objAsset && objAsset.loaded) {
-                let objCollision = {
+                const objCollision = {
                     x: obj.x,
                     y: obj.y,
                     w: objAsset.width,
                     h: objAsset.height
                 };
-                
-                // NOVO v1.29: Reduzir colisão do parquinho e banco01
-                if (obj.type === 'parquinho') {
-                    // Reduzir área de colisão do parquinho (apenas a base)
-                    objCollision = {
-                        x: obj.x + 20,
-                        y: obj.y + 140,
-                        w: objAsset.width - 40,
-                        h: objAsset.height - 140
-                    };
-                } else if (obj.type === 'banco01') {
-                    // Reduzir área de colisão do banco01
-                    objCollision = {
-                        x: obj.x + 5,
-                        y: obj.y + 10,
-                        w: objAsset.width - 10,
-                        h: objAsset.height - 15
-                    };
-                }
                 
                 if (checkRectCollision(testEntity, objCollision)) {
                     return true;
@@ -2535,26 +2510,8 @@ function draw() {
         renderStreetLights(map, visibleArea);
         renderTrees(map, visibleArea, 'top');
         
-        // DEBUG: Mostrar colisões (v1.29 - CORRIGIDO)
+        // DEBUG: Mostrar colisões
         renderCollisionDebug(map);
-        
-        // Mostrar colisões dos carros também
-        if ((keys['c'] || keys['C']) && map.parkedCars) {
-            ctx.save();
-            ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
-            ctx.strokeStyle = 'rgba(0, 255, 0, 0.8)';
-            ctx.lineWidth = 2;
-            
-            map.parkedCars.forEach(car => {
-                const carAsset = assets[car.type];
-                if (carAsset) {
-                    ctx.fillRect(car.x, car.y, carAsset.width, carAsset.height);
-                    ctx.strokeRect(car.x, car.y, carAsset.width, carAsset.height);
-                }
-            });
-            
-            ctx.restore();
-        }
         
         // Efeito de noite
         ctx.fillStyle = 'rgba(0, 0, 40, 0.4)';
@@ -2663,7 +2620,7 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.29 - Correção de Bugs e Colisões');
+console.log('🎮 Mad Night v1.28 - Carros Estacionados KS');
 console.log('📢 Controles: Setas=mover, Espaço=dash, C=ver colisões');
 console.log('🔧 Debug: K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
-console.log('🔨 Corrigido: Erro de renderização e colisões reduzidas!');
+console.log('🚗 7 carros estacionados adicionados com colisão!');
