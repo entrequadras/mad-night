@@ -1,4 +1,4 @@
-console.log('Mad Night v1.31 - Camadas Definitivas');
+console.log('Mad Night v1.32 - Debug Forçado de Carros');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -38,7 +38,7 @@ const gameState = {
     enemySpawnDelay: 1000,
     spawnCorner: 0,
     lastFrameTime: 0, // Movido para dentro do gameState
-    version: 'v1.31' // Camadas Definitivas!
+    version: 'v1.32' // Debug Forçado de Carros!
 };
 
 // Player
@@ -1975,43 +1975,75 @@ function renderCarCollisionDebug(map) {
     ctx.restore();
 }
 
-// Renderizar carros estacionados (v1.31 - com debug visual)
+// Renderizar carros estacionados (v1.32 - DEBUG TOTAL)
 function renderParkedCars(map, visibleArea) {
-    if (!map.parkedCars) return;
+    // Debug: verificar se a função está sendo chamada
+    if (gameState.currentMap === 2) {
+        console.log('=== renderParkedCars CHAMADA ===');
+        console.log('Map tem parkedCars?', map.parkedCars ? 'SIM' : 'NÃO');
+        if (map.parkedCars) {
+            console.log('Quantidade de carros:', map.parkedCars.length);
+            console.log('Área visível:', visibleArea);
+        }
+    }
     
-    let carrosRenderizados = 0;
+    if (!map.parkedCars) {
+        console.log('Map não tem parkedCars, saindo...');
+        return;
+    }
     
-    map.parkedCars.forEach(car => {
-        const carAsset = assets[car.type];
+    // FORÇAR desenho de um retângulo VERDE onde a função roda
+    ctx.fillStyle = '#00ff00';
+    ctx.fillRect(100, 100, 200, 50);
+    ctx.fillStyle = '#000';
+    setPixelFont(10);
+    ctx.fillText('CARROS AQUI', 110, 120);
+    
+    let carrosProcessados = 0;
+    
+    map.parkedCars.forEach((car, index) => {
+        carrosProcessados++;
         
-        // SEMPRE desenhar algo, mesmo que o asset não carregue
-        if (car.x + 200 > visibleArea.left && 
-            car.x < visibleArea.right &&
-            car.y + 150 > visibleArea.top && 
-            car.y < visibleArea.bottom) {
-            
-            if (carAsset && carAsset.loaded) {
-                // Desenhar o carro real
-                ctx.drawImage(carAsset.img, car.x, car.y);
-                carrosRenderizados++;
-            } else {
-                // Fallback VISÍVEL: retângulo colorido
-                ctx.fillStyle = '#ff0000'; // VERMELHO para debug
-                ctx.strokeStyle = '#ffff00'; // AMARELO
-                ctx.lineWidth = 3;
-                ctx.fillRect(car.x, car.y, 150, 100);
-                ctx.strokeRect(car.x, car.y, 150, 100);
-                ctx.fillStyle = '#fff';
-                setPixelFont(10);
-                ctx.fillText('CARRO', car.x + 45, car.y + 45);
-                console.log(`Carro ${car.type} em ${car.x},${car.y} - asset não carregado!`);
-            }
+        // Log detalhado de CADA carro
+        if (gameState.currentMap === 2) {
+            console.log(`Carro ${index}: tipo=${car.type}, x=${car.x}, y=${car.y}`);
+        }
+        
+        // SEMPRE desenhar um retângulo, independente de visibilidade
+        ctx.fillStyle = '#ff00ff'; // MAGENTA brilhante
+        ctx.strokeStyle = '#00ffff'; // CIANO
+        ctx.lineWidth = 3;
+        
+        // Desenhar o retângulo do carro
+        ctx.fillRect(car.x, car.y, 150, 100);
+        ctx.strokeRect(car.x, car.y, 150, 100);
+        
+        // Texto no carro
+        ctx.fillStyle = '#ffffff';
+        setPixelFont(8);
+        ctx.fillText(`CAR${index}`, car.x + 50, car.y + 45);
+        
+        // Tentar desenhar o asset real também
+        const carAsset = assets[car.type];
+        if (carAsset && carAsset.loaded) {
+            // Desenhar com transparência para ver o debug
+            ctx.globalAlpha = 0.7;
+            ctx.drawImage(carAsset.img, car.x, car.y);
+            ctx.globalAlpha = 1.0;
+            console.log(`Asset ${car.type} desenhado!`);
         }
     });
     
-    // Debug: sempre mostrar log no mapa 2
+    // Log final
     if (gameState.currentMap === 2) {
-        console.log(`Mapa 2: ${carrosRenderizados} carros renderizados de ${map.parkedCars.length}`);
+        console.log(`Total de carros processados: ${carrosProcessados}`);
+        
+        // Desenhar contador na tela
+        ctx.fillStyle = '#ffff00';
+        ctx.fillRect(10, 200, 300, 30);
+        ctx.fillStyle = '#000';
+        setPixelFont(10);
+        ctx.fillText(`CARROS: ${carrosProcessados}`, 20, 210);
     }
 }
 
@@ -2649,11 +2681,11 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.31 - Camadas Definitivas');
+console.log('🎮 Mad Night v1.32 - Debug Forçado de Carros');
 console.log('📢 Controles: Setas=mover, Espaço=dash, C=ver colisões');
-console.log('🔧 Debug: K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
-console.log('🚗 Ordem de renderização: Tiles → Background → Carros → Sombras');
-console.log('✅ Tiles e carros agora visíveis!');
+console.log('🔴 MODO DEBUG: Carros aparecem como retângulos MAGENTA');
+console.log('🟢 Retângulo VERDE = função renderParkedCars rodou');
+console.log('🟡 Retângulo AMARELO = contador de carros');
 
 // Debug de carregamento dos carros
 setTimeout(() => {
