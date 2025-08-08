@@ -1,4 +1,4 @@
-console.log('Mad Night v1.26 - Colisões Isométricas');
+console.log('Mad Night v1.27 - Parquinho e Novos Objetos');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -38,7 +38,7 @@ const gameState = {
     enemySpawnDelay: 1000,
     spawnCorner: 0,
     lastFrameTime: 0, // Movido para dentro do gameState
-    version: 'v1.26' // NOVA VERSÃO!
+    version: 'v1.27' // Parquinho e Novos Objetos!
 };
 
 // Player
@@ -77,9 +77,14 @@ const assets = {
     arvore002: { img: new Image(), loaded: false, width: 194, height: 200 },
     arvore003: { img: new Image(), loaded: false, width: 162, height: 200 },
     arvore004: { img: new Image(), loaded: false, width: 150, height: 190 },
+    arvore006: { img: new Image(), loaded: false, width: 169, height: 194 },
     arvorebloco001: { img: new Image(), loaded: false, width: 354, height: 186 },
     poste000: { img: new Image(), loaded: false, width: 40, height: 120 },
     poste001: { img: new Image(), loaded: false, width: 40, height: 120 },
+    // Novos objetos do parquinho
+    parquinho: { img: new Image(), loaded: false, width: 199, height: 241 },
+    banco01: { img: new Image(), loaded: false, width: 61, height: 50 },
+    // Tiles
     grama000: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama001: { img: new Image(), loaded: false, width: 120, height: 120 },
     grama002: { img: new Image(), loaded: false, width: 120, height: 120 },
@@ -141,6 +146,9 @@ assets.arvore003.img.onload = () => { assets.arvore003.loaded = true; };
 assets.arvore004.img.src = 'assets/scenary/arvore004.png';
 assets.arvore004.img.onload = () => { assets.arvore004.loaded = true; };
 
+assets.arvore006.img.src = 'assets/scenary/arvore006.png';
+assets.arvore006.img.onload = () => { assets.arvore006.loaded = true; };
+
 assets.arvorebloco001.img.src = 'assets/scenary/arvorebloco001.png';
 assets.arvorebloco001.img.onload = () => { assets.arvorebloco001.loaded = true; };
 
@@ -186,6 +194,9 @@ assets.asfaltosujo005.img.onload = () => { assets.asfaltosujo005.loaded = true; 
 assets.caixadeluz.img.src = 'assets/objects/caixadeluz.png';
 assets.caixadeluz.img.onload = () => { assets.caixadeluz.loaded = true; };
 
+assets.banco01.img.src = 'assets/objects/banco01.png';
+assets.banco01.img.onload = () => { assets.banco01.loaded = true; };
+
 assets.banco03.img.src = 'assets/objects/banco03.png';
 assets.banco03.img.onload = () => { assets.banco03.loaded = true; };
 
@@ -200,6 +211,9 @@ assets.garrafaquebrada02.img.onload = () => { assets.garrafaquebrada02.loaded = 
 
 assets.cadeiradepraia01.img.src = 'assets/objects/cadeiradepraia01.png';
 assets.cadeiradepraia01.img.onload = () => { assets.cadeiradepraia01.loaded = true; };
+
+assets.parquinho.img.src = 'assets/objects/parquinho.png';
+assets.parquinho.img.onload = () => { assets.parquinho.loaded = true; };
 
 // Carregar assets do Eixão
 assets.eixaoCamada1.img.src = 'assets/floors/eixao_da_morte_camada1.png';
@@ -752,10 +766,10 @@ const maps = [
                 y: 665,
                 // COLISÕES: Diagonal esquerda-inferior para direita-superior (MAGRO)
                 collisionRects: [
-                    {x: 1680, y: 1100, w: 200, h: 60},  // Base inferior
-                    {x: 1680, y: 1060, w: 220, h: 40},  // Meio-baixo
-                    {x: 1710, y: 1020, w: 220, h: 40},   // Meio
-                    {x: 1740, y: 960, w: 200, h: 60}     // Meio-alto
+                    {x: 1650, y: 1100, w: 120, h: 40},  // Base inferior
+                    {x: 1680, y: 1060, w: 100, h: 40},  // Meio-baixo
+                    {x: 1710, y: 1020, w: 80, h: 40},   // Meio
+                    {x: 1740, y: 980, w: 60, h: 40}     // Meio-alto
                 ]
             },
             {
@@ -764,7 +778,7 @@ const maps = [
                 y: 970,
                 // COLISÕES: Retangular normal (não diagonal)
                 collisionRects: [
-                    {x: 40, y: 1220, w: 342, h: 155}    // Retângulo único centralizado
+                    {x: 40, y: 1320, w: 320, h: 100}    // Retângulo único centralizado
                 ]
             },
             {
@@ -773,10 +787,10 @@ const maps = [
                 y: -60,
                 // COLISÕES: Diagonal direita-inferior para esquerda-superior
                 collisionRects: [
-                    {x: 1360, y: 280, w: 210, h: 40},    // Meio-alto
-                    {x: 1440, y: 320, w: 190, h: 40},    // Meio
-                    {x: 1490, y: 360, w: 210, h: 40},   // Meio-baixo
-                    {x: 1540, y: 400, w: 180, h: 40}    // Base inferior
+                    {x: 1360, y: 380, w: 60, h: 40},    // Meio-alto
+                    {x: 1340, y: 420, w: 80, h: 40},    // Meio
+                    {x: 1320, y: 460, w: 100, h: 40},   // Meio-baixo
+                    {x: 1300, y: 500, w: 120, h: 40}    // Base inferior
                 ]
             },
             {
@@ -785,10 +799,10 @@ const maps = [
                 y: -90,
                 // COLISÕES: Diagonal direita-inferior para esquerda-superior
                 collisionRects: [
-                    {x: 220, y: 150, w: 350, h: 40},     // Meio-alto
-                    {x: 250, y: 190, w: 300, h: 40},     // Meio
-                    {x: 304, y: 230, w: 160, h: 40},    // Meio-baixo
-                    {x: 361, y: 270, w: 160, h: 40}     // Base inferior
+                    {x: 281, y: 250, w: 60, h: 40},     // Meio-alto
+                    {x: 261, y: 290, w: 80, h: 40},     // Meio
+                    {x: 241, y: 330, w: 100, h: 40},    // Meio-baixo
+                    {x: 221, y: 370, w: 120, h: 40}     // Base inferior
                 ]
             },
             {
@@ -797,10 +811,10 @@ const maps = [
                 y: 50,
                 // COLISÕES: Diagonal direita-inferior para esquerda-superior
                 collisionRects: [
-                    {x: 540, y: 290, w: 500, h: 40},     // Meio-alto
-                    {x: 640, y: 330, w: 380, h: 40},     // Meio
-                    {x: 690, y: 370, w: 340, h: 40},    // Meio-baixo
-                    {x: 770, y: 410, w: 190, h: 40}     // Base inferior
+                    {x: 630, y: 390, w: 60, h: 40},     // Meio-alto
+                    {x: 610, y: 430, w: 80, h: 40},     // Meio
+                    {x: 590, y: 470, w: 100, h: 40},    // Meio-baixo
+                    {x: 570, y: 510, w: 120, h: 40}     // Base inferior
                 ]
             }
         ],
@@ -2489,7 +2503,8 @@ loadAudio();
 loadMap(0);
 setTimeout(() => playMusic('inicio'), 1000);
 
-console.log('🎮 Mad Night v1.26 - Colisões Isométricas');
+console.log('🎮 Mad Night v1.27 - Parquinho e Novos Objetos');
 console.log('📢 Controles: Setas=mover, Espaço=dash, C=ver colisões');
 console.log('🔧 Debug: K=morrer, E=spawn inimigo, M=música, N=próximo mapa');
 console.log('🏢 Sistema de colisões isométricas implementado!');
+console.log('🎪 Parquinho, árvore006 e banco01 adicionados!');
