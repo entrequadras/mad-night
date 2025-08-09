@@ -415,6 +415,29 @@
                 {type: 'carrolateral_07', x: 89, y: 299},
                 {type: 'carrolateral_08', x: 238, y: 704}
             ];
+        },
+        
+        // Carregar mapa atual (para respawn)
+        loadCurrentMap: function(isEscape = false) {
+            if (!MadNight.game || !MadNight.game.state) {
+                console.error('Game não inicializado');
+                return;
+            }
+            
+            const currentMapIndex = MadNight.game.state.currentMap;
+            
+            // Delegar para o game.js fazer o carregamento
+            if (MadNight.game.loadMap) {
+                MadNight.game.loadMap(currentMapIndex, isEscape);
+            }
+        },
+        
+        // Método alternativo para carregar mapa
+        loadMap: function(mapIndex, isEscape = false) {
+            // Delegar para o game.js
+            if (MadNight.game && MadNight.game.loadMap) {
+                MadNight.game.loadMap(mapIndex, isEscape);
+            }
         }
     };
     
