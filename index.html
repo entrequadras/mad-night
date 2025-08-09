@@ -3,431 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mad Night - v1.40</title>
+    <title>Mad Night - Debug</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
         body {
             margin: 0;
-            padding: 0;
+            padding: 20px;
             background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: 'Press Start 2P', monospace;
-            overflow: hidden;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
         }
         
         #gameCanvas {
             image-rendering: pixelated;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: crisp-edges;
             border: 2px solid #333;
+            display: none;
         }
         
-        #info {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: #0f0;
-            font-size: 10px;
-            text-shadow: 2px 2px 0px #000;
+        #debug {
+            background: #111;
+            padding: 20px;
+            border: 1px solid #0f0;
+            margin-bottom: 20px;
+            font-size: 12px;
+            line-height: 1.6;
+            max-height: 400px;
+            overflow-y: auto;
         }
+        
+        .success { color: #0f0; }
+        .error { color: #f00; }
+        .warning { color: #ff0; }
+        .info { color: #0ff; }
     </style>
 </head>
 <body>
+    <div id="debug">
+        <h3>MAD NIGHT v1.40 - DEBUG MODE</h3>
+        <div id="log"></div>
+    </div>
     <canvas id="gameCanvas"></canvas>
-    <div id="info">Carregando...</div>
     
     <script>
-        // MAD NIGHT v1.40 - VERSÃO STANDALONE
-        console.log('Mad Night v1.40 - Standalone Version');
+        const log = document.getElementById('log');
         
-        // Canvas e contexto
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const info = document.getElementById('info');
+        function addLog(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = type;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+            console.log(message);
+        }
         
-        // Configurações
-        canvas.width = 960 * 2;  // 1920
-        canvas.height = 540 * 2; // 1080
-        ctx.imageSmoothingEnabled = false;
+        addLog('Iniciando Mad Night v1.40...', 'info');
         
-        // Estado do jogo
-        const game = {
+        // Verificar suporte básico
+        if (!document.getElementById('gameCanvas')) {
+            addLog('ERRO: Canvas não encontrado!', 'error');
+        } else {
+            addLog('Canvas encontrado ✓', 'success');
+        }
+        
+        // Variáveis globais essenciais
+        window.canvas = null;
+        window.ctx = null;
+        window.camera = null;
+        window.enemies = [];
+        window.projectiles = [];
+        window.keys = {};
+        window.maps = [];
+        window.assets = {};
+        window.audio = {
+            playSFX: function() {},
+            stopLoopSFX: function() {}
+        };
+        window.trafficSystem = {
+            update: function() {},
+            render: function() {}
+        };
+        
+        // Estado e player básicos caso os arquivos falhem
+        window.gameState = {
             currentMap: 0,
             deaths: 0,
             phase: 'infiltration',
             dashUnlocked: false,
+            bombPlaced: false,
             pedalPower: 4,
             maxPedalPower: 4,
-            lastRecharge: Date.now()
+            version: 'v1.40'
         };
         
-        // Player
-        const player = {
-            x: 150,
+        window.player = {
+            x: 100,
             y: 300,
             width: 56,
             height: 56,
             speed: 3.6,
             direction: 'right',
+            frame: 0,
+            sprites: [],
             isDead: false,
             isDashing: false,
-            dashStart: 0,
-            dashDuration: 150,
-            dashDistance: 60,
-            color: '#f00'
+            inShadow: false
         };
         
-        // Câmera
-        const camera = {
-            x: 0,
-            y: 0,
-            width: 960,
-            height: 540,
-            zoom: 2
+        window.CONFIG = {
+            CANVAS_WIDTH: 960,
+            CANVAS_HEIGHT: 540,
+            ZOOM: 2,
+            DEBUG_MODE: true,
+            VERSION: 'v1.40'
         };
         
-        // Inimigos
-        const enemies = [];
+        // Lista de arquivos para carregar
+        const scripts = [
+            'js/config.js',
+            'js/assets.js',
+            'js/audio.js',
+            'js/player.js',
+            'js/enemy.js',
+            'js/projectiles.js',
+            'js/camera.js',
+            'js/collision.js',
+            'js/lighting.js',
+            'js/traffic.js',
+            'js/maps.js',
+            'js/renderer.js',
+            'js/ui.js',
+            'js/game.js',
+            'js/main.js'
+        ];
         
-        // Mapa básico
-        const map = {
-            width: 1920,
-            height: 1080,
-            name: "Maconhão",
-            subtitle: "Tutorial de movimento"
-        };
+        let loadedCount = 0;
+        let failedScripts = [];
         
-        // Input
-        const keys = {};
-        
-        // Inimigo básico
-        class Enemy {
-            constructor(x, y, type = 'faquinha') {
-                this.x = x;
-                this.y = y;
-                this.width = 46;
-                this.height = 46;
-                this.speed = 2;
-                this.type = type;
-                this.color = type === 'faquinha' ? '#808' : '#408';
-                this.isDead = false;
-                this.direction = 'down';
-                this.state = 'patrol';
-                this.visionRange = 150;
-            }
-            
-            update() {
-                if (this.isDead) return;
+        // Função para carregar script
+        function loadScript(src) {
+            return new Promise((resolve) => {
+                addLog(`Carregando ${src}...`, 'info');
                 
-                // Distância até o player
-                const dx = player.x - this.x;
-                const dy = player.y - this.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
+                const script = document.createElement('script');
+                script.src = src;
                 
-                // Perseguir se ver o player
-                if (dist < this.visionRange && !player.isDead) {
-                    this.state = 'chase';
-                    
-                    // Mover em direção ao player
-                    const angle = Math.atan2(dy, dx);
-                    this.x += Math.cos(angle) * this.speed;
-                    this.y += Math.sin(angle) * this.speed;
-                    
-                    // Matar player se tocar
-                    if (dist < 30) {
-                        killPlayer();
+                script.onload = () => {
+                    loadedCount++;
+                    addLog(`✓ ${src} carregado com sucesso!`, 'success');
+                    resolve(true);
+                };
+                
+                script.onerror = (e) => {
+                    failedScripts.push(src);
+                    addLog(`✗ ${src} FALHOU!`, 'error');
+                    resolve(false);
+                };
+                
+                // Timeout de 5 segundos
+                setTimeout(() => {
+                    if (!script.loaded && !script.failed) {
+                        failedScripts.push(src);
+                        addLog(`⚠ ${src} timeout!`, 'warning');
+                        resolve(false);
                     }
-                } else {
-                    this.state = 'patrol';
-                    // Movimento aleatório simples
-                    this.x += (Math.random() - 0.5) * 1;
-                    this.y += (Math.random() - 0.5) * 1;
-                }
+                }, 5000);
                 
-                // Limitar ao mapa
-                this.x = Math.max(0, Math.min(map.width - this.width, this.x));
-                this.y = Math.max(0, Math.min(map.height - this.height, this.y));
-                
-                // Morrer com dash
-                if (player.isDashing) {
-                    const dashDist = Math.sqrt(
-                        Math.pow(player.x - this.x, 2) + 
-                        Math.pow(player.y - this.y, 2)
-                    );
-                    if (dashDist < 40) {
-                        this.isDead = true;
-                    }
-                }
-            }
-            
-            draw(ctx) {
-                if (this.isDead) {
-                    ctx.fillStyle = '#444';
-                } else {
-                    ctx.fillStyle = this.state === 'chase' ? '#f0f' : this.color;
-                }
-                ctx.fillRect(this.x, this.y, this.width, this.height);
-            }
-        }
-        
-        // Funções do jogo
-        function killPlayer() {
-            if (player.isDead) return;
-            
-            player.isDead = true;
-            player.color = '#800';
-            game.deaths++;
-            
-            setTimeout(() => {
-                player.isDead = false;
-                player.color = '#f00';
-                player.x = 150;
-                player.y = 300;
-                
-                if (game.deaths >= 5) {
-                    game.deaths = 0;
-                    enemies.length = 0;
-                    game.dashUnlocked = false;
-                    info.textContent = 'Game Over! Recomeçando...';
-                }
-            }, 2000);
-        }
-        
-        // Update
-        function update() {
-            if (player.isDead) return;
-            
-            // Movimento do player
-            let dx = 0, dy = 0;
-            let moving = false;
-            
-            if (player.isDashing) {
-                // Lógica do dash
-                const progress = (Date.now() - player.dashStart) / player.dashDuration;
-                if (progress >= 1) {
-                    player.isDashing = false;
-                } else {
-                    const dashSpeed = player.dashDistance / player.dashDuration * 16;
-                    switch(player.direction) {
-                        case 'up': player.y -= dashSpeed; break;
-                        case 'down': player.y += dashSpeed; break;
-                        case 'left': player.x -= dashSpeed; break;
-                        case 'right': player.x += dashSpeed; break;
-                    }
-                }
-            } else {
-                // Movimento normal
-                if (keys['ArrowUp']) { 
-                    dy = -1; 
-                    player.direction = 'up'; 
-                    moving = true;
-                }
-                if (keys['ArrowDown']) { 
-                    dy = 1; 
-                    player.direction = 'down'; 
-                    moving = true;
-                }
-                if (keys['ArrowLeft']) { 
-                    dx = -1; 
-                    player.direction = 'left'; 
-                    moving = true;
-                }
-                if (keys['ArrowRight']) { 
-                    dx = 1; 
-                    player.direction = 'right'; 
-                    moving = true;
-                }
-                
-                player.x += dx * player.speed;
-                player.y += dy * player.speed;
-                
-                // Dash (espaço)
-                if (keys[' '] && game.dashUnlocked && game.pedalPower > 0 && !player.isDashing) {
-                    player.isDashing = true;
-                    player.dashStart = Date.now();
-                    game.pedalPower--;
-                    player.color = '#ff0';
-                    
-                    setTimeout(() => {
-                        player.color = '#f00';
-                    }, 150);
-                }
-            }
-            
-            // Recarregar pedal power
-            if (!moving && Date.now() - game.lastRecharge > 6000 && game.pedalPower < game.maxPedalPower) {
-                game.pedalPower++;
-                game.lastRecharge = Date.now();
-            }
-            
-            // Limitar ao mapa
-            player.x = Math.max(0, Math.min(map.width - player.width, player.x));
-            player.y = Math.max(0, Math.min(map.height - player.height, player.y));
-            
-            // Atualizar câmera
-            camera.x = player.x + player.width/2 - camera.width/2;
-            camera.y = player.y + player.height/2 - camera.height/2;
-            camera.x = Math.max(0, Math.min(map.width - camera.width, camera.x));
-            camera.y = Math.max(0, Math.min(map.height - camera.height, camera.y));
-            
-            // Atualizar inimigos
-            enemies.forEach(enemy => enemy.update());
-            
-            // Remover inimigos mortos após 3 segundos
-            enemies.forEach((enemy, index) => {
-                if (enemy.isDead && !enemy.removeTime) {
-                    enemy.removeTime = Date.now() + 3000;
-                }
-                if (enemy.removeTime && Date.now() > enemy.removeTime) {
-                    enemies.splice(index, 1);
-                }
+                document.body.appendChild(script);
             });
         }
         
-        // Draw
-        function draw() {
-            // Limpar
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Carregar todos os scripts
+        async function loadAllScripts() {
+            addLog('=== CARREGANDO SCRIPTS ===', 'info');
             
-            // Aplicar transformação da câmera
-            ctx.save();
-            ctx.scale(camera.zoom, camera.zoom);
-            ctx.translate(-camera.x, -camera.y);
+            for (const src of scripts) {
+                await loadScript(src);
+            }
             
-            // Background
-            ctx.fillStyle = '#1a1a1a';
-            ctx.fillRect(0, 0, map.width, map.height);
+            addLog('=== RESUMO ===', 'info');
+            addLog(`Scripts carregados: ${loadedCount}/${scripts.length}`, 
+                   loadedCount === scripts.length ? 'success' : 'warning');
             
-            // Grade (tiles)
-            ctx.strokeStyle = '#222';
-            ctx.lineWidth = 1;
-            for (let x = 0; x < map.width; x += 120) {
-                for (let y = 0; y < map.height; y += 120) {
-                    ctx.strokeRect(x, y, 120, 120);
+            if (failedScripts.length > 0) {
+                addLog(`Scripts que falharam: ${failedScripts.join(', ')}`, 'error');
+            }
+            
+            // Verificar funções essenciais
+            addLog('=== VERIFICANDO FUNÇÕES ===', 'info');
+            
+            const functions = [
+                'initGame',
+                'gameLoop', 
+                'update',
+                'draw',
+                'loadMap',
+                'killPlayer',
+                'checkWallCollision'
+            ];
+            
+            functions.forEach(fn => {
+                if (typeof window[fn] === 'function') {
+                    addLog(`✓ Função ${fn} encontrada`, 'success');
+                } else {
+                    addLog(`✗ Função ${fn} NÃO encontrada`, 'error');
                 }
+            });
+            
+            // Verificar se maps foram carregados
+            if (window.maps && window.maps.length > 0) {
+                addLog(`✓ ${window.maps.length} mapas carregados`, 'success');
+            } else {
+                addLog('✗ Nenhum mapa encontrado!', 'error');
+                // Criar mapa mínimo
+                window.maps = [{
+                    name: "Mapa de Teste",
+                    subtitle: "Fallback",
+                    width: 1920,
+                    height: 1080,
+                    walls: [],
+                    enemies: [],
+                    playerStart: {x: 100, y: 300}
+                }];
+                addLog('Mapa de fallback criado', 'warning');
             }
             
-            // Bordas do mapa
-            ctx.strokeStyle = '#444';
-            ctx.lineWidth = 20;
-            ctx.strokeRect(0, 0, map.width, map.height);
+            // Tentar inicializar o jogo
+            addLog('=== INICIALIZANDO JOGO ===', 'info');
             
-            // Inimigos
-            enemies.forEach(enemy => enemy.draw(ctx));
-            
-            // Player
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-            
-            // Direção do player (pequeno indicador)
-            ctx.fillStyle = '#fff';
-            switch(player.direction) {
-                case 'up': ctx.fillRect(player.x + 23, player.y, 10, 10); break;
-                case 'down': ctx.fillRect(player.x + 23, player.y + 46, 10, 10); break;
-                case 'left': ctx.fillRect(player.x, player.y + 23, 10, 10); break;
-                case 'right': ctx.fillRect(player.x + 46, player.y + 23, 10, 10); break;
-            }
-            
-            ctx.restore();
-            
-            // UI (sem transformação)
-            ctx.fillStyle = '#ff0';
-            ctx.font = '20px "Press Start 2P"';
-            ctx.textAlign = 'center';
-            ctx.fillText(map.name, canvas.width/2, 60);
-            
-            ctx.font = '10px "Press Start 2P"';
-            ctx.fillText(map.subtitle, canvas.width/2, 90);
-            
-            // Info
-            ctx.textAlign = 'left';
-            ctx.fillStyle = '#fff';
-            ctx.fillText(`Mortes: ${game.deaths}/5`, 20, 40);
-            ctx.fillText(`Inimigos: ${enemies.filter(e => !e.isDead).length}`, 20, 70);
-            
-            // Pedal power
-            if (game.dashUnlocked) {
-                ctx.fillText('Pedal: ', 20, 100);
-                for (let i = 0; i < game.maxPedalPower; i++) {
-                    ctx.fillStyle = i < game.pedalPower ? '#0f0' : '#333';
-                    ctx.fillText('█', 100 + i * 20, 100);
+            try {
+                // Pegar canvas
+                window.canvas = document.getElementById('gameCanvas');
+                window.ctx = canvas.getContext('2d');
+                
+                if (!window.ctx) {
+                    throw new Error('Contexto 2D não disponível');
                 }
-            }
-            
-            // Mensagem de morte
-            if (player.isDead) {
-                ctx.fillStyle = '#f00';
-                ctx.font = '24px "Press Start 2P"';
-                ctx.textAlign = 'center';
-                ctx.fillText(game.deaths < 4 ? "Ah véi, se liga!" : "SIFUDEU", canvas.width/2, canvas.height/2);
+                
+                // Configurar canvas
+                canvas.width = (window.CONFIG?.CANVAS_WIDTH || 960) * (window.CONFIG?.ZOOM || 2);
+                canvas.height = (window.CONFIG?.CANVAS_HEIGHT || 540) * (window.CONFIG?.ZOOM || 2);
+                canvas.style.display = 'block';
+                
+                // Inicializar câmera
+                window.camera = {
+                    x: 0,
+                    y: 0,
+                    width: window.CONFIG?.CANVAS_WIDTH || 960,
+                    height: window.CONFIG?.CANVAS_HEIGHT || 540,
+                    zoom: window.CONFIG?.ZOOM || 2
+                };
+                
+                addLog('Canvas configurado', 'success');
+                
+                // Tentar chamar initGame ou fallback
+                if (typeof window.initGame === 'function') {
+                    addLog('Chamando initGame()...', 'info');
+                    window.initGame();
+                } else if (typeof window.init === 'function') {
+                    addLog('Chamando init()...', 'info');
+                    window.init();
+                } else {
+                    addLog('Criando game loop de fallback...', 'warning');
+                    
+                    // Fallback mínimo
+                    function fallbackUpdate() {
+                        // Movimento básico
+                        if (window.keys['ArrowUp']) window.player.y -= 3;
+                        if (window.keys['ArrowDown']) window.player.y += 3;
+                        if (window.keys['ArrowLeft']) window.player.x -= 3;
+                        if (window.keys['ArrowRight']) window.player.x += 3;
+                    }
+                    
+                    function fallbackDraw() {
+                        if (!window.ctx) return;
+                        
+                        // Limpar
+                        ctx.fillStyle = '#000';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        
+                        // Player
+                        ctx.fillStyle = '#f00';
+                        ctx.fillRect(
+                            window.player.x * (window.camera?.zoom || 2),
+                            window.player.y * (window.camera?.zoom || 2),
+                            window.player.width * (window.camera?.zoom || 2),
+                            window.player.height * (window.camera?.zoom || 2)
+                        );
+                        
+                        // Info
+                        ctx.fillStyle = '#fff';
+                        ctx.font = '20px Arial';
+                        ctx.fillText('MODO FALLBACK - Use as setas', 20, 40);
+                    }
+                    
+                    function fallbackLoop() {
+                        fallbackUpdate();
+                        fallbackDraw();
+                        requestAnimationFrame(fallbackLoop);
+                    }
+                    
+                    fallbackLoop();
+                    addLog('Game loop de fallback iniciado', 'success');
+                }
+                
+            } catch (error) {
+                addLog(`ERRO FATAL: ${error.message}`, 'error');
+                addLog(error.stack, 'error');
             }
         }
         
-        // Game loop
-        function gameLoop() {
-            update();
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
-        
-        // Input
+        // Event listeners básicos
         window.addEventListener('keydown', (e) => {
-            keys[e.key] = true;
-            
-            // Debug keys
-            if (e.key === 'e' || e.key === 'E') {
-                enemies.push(new Enemy(
-                    player.x + 200 + Math.random() * 100,
-                    player.y + Math.random() * 100,
-                    Math.random() > 0.5 ? 'faquinha' : 'morcego'
-                ));
-                info.textContent = 'Inimigo criado!';
-            }
-            
-            if (e.key === 'd' || e.key === 'D') {
-                game.dashUnlocked = !game.dashUnlocked;
-                info.textContent = game.dashUnlocked ? 'Dash desbloqueado!' : 'Dash bloqueado';
-            }
-            
-            if (e.key === 'k' || e.key === 'K') {
-                killPlayer();
-            }
-            
-            // Prevenir scroll
+            window.keys[e.key] = true;
             if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
                 e.preventDefault();
             }
         });
         
         window.addEventListener('keyup', (e) => {
-            keys[e.key] = false;
+            window.keys[e.key] = false;
         });
         
-        // Inicializar
-        function init() {
-            console.log('Jogo iniciado!');
-            info.innerHTML = 'CONTROLES:<br>' +
-                           'Setas = Mover<br>' +
-                           'E = Criar inimigo<br>' +
-                           'D = Ativar dash<br>' +
-                           'Espaço = Dash<br>' +
-                           'K = Morrer';
-            
-            // Criar alguns inimigos iniciais
-            enemies.push(new Enemy(500, 300, 'faquinha'));
-            enemies.push(new Enemy(800, 500, 'morcego'));
-            
-            // Iniciar loop
-            gameLoop();
-        }
+        // Interceptar erros globais
+        window.addEventListener('error', (e) => {
+            addLog(`ERRO: ${e.message} em ${e.filename}:${e.lineno}`, 'error');
+        });
         
-        // Iniciar quando carregar
-        window.addEventListener('DOMContentLoaded', init);
+        // Iniciar carregamento
+        addLog('=== INICIANDO CARREGAMENTO ===', 'info');
+        loadAllScripts();
     </script>
 </body>
 </html>
