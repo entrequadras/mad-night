@@ -1,4 +1,3 @@
-// Mad Night v1.40 - Estrutura Modular
 // player.js - Sistema do player
 
 MadNight.player = {
@@ -78,7 +77,7 @@ MadNight.player = {
             MadNight.maps.loadCurrentMap(gameState.phase === 'escape');
         }
     },
-    
+
     // Atualizar player
     update: function(keys) {
         if (this.isDead) return;
