@@ -359,7 +359,7 @@
         // Lista de mapas
         list: mapsList,
         
-        // Inicializar mapas
+        // Inicializar mapas (chamado pelo game.js)
         init: function() {
             console.log('Inicializando sistema de mapas...');
             
