@@ -1,70 +1,61 @@
-// enemy.js - Sistema de Inimigos
+// Mad Night v1.40 - Estrutura Modular
+// enemy.js - Sistema de inimigos
 
-class Enemy {
+// Classe Enemy
+MadNight.Enemy = class Enemy {
     constructor(x, y, type = 'faquinha') {
         this.x = x;
         this.y = y;
         this.originX = x;
         this.originY = y;
         this.type = type;
-        this.width = CONFIG.ENEMY_WIDTH;
-        this.height = CONFIG.ENEMY_HEIGHT;
-        this.speed = type === 'caveirinha' ? 2.5 : CONFIG.ENEMY_SPEED;
-        this.patrolSpeed = CONFIG.ENEMY_PATROL_SPEED;
+        
+        // Configurações base
+        const config = MadNight.config.enemy;
+        const typeConfig = MadNight.config.enemyTypes[type] || {};
+        
+        this.width = config.width;
+        this.height = config.height;
+        this.speed = typeConfig.speed || config.baseSpeed;
+        this.patrolSpeed = config.patrolSpeed;
         this.direction = 'down';
         this.frame = 0;
-        this.state = 'patrol';
+        this.state = 'patrol'; // patrol, chase, attack
         this.isDead = false;
         this.deathFrame = 12;
         this.sprites = [];
-        this.visionRange = CONFIG.ENEMY_VISION_RANGE;
-        this.alertVisionRange = CONFIG.ENEMY_ALERT_VISION_RANGE;
-        this.patrolRadius = CONFIG.ENEMY_PATROL_RADIUS;
+        
+        // Visão e detecção
+        this.visionRange = config.visionRange;
+        this.alertVisionRange = config.alertVisionRange;
+        this.patrolRadius = config.patrolRadius;
+        
+        // Patrulha
         this.patrolDirection = this.getRandomDirection();
         this.lastDirectionChange = Date.now();
         this.directionChangeInterval = 2000 + Math.random() * 2000;
         
-        // Atributos específicos por tipo
-        if (type === 'janis') {
-            this.attackRange = 200;
-            this.lastAttack = 0;
-            this.attackCooldown = 2000;
-        }
+        // Ataque
+        this.attackRange = config.attackRange;
+        this.lastAttack = 0;
+        this.attackCooldown = config.attackCooldown;
         
-        if (type === 'chacal') {
-            this.health = 3;
-            this.maxHealth = 3;
-            this.isInvulnerable = false;
-            this.invulnerableTime = 0;
-            this.invulnerableDuration = 500;
-        } else {
-            this.health = 1;
-            this.maxHealth = 1;
-        }
+        // Vida e invulnerabilidade
+        this.health = typeConfig.health || 1;
+        this.maxHealth = this.health;
+        this.isInvulnerable = false;
+        this.invulnerableTime = 0;
+        this.invulnerableDuration = typeConfig.invulnerableDuration || 500;
         
-        // Carregar sprites apropriados
+        // Tempo para remover após morte
+        this.removeTime = null;
+        
+        // Carregar sprites corretos
         this.loadSprites();
     }
     
     loadSprites() {
-        // Sprites são carregados globalmente e atribuídos ao criar o inimigo
-        switch(this.type) {
-            case 'faquinha':
-                this.sprites = enemySprites.faquinha;
-                break;
-            case 'morcego':
-                this.sprites = enemySprites.morcego;
-                break;
-            case 'caveirinha':
-                this.sprites = enemySprites.caveirinha;
-                break;
-            case 'janis':
-                this.sprites = enemySprites.janis;
-                break;
-            case 'chacal':
-                this.sprites = enemySprites.chacal;
-                break;
-        }
+        this.sprites = MadNight.assets.sprites[this.type] || [];
     }
     
     getRandomDirection() {
@@ -73,47 +64,54 @@ class Enemy {
     }
     
     throwStone() {
-        if (this.type !== 'janis' || Date.now() - this.lastAttack < this.attackCooldown) return;
+        if (this.type !== 'janis' || Date.now() - this.lastAttack < this.attackCooldown) {
+            return;
+        }
+        
+        const player = MadNight.player;
+        if (!player) return;
         
         const dx = player.x - this.x;
         const dy = player.y - this.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
+        const dist = Math.sqrt(dx * dx + dy * dy);
         
         if (dist < this.attackRange && !player.isDead) {
             this.lastAttack = Date.now();
             
-            const stone = {
-                x: this.x + this.width/2,
-                y: this.y + this.height/2,
-                vx: (dx/dist) * 4,
-                vy: (dy/dist) * 4,
-                width: 10,
-                height: 10,
-                active: true
-            };
+            // Criar projétil usando o sistema de projéteis
+            MadNight.projectiles.create(
+                this.x + this.width / 2,
+                this.y + this.height / 2,
+                player.x + player.width / 2,
+                player.y + player.height / 2
+            );
             
-            projectiles.push(stone);
-            audio.playSFX('ataque_janis', 0.5);
+            MadNight.audio.playSFX('ataque_janis', 0.5);
         }
     }
     
     update() {
         if (this.isDead) return;
         
-        // Invulnerabilidade (para Chacal)
+        const player = MadNight.player;
+        if (!player) return;
+        
+        // Verificar invulnerabilidade
         if (this.isInvulnerable && Date.now() - this.invulnerableTime > this.invulnerableDuration) {
             this.isInvulnerable = false;
         }
         
         const dx = player.x - this.x;
         const dy = player.y - this.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
+        const dist = Math.sqrt(dx * dx + dy * dy);
         
-        // Ajustar visão baseado em sombra
+        // Ajustar visão baseado em sombras
         let visionRange = this.state === 'chase' ? this.alertVisionRange : this.visionRange;
-        if (player.inShadow) visionRange *= 0.3;
+        if (player.inShadow) {
+            visionRange *= 0.3;
+        }
         
-        // Comportamento específico do Janis
+        // Comportamento específico do Janis (atirador)
         if (this.type === 'janis') {
             if (dist < this.attackRange && !player.isDead) {
                 this.state = 'attack';
@@ -126,12 +124,12 @@ class Enemy {
             }
         }
         
-        // Chacal sempre persegue quando próximo
+        // Comportamento específico do Chacal
         if (this.type === 'chacal' && dist < 300 && !player.isDead) {
             this.state = 'chase';
         }
         
-        // Detecção e perseguição para outros tipos
+        // Detecção e perseguição para inimigos normais
         if (this.type !== 'janis' && dist < visionRange && !player.isDead) {
             let canSee = false;
             const angleThreshold = 50;
@@ -152,6 +150,7 @@ class Enemy {
                     break;
             }
             
+            // Perseguir se viu ou já está perseguindo
             if (this.state === 'chase' || canSee || this.type === 'chacal') {
                 this.state = 'chase';
                 
@@ -160,11 +159,13 @@ class Enemy {
                 const moveX = Math.cos(angle) * this.speed;
                 const moveY = Math.sin(angle) * this.speed;
                 
-                if (!checkWallCollision(this, this.x + moveX, this.y)) {
+                // Tentar mover horizontalmente
+                if (!MadNight.collision.checkWallCollision(this, this.x + moveX, this.y)) {
                     this.x += moveX;
                 }
                 
-                if (!checkWallCollision(this, this.x, this.y + moveY)) {
+                // Tentar mover verticalmente
+                if (!MadNight.collision.checkWallCollision(this, this.x, this.y + moveY)) {
                     this.y += moveY;
                 }
                 
@@ -175,11 +176,13 @@ class Enemy {
                     this.direction = dy > 0 ? 'down' : 'up';
                 }
                 
-                // Matar player se tocar
-                if (dist < 30) killPlayer();
+                // Matar player se muito próximo
+                if (dist < 30) {
+                    MadNight.player.kill();
+                }
             }
         } else if (this.type !== 'janis' || this.state !== 'attack') {
-            // Patrulha
+            // Comportamento de patrulha
             this.state = 'patrol';
             this.patrol();
         }
@@ -193,12 +196,12 @@ class Enemy {
             }
         }
         
-        // Animação
+        // Atualizar frame de animação
         this.frame = Date.now() % 400 < 200 ? 0 : 1;
     }
     
     patrol() {
-        // Mudar direção periodicamente
+        // Mudar direção aleatoriamente
         if (Date.now() - this.lastDirectionChange > this.directionChangeInterval) {
             this.patrolDirection = this.getRandomDirection();
             this.lastDirectionChange = Date.now();
@@ -206,12 +209,13 @@ class Enemy {
             this.direction = this.patrolDirection;
         }
         
-        // Voltar para origem se muito longe
+        // Verificar distância da origem
         const distFromOrigin = Math.sqrt(
             Math.pow(this.x - this.originX, 2) + 
             Math.pow(this.y - this.originY, 2)
         );
         
+        // Voltar se muito longe da origem
         if (distFromOrigin > this.patrolRadius) {
             const backDx = this.originX - this.x;
             const backDy = this.originY - this.y;
@@ -231,11 +235,11 @@ class Enemy {
             case 'right': pdx = this.patrolSpeed; break;
         }
         
-        if (!checkWallCollision(this, this.x + pdx, this.y + pdy)) {
+        // Tentar mover, mudar direção se colidir
+        if (!MadNight.collision.checkWallCollision(this, this.x + pdx, this.y + pdy)) {
             this.x += pdx;
             this.y += pdy;
         } else {
-            // Mudar direção se colidir
             this.patrolDirection = this.getRandomDirection();
             this.lastDirectionChange = Date.now();
             this.direction = this.patrolDirection;
@@ -256,112 +260,172 @@ class Enemy {
     
     die() {
         if (this.isDead) return;
+        
         this.isDead = true;
         this.deathFrame = Math.floor(Math.random() * 4) + 12;
         
-        // Som de morte baseado no tipo
-        const deathSounds = {
-            'faquinha': 'morte_faquinha',
-            'morcego': 'morte_morcego', 
-            'caveirinha': 'morte_caveira',
-            'janis': 'morte_janis',
-            'chacal': 'morte_chacal'
-        };
+        // Tocar som de morte
+        MadNight.audio.playDeathSound(this.type);
         
-        if (deathSounds[this.type]) {
-            audio.playSFX(deathSounds[this.type], 0.6);
-        }
+        // Marcar para remoção
+        this.removeTime = Date.now() + MadNight.config.enemy.removeDelay;
     }
     
     getSprite() {
-        if (this.isDead) return this.sprites[this.deathFrame];
+        if (this.isDead) {
+            return this.sprites[this.deathFrame];
+        }
         
         const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
         const base = dirMap[this.direction];
         const offset = (this.state === 'chase' || this.state === 'attack') ? 8 : this.frame * 4;
+        
         return this.sprites[base + offset];
     }
-}
-
-// Container global para sprites dos inimigos
-const enemySprites = {
-    faquinha: [],
-    morcego: [],
-    caveirinha: [],
-    janis: [],
-    chacal: []
-};
-
-// Carregar sprites dos inimigos
-function loadEnemySprites() {
-    const types = ['faquinha', 'morcego', 'caveirinha', 'janis', 'chacal'];
     
-    types.forEach(type => {
-        for (let i = 0; i <= 15; i++) {
-            const img = new Image();
-            img.src = `assets/sprites/${type}${String(i).padStart(3, '0')}.png`;
-            img.onload = () => {
-                // Sprite carregado
-            };
-            img.onerror = () => {
-                console.warn(`⚠️ Sprite ${type}${String(i).padStart(3, '0')}.png não encontrado`);
-            };
-            enemySprites[type][i] = img;
+    render(ctx, visibleArea) {
+        // Verificar se está visível
+        if (!MadNight.camera.isVisible(this)) return;
+        
+        // Verificar se sprites estão carregados
+        if (MadNight.assets.areSpritesLoaded(this.type)) {
+            const sprite = this.getSprite();
+            if (sprite) {
+                ctx.save();
+                
+                // Aplicar transparência se estiver na sombra
+                if (MadNight.lighting.isInShadow(
+                    this.x + this.width / 2, 
+                    this.y + this.height / 2
+                )) {
+                    ctx.globalAlpha = 0.5;
+                }
+                
+                // Mostrar barra de vida do Chacal
+                if (this.type === 'chacal' && !this.isDead && this.health < this.maxHealth) {
+                    ctx.fillStyle = '#800';
+                    ctx.fillRect(this.x, this.y - 10, this.width, 5);
+                    ctx.fillStyle = '#f00';
+                    ctx.fillRect(this.x, this.y - 10, this.width * (this.health / this.maxHealth), 5);
+                }
+                
+                // Aplicar transparência se invulnerável
+                if (this.isInvulnerable) {
+                    ctx.globalAlpha = 0.5;
+                }
+                
+                // Renderizar sprite
+                ctx.drawImage(sprite, this.x, this.y, this.width, this.height);
+                
+                ctx.restore();
+            }
+        } else {
+            // Fallback se sprites não carregaram
+            if (!this.isDead) {
+                const colors = {
+                    'faquinha': '#808',
+                    'morcego': '#408',
+                    'caveirinha': '#c0c',
+                    'janis': '#0cc',
+                    'chacal': '#f80'
+                };
+                
+                ctx.fillStyle = this.state === 'chase' ? '#f0f' : colors[this.type];
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
         }
-    });
-}
-
-// Spawnar inimigo durante fuga
-function spawnEscapeEnemy() {
-    const map = maps[gameState.currentMap];
-    const corners = [
-        {x: 50, y: 50, dir: 'down'},
-        {x: map.width - 100, y: 50, dir: 'down'},
-        {x: 50, y: map.height - 100, dir: 'up'},
-        {x: map.width - 100, y: map.height - 100, dir: 'up'}
-    ];
-    
-    const corner = corners[gameState.spawnCorner % 4];
-    gameState.spawnCorner++;
-    
-    const types = ['faquinha', 'morcego', 'caveirinha', 'caveirinha'];
-    const randomType = types[Math.floor(Math.random() * types.length)];
-    
-    const validPos = findValidSpawnPosition(corner.x, corner.y, CONFIG.ENEMY_WIDTH, CONFIG.ENEMY_HEIGHT);
-    
-    const enemy = new Enemy(validPos.x, validPos.y, randomType);
-    enemy.state = 'chase';
-    enemy.alertVisionRange = 400;
-    
-    // Definir direção inicial em direção ao centro
-    const centerX = map.width / 2;
-    const centerY = map.height / 2;
-    enemy.direction = Math.abs(corner.x - centerX) > Math.abs(corner.y - centerY) ?
-        (corner.x < centerX ? 'right' : 'left') :
-        (corner.y < centerY ? 'down' : 'up');
-    
-    enemies.push(enemy);
-}
-
-// Atualizar todos os inimigos
-function updateEnemies() {
-    enemies.forEach(enemy => enemy.update());
-    
-    // Remover inimigos mortos após delay
-    enemies.forEach((enemy, index) => {
-        if (enemy.isDead && !enemy.removeTime) {
-            enemy.removeTime = Date.now() + CONFIG.ENEMY_REMOVE_DELAY;
-        }
-        if (enemy.removeTime && Date.now() > enemy.removeTime) {
-            enemies.splice(index, 1);
-        }
-    });
-    
-    // Spawn de inimigos durante fuga no mapa 5
-    if (gameState.phase === 'escape' && gameState.currentMap === 5 && gameState.bombPlaced) {
-        if (Date.now() - gameState.lastEnemySpawn > gameState.enemySpawnDelay) {
-            spawnEscapeEnemy();
-            gameState.lastEnemySpawn = Date.now();
+        
+        // Mostrar indicador de alerta durante fuga
+        const gameState = MadNight.game.state;
+        if (!this.isDead && gameState.phase === 'escape') {
+            ctx.fillStyle = '#f00';
+            ctx.font = '8px "Press Start 2P"';
+            ctx.fillText('!', this.x + 23, this.y - 5);
         }
     }
-}
+};
+
+// Sistema de gerenciamento de inimigos
+MadNight.enemies = {
+    list: [],
+    
+    // Criar novo inimigo
+    create: function(x, y, type = 'faquinha') {
+        const enemy = new MadNight.Enemy(x, y, type);
+        this.list.push(enemy);
+        return enemy;
+    },
+    
+    // Atualizar todos os inimigos
+    update: function() {
+        this.list.forEach(enemy => {
+            enemy.update();
+        });
+        
+        // Remover inimigos mortos após delay
+        this.cleanup();
+    },
+    
+    // Limpar inimigos mortos
+    cleanup: function() {
+        const now = Date.now();
+        this.list = this.list.filter(enemy => {
+            return !enemy.removeTime || now < enemy.removeTime;
+        });
+    },
+    
+    // Renderizar todos os inimigos
+    render: function(ctx, visibleArea) {
+        this.list.forEach(enemy => {
+            enemy.render(ctx, visibleArea);
+        });
+    },
+    
+    // Limpar todos os inimigos
+    clear: function() {
+        this.list = [];
+    },
+    
+    // Obter número de inimigos vivos
+    getAliveCount: function() {
+        return this.list.filter(e => !e.isDead).length;
+    },
+    
+    // Spawnar inimigo de fuga
+    spawnEscapeEnemy: function() {
+        const map = MadNight.maps.getCurrentMap();
+        if (!map) return;
+        
+        const gameState = MadNight.game.state;
+        
+        const corners = [
+            {x: 50, y: 50, dir: 'down'},
+            {x: map.width - 100, y: 50, dir: 'down'},
+            {x: 50, y: map.height - 100, dir: 'up'},
+            {x: map.width - 100, y: map.height - 100, dir: 'up'}
+        ];
+        
+        const corner = corners[gameState.spawnCorner % 4];
+        gameState.spawnCorner++;
+        
+        const types = ['faquinha', 'morcego', 'caveirinha', 'caveirinha'];
+        const randomType = types[Math.floor(Math.random() * types.length)];
+        
+        const validPos = MadNight.collision.findValidSpawnPosition(
+            corner.x, corner.y, 46, 46
+        );
+        
+        const enemy = this.create(validPos.x, validPos.y, randomType);
+        enemy.state = 'chase';
+        enemy.alertVisionRange = 400;
+        
+        // Definir direção inicial
+        const centerX = map.width / 2;
+        const centerY = map.height / 2;
+        enemy.direction = Math.abs(corner.x - centerX) > Math.abs(corner.y - centerY) ?
+            (corner.x < centerX ? 'right' : 'left') :
+            (corner.y < centerY ? 'down' : 'up');
+        
+        return enemy;
+    }
+};
