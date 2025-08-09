@@ -23,35 +23,421 @@
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
             border: 2px solid #333;
+            display: none;
         }
         
-        .loading {
-            position: absolute;
+        #loading {
             color: #fff;
-            font-size: 24px;
+            font-size: 14px;
             text-align: center;
+        }
+        
+        #errorMsg {
+            color: #f00;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
-    <div class="loading" id="loading">Carregando...</div>
+    <div id="container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="loading">Carregando...</div>
+        <div id="errorMsg"></div>
+    </div>
     
-    <!-- 15 ARQUIVOS JS (sem pasta maps/) -->
-    <script src="js/config.js"></script>
-    <script src="js/assets.js"></script>
-    <script src="js/audio.js"></script>
-    <script src="js/player.js"></script>
-    <script src="js/enemy.js"></script>
-    <script src="js/projectiles.js"></script>
-    <script src="js/camera.js"></script>
-    <script src="js/collision.js"></script>
-    <script src="js/lighting.js"></script>
-    <script src="js/traffic.js"></script>
-    <script src="js/maps.js"></script>
-    <script src="js/renderer.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/game.js"></script>
-    <script src="js/main.js"></script>
+    <script>
+        // Verificação inicial
+        console.log('Mad Night v1.40 - Iniciando...');
+        
+        // Variáveis globais essenciais
+        let canvas, ctx, camera;
+        const enemies = [];
+        const projectiles = [];
+        const keys = {};
+        
+        // Configuração básica (caso config.js falhe)
+        const CONFIG = {
+            CANVAS_WIDTH: 960,
+            CANVAS_HEIGHT: 540,
+            ZOOM: 2,
+            PLAYER_WIDTH: 56,
+            PLAYER_HEIGHT: 56,
+            PLAYER_SPEED: 3.6,
+            DASH_DURATION: 150,
+            DASH_DISTANCE: 60,
+            MAX_PEDAL_POWER: 4,
+            PEDAL_RECHARGE_TIME: 6000,
+            ENEMY_WIDTH: 46,
+            ENEMY_HEIGHT: 46,
+            ENEMY_SPEED: 2,
+            ENEMY_PATROL_SPEED: 1,
+            ENEMY_VISION_RANGE: 150,
+            ENEMY_ALERT_VISION_RANGE: 200,
+            ENEMY_PATROL_RADIUS: 150,
+            MAX_DEATHS: 5,
+            ENEMY_SPAWN_DELAY: 1000,
+            ENEMY_REMOVE_DELAY: 3000,
+            SFX_VOLUME: 0.7,
+            MUSIC_VOLUME: 0.5,
+            TILE_SIZE: 120,
+            SHADOW_ALPHA: 0.5,
+            NIGHT_OVERLAY_ALPHA: 0.4,
+            DEBUG_MODE: false,
+            VERSION: 'v1.40'
+        };
+        
+        // Estado do jogo básico
+        const gameState = {
+            deaths: 0,
+            pedalPower: 4,
+            maxPedalPower: 4,
+            lastRecharge: Date.now(),
+            musicPhase: 'inicio',
+            currentMusic: null,
+            currentMap: 0,
+            phase: 'infiltration',
+            dashUnlocked: false,
+            bombPlaced: false,
+            lastEnemySpawn: 0,
+            enemySpawnDelay: 1000,
+            spawnCorner: 0,
+            lastFrameTime: 0,
+            version: 'v1.40'
+        };
+        
+        // Player básico
+        const player = {
+            x: 100,
+            y: 300,
+            width: 56,
+            height: 56,
+            speed: 3.6,
+            direction: 'right',
+            frame: 0,
+            sprites: [],
+            isDead: false,
+            deathFrame: 12,
+            isDashing: false,
+            dashStart: 0,
+            dashDuration: 150,
+            dashDistance: 60,
+            lastMove: Date.now(),
+            inShadow: false
+        };
+        
+        // Mapa mínimo para teste
+        const maps = [
+            {
+                name: "Maconhão",
+                subtitle: "Tutorial de movimento",
+                width: 1920,
+                height: 1080,
+                enemies: [],
+                tiles: [],
+                trees: [],
+                streetLights: [],
+                objects: [],
+                walls: [
+                    {x: 0, y: 0, w: 1920, h: 20, invisible: true},
+                    {x: 0, y: 1060, w: 1920, h: 20, invisible: true},
+                    {x: 0, y: 20, w: 20, h: 1040, invisible: true},
+                    {x: 1900, y: 20, w: 20, h: 1040, invisible: true}
+                ],
+                lights: [],
+                shadows: [],
+                playerStart: {x: 150, y: 300},
+                playerStartEscape: {x: 1700, y: 540},
+                exit: {x: 1800, y: 490, w: 80, h: 100},
+                direction: 'right'
+            }
+        ];
+        
+        // Assets vazio para não dar erro
+        const assets = {};
+        
+        // Audio vazio para não dar erro
+        const audio = {
+            playSFX: function() {},
+            stopLoopSFX: function() {}
+        };
+        
+        // Sistema de tráfego vazio
+        const trafficSystem = {
+            update: function() {},
+            render: function() {}
+        };
+        
+        // Funções essenciais mínimas
+        function checkRectCollision(obj1, obj2) {
+            return obj1.x < obj2.x + obj2.w &&
+                   obj1.x + obj1.width > obj2.x &&
+                   obj1.y < obj2.y + obj2.h &&
+                   obj1.y + obj1.height > obj2.y;
+        }
+        
+        function checkWallCollision(entity, newX, newY) {
+            const map = maps[gameState.currentMap];
+            if (!map) return false;
+            
+            const testEntity = {
+                x: newX,
+                y: newY,
+                width: entity.width,
+                height: entity.height
+            };
+            
+            if (map.walls) {
+                for (let wall of map.walls) {
+                    if (checkRectCollision(testEntity, wall)) {
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
+        }
+        
+        function isInShadow() {
+            return false; // Simplificado
+        }
+        
+        function killPlayer() {
+            player.isDead = true;
+            gameState.deaths++;
+            setTimeout(() => {
+                player.isDead = false;
+                player.x = maps[gameState.currentMap].playerStart.x;
+                player.y = maps[gameState.currentMap].playerStart.y;
+            }, 2000);
+        }
+        
+        function getPlayerSprite() {
+            return null; // Simplificado
+        }
+        
+        function findValidSpawnPosition(x, y, width, height) {
+            return {x, y};
+        }
+        
+        function updateProjectiles() {
+            // Simplificado
+        }
+        
+        function loadMap(index) {
+            console.log('Carregando mapa', index);
+            gameState.currentMap = index;
+            const map = maps[index];
+            if (map) {
+                player.x = map.playerStart.x;
+                player.y = map.playerStart.y;
+            }
+        }
+        
+        // Update mínimo
+        function update() {
+            if (player.isDead) return;
+            
+            const map = maps[gameState.currentMap];
+            if (!map) return;
+            
+            // Movimento básico
+            let dx = 0, dy = 0;
+            if (keys['ArrowUp']) { dy = -1; player.direction = 'up'; }
+            if (keys['ArrowDown']) { dy = 1; player.direction = 'down'; }
+            if (keys['ArrowLeft']) { dx = -1; player.direction = 'left'; }
+            if (keys['ArrowRight']) { dx = 1; player.direction = 'right'; }
+            
+            const newX = player.x + dx * player.speed;
+            const newY = player.y + dy * player.speed;
+            
+            if (!checkWallCollision(player, newX, player.y)) {
+                player.x = newX;
+            }
+            if (!checkWallCollision(player, player.x, newY)) {
+                player.y = newY;
+            }
+            
+            // Limitar aos bounds
+            player.x = Math.max(0, Math.min(map.width - player.width, player.x));
+            player.y = Math.max(0, Math.min(map.height - player.height, player.y));
+            
+            // Atualizar câmera
+            camera.x = player.x + player.width/2 - camera.width/2;
+            camera.y = player.y + player.height/2 - camera.height/2;
+            camera.x = Math.max(0, Math.min(map.width - camera.width, camera.x));
+            camera.y = Math.max(0, Math.min(map.height - camera.height, camera.y));
+        }
+        
+        // Draw mínimo
+        function draw() {
+            if (!ctx) return;
+            
+            // Limpar
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Salvar contexto
+            ctx.save();
+            ctx.scale(camera.zoom, camera.zoom);
+            ctx.translate(-camera.x, -camera.y);
+            
+            // Background
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
+            
+            // Player (quadrado vermelho)
+            ctx.fillStyle = player.isDead ? '#800' : '#f00';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            
+            // Restaurar
+            ctx.restore();
+            
+            // UI básica
+            ctx.fillStyle = '#fff';
+            ctx.font = '12px "Press Start 2P"';
+            ctx.fillText('Mad Night v1.40', 10, 30);
+            ctx.fillText('Use as setas para mover', 10, 60);
+            ctx.fillText(`Mortes: ${gameState.deaths}`, 10, 90);
+        }
+        
+        // Game loop
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Inicialização
+        function init() {
+            console.log('Inicializando jogo...');
+            
+            // Pegar canvas
+            canvas = document.getElementById('gameCanvas');
+            if (!canvas) {
+                throw new Error('Canvas não encontrado');
+            }
+            
+            ctx = canvas.getContext('2d');
+            if (!ctx) {
+                throw new Error('Contexto 2D não suportado');
+            }
+            
+            // Configurar canvas
+            canvas.width = CONFIG.CANVAS_WIDTH * CONFIG.ZOOM;
+            canvas.height = CONFIG.CANVAS_HEIGHT * CONFIG.ZOOM;
+            ctx.imageSmoothingEnabled = false;
+            
+            // Inicializar câmera
+            camera = {
+                x: 0,
+                y: 0,
+                width: CONFIG.CANVAS_WIDTH,
+                height: CONFIG.CANVAS_HEIGHT,
+                zoom: CONFIG.ZOOM
+            };
+            
+            // Carregar primeiro mapa
+            loadMap(0);
+            
+            // Mostrar canvas
+            canvas.style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+            
+            // Iniciar loop
+            console.log('Iniciando game loop...');
+            gameLoop();
+        }
+        
+        // Event listeners
+        window.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            e.preventDefault();
+        });
+        
+        window.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+            e.preventDefault();
+        });
+        
+        // Tentar carregar scripts externos
+        let scriptsToLoad = [
+            'js/config.js',
+            'js/assets.js',
+            'js/audio.js',
+            'js/player.js',
+            'js/enemy.js',
+            'js/projectiles.js',
+            'js/camera.js',
+            'js/collision.js',
+            'js/lighting.js',
+            'js/traffic.js',
+            'js/maps.js',
+            'js/renderer.js',
+            'js/ui.js',
+            'js/game.js',
+            'js/main.js'
+        ];
+        
+        let scriptsLoaded = 0;
+        let scriptsFailed = 0;
+        
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = () => {
+                    console.log('✅ Carregado:', src);
+                    resolve();
+                };
+                script.onerror = () => {
+                    console.warn('⚠️ Falhou:', src);
+                    scriptsFailed++;
+                    resolve(); // Continua mesmo se falhar
+                };
+                document.body.appendChild(script);
+            });
+        }
+        
+        // Carregar scripts em sequência
+        async function loadAllScripts() {
+            for (let src of scriptsToLoad) {
+                await loadScript(src);
+                scriptsLoaded++;
+                document.getElementById('loading').textContent = 
+                    `Carregando... ${scriptsLoaded}/${scriptsToLoad.length}`;
+            }
+            
+            // Após carregar tudo (ou falhar)
+            console.log(`Scripts carregados: ${scriptsLoaded - scriptsFailed}/${scriptsToLoad.length}`);
+            
+            // Aguardar um pouco e iniciar
+            setTimeout(() => {
+                try {
+                    // Tentar usar a função initGame se existir
+                    if (typeof initGame === 'function') {
+                        console.log('Usando initGame()');
+                        initGame();
+                    } else {
+                        console.log('Usando init() fallback');
+                        init();
+                    }
+                } catch (error) {
+                    console.error('Erro ao inicializar:', error);
+                    document.getElementById('errorMsg').textContent = 
+                        'Erro ao inicializar: ' + error.message;
+                    document.getElementById('errorMsg').style.display = 'block';
+                }
+            }, 100);
+        }
+        
+        // Iniciar carregamento
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM carregado, iniciando carregamento de scripts...');
+            loadAllScripts();
+        });
+    </script>
 </body>
 </html>
