@@ -1,22 +1,25 @@
-// traffic.js - Sistema de Tráfego (Eixão)
+// traffic.js - Sistema de tráfego
 
-const trafficSystem = {
+MadNight.traffic = {
+    // Lista de carros ativos
     cars: [],
+    
+    // Último spawn
     lastSpawn: {
         mainNorthSouth: 0,
         mainSouthNorth: 0
     },
     
-    // Configurações de spawn - madrugada, pouco movimento
-    spawnConfig: {
-        mainLanes: {
-            minInterval: 6000,   // 6 segundos mínimo
-            maxInterval: 12000,  // 12 segundos máximo
-            rushChance: 0.15     // 15% chance de "rush" com mais carros
-        }
+    // Configurações
+    config: {
+        mainLanes: MadNight.config.traffic.mainLanes,
+        carSpeed: MadNight.config.traffic.carSpeed,
+        maxCars: MadNight.config.traffic.maxCars,
+        northSouthLanes: MadNight.config.traffic.northSouthLanes,
+        southNorthLanes: MadNight.config.traffic.southNorthLanes
     },
     
-    // Tipos de carros por direção
+    // Tipos de carros disponíveis
     carTypes: {
         northSouth: [
             { sprite: 'carro001frente' },
@@ -31,79 +34,21 @@ const trafficSystem = {
         ]
     },
     
-    // Helper para pegar dimensões do carro
+    // Obter dimensões do carro
     getCarDimensions: function(spriteName) {
-        const asset = assets[spriteName];
-        return {
-            width: asset.width || 100,
-            height: asset.height || 100
-        };
-    },
-    
-    // Atualizar sistema
-    update: function() {
-        // Só funciona no mapa do Eixão
-        if (gameState.currentMap !== 1) {
-            this.cars = [];
-            return;
+        const asset = MadNight.assets.get(spriteName);
+        if (asset) {
+            return {
+                width: asset.width || 100,
+                height: asset.height || 100
+            };
         }
-        
-        const now = Date.now();
-        
-        // Remover carros fora da tela
-        this.cars = this.cars.filter(car => 
-            car.y >= -200 && car.y <= 1068
-        );
-        
-        // Limitar número de carros
-        if (this.cars.length < 10) {
-            // Spawn nas pistas norte-sul
-            if (now - this.lastSpawn.mainNorthSouth > this.getNextSpawnTime('main')) {
-                this.spawnMainLanes('northSouth');
-                this.lastSpawn.mainNorthSouth = now;
-            }
-            
-            // Spawn nas pistas sul-norte
-            if (now - this.lastSpawn.mainSouthNorth > this.getNextSpawnTime('main')) {
-                this.spawnMainLanes('southNorth');
-                this.lastSpawn.mainSouthNorth = now;
-            }
-        }
-        
-        // Atualizar movimento dos carros
-        this.cars.forEach(car => {
-            car.y += car.vy;
-            
-            // Verificar colisão com player
-            if (this.checkCarCollision(car)) {
-                killPlayer();
-            }
-        });
-    },
-    
-    // Verificar colisão com player
-    checkCarCollision: function(car) {
-        // Área de colisão reduzida (80% do tamanho)
-        const carRect = {
-            x: car.x + car.width * 0.1,
-            y: car.y + car.height * 0.1,
-            w: car.width * 0.8,
-            h: car.height * 0.8
-        };
-        
-        const playerRect = {
-            x: player.x,
-            y: player.y,
-            w: player.width,
-            h: player.height
-        };
-        
-        return checkRectCollision(playerRect, carRect);
+        return { width: 100, height: 100 };
     },
     
     // Calcular próximo tempo de spawn
-    getNextSpawnTime: function(laneType) {
-        const config = this.spawnConfig.mainLanes;
+    getNextSpawnTime: function() {
+        const config = this.config.mainLanes;
         
         // Chance de "rush" - vários carros juntos
         if (Math.random() < config.rushChance) {
@@ -116,13 +61,12 @@ const trafficSystem = {
     
     // Spawnar carros nas pistas principais
     spawnMainLanes: function(direction) {
-        // Pistas do Eixão
         const lanes = direction === 'northSouth' ? 
-            [1305, 1390, 1470, 1550] :  // Descendo
-            [1637, 1706, 1790, 1883];    // Subindo
+            this.config.northSouthLanes : 
+            this.config.southNorthLanes;
         
-        // Escolher 1-2 pistas aleatórias
-        const numCars = Math.random() < 0.25 ? 2 : 1;
+        // Escolher 1-2 pistas aleatórias para spawn
+        const numCars = Math.random() < 0.25 ? 2 : 1; // 25% de chance de 2 carros
         const usedLanes = [];
         
         for (let i = 0; i < numCars; i++) {
@@ -132,19 +76,16 @@ const trafficSystem = {
             } while (usedLanes.includes(lane));
             usedLanes.push(lane);
             
-            // Escolher tipo de carro
             const carType = this.carTypes[direction][
                 Math.floor(Math.random() * this.carTypes[direction].length)
             ];
             const dimensions = this.getCarDimensions(carType.sprite);
+            const speed = this.config.carSpeed.min + 
+                         Math.random() * (this.config.carSpeed.max - this.config.carSpeed.min);
             
-            // Velocidade variável
-            const speed = 4.5 + Math.random() * 1.5;
-            
-            // Criar carro
             this.cars.push({
                 sprite: carType.sprite,
-                x: lane - dimensions.width/2,
+                x: lane - dimensions.width / 2, // Centralizar na pista
                 y: direction === 'northSouth' ? -150 : 968,
                 vy: direction === 'northSouth' ? speed : -speed,
                 vx: 0,
@@ -156,88 +97,140 @@ const trafficSystem = {
         }
     },
     
-    // Renderizar carros
+    // Atualizar sistema de tráfego
+    update: function() {
+        // Só funciona no mapa do Eixão (mapa 1)
+        if (MadNight.game.state.currentMap !== 1) {
+            this.cars = [];
+            return;
+        }
+        
+        const now = Date.now();
+        
+        // Remover carros fora da tela
+        this.cars = this.cars.filter(car => 
+            car.y >= -200 && car.y <= 1068
+        );
+        
+        // Só spawnar se tiver menos carros que o máximo
+        if (this.cars.length < this.config.maxCars) {
+            // Spawn nas pistas norte-sul
+            if (now - this.lastSpawn.mainNorthSouth > this.getNextSpawnTime()) {
+                this.spawnMainLanes('northSouth');
+                this.lastSpawn.mainNorthSouth = now;
+            }
+            
+            // Spawn nas pistas sul-norte
+            if (now - this.lastSpawn.mainSouthNorth > this.getNextSpawnTime()) {
+                this.spawnMainLanes('southNorth');
+                this.lastSpawn.mainSouthNorth = now;
+            }
+        }
+        
+        // Atualizar movimento dos carros
+        this.cars.forEach(car => {
+            car.y += car.vy;
+            car.x += car.vx;
+        });
+    },
+    
+    // Renderizar carros e faróis
     render: function(ctx, visibleArea) {
         this.cars.forEach(car => {
-            // Verificar se está visível
-            if (!isInView(car)) return;
+            // Verificar se o carro está visível
+            if (!MadNight.camera.isVisible(car)) return;
             
             // Calcular dimensões reduzidas (50% do tamanho)
             const scaledWidth = car.width * 0.5;
             const scaledHeight = car.height * 0.5;
+            
+            // Centralizar o carro reduzido na posição original
             const offsetX = (car.width - scaledWidth) / 2;
             const offsetY = (car.height - scaledHeight) / 2;
-
-            // Renderizar carro com escurecimento
-            ctx.save();
-            ctx.filter = 'brightness(0.6)';
             
-            const carAsset = assets[car.sprite];
+            // Aplicar escurecimento para o Eixão
+            ctx.save();
+            ctx.filter = 'brightness(0.6)'; // 60% do brilho original
+            
+            // Renderizar sprite do carro se carregado
+            const carAsset = MadNight.assets.get(car.sprite);
             if (carAsset && carAsset.loaded) {
                 ctx.drawImage(
-                    carAsset.img, 
-                    car.x + offsetX, 
-                    car.y + offsetY, 
-                    scaledWidth, 
+                    carAsset.img,
+                    car.x + offsetX,
+                    car.y + offsetY,
+                    scaledWidth,
                     scaledHeight
                 );
             } else {
-                // Fallback
+                // Fallback: retângulo colorido
                 ctx.fillStyle = car.vy > 0 ? '#c44' : '#44c';
                 ctx.fillRect(
-                    car.x + offsetX, 
-                    car.y + offsetY, 
-                    scaledWidth, 
+                    car.x + offsetX,
+                    car.y + offsetY,
+                    scaledWidth,
                     scaledHeight
                 );
             }
             
             ctx.restore();
             
-            // Renderizar faróis
-            this.renderHeadlights(ctx, car, offsetX, offsetY, scaledWidth, scaledHeight);
+            // Renderizar faróis usando o sistema de iluminação
+            MadNight.lighting.renderCarHeadlights(ctx, car);
         });
     },
     
-    // Renderizar faróis dos carros
-    renderHeadlights: function(ctx, car, offsetX, offsetY, scaledWidth, scaledHeight) {
-        ctx.save();
-        ctx.globalCompositeOperation = 'lighter';
-        
-        // Ajuste para carros subindo
-        const yAdjustment = car.vy < 0 ? -5 : 0;
-        
-        // Posições dos dois faróis
-        const headlightY = car.y + offsetY + (car.headlightOffsetY * 0.5) + yAdjustment;
-        const headlightPositions = [
-            { x: car.x + offsetX + scaledWidth * 0.25, y: headlightY },
-            { x: car.x + offsetX + scaledWidth * 0.75, y: headlightY }
-        ];
-        
-        headlightPositions.forEach(pos => {
-            const gradient = ctx.createRadialGradient(
-                pos.x, pos.y, 0,
-                pos.x, pos.y, 40
-            );
-            
-            // Intensidade reduzida
-            gradient.addColorStop(0, 'rgba(255, 255, 200, 0.3)');
-            gradient.addColorStop(0.5, 'rgba(255, 255, 150, 0.15)');
-            gradient.addColorStop(1, 'rgba(255, 255, 100, 0)');
-            
-            ctx.fillStyle = gradient;
-            ctx.beginPath();
-            ctx.arc(pos.x, pos.y, 40, 0, Math.PI * 2);
-            ctx.fill();
-        });
-        
-        ctx.restore();
+    // Verificar colisão com carros
+    checkCollision: function(entity) {
+        for (let car of this.cars) {
+            if (entity.x < car.x + car.width &&
+                entity.x + entity.width > car.x &&
+                entity.y < car.y + car.height &&
+                entity.y + entity.height > car.y) {
+                return true;
+            }
+        }
+        return false;
     },
     
-    // Limpar sistema
+    // Limpar todos os carros
     clear: function() {
         this.cars = [];
         this.lastSpawn.mainNorthSouth = 0;
         this.lastSpawn.mainSouthNorth = 0;
+    },
+    
+    // Obter número de carros ativos
+    getCarCount: function() {
+        return this.cars.length;
+    },
+    
+    // Criar engarrafamento (para eventos especiais)
+    createTrafficJam: function(laneIndex, carCount = 5) {
+        const lanes = [...this.config.northSouthLanes, ...this.config.southNorthLanes];
+        if (laneIndex >= lanes.length) return;
+        
+        const lane = lanes[laneIndex];
+        const isNorthSouth = laneIndex < this.config.northSouthLanes.length;
+        
+        for (let i = 0; i < carCount; i++) {
+            const carType = isNorthSouth ? 
+                this.carTypes.northSouth[0] : 
+                this.carTypes.southNorth[0];
+            
+            const dimensions = this.getCarDimensions(carType.sprite);
+            
+            this.cars.push({
+                sprite: carType.sprite,
+                x: lane - dimensions.width / 2,
+                y: 300 + i * (dimensions.height + 20),
+                vy: 0, // Parado
+                vx: 0,
+                width: dimensions.width,
+                height: dimensions.height,
+                headlightOffsetY: isNorthSouth ? 
+                    dimensions.height - 20 : 20
+            });
+        }
     }
 };
