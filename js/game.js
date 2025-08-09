@@ -52,6 +52,9 @@
         traffic = MadNight.traffic;
         ui = MadNight.ui;
         
+        // IMPORTANTE: Obter referência do assets também!
+        const assets = MadNight.assets;
+        
         // Verificar módulos essenciais
         if (!player || !maps) {
             console.error('❌ Módulos essenciais não carregados!');
@@ -60,6 +63,7 @@
         
         // Inicializar subsistemas (com verificação segura)
         const modules = [
+            { name: 'assets', module: assets },  // ADICIONAR ASSETS PRIMEIRO!
             { name: 'maps', module: maps },
             { name: 'player', module: player },
             { name: 'enemies', module: enemies },
