@@ -3,7 +3,7 @@
 (function() {
     'use strict';
     
-    // Estado do jogo
+    // Estado do jogo (exposto para outros módulos)
     const gameState = {
         currentMap: 0,
         phase: 'infiltration', // 'infiltration' ou 'escape'
@@ -31,6 +31,9 @@
     let lighting = null;
     let traffic = null;
     let ui = null;
+    
+    // Sistema de input
+    const keys = {};
     
     // Inicialização do módulo game
     function init() {
@@ -140,7 +143,7 @@
         if (!map) return;
         
         // Atualizar sistemas
-        if (player.update) player.update(deltaTime);
+        if (player.update) player.update(keys);
         if (enemies.update) enemies.update(deltaTime);
         if (projectiles.update) projectiles.update(deltaTime);
         if (camera.update) camera.update(deltaTime);
@@ -297,6 +300,8 @@
     }
     
     function handleKeyDown(e) {
+        keys[e.key] = true;
+        
         // Passar para o player
         if (player.handleKeyDown) {
             player.handleKeyDown(e);
@@ -314,6 +319,8 @@
     }
     
     function handleKeyUp(e) {
+        keys[e.key] = false;
+        
         if (player.handleKeyUp) {
             player.handleKeyUp(e);
         }
@@ -447,11 +454,17 @@
     
     // Exportar módulo
     MadNight.game = {
+        // Estado exposto para outros módulos
+        state: gameState,
+        keys: keys,
+        
+        // Métodos principais
         init: init,
         update: update,
         restart: restart,
         togglePause: togglePause,
         handlePlayerDeath: handlePlayerDeath,
+        handleMapExit: handleMapTransition,
         
         // Getters para outros módulos
         getState: () => gameState,
