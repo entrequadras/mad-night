@@ -485,6 +485,7 @@
         togglePause: togglePause,
         handlePlayerDeath: handlePlayerDeath,
         handleMapExit: handleMapTransition,
+        loadMap: loadMap,  // Expor loadMap para outros módulos
         
         // Getters para outros módulos
         getState: () => gameState,
