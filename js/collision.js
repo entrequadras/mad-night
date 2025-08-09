@@ -1,312 +1,293 @@
-// collision.js - Sistema de Colisão
+// collision.js - Sistema de colisão
 
-// Verificar colisão entre dois retângulos
-function checkRectCollision(obj1, obj2) {
-    return obj1.x < obj2.x + obj2.w &&
-           obj1.x + obj1.width > obj2.x &&
-           obj1.y < obj2.y + obj2.h &&
-           obj1.y + obj1.height > obj2.y;
-}
-
-// Verificar colisão com paredes e objetos
-function checkWallCollision(entity, newX, newY) {
-    const map = maps[gameState.currentMap];
-    if (!map) return false;
-    
-    const testEntity = {
-        x: newX,
-        y: newY,
-        width: entity.width,
-        height: entity.height
-    };
+MadNight.collision = {
+    // Verificar colisão entre dois retângulos
+    checkRectCollision: function(obj1, obj2) {
+        return obj1.x < obj2.x + obj2.w &&
+               obj1.x + obj1.width > obj2.x &&
+               obj1.y < obj2.y + obj2.h &&
+               obj1.y + obj1.height > obj2.y;
+    },
     
     // Verificar colisão com paredes
-    if (map.walls) {
-        for (let wall of map.walls) {
-            if (checkRectCollision(testEntity, wall)) {
-                return true;
+    checkWallCollision: function(entity, newX, newY) {
+        const map = MadNight.maps.getCurrentMap();
+        if (!map) return false;
+        
+        const testEntity = {
+            x: newX,
+            y: newY,
+            width: entity.width,
+            height: entity.height
+        };
+        
+        // Verificar colisão com paredes normais
+        if (map.walls) {
+            for (let wall of map.walls) {
+                if (this.checkRectCollision(testEntity, wall)) {
+                    return true;
+                }
             }
         }
-    }
-    
-    // Verificar colisão com prédios
-    if (map.buildings) {
-        for (let building of map.buildings) {
-            if (building.collisionRects) {
-                for (let rect of building.collisionRects) {
-                    if (checkRectCollision(testEntity, rect)) {
+        
+        // Verificar colisão com prédios
+        if (map.buildings) {
+            for (let building of map.buildings) {
+                if (building.collisionRects) {
+                    for (let rect of building.collisionRects) {
+                        if (this.checkRectCollision(testEntity, rect)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Verificar colisão com árvores
+        if (map.trees) {
+            for (let tree of map.trees) {
+                const treeAsset = MadNight.assets.get(tree.type);
+                if (treeAsset && treeAsset.loaded) {
+                    const trunkCollision = {
+                        x: tree.x + treeAsset.width * 0.35,
+                        y: tree.y + treeAsset.height * 0.75,
+                        w: treeAsset.width * 0.3,
+                        h: treeAsset.height * 0.2
+                    };
+                    
+                    if (this.checkRectCollision(testEntity, trunkCollision)) {
                         return true;
                     }
                 }
             }
         }
-    }
-    
-    // Verificar colisão com árvores (tronco)
-    if (map.trees) {
-        for (let tree of map.trees) {
-            const treeAsset = assets[tree.type];
-            if (treeAsset && treeAsset.loaded) {
-                const trunkCollision = {
-                    x: tree.x + treeAsset.width * 0.35,
-                    y: tree.y + treeAsset.height * 0.75,
-                    w: treeAsset.width * 0.3,
-                    h: treeAsset.height * 0.2
-                };
-                
-                if (checkRectCollision(testEntity, trunkCollision)) {
-                    return true;
-                }
-            }
-        }
-    }
-    
-    // Verificar colisão com postes
-    if (map.streetLights) {
-        for (let light of map.streetLights) {
-            const lightAsset = assets[light.type];
-            if (lightAsset && lightAsset.loaded) {
-                const postCollision = {
-                    x: light.x + lightAsset.width * 0.25,
-                    y: light.y + lightAsset.height * 0.8,
-                    w: lightAsset.width * 0.5,
-                    h: lightAsset.height * 0.2
-                };
-                
-                if (checkRectCollision(testEntity, postCollision)) {
-                    return true;
-                }
-            }
-        }
-    }
-    
-    // Verificar colisão com objetos (exceto garrafas)
-    if (map.objects) {
-        for (let obj of map.objects) {
-            // Pular garrafas quebradas - sem colisão
-            if (obj.type === 'garrafaquebrada01' || obj.type === 'garrafaquebrada02') {
-                continue;
-            }
-            
-            const objAsset = assets[obj.type];
-            if (objAsset && objAsset.loaded) {
-                // Colisão de 50% centralizada para parquinho e banco
-                const fullWidth = objAsset.width;
-                const fullHeight = objAsset.height;
-                const halfWidth = fullWidth * 0.5;
-                const halfHeight = fullHeight * 0.5;
-                
-                const objCollision = {
-                    x: obj.x + (fullWidth - halfWidth) / 2,
-                    y: obj.y + (fullHeight - halfHeight) / 2,
-                    w: halfWidth,
-                    h: halfHeight
-                };
-                
-                if (checkRectCollision(testEntity, objCollision)) {
-                    return true;
-                }
-            }
-        }
-    }
-    
-    // Verificar colisão com carros estacionados
-    if (map.parkedCars || gameState.currentMap === 2) {
-        const carros = gameState.currentMap === 2 ? getMap2ParkedCars() : (map.parkedCars || []);
         
-        for (let car of carros) {
-            const carAsset = assets[car.type];
-            if (carAsset) {
-                // Colisão de 50% centralizada
-                const fullWidth = carAsset.width || 150;
-                const fullHeight = carAsset.height || 100;
-                const halfWidth = fullWidth * 0.5;
-                const halfHeight = fullHeight * 0.5;
-                
-                const carCollision = {
-                    x: car.x + (fullWidth - halfWidth) / 2,
-                    y: car.y + (fullHeight - halfHeight) / 2,
-                    w: halfWidth,
-                    h: halfHeight
-                };
-                
-                if (checkRectCollision(testEntity, carCollision)) {
-                    return true;
-                }
-            }
-        }
-    }
-    
-    return false;
-}
-
-// Carros estacionados hardcoded do mapa 2
-function getMap2ParkedCars() {
-    return [
-        {type: 'carro002frente', x: 34, y: 1472},
-        {type: 'carrolateral_04', x: 1770, y: 1210},
-        {type: 'carrolateral_06', x: 602, y: 523},
-        {type: 'carrolateral_02', x: 527, y: 474},
-        {type: 'carrolateral_03', x: 299, y: 378},
-        {type: 'carrolateral_07', x: 89, y: 299},
-        {type: 'carrolateral_08', x: 238, y: 704}
-    ];
-}
-
-// Encontrar posição válida para spawn
-function findValidSpawnPosition(x, y, width, height) {
-    // Se a posição inicial é válida, retornar
-    if (!checkWallCollision({x, y, width, height}, x, y)) {
-        return {x, y};
-    }
-    
-    // Procurar posição válida em espiral
-    const maxDistance = 200;
-    const step = 20;
-    
-    for (let dist = step; dist <= maxDistance; dist += step) {
-        const positions = [
-            {x: x + dist, y: y},
-            {x: x - dist, y: y},
-            {x: x, y: y + dist},
-            {x: x, y: y - dist},
-            {x: x + dist, y: y + dist},
-            {x: x - dist, y: y - dist},
-            {x: x + dist, y: y - dist},
-            {x: x - dist, y: y + dist}
-        ];
-        
-        for (let pos of positions) {
-            const map = maps[gameState.currentMap];
-            if (pos.x >= 0 && pos.x + width <= map.width && 
-                pos.y >= 0 && pos.y + height <= map.height) {
-                if (!checkWallCollision({x: pos.x, y: pos.y, width, height}, pos.x, pos.y)) {
-                    return pos;
-                }
-            }
-        }
-    }
-    
-    // Se não encontrar, retornar posição original
-    console.warn('Não foi possível encontrar posição válida para spawn');
-    return {x, y};
-}
-
-// Obter todas as áreas de colisão para debug
-function getAllCollisionRects() {
-    const map = maps[gameState.currentMap];
-    if (!map) return [];
-    
-    const rects = [];
-    
-    // Paredes
-    if (map.walls) {
-        map.walls.forEach(wall => {
-            if (!wall.invisible) {
-                rects.push({
-                    type: 'wall',
-                    rect: wall
-                });
-            }
-        });
-    }
-    
-    // Prédios
-    if (map.buildings) {
-        map.buildings.forEach(building => {
-            if (building.collisionRects) {
-                building.collisionRects.forEach(rect => {
-                    rects.push({
-                        type: 'building',
-                        rect: rect
-                    });
-                });
-            }
-        });
-    }
-    
-    // Árvores
-    if (map.trees) {
-        map.trees.forEach(tree => {
-            const treeAsset = assets[tree.type];
-            if (treeAsset && treeAsset.loaded) {
-                rects.push({
-                    type: 'tree',
-                    rect: {
-                        x: tree.x + treeAsset.width * 0.35,
-                        y: tree.y + treeAsset.height * 0.75,
-                        w: treeAsset.width * 0.3,
-                        h: treeAsset.height * 0.2
-                    }
-                });
-            }
-        });
-    }
-    
-    // Postes
-    if (map.streetLights) {
-        map.streetLights.forEach(light => {
-            const lightAsset = assets[light.type];
-            if (lightAsset && lightAsset.loaded) {
-                rects.push({
-                    type: 'post',
-                    rect: {
+        // Verificar colisão com postes
+        if (map.streetLights) {
+            for (let light of map.streetLights) {
+                const lightAsset = MadNight.assets.get(light.type);
+                if (lightAsset && lightAsset.loaded) {
+                    const postCollision = {
                         x: light.x + lightAsset.width * 0.25,
                         y: light.y + lightAsset.height * 0.8,
                         w: lightAsset.width * 0.5,
                         h: lightAsset.height * 0.2
+                    };
+                    
+                    if (this.checkRectCollision(testEntity, postCollision)) {
+                        return true;
                     }
-                });
+                }
             }
-        });
-    }
-    
-    // Objetos
-    if (map.objects) {
-        map.objects.forEach(obj => {
-            if (obj.type !== 'garrafaquebrada01' && obj.type !== 'garrafaquebrada02') {
-                const objAsset = assets[obj.type];
+        }
+        
+        // Verificar colisão com objetos (50% para parquinho e banco)
+        if (map.objects) {
+            for (let obj of map.objects) {
+                // Pular garrafas quebradas - sem colisão
+                if (obj.type === 'garrafaquebrada01' || obj.type === 'garrafaquebrada02') {
+                    continue;
+                }
+                
+                const objAsset = MadNight.assets.get(obj.type);
                 if (objAsset && objAsset.loaded) {
                     const fullWidth = objAsset.width;
                     const fullHeight = objAsset.height;
                     const halfWidth = fullWidth * 0.5;
                     const halfHeight = fullHeight * 0.5;
                     
-                    rects.push({
-                        type: 'object',
-                        rect: {
-                            x: obj.x + (fullWidth - halfWidth) / 2,
-                            y: obj.y + (fullHeight - halfHeight) / 2,
-                            w: halfWidth,
-                            h: halfHeight
-                        }
-                    });
+                    const objCollision = {
+                        x: obj.x + (fullWidth - halfWidth) / 2,
+                        y: obj.y + (fullHeight - halfHeight) / 2,
+                        w: halfWidth,
+                        h: halfHeight
+                    };
+                    
+                    if (this.checkRectCollision(testEntity, objCollision)) {
+                        return true;
+                    }
                 }
             }
-        });
-    }
+        }
+        
+        // Verificar colisão com carros estacionados
+        if (this.checkParkedCarsCollision(testEntity)) {
+            return true;
+        }
+        
+        return false;
+    },
     
-    // Carros
-    const carros = gameState.currentMap === 2 ? getMap2ParkedCars() : (map.parkedCars || []);
-    carros.forEach(car => {
-        const carAsset = assets[car.type];
-        if (carAsset) {
-            const fullWidth = carAsset.width || 150;
-            const fullHeight = carAsset.height || 100;
-            const halfWidth = fullWidth * 0.5;
-            const halfHeight = fullHeight * 0.5;
+    // Verificar colisão com carros estacionados
+    checkParkedCarsCollision: function(testEntity) {
+        const gameState = MadNight.game.state;
+        const map = MadNight.maps.getCurrentMap();
+        
+        if (map.parkedCars || gameState.currentMap === 2) {
+            const carros = gameState.currentMap === 2 ? [
+                {type: 'carro002frente', x: 34, y: 1472},
+                {type: 'carrolateral_04', x: 1770, y: 1210},
+                {type: 'carrolateral_06', x: 602, y: 523},
+                {type: 'carrolateral_02', x: 527, y: 474},
+                {type: 'carrolateral_03', x: 299, y: 378},
+                {type: 'carrolateral_07', x: 89, y: 299},
+                {type: 'carrolateral_08', x: 238, y: 704}
+            ] : (map.parkedCars || []);
             
-            rects.push({
-                type: 'car',
-                rect: {
-                    x: car.x + (fullWidth - halfWidth) / 2,
-                    y: car.y + (fullHeight - halfHeight) / 2,
-                    w: halfWidth,
-                    h: halfHeight
+            for (let car of carros) {
+                const carAsset = MadNight.assets.get(car.type);
+                if (carAsset) {
+                    const fullWidth = carAsset.width || 150;
+                    const fullHeight = carAsset.height || 100;
+                    const halfWidth = fullWidth * 0.5;
+                    const halfHeight = fullHeight * 0.5;
+                    
+                    const carCollision = {
+                        x: car.x + (fullWidth - halfWidth) / 2,
+                        y: car.y + (fullHeight - halfHeight) / 2,
+                        w: halfWidth,
+                        h: halfHeight
+                    };
+                    
+                    if (this.checkRectCollision(testEntity, carCollision)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
+    },
+    
+    // Encontrar posição válida para spawn
+    findValidSpawnPosition: function(x, y, width, height) {
+        const map = MadNight.maps.getCurrentMap();
+        if (!map) return {x, y};
+        
+        if (!this.checkWallCollision({x, y, width, height}, x, y)) {
+            return {x, y};
+        }
+        
+        const maxDistance = 200;
+        const step = 20;
+        
+        for (let dist = step; dist <= maxDistance; dist += step) {
+            const positions = [
+                {x: x + dist, y: y},
+                {x: x - dist, y: y},
+                {x: x, y: y + dist},
+                {x: x, y: y - dist},
+                {x: x + dist, y: y + dist},
+                {x: x - dist, y: y - dist},
+                {x: x + dist, y: y - dist},
+                {x: x - dist, y: y + dist}
+            ];
+            
+            for (let pos of positions) {
+                if (pos.x >= 0 && pos.x + width <= map.width && 
+                    pos.y >= 0 && pos.y + height <= map.height) {
+                    if (!this.checkWallCollision({x: pos.x, y: pos.y, width, height}, pos.x, pos.y)) {
+                        return pos;
+                    }
+                }
+            }
+        }
+        
+        return {x, y};
+    },
+    
+    // Verificar colisão entre entidade e projétil
+    checkProjectileCollision: function(projectile, entity) {
+        return projectile.x < entity.x + entity.width &&
+               projectile.x + projectile.width > entity.x &&
+               projectile.y < entity.y + entity.height &&
+               projectile.y + projectile.height > entity.y;
+    },
+    
+    // Verificar se entidade está dentro dos limites do mapa
+    checkMapBounds: function(entity, x, y) {
+        const map = MadNight.maps.getCurrentMap();
+        if (!map) return false;
+        
+        return x >= 0 && 
+               x + entity.width <= map.width && 
+               y >= 0 && 
+               y + entity.height <= map.height;
+    },
+    
+    // Obter áreas de colisão para debug
+    getCollisionRects: function() {
+        const map = MadNight.maps.getCurrentMap();
+        const rects = [];
+        
+        if (!map) return rects;
+        
+        // Colisões dos prédios
+        if (map.buildings) {
+            map.buildings.forEach(building => {
+                if (building.collisionRects) {
+                    building.collisionRects.forEach(rect => {
+                        rects.push({...rect, type: 'building'});
+                    });
                 }
             });
         }
-    });
-    
-    return rects;
-}
+        
+        // Colisões de objetos
+        if (map.objects) {
+            map.objects.forEach(obj => {
+                if (obj.type !== 'garrafaquebrada01' && obj.type !== 'garrafaquebrada02') {
+                    const objAsset = MadNight.assets.get(obj.type);
+                    if (objAsset) {
+                        const fullWidth = objAsset.width || 100;
+                        const fullHeight = objAsset.height || 100;
+                        const halfWidth = fullWidth * 0.5;
+                        const halfHeight = fullHeight * 0.5;
+                        
+                        rects.push({
+                            x: obj.x + (fullWidth - halfWidth) / 2,
+                            y: obj.y + (fullHeight - halfHeight) / 2,
+                            w: halfWidth,
+                            h: halfHeight,
+                            type: 'object'
+                        });
+                    }
+                }
+            });
+        }
+        
+        // Colisões de carros
+        const gameState = MadNight.game.state;
+        if (map.parkedCars || gameState.currentMap === 2) {
+            const carros = gameState.currentMap === 2 ? [
+                {type: 'carro002frente', x: 34, y: 1472},
+                {type: 'carrolateral_04', x: 1770, y: 1210},
+                {type: 'carrolateral_06', x: 602, y: 523},
+                {type: 'carrolateral_02', x: 527, y: 474},
+                {type: 'carrolateral_03', x: 299, y: 378},
+                {type: 'carrolateral_07', x: 89, y: 299},
+                {type: 'carrolateral_08', x: 238, y: 704}
+            ] : (map.parkedCars || []);
+            
+            carros.forEach(car => {
+                const carAsset = MadNight.assets.get(car.type);
+                if (carAsset) {
+                    const fullWidth = carAsset.width || 150;
+                    const fullHeight = carAsset.height || 100;
+                    const halfWidth = fullWidth * 0.5;
+                    const halfHeight = fullHeight * 0.5;
+                    
+                    rects.push({
+                        x: car.x + (fullWidth - halfWidth) / 2,
+                        y: car.y + (fullHeight - halfHeight) / 2,
+                        w: halfWidth,
+                        h: halfHeight,
+                        type: 'car'
+                    });
+                }
+            });
+        }
+        
+        return rects;
+    }
+};
