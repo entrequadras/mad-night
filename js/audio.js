@@ -1,164 +1,176 @@
-// audio.js - Sistema de Áudio
+// audio.js - Sistema de áudio
 
-const audio = {
+MadNight.audio = {
     // Músicas
-    inicio: null,
-    fuga: null,
-    creditos: null,
+    musicas: {
+        inicio: null,
+        fuga: null,
+        creditos: null
+    },
     
-    // SFX
-    ataque_janis: null,
-    dash: null,
-    mobilete: null,
-    morte_caveira: null,
-    morte_chacal: null,
-    morte_janis: null,
-    morte_faquinha: null,
-    morte_madmax: null,
-    morte_morcego: null,
-    phone_ring: null,
+    // Efeitos sonoros
+    sfx: {
+        ataque_janis: null,
+        dash: null,
+        mobilete: null,
+        morte_caveira: null,
+        morte_chacal: null,
+        morte_janis: null,
+        morte_faquinha: null,
+        morte_madmax: null,
+        morte_morcego: null,
+        phone_ring: null
+    },
     
-    sfxVolume: CONFIG.SFX_VOLUME,
-    musicVolume: CONFIG.MUSIC_VOLUME,
+    // Volume padrão
+    sfxVolume: MadNight.config.audio.sfxVolume,
+    musicVolume: MadNight.config.audio.musicVolume,
     
-    // Carregar um SFX
+    // Música atual tocando
+    currentMusic: null,
+    
+    // Carregar um efeito sonoro
     loadSFX: function(name, loop = false) {
         try {
-            this[name] = new Audio(`assets/audio/${name}.mp3`);
-            this[name].volume = this.sfxVolume;
-            this[name].loop = loop;
-            this[name].load();
-            console.log(`✅ SFX ${name} carregado`);
+            this.sfx[name] = new Audio(`assets/audio/${name}.mp3`);
+            this.sfx[name].volume = this.sfxVolume;
+            this.sfx[name].loop = loop;
+            this.sfx[name].load();
+            console.log(`SFX carregado: ${name}`);
         } catch (e) {
-            console.error(`❌ Erro ao carregar ${name}:`, e);
+            console.error(`Erro ao carregar SFX ${name}:`, e);
         }
     },
     
-    // Tocar SFX
-    playSFX: function(soundName, volume = null) {
-        if (!this[soundName]) {
-            console.warn(`⚠️ Som ${soundName} não encontrado`);
-            return;
+    // Carregar uma música
+    loadMusic: function(name, loop = true) {
+        try {
+            this.musicas[name] = new Audio(`assets/audio/musica_etqgame_${name === 'inicio' ? 'tema_inicio' : name === 'fuga' ? 'fuga' : 'end_credits'}.mp3`);
+            this.musicas[name].loop = loop;
+            this.musicas[name].volume = this.musicVolume;
+            this.musicas[name].load();
+            console.log(`Música carregada: ${name}`);
+        } catch (e) {
+            console.error(`Erro ao carregar música ${name}:`, e);
         }
+    },
+    
+    // Tocar efeito sonoro
+    playSFX: function(soundName, volume = null) {
+        if (!this.sfx[soundName]) return;
         
         try {
-            // Clonar o áudio para permitir múltiplas reproduções
-            const sound = this[soundName].cloneNode();
+            const sound = this.sfx[soundName].cloneNode();
             sound.volume = volume !== null ? volume : this.sfxVolume;
-            sound.play().catch(e => {
-                // Falha silenciosa - navegador pode bloquear autoplay
-                console.warn(`Autoplay bloqueado para ${soundName}`);
-            });
+            sound.play().catch(() => {});
         } catch (e) {
-            console.error(`Erro ao tocar ${soundName}:`, e);
+            // Falha silenciosa
+        }
+    },
+    
+    // Tocar som de morte baseado no tipo de inimigo
+    playDeathSound: function(enemyType) {
+        const deathSounds = {
+            'faquinha': 'morte_faquinha',
+            'morcego': 'morte_morcego',
+            'caveirinha': 'morte_caveira',
+            'janis': 'morte_janis',
+            'chacal': 'morte_chacal',
+            'player': 'morte_madmax'
+        };
+        
+        const soundName = deathSounds[enemyType];
+        if (soundName) {
+            this.playSFX(soundName, enemyType === 'player' ? 0.8 : 0.6);
         }
     },
     
     // Parar som em loop
     stopLoopSFX: function(soundName) {
-        if (this[soundName] && !this[soundName].paused) {
-            this[soundName].pause();
-            this[soundName].currentTime = 0;
+        if (this.sfx[soundName] && !this.sfx[soundName].paused) {
+            this.sfx[soundName].pause();
+            this.sfx[soundName].currentTime = 0;
         }
+    },
+    
+    // Tocar música
+    playMusic: function(phase) {
+        if (this.currentMusic) {
+            this.currentMusic.pause();
+            this.currentMusic.currentTime = 0;
+        }
+        
+        if (phase === 'inicio' && this.musicas.inicio) {
+            this.musicas.inicio.play().catch(() => {});
+            this.currentMusic = this.musicas.inicio;
+        } else if (phase === 'fuga' && this.musicas.fuga) {
+            this.musicas.fuga.play().catch(() => {});
+            this.currentMusic = this.musicas.fuga;
+        } else if (phase === 'creditos' && this.musicas.creditos) {
+            this.musicas.creditos.play().catch(() => {});
+            this.currentMusic = this.musicas.creditos;
+        }
+    },
+    
+    // Parar todas as músicas
+    stopMusic: function() {
+        if (this.currentMusic) {
+            this.currentMusic.pause();
+            this.currentMusic.currentTime = 0;
+            this.currentMusic = null;
+        }
+    },
+    
+    // Toggle música (para debug)
+    toggleMusic: function() {
+        if (this.currentMusic && !this.currentMusic.paused) {
+            this.currentMusic.pause();
+        } else if (this.currentMusic) {
+            this.currentMusic.play().catch(() => {});
+        }
+    },
+    
+    // Atualizar volume dos SFX
+    setSFXVolume: function(volume) {
+        this.sfxVolume = Math.max(0, Math.min(1, volume));
+        for (let key in this.sfx) {
+            if (this.sfx[key]) {
+                this.sfx[key].volume = this.sfxVolume;
+            }
+        }
+    },
+    
+    // Atualizar volume da música
+    setMusicVolume: function(volume) {
+        this.musicVolume = Math.max(0, Math.min(1, volume));
+        for (let key in this.musicas) {
+            if (this.musicas[key]) {
+                this.musicas[key].volume = this.musicVolume;
+            }
+        }
+    },
+    
+    // Inicializar sistema de áudio
+    init: function() {
+        console.log('Inicializando sistema de áudio...');
+        
+        // Carregar todos os SFX
+        this.loadSFX('ataque_janis');
+        this.loadSFX('dash');
+        this.loadSFX('mobilete', true);
+        this.loadSFX('morte_caveira');
+        this.loadSFX('morte_chacal');
+        this.loadSFX('morte_janis');
+        this.loadSFX('morte_faquinha');
+        this.loadSFX('morte_madmax');
+        this.loadSFX('morte_morcego');
+        this.loadSFX('phone_ring', true);
+        
+        // Carregar músicas
+        this.loadMusic('inicio', true);
+        this.loadMusic('fuga', true);
+        this.loadMusic('creditos', false);
+        
+        console.log('Sistema de áudio inicializado');
     }
 };
-
-// Carregar todos os sons
-function loadAudio() {
-    console.log('🎵 Carregando áudio...');
-    
-    // Carregar SFX
-    audio.loadSFX('ataque_janis');
-    audio.loadSFX('dash');
-    audio.loadSFX('mobilete', true); // Loop
-    audio.loadSFX('morte_caveira');
-    audio.loadSFX('morte_chacal');
-    audio.loadSFX('morte_janis');
-    audio.loadSFX('morte_faquinha');
-    audio.loadSFX('morte_madmax');
-    audio.loadSFX('morte_morcego');
-    audio.loadSFX('phone_ring', true); // Loop
-    
-    // Carregar músicas
-    try {
-        audio.inicio = new Audio('assets/audio/musica_etqgame_tema_inicio.mp3');
-        audio.fuga = new Audio('assets/audio/musica_etqgame_fuga.mp3');
-        audio.creditos = new Audio('assets/audio/musica_etqgame_end_credits.mp3');
-        
-        audio.inicio.loop = true;
-        audio.fuga.loop = true;
-        audio.inicio.volume = audio.musicVolume;
-        audio.fuga.volume = audio.musicVolume;
-        audio.creditos.volume = audio.musicVolume;
-        
-        // Preload das músicas
-        audio.inicio.load();
-        audio.fuga.load();
-        audio.creditos.load();
-        
-        console.log('✅ Músicas carregadas');
-    } catch (e) {
-        console.error('❌ Erro ao carregar músicas:', e);
-    }
-}
-
-// Tocar música
-function playMusic(phase) {
-    // Parar música atual
-    if (gameState.currentMusic) {
-        gameState.currentMusic.pause();
-        gameState.currentMusic.currentTime = 0;
-    }
-    
-    // Tocar nova música
-    if (phase === 'inicio' && audio.inicio) {
-        audio.inicio.play().catch(e => {
-            console.warn('Autoplay de música bloqueado - clique na tela para ativar');
-        });
-        gameState.currentMusic = audio.inicio;
-        gameState.musicPhase = 'inicio';
-    } else if (phase === 'fuga' && audio.fuga) {
-        audio.fuga.play().catch(e => {
-            console.warn('Autoplay de música bloqueado');
-        });
-        gameState.currentMusic = audio.fuga;
-        gameState.musicPhase = 'fuga';
-    } else if (phase === 'creditos' && audio.creditos) {
-        audio.creditos.play().catch(e => {
-            console.warn('Autoplay de música bloqueado');
-        });
-        gameState.currentMusic = audio.creditos;
-        gameState.musicPhase = 'creditos';
-    }
-}
-
-// Atualizar sons baseados em proximidade
-function updateProximitySounds() {
-    const map = maps[gameState.currentMap];
-    
-    // Som do telefone tocando
-    if (map.orelhao && !gameState.dashUnlocked) {
-        const orelhaoCenter = {
-            x: map.orelhao.x + map.orelhao.w / 2,
-            y: map.orelhao.y + map.orelhao.h / 2
-        };
-        const playerCenter = {
-            x: player.x + player.width / 2,
-            y: player.y + player.height / 2
-        };
-        
-        const distance = Math.sqrt(
-            Math.pow(playerCenter.x - orelhaoCenter.x, 2) + 
-            Math.pow(playerCenter.y - orelhaoCenter.y, 2)
-        );
-        
-        // Tocar telefone quando estiver próximo
-        if (distance < 150 && audio.phone_ring && audio.phone_ring.paused) {
-            audio.phone_ring.play().catch(() => {});
-        }
-        // Parar se afastar
-        else if (distance > 200 && audio.phone_ring && !audio.phone_ring.paused) {
-            audio.phone_ring.pause();
-        }
-    }
-}
