@@ -153,3 +153,9 @@ MadNight.config = {
         deathFrames: 4
     }
 };
+// Teste de configuração
+console.log('Config carregada:', {
+    version: MadNight.config.version,
+    canvasSize: `${MadNight.config.canvas.width}x${MadNight.config.canvas.height}`,
+    playerSize: `${MadNight.config.player.width}x${MadNight.config.player.height}`
+});
