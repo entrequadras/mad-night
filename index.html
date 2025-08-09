@@ -3,336 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mad Night - Debug</title>
+    <title>Mad Night v1.40 - Estrutura Modular</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-        
         body {
             margin: 0;
-            padding: 20px;
+            padding: 0;
             background: #000;
-            color: #0f0;
-            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Press Start 2P', monospace;
         }
         
         #gameCanvas {
             image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
             border: 2px solid #333;
-            display: none;
         }
-        
-        #debug {
-            background: #111;
-            padding: 20px;
-            border: 1px solid #0f0;
-            margin-bottom: 20px;
-            font-size: 12px;
-            line-height: 1.6;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .success { color: #0f0; }
-        .error { color: #f00; }
-        .warning { color: #ff0; }
-        .info { color: #0ff; }
     </style>
 </head>
 <body>
-    <div id="debug">
-        <h3>MAD NIGHT v1.40 - DEBUG MODE</h3>
-        <div id="log"></div>
-    </div>
     <canvas id="gameCanvas"></canvas>
     
-    <script>
-        const log = document.getElementById('log');
-        
-        function addLog(message, type = 'info') {
-            const entry = document.createElement('div');
-            entry.className = type;
-            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-            log.appendChild(entry);
-            log.scrollTop = log.scrollHeight;
-            console.log(message);
-        }
-        
-        addLog('Iniciando Mad Night v1.40...', 'info');
-        
-        // Verificar suporte básico
-        if (!document.getElementById('gameCanvas')) {
-            addLog('ERRO: Canvas não encontrado!', 'error');
-        } else {
-            addLog('Canvas encontrado ✓', 'success');
-        }
-        
-        // Variáveis globais essenciais
-        window.canvas = null;
-        window.ctx = null;
-        window.camera = null;
-        window.enemies = [];
-        window.projectiles = [];
-        window.keys = {};
-        window.maps = [];
-        window.assets = {};
-        window.audio = {
-            playSFX: function() {},
-            stopLoopSFX: function() {}
-        };
-        window.trafficSystem = {
-            update: function() {},
-            render: function() {}
-        };
-        
-        // Estado e player básicos caso os arquivos falhem
-        window.gameState = {
-            currentMap: 0,
-            deaths: 0,
-            phase: 'infiltration',
-            dashUnlocked: false,
-            bombPlaced: false,
-            pedalPower: 4,
-            maxPedalPower: 4,
-            version: 'v1.40'
-        };
-        
-        window.player = {
-            x: 100,
-            y: 300,
-            width: 56,
-            height: 56,
-            speed: 3.6,
-            direction: 'right',
-            frame: 0,
-            sprites: [],
-            isDead: false,
-            isDashing: false,
-            inShadow: false
-        };
-        
-        window.CONFIG = {
-            CANVAS_WIDTH: 960,
-            CANVAS_HEIGHT: 540,
-            ZOOM: 2,
-            DEBUG_MODE: true,
-            VERSION: 'v1.40'
-        };
-        
-        // Lista de arquivos para carregar
-        const scripts = [
-            'js/config.js',
-            'js/assets.js',
-            'js/audio.js',
-            'js/player.js',
-            'js/enemy.js',
-            'js/projectiles.js',
-            'js/camera.js',
-            'js/collision.js',
-            'js/lighting.js',
-            'js/traffic.js',
-            'js/maps.js',
-            'js/renderer.js',
-            'js/ui.js',
-            'js/game.js',
-            'js/main.js'
-        ];
-        
-        let loadedCount = 0;
-        let failedScripts = [];
-        
-        // Função para carregar script
-        function loadScript(src) {
-            return new Promise((resolve) => {
-                addLog(`Carregando ${src}...`, 'info');
-                
-                const script = document.createElement('script');
-                script.src = src;
-                
-                script.onload = () => {
-                    loadedCount++;
-                    addLog(`✓ ${src} carregado com sucesso!`, 'success');
-                    resolve(true);
-                };
-                
-                script.onerror = (e) => {
-                    failedScripts.push(src);
-                    addLog(`✗ ${src} FALHOU!`, 'error');
-                    resolve(false);
-                };
-                
-                // Timeout de 5 segundos
-                setTimeout(() => {
-                    if (!script.loaded && !script.failed) {
-                        failedScripts.push(src);
-                        addLog(`⚠ ${src} timeout!`, 'warning');
-                        resolve(false);
-                    }
-                }, 5000);
-                
-                document.body.appendChild(script);
-            });
-        }
-        
-        // Carregar todos os scripts
-        async function loadAllScripts() {
-            addLog('=== CARREGANDO SCRIPTS ===', 'info');
-            
-            for (const src of scripts) {
-                await loadScript(src);
-            }
-            
-            addLog('=== RESUMO ===', 'info');
-            addLog(`Scripts carregados: ${loadedCount}/${scripts.length}`, 
-                   loadedCount === scripts.length ? 'success' : 'warning');
-            
-            if (failedScripts.length > 0) {
-                addLog(`Scripts que falharam: ${failedScripts.join(', ')}`, 'error');
-            }
-            
-            // Verificar funções essenciais
-            addLog('=== VERIFICANDO FUNÇÕES ===', 'info');
-            
-            const functions = [
-                'initGame',
-                'gameLoop', 
-                'update',
-                'draw',
-                'loadMap',
-                'killPlayer',
-                'checkWallCollision'
-            ];
-            
-            functions.forEach(fn => {
-                if (typeof window[fn] === 'function') {
-                    addLog(`✓ Função ${fn} encontrada`, 'success');
-                } else {
-                    addLog(`✗ Função ${fn} NÃO encontrada`, 'error');
-                }
-            });
-            
-            // Verificar se maps foram carregados
-            if (window.maps && window.maps.length > 0) {
-                addLog(`✓ ${window.maps.length} mapas carregados`, 'success');
-            } else {
-                addLog('✗ Nenhum mapa encontrado!', 'error');
-                // Criar mapa mínimo
-                window.maps = [{
-                    name: "Mapa de Teste",
-                    subtitle: "Fallback",
-                    width: 1920,
-                    height: 1080,
-                    walls: [],
-                    enemies: [],
-                    playerStart: {x: 100, y: 300}
-                }];
-                addLog('Mapa de fallback criado', 'warning');
-            }
-            
-            // Tentar inicializar o jogo
-            addLog('=== INICIALIZANDO JOGO ===', 'info');
-            
-            try {
-                // Pegar canvas
-                window.canvas = document.getElementById('gameCanvas');
-                window.ctx = canvas.getContext('2d');
-                
-                if (!window.ctx) {
-                    throw new Error('Contexto 2D não disponível');
-                }
-                
-                // Configurar canvas
-                canvas.width = (window.CONFIG?.CANVAS_WIDTH || 960) * (window.CONFIG?.ZOOM || 2);
-                canvas.height = (window.CONFIG?.CANVAS_HEIGHT || 540) * (window.CONFIG?.ZOOM || 2);
-                canvas.style.display = 'block';
-                
-                // Inicializar câmera
-                window.camera = {
-                    x: 0,
-                    y: 0,
-                    width: window.CONFIG?.CANVAS_WIDTH || 960,
-                    height: window.CONFIG?.CANVAS_HEIGHT || 540,
-                    zoom: window.CONFIG?.ZOOM || 2
-                };
-                
-                addLog('Canvas configurado', 'success');
-                
-                // Tentar chamar initGame ou fallback
-                if (typeof window.initGame === 'function') {
-                    addLog('Chamando initGame()...', 'info');
-                    window.initGame();
-                } else if (typeof window.init === 'function') {
-                    addLog('Chamando init()...', 'info');
-                    window.init();
-                } else {
-                    addLog('Criando game loop de fallback...', 'warning');
-                    
-                    // Fallback mínimo
-                    function fallbackUpdate() {
-                        // Movimento básico
-                        if (window.keys['ArrowUp']) window.player.y -= 3;
-                        if (window.keys['ArrowDown']) window.player.y += 3;
-                        if (window.keys['ArrowLeft']) window.player.x -= 3;
-                        if (window.keys['ArrowRight']) window.player.x += 3;
-                    }
-                    
-                    function fallbackDraw() {
-                        if (!window.ctx) return;
-                        
-                        // Limpar
-                        ctx.fillStyle = '#000';
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-                        
-                        // Player
-                        ctx.fillStyle = '#f00';
-                        ctx.fillRect(
-                            window.player.x * (window.camera?.zoom || 2),
-                            window.player.y * (window.camera?.zoom || 2),
-                            window.player.width * (window.camera?.zoom || 2),
-                            window.player.height * (window.camera?.zoom || 2)
-                        );
-                        
-                        // Info
-                        ctx.fillStyle = '#fff';
-                        ctx.font = '20px Arial';
-                        ctx.fillText('MODO FALLBACK - Use as setas', 20, 40);
-                    }
-                    
-                    function fallbackLoop() {
-                        fallbackUpdate();
-                        fallbackDraw();
-                        requestAnimationFrame(fallbackLoop);
-                    }
-                    
-                    fallbackLoop();
-                    addLog('Game loop de fallback iniciado', 'success');
-                }
-                
-            } catch (error) {
-                addLog(`ERRO FATAL: ${error.message}`, 'error');
-                addLog(error.stack, 'error');
-            }
-        }
-        
-        // Event listeners básicos
-        window.addEventListener('keydown', (e) => {
-            window.keys[e.key] = true;
-            if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
-                e.preventDefault();
-            }
-        });
-        
-        window.addEventListener('keyup', (e) => {
-            window.keys[e.key] = false;
-        });
-        
-        // Interceptar erros globais
-        window.addEventListener('error', (e) => {
-            addLog(`ERRO: ${e.message} em ${e.filename}:${e.lineno}`, 'error');
-        });
-        
-        // Iniciar carregamento
-        addLog('=== INICIANDO CARREGAMENTO ===', 'info');
-        loadAllScripts();
-    </script>
+    <!-- Módulos do jogo na ordem correta de dependências -->
+    <script src="js/config.js"></script>
+    <script src="js/assets.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/collision.js"></script>
+    <script src="js/lighting.js"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/projectiles.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/traffic.js"></script>
+    <script src="js/maps.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
