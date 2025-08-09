@@ -1,4 +1,3 @@
-// Mad Night v1.40 - Estrutura Modular
 // camera.js - Sistema de câmera
 
 MadNight.camera = {
