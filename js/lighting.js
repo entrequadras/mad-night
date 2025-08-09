@@ -1,12 +1,22 @@
-// lighting.js - Sistema de Iluminação e Sombras
+// lighting.js - Sistema de iluminação e sombras
 
-// Sistema de flicker para luzes
-const flickerSystem = {
-    lights: {},
+MadNight.lighting = {
+    // Sistema de flicker para postes
+    flickerLights: {},
     
-    update: function(lightId) {
-        if (!this.lights[lightId]) {
-            this.lights[lightId] = {
+    // Configurações
+    config: {
+        shadowOpacity: MadNight.config.lighting.shadowOpacity,
+        nightOverlayOpacity: MadNight.config.lighting.nightOverlayOpacity,
+        lightIntensity: MadNight.config.lighting.lightIntensity,
+        flickerMinTime: MadNight.config.lighting.flickerMinTime,
+        flickerMaxTime: MadNight.config.lighting.flickerMaxTime
+    },
+    
+    // Atualizar flicker de uma luz
+    updateFlicker: function(lightId) {
+        if (!this.flickerLights[lightId]) {
+            this.flickerLights[lightId] = {
                 intensity: 1.0,
                 targetIntensity: 1.0,
                 flickering: false,
@@ -15,242 +25,248 @@ const flickerSystem = {
             };
         }
         
-        const light = this.lights[lightId];
+        const light = this.flickerLights[lightId];
         const now = Date.now();
         
-        // Iniciar flicker aleatório
         if (!light.flickering && now > light.nextFlicker) {
             light.flickering = true;
             light.flickerTime = now + Math.random() * 500 + 200;
             light.targetIntensity = 0.3 + Math.random() * 0.5;
         }
         
-        // Processar flicker
         if (light.flickering) {
             if (now < light.flickerTime) {
-                // Oscilação durante flicker
                 light.intensity = light.targetIntensity + Math.sin(now * 0.05) * 0.2;
             } else {
-                // Fim do flicker
                 light.flickering = false;
                 light.intensity = 1.0;
-                light.nextFlicker = now + Math.random() * 8000 + 4000;
+                light.nextFlicker = now + Math.random() * this.config.flickerMaxTime + this.config.flickerMinTime;
             }
         }
         
         return light.intensity;
-    }
-};
-
-// Verificar se posição está na sombra
-function isInShadow(x, y) {
-    const map = maps[gameState.currentMap];
-    if (!map || !map.trees) return false;
+    },
     
-    for (let tree of map.trees) {
-        const treeAsset = assets[tree.type];
-        if (treeAsset && treeAsset.loaded) {
-            // Raio da sombra baseado no tipo de árvore
-            let shadowRadius = tree.type === 'arvorebloco001' ? 
-                treeAsset.width * 0.35 : treeAsset.width * 0.5;
-            
-            // Centro da sombra (deslocado para baixo da árvore)
-            const shadowX = tree.x + treeAsset.width * 0.5;
-            const shadowY = tree.y + treeAsset.height * 0.85;
-            
-            // Verificar distância
-            const dist = Math.sqrt(
-                Math.pow(x - shadowX, 2) + 
-                Math.pow(y - shadowY, 2)
-            );
-            
-            if (dist < shadowRadius) {
-                return true;
+    // Verificar se uma posição está na sombra
+    isInShadow: function(x, y) {
+        const map = MadNight.maps.getCurrentMap();
+        if (!map || !map.trees) return false;
+        
+        for (let tree of map.trees) {
+            const treeAsset = MadNight.assets.get(tree.type);
+            if (treeAsset && treeAsset.loaded) {
+                let shadowRadius = tree.type === 'arvorebloco001' ? 
+                    treeAsset.width * 0.35 : treeAsset.width * 0.5;
+                
+                const shadowX = tree.x + treeAsset.width * 0.5;
+                const shadowY = tree.y + treeAsset.height * 0.85;
+                
+                const dist = Math.sqrt(Math.pow(x - shadowX, 2) + Math.pow(y - shadowY, 2));
+                if (dist < shadowRadius) return true;
             }
         }
-    }
+        
+        return false;
+    },
     
-    return false;
-}
-
-// Renderizar sombras das árvores
-function renderShadows(ctx, map, visibleArea) {
-    if (!map.trees) return;
-    
-    ctx.save();
-    
-    map.trees.forEach(tree => {
-        const treeAsset = assets[tree.type];
-        if (treeAsset && treeAsset.loaded) {
-            let shadowRadius = tree.type === 'arvorebloco001' ? 
-                treeAsset.width * 0.35 : treeAsset.width * 0.5;
-            
-            const shadowX = tree.x + treeAsset.width * 0.5;
-            const shadowY = tree.y + treeAsset.height * 0.85;
-            
-            // Verificar se está visível
-            if (shadowX + shadowRadius > visibleArea.left && 
-                shadowX - shadowRadius < visibleArea.right &&
-                shadowY + shadowRadius > visibleArea.top && 
-                shadowY - shadowRadius < visibleArea.bottom) {
+    // Renderizar sombras das árvores
+    renderTreeShadows: function(ctx, map, visibleArea) {
+        if (!map.trees) return;
+        
+        ctx.save();
+        
+        map.trees.forEach(tree => {
+            const treeAsset = MadNight.assets.get(tree.type);
+            if (treeAsset && treeAsset.loaded) {
+                let shadowRadius = tree.type === 'arvorebloco001' ? 
+                    treeAsset.width * 0.35 : treeAsset.width * 0.5;
                 
-                // Criar gradiente radial para sombra
-                const gradient = ctx.createRadialGradient(
-                    shadowX, shadowY, 0,
-                    shadowX, shadowY, shadowRadius
-                );
-                gradient.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
-                gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
-                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                const shadowX = tree.x + treeAsset.width * 0.5;
+                const shadowY = tree.y + treeAsset.height * 0.85;
                 
-                ctx.fillStyle = gradient;
-                ctx.fillRect(
-                    shadowX - shadowRadius,
-                    shadowY - shadowRadius,
-                    shadowRadius * 2,
-                    shadowRadius * 2
-                );
+                if (shadowX + shadowRadius > visibleArea.left && 
+                    shadowX - shadowRadius < visibleArea.right &&
+                    shadowY + shadowRadius > visibleArea.top && 
+                    shadowY - shadowRadius < visibleArea.bottom) {
+                    
+                    const gradient = ctx.createRadialGradient(
+                        shadowX, shadowY, 0,
+                        shadowX, shadowY, shadowRadius
+                    );
+                    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
+                    gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
+                    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(
+                        shadowX - shadowRadius,
+                        shadowY - shadowRadius,
+                        shadowRadius * 2,
+                        shadowRadius * 2
+                    );
+                }
             }
-        }
-    });
+        });
+        
+        ctx.restore();
+    },
     
-    ctx.restore();
-}
-
-// Renderizar luzes pontuais
-function renderPointLights(ctx, map, visibleArea) {
-    if (!map.lights || map.lights.length === 0) return;
+    // Renderizar sombra do campo (mapa 0)
+    renderFieldShadow: function(ctx, map) {
+        const gameState = MadNight.game.state;
+        if (gameState.currentMap !== 0) return;
+        
+        const campoX = (map.width - 800) / 2;
+        const campoY = (map.height - 462) / 2;
+        const centerX = campoX + 400;
+        const centerY = campoY + 231;
+        
+        ctx.save();
+        
+        const gradient = ctx.createRadialGradient(
+            centerX, centerY, 0,
+            centerX, centerY, 450
+        );
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+        gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.54)');
+        gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.42)');
+        gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.24)');
+        gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.12)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(centerX - 450, centerY - 450, 900, 900);
+        
+        this.renderCornerShadow(ctx, 0, 0, 400);
+        this.renderCornerShadow(ctx, map.width, 0, 400);
+        this.renderCornerShadow(ctx, 0, map.height, 400);
+        this.renderCornerShadow(ctx, map.width, map.height, 400);
+        
+        ctx.restore();
+    },
     
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
+    // Renderizar sombra de canto
+    renderCornerShadow: function(ctx, x, y, radius) {
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
+        gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(
+            x - radius,
+            y - radius,
+            radius * 2,
+            radius * 2
+        );
+    },
     
-    map.lights.forEach(light => {
-        // Verificar se a luz está visível
-        if (light.x + light.radius > visibleArea.left && 
-            light.x - light.radius < visibleArea.right &&
-            light.y + light.radius > visibleArea.top && 
-            light.y - light.radius < visibleArea.bottom) {
+    // Renderizar luzes dos postes
+    renderStreetLights: function(ctx, map) {
+        if (!map.streetLights) return;
+        
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        
+        map.streetLights.forEach(light => {
+            const intensity = this.updateFlicker(light.id || 'default');
             
-            // Aplicar flicker
-            const intensity = flickerSystem.update(light.id || 'default');
-            
-            // Criar gradiente radial
             const gradient = ctx.createRadialGradient(
-                light.x, light.y, 0,
-                light.x, light.y, light.radius
+                light.x + 20, light.y + 45, 0,
+                light.x + 20, light.y + 45, 100
             );
-            
-            // Cores da luz com intensidade
-            gradient.addColorStop(0, `rgba(255, 200, 100, ${0.28 * intensity})`);
-            gradient.addColorStop(0.5, `rgba(255, 180, 80, ${0.14 * intensity})`);
+            gradient.addColorStop(0, `rgba(255, 200, 100, ${0.4 * intensity})`);
+            gradient.addColorStop(0.5, `rgba(255, 180, 80, ${0.2 * intensity})`);
             gradient.addColorStop(1, 'rgba(255, 160, 60, 0)');
             
             ctx.fillStyle = gradient;
             ctx.beginPath();
-            ctx.arc(light.x, light.y, light.radius, 0, Math.PI * 2);
+            ctx.arc(light.x + 20, light.y + 45, 100, 0, Math.PI * 2);
             ctx.fill();
-        }
-    });
-    
-    ctx.restore();
-}
-
-// Renderizar luzes dos postes
-function renderStreetLights(ctx, map, visibleArea) {
-    if (!map.streetLights) return;
-    
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
-    
-    map.streetLights.forEach(light => {
-        if (!isInView(light)) return;
+        });
         
-        // Posição da luz (offset do poste)
-        const lightX = light.x + 20;
-        const lightY = light.y + 45;
-        const radius = light.lightRadius || 100;
+        ctx.restore();
+    },
+    
+    // Renderizar luzes customizadas do mapa
+    renderMapLights: function(ctx, map, visibleArea) {
+        if (!map.lights || map.lights.length === 0) return;
         
-        // Aplicar flicker
-        const intensity = flickerSystem.update(light.id || 'default');
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
         
-        // Criar gradiente radial
-        const gradient = ctx.createRadialGradient(
-            lightX, lightY, 0,
-            lightX, lightY, radius
-        );
+        map.lights.forEach(light => {
+            if (light.x + light.radius > visibleArea.left && 
+                light.x - light.radius < visibleArea.right &&
+                light.y + light.radius > visibleArea.top && 
+                light.y - light.radius < visibleArea.bottom) {
+                
+                const intensity = this.updateFlicker(light.id || 'default');
+                
+                const gradient = ctx.createRadialGradient(
+                    light.x, light.y, 0,
+                    light.x, light.y, light.radius
+                );
+                gradient.addColorStop(0, `rgba(255, 200, 100, ${0.28 * intensity})`);
+                gradient.addColorStop(0.5, `rgba(255, 180, 80, ${0.14 * intensity})`);
+                gradient.addColorStop(1, 'rgba(255, 160, 60, 0)');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(light.x, light.y, light.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        });
         
-        gradient.addColorStop(0, `rgba(255, 200, 100, ${0.4 * intensity})`);
-        gradient.addColorStop(0.5, `rgba(255, 180, 80, ${0.2 * intensity})`);
-        gradient.addColorStop(1, 'rgba(255, 160, 60, 0)');
+        ctx.restore();
+    },
+    
+    // Renderizar overlay de noite
+    renderNightOverlay: function(ctx, camera) {
+        ctx.save();
+        ctx.fillStyle = MadNight.config.colors.nightOverlay;
+        ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
+        ctx.restore();
+    },
+    
+    // Renderizar faróis dos carros
+    renderCarHeadlights: function(ctx, car) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
         
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(lightX, lightY, radius, 0, Math.PI * 2);
-        ctx.fill();
-    });
-    
-    ctx.restore();
-}
-
-// Renderizar sombra especial do campo (mapa 0)
-function renderFieldShadow(ctx, map) {
-    if (gameState.currentMap !== 0) return;
-    
-    const campoX = (map.width - 800) / 2;
-    const campoY = (map.height - 462) / 2;
-    const centerX = campoX + 400;
-    const centerY = campoY + 231;
-    
-    ctx.save();
-    
-    // Sombra central do campo
-    const gradient = ctx.createRadialGradient(
-        centerX, centerY, 0,
-        centerX, centerY, 450
-    );
-    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-    gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.54)');
-    gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.42)');
-    gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.24)');
-    gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.12)');
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    
-    ctx.fillStyle = gradient;
-    ctx.fillRect(centerX - 450, centerY - 450, 900, 900);
-    
-    // Sombras dos cantos
-    const corners = [
-        {x: 0, y: 0},
-        {x: map.width, y: 0},
-        {x: 0, y: map.height},
-        {x: map.width, y: map.height}
-    ];
-    
-    corners.forEach(corner => {
-        const cornerGradient = ctx.createRadialGradient(
-            corner.x, corner.y, 0,
-            corner.x, corner.y, 400
-        );
-        cornerGradient.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
-        cornerGradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
-        cornerGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        const scaledWidth = car.width * 0.5;
+        const scaledHeight = car.height * 0.5;
+        const offsetX = (car.width - scaledWidth) / 2;
+        const offsetY = (car.height - scaledHeight) / 2;
         
-        ctx.fillStyle = cornerGradient;
-        ctx.fillRect(
-            corner.x - 400,
-            corner.y - 400,
-            800,
-            800
-        );
-    });
+        const yAdjustment = car.vy < 0 ? -5 : 0;
+        
+        const headlightY = car.y + offsetY + (car.headlightOffsetY * 0.5) + yAdjustment;
+        const headlightPositions = [
+            { x: car.x + offsetX + scaledWidth * 0.25, y: headlightY },
+            { x: car.x + offsetX + scaledWidth * 0.75, y: headlightY }
+        ];
+        
+        headlightPositions.forEach(pos => {
+            const gradient = ctx.createRadialGradient(
+                pos.x, pos.y, 0,
+                pos.x, pos.y, 40
+            );
+            gradient.addColorStop(0, 'rgba(255, 255, 200, 0.3)');
+            gradient.addColorStop(0.5, 'rgba(255, 255, 150, 0.15)');
+            gradient.addColorStop(1, 'rgba(255, 255, 100, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, 40, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        
+        ctx.restore();
+    },
     
-    ctx.restore();
-}
-
-// Aplicar overlay de noite
-function renderNightOverlay(ctx) {
-    ctx.save();
-    ctx.fillStyle = `rgba(0, 0, 40, ${CONFIG.NIGHT_OVERLAY_ALPHA})`;
-    ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
-    ctx.restore();
-}
+    // Resetar sistema de flicker
+    reset: function() {
+        this.flickerLights = {};
+    }
+};
