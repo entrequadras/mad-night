@@ -1,3 +1,4 @@
+// config.js - Configurações globais do jogo
 console.log('Mad Night v1.40 - Estrutura Modular');
 
 // Namespace global do jogo
