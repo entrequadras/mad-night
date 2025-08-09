@@ -1,8 +1,10 @@
-// maps.js - Sistema de mapas
+// maps.js - Sistema de mapas (Revisão Alpha-03)
 
-MadNight.maps = {
+(function() {
+    'use strict';
+    
     // Função auxiliar para gerar tiles
-    generateTiles: function(mapWidth, mapHeight, tileSize, tileTypes) {
+    function generateTiles(mapWidth, mapHeight, tileSize, tileTypes) {
         const tiles = [];
         
         for (let y = 0; y < mapHeight; y += tileSize) {
@@ -17,13 +19,14 @@ MadNight.maps = {
         }
         
         return tiles;
-    },
+    }
     
     // Definição de todos os mapas
-    list: [
+    const mapsList = [
         // Mapa 0 - Maconhão
         {
             name: "Maconhão",
+            displayName: "Maconhão",
             subtitle: "Tutorial de movimento",
             width: 1920,
             height: 1080,
@@ -97,6 +100,7 @@ MadNight.maps = {
         // Mapa 1 - Eixão da Morte
         {
             name: "Eixão da Morte",
+            displayName: "Eixão da Morte",
             subtitle: "Túnel sob as pistas",
             width: 3000,
             height: 868,
@@ -153,6 +157,7 @@ MadNight.maps = {
         // Mapa 2 - Fronteira com o Komando Satânico
         {
             name: "Fronteira com o Komando Satânico",
+            displayName: "Fronteira com o KS",
             subtitle: "Primeira superquadra",
             width: 1920,
             height: 1610,
@@ -250,6 +255,7 @@ MadNight.maps = {
         // Mapa 3 - Na área da KS
         {
             name: "Na área da KS",
+            displayName: "Na área da KS",
             subtitle: "Estacionamento estreito",
             width: 600,
             height: 800,
@@ -285,6 +291,7 @@ MadNight.maps = {
         // Mapa 4 - Entre Prédios
         {
             name: "Entre Prédios",
+            displayName: "Entre Prédios",
             subtitle: "Muitas sombras",
             width: 600,
             height: 800,
@@ -318,6 +325,7 @@ MadNight.maps = {
         // Mapa 5 - Ninho dos Ratos
         {
             name: "Ninho dos Ratos",
+            displayName: "Ninho dos Ratos",
             subtitle: "Estacionamento da bomba",
             width: 600,
             height: 800,
@@ -344,107 +352,72 @@ MadNight.maps = {
             lixeira: {x: 280, y: 120, w: 40, h: 40},
             direction: 'up'
         }
-    ],
+    ];
     
-    // Inicializar mapas
-    init: function() {
-        // Gerar tiles para os mapas que precisam
-        this.list[0].tiles = this.generateTiles(
-            1920, 1080, 120, 
-            ['grama000', 'grama001', 'grama002', 'grama003', 'grama004']
-        );
+    // Exportar módulo
+    MadNight.maps = {
+        // Lista de mapas
+        list: mapsList,
         
-        this.list[2].tiles = this.generateTiles(
-            1920, 1610, 120,
-            ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
-        );
-        
-        for (let i = 3; i <= 5; i++) {
-            this.list[i].tiles = this.generateTiles(
-                600, 800, 120,
+        // Inicializar mapas
+        init: function() {
+            console.log('Inicializando sistema de mapas...');
+            
+            // Gerar tiles para os mapas que precisam
+            this.list[0].tiles = generateTiles(
+                1920, 1080, 120, 
+                ['grama000', 'grama001', 'grama002', 'grama003', 'grama004']
+            );
+            
+            this.list[2].tiles = generateTiles(
+                1920, 1610, 120,
                 ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
             );
-        }
-    },
-    
-    // Obter mapa atual
-    getCurrentMap: function() {
-        const gameState = MadNight.game.state;
-        return this.list[gameState.currentMap] || null;
-    },
-    
-    // Carregar mapa específico
-    loadMap: function(mapIndex, isEscape = false) {
-        const map = this.list[mapIndex];
-        if (!map) return;
-        
-        const gameState = MadNight.game.state;
-        gameState.currentMap = mapIndex;
-        
-        // Limpar entidades antigas
-        MadNight.enemies.clear();
-        MadNight.projectiles.clear();
-        
-        // Posicionar player
-        if (isEscape && map.playerStartEscape) {
-            MadNight.player.setPosition(
-                map.playerStartEscape.x,
-                map.playerStartEscape.y
-            );
-        } else {
-            MadNight.player.setPosition(
-                map.playerStart.x,
-                map.playerStart.y
-            );
-        }
-        
-        MadNight.player.isDead = false;
-        MadNight.player.isDashing = false;
-        
-        // Carregar inimigos
-        const enemyList = (isEscape && map.escapeEnemies) ? 
-            map.escapeEnemies : map.enemies;
-        
-        enemyList.forEach(enemyData => {
-            // Converter centro para posição
-            const enemyX = enemyData.x - 23;
-            const enemyY = enemyData.y - 23;
             
-            const validPos = MadNight.collision.findValidSpawnPosition(
-                enemyX, enemyY, 46, 46
-            );
-            
-            const enemy = MadNight.enemies.create(
-                validPos.x, 
-                validPos.y, 
-                enemyData.type || 'faquinha'
-            );
-            
-            if (isEscape) {
-                enemy.state = 'chase';
+            for (let i = 3; i <= 5; i++) {
+                this.list[i].tiles = generateTiles(
+                    600, 800, 120,
+                    ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
+                );
             }
-        });
+            
+            console.log(`${this.list.length} mapas carregados`);
+        },
         
-        // Resetar câmera
-        MadNight.camera.snapToTarget();
-    },
+        // Obter mapa por índice
+        getMap: function(index) {
+            return this.list[index] || null;
+        },
+        
+        // Obter mapa atual
+        getCurrentMap: function() {
+            // Verificar se game está inicializado
+            if (!MadNight.game || !MadNight.game.state) {
+                console.warn('Game não inicializado, retornando mapa 0');
+                return this.list[0];
+            }
+            return this.list[MadNight.game.state.currentMap] || this.list[0];
+        },
+        
+        // Obter quantidade de mapas
+        getCount: function() {
+            return this.list.length;
+        },
+        
+        // Obter carros estacionados para o mapa 2
+        getParkedCarsForMap2: function() {
+            return [
+                {type: 'carro002frente', x: 34, y: 1472},
+                {type: 'carrolateral_04', x: 1770, y: 1210},
+                {type: 'carrolateral_06', x: 602, y: 523},
+                {type: 'carrolateral_02', x: 527, y: 474},
+                {type: 'carrolateral_03', x: 299, y: 378},
+                {type: 'carrolateral_07', x: 89, y: 299},
+                {type: 'carrolateral_08', x: 238, y: 704}
+            ];
+        }
+    };
     
-    // Carregar mapa atual
-    loadCurrentMap: function(isEscape = false) {
-        const gameState = MadNight.game.state;
-        this.loadMap(gameState.currentMap, isEscape);
-    },
+    console.log('Módulo Maps carregado');
     
-    // Obter carros estacionados para o mapa 2
-    getParkedCarsForMap2: function() {
-        return [
-            {type: 'carro002frente', x: 34, y: 1472},
-            {type: 'carrolateral_04', x: 1770, y: 1210},
-            {type: 'carrolateral_06', x: 602, y: 523},
-            {type: 'carrolateral_02', x: 527, y: 474},
-            {type: 'carrolateral_03', x: 299, y: 378},
-            {type: 'carrolateral_07', x: 89, y: 299},
-            {type: 'carrolateral_08', x: 238, y: 704}
-        ];
-    }
-};
+})();
