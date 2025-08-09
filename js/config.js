@@ -1,63 +1,3 @@
-==================================================
-ARQUIVO 1/10: index.html (salvar na raiz do projeto)
-==================================================
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mad Night v1.40 - Estrutura Modular</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: 'Press Start 2P', monospace;
-        }
-        
-        #gameCanvas {
-            image-rendering: pixelated;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: crisp-edges;
-            border: 2px solid #333;
-        }
-    </style>
-</head>
-<body>
-    <canvas id="gameCanvas"></canvas>
-    
-    <!-- Módulos do jogo na ordem correta de dependências -->
-    <script src="js/config.js"></script>
-    <script src="js/assets.js"></script>
-    <script src="js/audio.js"></script>
-    <script src="js/collision.js"></script>
-    <script src="js/lighting.js"></script>
-    <script src="js/camera.js"></script>
-    <script src="js/projectiles.js"></script>
-    <script src="js/enemy.js"></script>
-    <script src="js/player.js"></script>
-    <script src="js/traffic.js"></script>
-    <script src="js/maps.js"></script>
-    <script src="js/renderer.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/game.js"></script>
-    <script src="js/main.js"></script>
-</body>
-</html>
-
-==================================================
-ARQUIVO 2/10: js/config.js
-==================================================
-// Mad Night v1.40 - Estrutura Modular
-// config.js - Configurações globais do jogo
-
 console.log('Mad Night v1.40 - Estrutura Modular');
 
 // Namespace global do jogo
@@ -211,5 +151,3 @@ MadNight.config = {
         deathFrames: 4
     }
 };
-
-window.MadNight.config = MadNight.config;
