@@ -1,4 +1,3 @@
-// Mad Night v1.40 - Estrutura Modular
 // maps.js - Sistema de mapas
 
 MadNight.maps = {
