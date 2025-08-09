@@ -1,46 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <title>Mad Night</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mad Night - O Jogo</title>
     <style>
-        /* DEFINE A FONTE LOCAL */
-        @font-face {
-            font-family: 'Press Start 2P';
-            src: url('assets/fonts/PressStart2P-Regular.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
         body {
             margin: 0;
+            padding: 0;
             background: #000;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            /* USA A FONTE COM FALLBACK */
+            min-height: 100vh;
             font-family: 'Press Start 2P', monospace;
         }
         
-        canvas {
-            border: 2px solid #333;
+        #gameCanvas {
             image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
+            border: 2px solid #333;
         }
         
-        /* FORÇA O CARREGAMENTO DA FONTE */
-        .font-preload {
-            font-family: 'Press Start 2P';
+        .loading {
             position: absolute;
-            left: -9999px;
+            color: #fff;
+            font-size: 24px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <!-- DIV INVISÍVEL PARA PRÉ-CARREGAR A FONTE -->
-    <div class="font-preload">.</div>
+    <canvas id="gameCanvas"></canvas>
+    <div class="loading" id="loading">Carregando...</div>
     
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
-    <script src="game.js"></script>
+    <!-- 15 ARQUIVOS JS (sem pasta maps/) -->
+    <script src="js/config.js"></script>
+    <script src="js/assets.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/projectiles.js"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/collision.js"></script>
+    <script src="js/lighting.js"></script>
+    <script src="js/traffic.js"></script>
+    <script src="js/maps.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
