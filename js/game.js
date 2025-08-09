@@ -1,4 +1,4 @@
-// game.js - Lógica Principal do Jogo (Revisão Alpha-02)
+// game.js - Lógica Principal do Jogo (Revisão Alpha-04)
 
 (function() {
     'use strict';
@@ -58,15 +58,29 @@
             return false;
         }
         
-        // Inicializar subsistemas
-        if (player.init) player.init();
-        if (enemies.init) enemies.init();
-        if (projectiles.init) projectiles.init();
-        if (camera.init) camera.init();
-        if (audio.init) audio.init();
-        if (lighting.init) lighting.init();
-        if (traffic.init) traffic.init();
-        if (ui.init) ui.init();
+        // Inicializar subsistemas (com verificação segura)
+        const modules = [
+            { name: 'maps', module: maps },
+            { name: 'player', module: player },
+            { name: 'enemies', module: enemies },
+            { name: 'projectiles', module: projectiles },
+            { name: 'camera', module: camera },
+            { name: 'audio', module: audio },
+            { name: 'lighting', module: lighting },
+            { name: 'traffic', module: traffic },
+            { name: 'ui', module: ui }
+        ];
+        
+        modules.forEach(({ name, module }) => {
+            if (module && module.init) {
+                console.log(`  Inicializando ${name}...`);
+                module.init();
+            } else if (module) {
+                console.log(`  ${name} não possui método init (ok)`);
+            } else {
+                console.warn(`  ⚠️ Módulo ${name} não encontrado`);
+            }
+        });
         
         // Carregar primeiro mapa
         loadMap(0);
@@ -89,29 +103,31 @@
         console.log(`📍 Carregando mapa ${mapIndex}: ${map.name}`);
         
         // Limpar entidades
-        if (enemies.clear) enemies.clear();
-        if (projectiles.clear) projectiles.clear();
+        if (enemies && enemies.clear) enemies.clear();
+        if (projectiles && projectiles.clear) projectiles.clear();
         
         // Posicionar player
         const startPos = (isEscape && map.playerStartEscape) ? 
             map.playerStartEscape : map.playerStart;
         
-        if (player.setPosition) {
+        if (player && player.setPosition) {
             player.setPosition(startPos.x, startPos.y);
-        } else {
+        } else if (player) {
             player.x = startPos.x;
             player.y = startPos.y;
         }
         
         // Reset player state
-        player.isDead = false;
-        player.isDashing = false;
+        if (player) {
+            player.isDead = false;
+            player.isDashing = false;
+        }
         
         // Carregar inimigos
         const enemyList = (isEscape && map.escapeEnemies) ? 
             map.escapeEnemies : map.enemies;
         
-        if (enemyList && enemies.create) {
+        if (enemyList && enemies && enemies.create) {
             enemyList.forEach(enemyData => {
                 const enemy = enemies.create(
                     enemyData.x,
@@ -125,7 +141,7 @@
         }
         
         // Atualizar câmera
-        if (camera.setTarget) {
+        if (camera && camera.setTarget) {
             camera.setTarget(player);
         }
         
@@ -142,20 +158,20 @@
         const map = maps.getMap(gameState.currentMap);
         if (!map) return;
         
-        // Atualizar sistemas
-        if (player.update) player.update(keys);
-        if (enemies.update) enemies.update(deltaTime);
-        if (projectiles.update) projectiles.update(deltaTime);
-        if (camera.update) camera.update(deltaTime);
-        if (lighting.update) lighting.update(deltaTime);
+        // Atualizar sistemas (com verificação segura)
+        if (player && player.update) player.update(keys);
+        if (enemies && enemies.update) enemies.update(deltaTime);
+        if (projectiles && projectiles.update) projectiles.update(deltaTime);
+        if (camera && camera.update) camera.update(deltaTime);
+        if (lighting && lighting.update) lighting.update(deltaTime);
         
         // Sistema de tráfego no Eixão (mapa 1)
-        if (gameState.currentMap === 1 && traffic.update) {
+        if (gameState.currentMap === 1 && traffic && traffic.update) {
             traffic.update(deltaTime);
         }
         
         // Verificar interações especiais
-        if (!player.isDead) {
+        if (player && !player.isDead) {
             checkSpecialInteractions();
             checkMapTransition();
         }
@@ -169,21 +185,21 @@
         updatePedalPower(deltaTime);
         
         // Atualizar UI
-        if (ui.update) ui.update(deltaTime);
+        if (ui && ui.update) ui.update(deltaTime);
     }
     
     // Verificar interações especiais
     function checkSpecialInteractions() {
         const map = maps.getMap(gameState.currentMap);
-        if (!map) return;
+        if (!map || !collision) return;
         
         // Orelhão - ativar dash
         if (map.orelhao && !gameState.dashUnlocked) {
-            if (collision.checkCollision(player, map.orelhao)) {
+            if (collision.checkCollision && collision.checkCollision(player, map.orelhao)) {
                 gameState.dashUnlocked = true;
-                if (audio.playSound) audio.playSound('phone');
+                if (audio && audio.playSound) audio.playSound('phone');
                 console.log('🏃 Dash desbloqueado!');
-                if (ui.showMessage) {
+                if (ui && ui.showMessage) {
                     ui.showMessage("DASH DESBLOQUEADO!\nPressione ESPAÇO para usar");
                 }
             }
@@ -191,25 +207,25 @@
         
         // Lixeira - plantar bomba
         if (map.lixeira && !gameState.bombPlaced) {
-            if (collision.checkCollision(player, map.lixeira)) {
+            if (collision.checkCollision && collision.checkCollision(player, map.lixeira)) {
                 // Verificar se todos os inimigos foram eliminados
-                const aliveEnemies = enemies.getAlive ? enemies.getAlive() : [];
+                const aliveEnemies = (enemies && enemies.getAlive) ? enemies.getAlive() : [];
                 if (aliveEnemies.length === 0) {
                     gameState.bombPlaced = true;
                     gameState.phase = 'escape';
                     gameState.lastEnemySpawn = Date.now();
                     
-                    if (audio.playMusic) audio.playMusic('fuga');
+                    if (audio && audio.playMusic) audio.playMusic('fuga');
                     console.log('💣 Bomba plantada! FUGA!');
                     
-                    if (ui.showMessage) {
+                    if (ui && ui.showMessage) {
                         ui.showMessage("BOMBA PLANTADA!\nFUJA!");
                     }
                     
                     // Recarregar mapa em modo fuga
                     loadMap(gameState.currentMap, true);
                 } else {
-                    if (ui.showMessage) {
+                    if (ui && ui.showMessage) {
                         ui.showMessage(`Elimine ${aliveEnemies.length} inimigo(s) primeiro!`);
                     }
                 }
@@ -220,9 +236,9 @@
     // Verificar transição de mapa
     function checkMapTransition() {
         const map = maps.getMap(gameState.currentMap);
-        if (!map || !map.exit) return;
+        if (!map || !map.exit || !collision) return;
         
-        if (collision.checkCollision(player, map.exit)) {
+        if (collision.checkCollision && collision.checkCollision(player, map.exit)) {
             handleMapTransition();
         }
     }
@@ -245,7 +261,7 @@
                 loadMap(gameState.currentMap);
                 
                 // Tocar música após primeiro mapa
-                if (gameState.currentMap === 1 && audio.playMusic) {
+                if (gameState.currentMap === 1 && audio && audio.playMusic) {
                     audio.playMusic('inicio');
                 }
             }
@@ -254,7 +270,7 @@
     
     // Sistema de spawn durante fuga
     function updateEscapeSpawns() {
-        if (gameState.currentMap !== 5) return; // Apenas no mapa 6 (índice 5)
+        if (gameState.currentMap !== 5 || !enemies) return; // Apenas no mapa 6 (índice 5)
         
         const now = Date.now();
         const config = MadNight.config.gameplay;
@@ -269,13 +285,15 @@
             if (gameState.escapeEnemyCount > 6) spawnCount = 8;
             
             // Spawnar inimigos
-            for (let i = 0; i < spawnCount; i++) {
-                const enemy = enemies.create(
-                    2000 + Math.random() * 200,
-                    300 + Math.random() * 200,
-                    'faquinha'
-                );
-                if (enemy) enemy.state = 'chase';
+            if (enemies.create) {
+                for (let i = 0; i < spawnCount; i++) {
+                    const enemy = enemies.create(
+                        2000 + Math.random() * 200,
+                        300 + Math.random() * 200,
+                        'faquinha'
+                    );
+                    if (enemy) enemy.state = 'chase';
+                }
             }
         }
     }
@@ -285,7 +303,7 @@
         const config = MadNight.config.gameplay;
         
         if (gameState.pedalPower < config.maxPedalPower) {
-            if (!player.isMoving && Date.now() - gameState.lastPedalRecharge > config.pedalRechargeDelay) {
+            if (player && !player.isMoving && Date.now() - gameState.lastPedalRecharge > config.pedalRechargeDelay) {
                 gameState.lastPedalRecharge = Date.now();
                 gameState.pedalPower++;
                 console.log(`Pedal Power: ${gameState.pedalPower}/${config.maxPedalPower}`);
@@ -303,7 +321,7 @@
         keys[e.key] = true;
         
         // Passar para o player
-        if (player.handleKeyDown) {
+        if (player && player.handleKeyDown) {
             player.handleKeyDown(e);
         }
         
@@ -313,7 +331,7 @@
         }
         
         // Tentar tocar música na primeira interação
-        if (!audio.currentMusic && gameState.currentMap > 0) {
+        if (audio && !audio.currentMusic && gameState.currentMap > 0) {
             if (audio.playMusic) audio.playMusic('inicio');
         }
     }
@@ -321,7 +339,7 @@
     function handleKeyUp(e) {
         keys[e.key] = false;
         
-        if (player.handleKeyUp) {
+        if (player && player.handleKeyUp) {
             player.handleKeyUp(e);
         }
     }
@@ -331,27 +349,29 @@
         switch(key.toLowerCase()) {
             case 'k':
                 console.log('DEBUG: Matando player');
-                if (player.kill) player.kill();
+                if (player && player.kill) player.kill();
                 break;
                 
             case 'e':
                 console.log('DEBUG: Spawnando inimigo');
-                if (enemies.create) {
+                if (enemies && enemies.create && player) {
                     enemies.create(player.x + 150, player.y, 'faquinha');
                 }
                 break;
                 
             case 'm':
                 console.log('DEBUG: Alternando música');
-                if (audio.playMusic) {
+                if (audio && audio.playMusic) {
                     audio.playMusic(gameState.phase === 'infiltration' ? 'fuga' : 'inicio');
                 }
                 break;
                 
             case 'n':
                 console.log('DEBUG: Próximo mapa');
-                gameState.currentMap = (gameState.currentMap + 1) % maps.getCount();
-                loadMap(gameState.currentMap);
+                if (maps) {
+                    gameState.currentMap = (gameState.currentMap + 1) % maps.getCount();
+                    loadMap(gameState.currentMap);
+                }
                 break;
                 
             case 'd':
@@ -363,7 +383,7 @@
                 console.log('DEBUG: Plantando bomba');
                 gameState.bombPlaced = true;
                 gameState.phase = 'escape';
-                if (audio.playMusic) audio.playMusic('fuga');
+                if (audio && audio.playMusic) audio.playMusic('fuga');
                 break;
                 
             case '`':
@@ -394,7 +414,7 @@
         gameState.isGameOver = true;
         console.log('💀 GAME OVER');
         
-        if (ui.showGameOver) {
+        if (ui && ui.showGameOver) {
             ui.showGameOver();
         }
         
@@ -408,11 +428,11 @@
     function handleVictory() {
         console.log('🎉 VITÓRIA!');
         
-        if (audio.playMusic) {
+        if (audio && audio.playMusic) {
             audio.playMusic('creditos');
         }
         
-        if (ui.showVictory) {
+        if (ui && ui.showVictory) {
             ui.showVictory();
         }
     }
@@ -432,11 +452,11 @@
         gameState.chacalDefeated = false;
         
         // Limpar entidades
-        if (enemies.clear) enemies.clear();
-        if (projectiles.clear) projectiles.clear();
+        if (enemies && enemies.clear) enemies.clear();
+        if (projectiles && projectiles.clear) projectiles.clear();
         
         // Parar música
-        if (audio.stopMusic) audio.stopMusic();
+        if (audio && audio.stopMusic) audio.stopMusic();
         
         // Recarregar primeiro mapa
         loadMap(0);
@@ -447,7 +467,7 @@
         gameState.isPaused = !gameState.isPaused;
         console.log('Jogo', gameState.isPaused ? 'pausado' : 'despausado');
         
-        if (ui.showPause) {
+        if (ui && ui.showPause) {
             ui.showPause(gameState.isPaused);
         }
     }
