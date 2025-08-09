@@ -1,74 +1,215 @@
+==================================================
+ARQUIVO 1/10: index.html (salvar na raiz do projeto)
+==================================================
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mad Night v1.40 - Estrutura Modular</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Press Start 2P', monospace;
+        }
+        
+        #gameCanvas {
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            border: 2px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    
+    <!-- Módulos do jogo na ordem correta de dependências -->
+    <script src="js/config.js"></script>
+    <script src="js/assets.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/collision.js"></script>
+    <script src="js/lighting.js"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/projectiles.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/traffic.js"></script>
+    <script src="js/maps.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
+
+==================================================
+ARQUIVO 2/10: js/config.js
+==================================================
+// Mad Night v1.40 - Estrutura Modular
 // config.js - Configurações globais do jogo
-console.log('Mad Night v1.40 - Refatorado e Modular');
 
-const CONFIG = {
-    // Canvas
-    CANVAS_WIDTH: 960,
-    CANVAS_HEIGHT: 540,
-    ZOOM: 2,
+console.log('Mad Night v1.40 - Estrutura Modular');
+
+// Namespace global do jogo
+window.MadNight = window.MadNight || {};
+
+// Configurações da câmera e canvas
+MadNight.config = {
+    // Versão do jogo
+    version: 'v1.40',
+    versionName: 'Estrutura Modular',
     
-    // Player
-    PLAYER_WIDTH: 56,
-    PLAYER_HEIGHT: 56,
-    PLAYER_SPEED: 3.6,
-    DASH_DURATION: 150,
-    DASH_DISTANCE: 60,
-    MAX_PEDAL_POWER: 4,
-    PEDAL_RECHARGE_TIME: 6000,
+    // Configurações de câmera
+    camera: {
+        width: 960,
+        height: 540,
+        zoom: 2
+    },
     
-    // Enemy
-    ENEMY_WIDTH: 46,
-    ENEMY_HEIGHT: 46,
-    ENEMY_SPEED: 2,
-    ENEMY_PATROL_SPEED: 1,
-    ENEMY_VISION_RANGE: 150,
-    ENEMY_ALERT_VISION_RANGE: 200,
-    ENEMY_PATROL_RADIUS: 150,
+    // Configurações do canvas
+    canvas: {
+        get width() {
+            return MadNight.config.camera.width * MadNight.config.camera.zoom;
+        },
+        get height() {
+            return MadNight.config.camera.height * MadNight.config.camera.zoom;
+        }
+    },
     
-    // Game
-    MAX_DEATHS: 5,
-    ENEMY_SPAWN_DELAY: 1000,
-    ENEMY_REMOVE_DELAY: 3000,
+    // Configurações do player
+    player: {
+        width: 56,
+        height: 56,
+        speed: 3.6,
+        startPosition: { x: 100, y: 300 },
+        dashDuration: 150,
+        dashDistance: 60
+    },
     
-    // Audio
-    SFX_VOLUME: 0.7,
-    MUSIC_VOLUME: 0.5,
+    // Configurações de inimigos
+    enemy: {
+        width: 46,
+        height: 46,
+        baseSpeed: 2,
+        patrolSpeed: 1,
+        visionRange: 150,
+        alertVisionRange: 200,
+        patrolRadius: 150,
+        attackRange: 200,
+        attackCooldown: 2000,
+        removeDelay: 3000
+    },
     
-    // Rendering
-    TILE_SIZE: 120,
-    SHADOW_ALPHA: 0.5,
-    NIGHT_OVERLAY_ALPHA: 0.4,
+    // Configurações específicas por tipo de inimigo
+    enemyTypes: {
+        faquinha: {
+            speed: 2,
+            health: 1
+        },
+        morcego: {
+            speed: 2,
+            health: 1
+        },
+        caveirinha: {
+            speed: 2.5,
+            health: 1
+        },
+        janis: {
+            speed: 2,
+            health: 1,
+            isRanged: true
+        },
+        chacal: {
+            speed: 2,
+            health: 3,
+            invulnerableDuration: 500
+        }
+    },
     
-    // Debug
-    DEBUG_MODE: false,
-    VERSION: 'v1.40'
+    // Configurações de gameplay
+    gameplay: {
+        maxDeaths: 5,
+        maxPedalPower: 4,
+        pedalRechargeTime: 6000,
+        pedalRechargeDelay: 1000,
+        escapeEnemySpawnDelay: 1000,
+        projectileSpeed: 4
+    },
+    
+    // Configurações de áudio
+    audio: {
+        sfxVolume: 0.7,
+        musicVolume: 0.5
+    },
+    
+    // Configurações de iluminação
+    lighting: {
+        shadowOpacity: 0.5,
+        nightOverlayOpacity: 0.4,
+        lightIntensity: 0.4,
+        flickerMinTime: 3000,
+        flickerMaxTime: 8000
+    },
+    
+    // Configurações do sistema de tráfego
+    traffic: {
+        mainLanes: {
+            minInterval: 6000,
+            maxInterval: 12000,
+            rushChance: 0.15
+        },
+        carSpeed: {
+            min: 4.5,
+            max: 6
+        },
+        maxCars: 10,
+        northSouthLanes: [1305, 1390, 1470, 1550],
+        southNorthLanes: [1637, 1706, 1790, 1883]
+    },
+    
+    // Configurações de debug
+    debug: {
+        showCollisions: false,
+        showFPS: false,
+        enableDebugKeys: true
+    },
+    
+    // Tamanhos de tiles
+    tiles: {
+        size: 120
+    },
+    
+    // Cores do jogo
+    colors: {
+        background: '#1a1a1a',
+        nightOverlay: 'rgba(0, 0, 40, 0.4)',
+        shadowBase: 'rgba(0, 0, 0, 0.72)',
+        lightWarm: 'rgba(255, 200, 100, 0.4)',
+        enemyAlert: '#f00',
+        playerDash: '#ff0',
+        playerDead: '#800',
+        phonePrompt: '#ff0',
+        bombPrompt: '#ff0',
+        escapeExit: '#f00',
+        normalExit: '#0f0'
+    },
+    
+    // Configurações de animação
+    animation: {
+        frameDelay: 150,
+        enemyFrameDelay: 400,
+        deathFrames: 4
+    }
 };
 
-// Estado global do jogo
-const gameState = {
-    deaths: 0,
-    pedalPower: CONFIG.MAX_PEDAL_POWER,
-    maxPedalPower: CONFIG.MAX_PEDAL_POWER,
-    lastRecharge: Date.now(),
-    musicPhase: 'inicio',
-    currentMusic: null,
-    currentMap: 0,
-    phase: 'infiltration',
-    dashUnlocked: false,
-    bombPlaced: false,
-    lastEnemySpawn: 0,
-    enemySpawnDelay: CONFIG.ENEMY_SPAWN_DELAY,
-    spawnCorner: 0,
-    lastFrameTime: 0,
-    version: CONFIG.VERSION
-};
-
-// Arrays globais
-const enemies = [];
-const projectiles = [];
-
-// Canvas e contexto
-let canvas, ctx, camera;
-
-// Teclas pressionadas
-const keys = {};
+window.MadNight.config = MadNight.config;
