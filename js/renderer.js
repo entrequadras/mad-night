@@ -1,376 +1,383 @@
-// renderer.js - Sistema de renderização
+// renderer.js - Sistema de renderização (Revisão Alpha-05)
 
-MadNight.renderer = {
-    // Contexto do canvas
-    ctx: null,
-    canvas: null,
+(function() {
+    'use strict';
     
-    // Inicializar renderer
-    init: function(canvas) {
-        this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
-        this.ctx.imageSmoothingEnabled = false;
+    // Variáveis internas do renderer
+    let ctx = null;
+    let canvas = null;
+    
+    // Criar objeto renderer
+    const renderer = {
+        // Contexto do canvas
+        ctx: null,
+        canvas: null,
         
-        // Configurar fonte padrão
-        this.setPixelFont(10);
+        // Inicializar renderer
+        init: function(canvasElement) {
+            canvas = canvasElement;
+            ctx = canvasElement.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            
+            // Salvar referências
+            this.canvas = canvas;
+            this.ctx = ctx;
+            
+            // Configurar fonte padrão
+            this.setPixelFont(10);
+            
+            console.log('Renderer inicializado');
+        },
         
-        console.log('Renderer inicializado');
-    },
-    
-    // Helper para definir fonte pixel
-    setPixelFont: function(size) {
-        this.ctx.font = `${size}px "Press Start 2P"`;
-        this.ctx.textBaseline = 'top';
-        this.ctx.textAlign = 'left';
-    },
-    
-    // Limpar tela
-    clear: function() {
-        this.ctx.fillStyle = '#000';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    },
-    
-    // Renderizar frame completo
-    render: function() {
-        const ctx = this.ctx;
-        const map = MadNight.maps.getCurrentMap();
-        const camera = MadNight.camera;
-        const visibleArea = camera.getVisibleArea();
+        // Helper para definir fonte pixel
+        setPixelFont: function(size) {
+            if (!ctx) return;
+            ctx.font = `${size}px "Press Start 2P"`;
+            ctx.textBaseline = 'top';
+            ctx.textAlign = 'left';
+        },
         
         // Limpar tela
-        this.clear();
+        clear: function() {
+            if (!ctx) return;
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        },
         
-        if (!map) return;
-        
-        try {
-            // Aplicar transformação da câmera
-            camera.applyTransform(ctx);
-            
-            // Background base
-            ctx.fillStyle = MadNight.config.colors.background;
-            ctx.fillRect(camera.x, camera.y, camera.width, camera.height);
-            
-            // Camada 1: Base
-            if (map.hasLayers && MadNight.game.state.currentMap === 1) {
-                this.renderEixaoLayer1(map);
-            } else {
-                this.renderTiles(map, visibleArea);
-                if (map.hasBackground && map.backgroundAsset) {
-                    this.renderBackground(map);
-                }
+        // Renderizar frame completo
+        render: function() {
+            if (!ctx || !canvas) {
+                console.error('Renderer não inicializado');
+                return;
             }
             
-            this.renderCampo(map);
-            this.renderParkedCars(map, visibleArea);
+            // Verificar se os módulos necessários existem
+            if (!MadNight.maps || !MadNight.camera) {
+                this.clear();
+                ctx.fillStyle = '#fff';
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Carregando...', canvas.width/2, canvas.height/2);
+                return;
+            }
             
-            // Sombras e iluminação base
-            MadNight.lighting.renderTreeShadows(ctx, map, visibleArea);
-            this.renderTrees(map, visibleArea, 'bottom');
+            const map = MadNight.maps.getCurrentMap();
+            const camera = MadNight.camera;
+            
+            // Limpar tela
+            this.clear();
+            
+            if (!map) {
+                ctx.fillStyle = '#fff';
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Mapa não encontrado', canvas.width/2, canvas.height/2);
+                return;
+            }
+            
+            try {
+                // Obter área visível
+                const visibleArea = camera.getVisibleArea ? camera.getVisibleArea() : {
+                    x: 0, y: 0, 
+                    width: canvas.width, 
+                    height: canvas.height
+                };
+                
+                // Aplicar transformação da câmera
+                if (camera.applyTransform) {
+                    camera.applyTransform(ctx);
+                }
+                
+                // Background base
+                ctx.fillStyle = MadNight.config.colors.background;
+                ctx.fillRect(
+                    camera.x || 0, 
+                    camera.y || 0, 
+                    camera.width || canvas.width, 
+                    camera.height || canvas.height
+                );
+                
+                // Renderizar camadas do mapa
+                this.renderMapLayers(map, visibleArea);
+                
+                // Renderizar entidades
+                this.renderEntities(visibleArea);
+                
+                // Renderizar efeitos e overlays
+                this.renderEffects(map, visibleArea);
+                
+                // Resetar transformação
+                if (camera.resetTransform) {
+                    camera.resetTransform(ctx);
+                }
+                
+                // UI (sem transformação de câmera)
+                if (MadNight.ui && MadNight.ui.render) {
+                    MadNight.ui.render(ctx);
+                }
+                
+            } catch (error) {
+                console.error('Erro no render:', error);
+                if (camera.resetTransform) {
+                    camera.resetTransform(ctx);
+                }
+                
+                ctx.fillStyle = '#f00';
+                ctx.font = '32px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('ERRO NO RENDER', canvas.width/2, canvas.height/2);
+                ctx.font = '20px Arial';
+                ctx.fillText(error.message, canvas.width/2, canvas.height/2 + 40);
+            }
+        },
+        
+        // Renderizar camadas do mapa
+        renderMapLayers: function(map, visibleArea) {
+            // Camada 1: Base (tiles, background)
+            this.renderTiles(map, visibleArea);
+            this.renderBackground(map);
+            
+            // Camada 2: Objetos estáticos
             this.renderObjects(map, visibleArea);
             this.renderBuildings(map, visibleArea, 'bottom');
             this.renderWalls(map, visibleArea);
+            
+            // Camada 3: Elementos especiais
             this.renderSpecialObjects(map);
             
-            // Camada 2: Entidades
-            MadNight.projectiles.render(ctx, visibleArea);
-            MadNight.enemies.render(ctx, visibleArea);
-            MadNight.player.render(ctx);
+            // Camada 4: Elementos superiores
+            this.renderBuildings(map, visibleArea, 'top');
+            this.renderTrees(map, visibleArea);
+            this.renderStreetLights(map, visibleArea);
+        },
+        
+        // Renderizar entidades
+        renderEntities: function(visibleArea) {
+            // Projéteis
+            if (MadNight.projectiles && MadNight.projectiles.render) {
+                MadNight.projectiles.render(ctx, visibleArea);
+            }
             
-            // Camada 3: Sobreposições
-            if (map.hasLayers && MadNight.game.state.currentMap === 1) {
-                this.renderEixaoLayer2(map);
+            // Inimigos
+            if (MadNight.enemies && MadNight.enemies.render) {
+                MadNight.enemies.render(ctx, visibleArea);
+            }
+            
+            // Player
+            if (MadNight.player && MadNight.player.render) {
+                MadNight.player.render(ctx);
             }
             
             // Tráfego (apenas no Eixão)
-            if (MadNight.game.state.currentMap === 1) {
+            if (MadNight.game && MadNight.game.state && 
+                MadNight.game.state.currentMap === 1 && 
+                MadNight.traffic && MadNight.traffic.render) {
                 MadNight.traffic.render(ctx, visibleArea);
             }
-            
-            this.renderBuildings(map, visibleArea, 'top');
-            this.renderCampoTraves();
-            MadNight.lighting.renderFieldShadow(ctx, map);
-            this.renderStreetLights(map, visibleArea);
-            this.renderTrees(map, visibleArea, 'top');
+        },
+        
+        // Renderizar efeitos e overlays
+        renderEffects: function(map, visibleArea) {
+            // Iluminação e sombras
+            if (MadNight.lighting) {
+                if (MadNight.lighting.renderTreeShadows) {
+                    MadNight.lighting.renderTreeShadows(ctx, map, visibleArea);
+                }
+                if (MadNight.lighting.renderNightOverlay) {
+                    MadNight.lighting.renderNightOverlay(ctx, MadNight.camera);
+                }
+                if (MadNight.lighting.renderStreetLights) {
+                    MadNight.lighting.renderStreetLights(ctx, map);
+                }
+            }
             
             // DEBUG: Colisões
-            if (MadNight.config.debug.showCollisions || MadNight.game.keys['c'] || MadNight.game.keys['C']) {
+            if (MadNight.config.debug.showCollisions || 
+                (MadNight.game && MadNight.game.keys && 
+                 (MadNight.game.keys['c'] || MadNight.game.keys['C']))) {
                 this.renderCollisionDebug();
             }
-            
-            // Efeito de noite
-            MadNight.lighting.renderNightOverlay(ctx, camera);
-            
-            // Luzes dos postes
-            MadNight.lighting.renderStreetLights(ctx, map);
-            MadNight.lighting.renderMapLights(ctx, map, visibleArea);
-            
-            // Resetar transformação
-            camera.resetTransform(ctx);
-            
-            // UI (sem transformação de câmera)
-            MadNight.ui.render(ctx);
-            
-        } catch (error) {
-            console.error('Erro no render:', error);
-            camera.resetTransform(ctx);
-            
-            ctx.fillStyle = '#f00';
-            ctx.font = '32px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('ERRO NO RENDER', this.canvas.width/2, this.canvas.height/2);
-            ctx.font = '20px Arial';
-            ctx.fillText(error.message, this.canvas.width/2, this.canvas.height/2 + 40);
-        }
-    },
-    
-    // Renderizar tiles
-    renderTiles: function(map, visibleArea) {
-        if (!map.tiles) return;
+        },
         
-        const ctx = this.ctx;
-        
-        map.tiles.forEach(tile => {
-            const tileAsset = MadNight.assets.get(tile.type);
-            if (tileAsset && tileAsset.loaded) {
-                if (MadNight.camera.isVisible(tile)) {
-                    ctx.drawImage(
-                        tileAsset.img,
-                        0, 0, 120, 120,
-                        Math.floor(tile.x), Math.floor(tile.y),
-                        121, 121
-                    );
-                }
-            }
-        });
-    },
-    
-    // Renderizar background
-    renderBackground: function(map) {
-        if (map.hasBackground && map.backgroundAsset) {
-            const bgAsset = MadNight.assets.get(map.backgroundAsset);
-            if (bgAsset && bgAsset.loaded) {
-                this.ctx.drawImage(bgAsset.img, 0, 0);
-            }
-        }
-    },
-    
-    // Renderizar campo de futebol
-    renderCampo: function(map) {
-        if (MadNight.game.state.currentMap === 0 && MadNight.assets.isLoaded('campo')) {
-            const campoAsset = MadNight.assets.get('campo');
-            const campoX = (map.width - 800) / 2;
-            const campoY = (map.height - 462) / 2;
-            this.ctx.drawImage(campoAsset.img, campoX, campoY);
-        }
-    },
-    
-    // Renderizar traves do campo
-    renderCampoTraves: function() {
-        if (MadNight.game.state.currentMap === 0 && MadNight.assets.isLoaded('campoTraves')) {
-            const map = MadNight.maps.getCurrentMap();
-            const travesAsset = MadNight.assets.get('campoTraves');
-            const campoX = (map.width - 800) / 2;
-            const campoY = (map.height - 462) / 2;
-            this.ctx.drawImage(travesAsset.img, campoX, campoY);
-        }
-    },
-    
-    // Renderizar camadas do Eixão
-    renderEixaoLayer1: function(map) {
-        if (MadNight.game.state.currentMap === 1 && MadNight.assets.isLoaded('eixaoCamada1')) {
-            const asset = MadNight.assets.get('eixaoCamada1');
-            this.ctx.drawImage(asset.img, 0, 0);
-        }
-    },
-    
-    renderEixaoLayer2: function(map) {
-        if (MadNight.game.state.currentMap === 1 && MadNight.assets.isLoaded('eixaoCamada2')) {
-            const asset = MadNight.assets.get('eixaoCamada2');
-            this.ctx.drawImage(asset.img, 0, 0);
-        }
-    },
-    
-    // Renderizar árvores
-    renderTrees: function(map, visibleArea, layer = 'bottom') {
-        if (!map.trees) return;
-        
-        const ctx = this.ctx;
-        
-        map.trees.forEach(tree => {
-            const treeAsset = MadNight.assets.get(tree.type);
-            if (treeAsset && treeAsset.loaded && MadNight.camera.isVisible(tree)) {
-                if (layer === 'bottom') {
-                    // Parte inferior da árvore
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.rect(tree.x, tree.y + treeAsset.height * 0.7, 
-                            treeAsset.width, treeAsset.height * 0.3);
-                    ctx.clip();
-                    ctx.drawImage(treeAsset.img, tree.x, tree.y);
-                    ctx.restore();
-                } else if (layer === 'top') {
-                    // Parte superior da árvore
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.rect(tree.x, tree.y, treeAsset.width, treeAsset.height * 0.75);
-                    ctx.clip();
+        // Renderizar tiles
+        renderTiles: function(map, visibleArea) {
+            if (!map.tiles || !MadNight.assets) return;
+            
+            map.tiles.forEach(tile => {
+                if (!MadNight.camera || !MadNight.camera.isVisible || 
+                    MadNight.camera.isVisible(tile)) {
                     
-                    // Verificar se player está sob a árvore
-                    const player = MadNight.player;
-                    const playerUnderTree = player.x + player.width > tree.x &&
-                                          player.x < tree.x + treeAsset.width &&
-                                          player.y + player.height > tree.y &&
-                                          player.y < tree.y + treeAsset.height * 0.75;
+                    const tileAsset = MadNight.assets.get ? 
+                        MadNight.assets.get(tile.type) : null;
                     
-                    if (playerUnderTree) {
-                        ctx.globalAlpha = 0.7;
+                    if (tileAsset && tileAsset.loaded && tileAsset.img) {
+                        ctx.drawImage(
+                            tileAsset.img,
+                            0, 0, 120, 120,
+                            Math.floor(tile.x), Math.floor(tile.y),
+                            121, 121
+                        );
                     }
+                }
+            });
+        },
+        
+        // Renderizar background
+        renderBackground: function(map) {
+            if (!map.hasBackground || !map.backgroundAsset || !MadNight.assets) return;
+            
+            const bgAsset = MadNight.assets.get ? 
+                MadNight.assets.get(map.backgroundAsset) : null;
+            
+            if (bgAsset && bgAsset.loaded && bgAsset.img) {
+                ctx.drawImage(bgAsset.img, 0, 0);
+            }
+        },
+        
+        // Renderizar objetos
+        renderObjects: function(map, visibleArea) {
+            if (!map.objects || !MadNight.assets) return;
+            
+            map.objects.forEach(obj => {
+                if (!MadNight.camera || !MadNight.camera.isVisible || 
+                    MadNight.camera.isVisible(obj)) {
                     
-                    ctx.drawImage(treeAsset.img, tree.x, tree.y);
-                    ctx.restore();
+                    const objAsset = MadNight.assets.get ? 
+                        MadNight.assets.get(obj.type) : null;
+                    
+                    if (objAsset && objAsset.loaded && objAsset.img) {
+                        if (obj.rotation) {
+                            ctx.save();
+                            const centerX = obj.x + objAsset.width / 2;
+                            const centerY = obj.y + objAsset.height / 2;
+                            ctx.translate(centerX, centerY);
+                            ctx.rotate(obj.rotation * Math.PI / 180);
+                            ctx.drawImage(objAsset.img, -objAsset.width / 2, -objAsset.height / 2);
+                            ctx.restore();
+                        } else {
+                            ctx.drawImage(objAsset.img, obj.x, obj.y);
+                        }
+                    }
                 }
-            }
-        });
-    },
-    
-    // Renderizar prédios
-    renderBuildings: function(map, visibleArea, layer) {
-        if (!map.buildings) return;
+            });
+        },
         
-        const ctx = this.ctx;
-        const player = MadNight.player;
-        
-        map.buildings.forEach(building => {
-            const buildingAsset = MadNight.assets.get(building.type);
-            if (buildingAsset && buildingAsset.loaded && MadNight.camera.isVisible(building)) {
-                const cutLine = building.y + buildingAsset.height * 0.75;
-                const playerBottom = player.y + player.height;
-                
-                if (layer === 'bottom' && playerBottom > cutLine) {
-                    ctx.drawImage(buildingAsset.img, building.x, building.y);
-                } else if (layer === 'top' && playerBottom <= cutLine) {
-                    ctx.drawImage(buildingAsset.img, building.x, building.y);
+        // Renderizar prédios
+        renderBuildings: function(map, visibleArea, layer) {
+            if (!map.buildings || !MadNight.assets || !MadNight.player) return;
+            
+            const player = MadNight.player;
+            
+            map.buildings.forEach(building => {
+                if (!MadNight.camera || !MadNight.camera.isVisible || 
+                    MadNight.camera.isVisible(building)) {
+                    
+                    const buildingAsset = MadNight.assets.get ? 
+                        MadNight.assets.get(building.type) : null;
+                    
+                    if (buildingAsset && buildingAsset.loaded && buildingAsset.img) {
+                        const cutLine = building.y + buildingAsset.height * 0.75;
+                        const playerBottom = player.y + player.height;
+                        
+                        if ((layer === 'bottom' && playerBottom > cutLine) ||
+                            (layer === 'top' && playerBottom <= cutLine)) {
+                            ctx.drawImage(buildingAsset.img, building.x, building.y);
+                        }
+                    }
                 }
-            }
-        });
-    },
-    
-    // Renderizar objetos
-    renderObjects: function(map, visibleArea) {
-        if (!map.objects) return;
+            });
+        },
         
-        const ctx = this.ctx;
-        
-        map.objects.forEach(obj => {
-            const objAsset = MadNight.assets.get(obj.type);
-            if (objAsset && objAsset.loaded && MadNight.camera.isVisible(obj)) {
-                if (obj.rotation) {
-                    ctx.save();
-                    const centerX = obj.x + objAsset.width / 2;
-                    const centerY = obj.y + objAsset.height / 2;
-                    ctx.translate(centerX, centerY);
-                    ctx.rotate(obj.rotation * Math.PI / 180);
-                    ctx.drawImage(objAsset.img, -objAsset.width / 2, -objAsset.height / 2);
-                    ctx.restore();
-                } else {
-                    ctx.drawImage(objAsset.img, obj.x, obj.y);
+        // Renderizar árvores
+        renderTrees: function(map, visibleArea) {
+            if (!map.trees || !MadNight.assets) return;
+            
+            map.trees.forEach(tree => {
+                if (!MadNight.camera || !MadNight.camera.isVisible || 
+                    MadNight.camera.isVisible(tree)) {
+                    
+                    const treeAsset = MadNight.assets.get ? 
+                        MadNight.assets.get(tree.type) : null;
+                    
+                    if (treeAsset && treeAsset.loaded && treeAsset.img) {
+                        ctx.drawImage(treeAsset.img, tree.x, tree.y);
+                    }
                 }
-            }
-        });
-    },
-    
-    // Renderizar postes de luz
-    renderStreetLights: function(map, visibleArea) {
-        if (!map.streetLights) return;
+            });
+        },
         
-        const ctx = this.ctx;
-        
-        map.streetLights.forEach(light => {
-            const lightAsset = MadNight.assets.get(light.type);
-            if (lightAsset && lightAsset.loaded && MadNight.camera.isVisible(light)) {
-                if (light.rotation) {
-                    ctx.save();
-                    const centerX = light.x + lightAsset.width / 2;
-                    const centerY = light.y + lightAsset.height / 2;
-                    ctx.translate(centerX, centerY);
-                    ctx.rotate(light.rotation * Math.PI / 180);
-                    ctx.drawImage(lightAsset.img, -lightAsset.width / 2, -lightAsset.height / 2);
-                    ctx.restore();
-                } else {
-                    ctx.drawImage(lightAsset.img, light.x, light.y);
+        // Renderizar postes de luz
+        renderStreetLights: function(map, visibleArea) {
+            if (!map.streetLights || !MadNight.assets) return;
+            
+            map.streetLights.forEach(light => {
+                if (!MadNight.camera || !MadNight.camera.isVisible || 
+                    MadNight.camera.isVisible(light)) {
+                    
+                    const lightAsset = MadNight.assets.get ? 
+                        MadNight.assets.get(light.type) : null;
+                    
+                    if (lightAsset && lightAsset.loaded && lightAsset.img) {
+                        if (light.rotation) {
+                            ctx.save();
+                            const centerX = light.x + lightAsset.width / 2;
+                            const centerY = light.y + lightAsset.height / 2;
+                            ctx.translate(centerX, centerY);
+                            ctx.rotate(light.rotation * Math.PI / 180);
+                            ctx.drawImage(lightAsset.img, -lightAsset.width / 2, -lightAsset.height / 2);
+                            ctx.restore();
+                        } else {
+                            ctx.drawImage(lightAsset.img, light.x, light.y);
+                        }
+                    }
                 }
-            }
-        });
-    },
-    
-    // Renderizar paredes
-    renderWalls: function(map, visibleArea) {
-        const ctx = this.ctx;
-        ctx.fillStyle = '#666';
+            });
+        },
         
-        map.walls.forEach(wall => {
-            if (MadNight.camera.isVisible(wall)) {
-                if (!wall.invisible) {
-                    ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
+        // Renderizar paredes
+        renderWalls: function(map, visibleArea) {
+            if (!map.walls) return;
+            
+            ctx.fillStyle = '#666';
+            
+            map.walls.forEach(wall => {
+                if (!MadNight.camera || !MadNight.camera.isVisible || 
+                    MadNight.camera.isVisible(wall)) {
+                    
+                    if (!wall.invisible) {
+                        ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
+                    }
                 }
-            }
-        });
-    },
-    
-    // Renderizar objetos especiais
-    renderSpecialObjects: function(map) {
-        const ctx = this.ctx;
-        const gameState = MadNight.game.state;
+            });
+        },
         
-        // Orelhão
-        if (map.orelhao) {
-            if (MadNight.assets.isLoaded('orelhao001')) {
-                const orelhaoAsset = MadNight.assets.get('orelhao001');
-                ctx.drawImage(orelhaoAsset.img, map.orelhao.x, map.orelhao.y);
-            } else {
+        // Renderizar objetos especiais (orelhão, lixeira, saída)
+        renderSpecialObjects: function(map) {
+            if (!MadNight.game || !MadNight.game.state) return;
+            
+            const gameState = MadNight.game.state;
+            
+            // Orelhão
+            if (map.orelhao) {
                 ctx.fillStyle = '#00f';
                 ctx.fillRect(map.orelhao.x, map.orelhao.y, map.orelhao.w, map.orelhao.h);
                 ctx.fillStyle = '#fff';
                 this.setPixelFont(8);
                 ctx.fillText('TEL', map.orelhao.x + 5, map.orelhao.y + 30);
             }
-        }
-        
-        // Lixeira
-        if (map.lixeira) {
-            ctx.fillStyle = gameState.bombPlaced ? '#f00' : '#080';
-            ctx.fillRect(map.lixeira.x, map.lixeira.y, map.lixeira.w, map.lixeira.h);
-            ctx.fillStyle = '#fff';
-            this.setPixelFont(8);
-            ctx.fillText(gameState.bombPlaced ? 'BOOM!' : 'LIXO', 
-                        map.lixeira.x + 2, map.lixeira.y + 25);
-        }
-        
-        // Saída
-        if (map.exit) {
-            const arrowMap = {
-                'right': 'setadireita',
-                'left': 'setaesquerda',
-                'up': 'setanorte',
-                'down': 'setasul'
-            };
             
-            const arrowAssetName = arrowMap[map.direction] || 'setadireita';
-            const arrowAsset = MadNight.assets.get(arrowAssetName);
+            // Lixeira
+            if (map.lixeira) {
+                ctx.fillStyle = gameState.bombPlaced ? '#f00' : '#080';
+                ctx.fillRect(map.lixeira.x, map.lixeira.y, map.lixeira.w, map.lixeira.h);
+                ctx.fillStyle = '#fff';
+                this.setPixelFont(8);
+                ctx.fillText(gameState.bombPlaced ? 'BOOM!' : 'LIXO', 
+                            map.lixeira.x + 2, map.lixeira.y + 25);
+            }
             
-            if (arrowAsset && arrowAsset.loaded) {
-                ctx.save();
-                
-                if (gameState.phase === 'escape') {
-                    ctx.filter = 'hue-rotate(0deg) saturate(2) brightness(0.8) sepia(1) saturate(3) hue-rotate(0deg)';
-                }
-                
-                const centerX = map.exit.x + (map.exit.w - arrowAsset.width) / 2;
-                const centerY = map.exit.y + (map.exit.h - arrowAsset.height) / 2;
-                
-                ctx.drawImage(arrowAsset.img, centerX, centerY);
-                ctx.restore();
-            } else {
+            // Saída
+            if (map.exit) {
                 ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#0f0';
                 ctx.fillRect(map.exit.x, map.exit.y, map.exit.w, map.exit.h);
                 ctx.fillStyle = '#fff';
@@ -378,67 +385,39 @@ MadNight.renderer = {
                 ctx.fillText(gameState.phase === 'escape' ? 'VOLTA' : 'SAÍDA', 
                             map.exit.x + 5, map.exit.y + 20);
             }
-        }
-    },
-    
-    // Renderizar carros estacionados
-    renderParkedCars: function(map, visibleArea) {
-        const gameState = MadNight.game.state;
+        },
         
-        // Carros especiais do mapa 2
-        if (gameState.currentMap === 2) {
-            const carros = MadNight.maps.getParkedCarsForMap2();
+        // Renderizar debug de colisões
+        renderCollisionDebug: function() {
+            if (!MadNight.collision || !MadNight.collision.getCollisionRects) return;
             
-            carros.forEach(car => {
-                const carAsset = MadNight.assets.get(car.type);
-                if (carAsset && carAsset.loaded && MadNight.camera.isVisible(car)) {
-                    this.ctx.drawImage(carAsset.img, car.x, car.y);
-                } else if (MadNight.camera.isVisible(car)) {
-                    this.ctx.fillStyle = '#444';
-                    this.ctx.fillRect(car.x, car.y, 150, 100);
-                }
-            });
-        }
-        
-        // Carros normais de outros mapas
-        if (map.parkedCars) {
-            map.parkedCars.forEach(car => {
-                const carAsset = MadNight.assets.get(car.type);
-                if (carAsset && carAsset.loaded && MadNight.camera.isVisible(car)) {
-                    this.ctx.drawImage(carAsset.img, car.x, car.y);
-                }
-            });
-        }
-    },
-    
-    // Renderizar debug de colisões
-    renderCollisionDebug: function() {
-        const ctx = this.ctx;
-        const rects = MadNight.collision.getCollisionRects();
-        
-        ctx.save();
-        
-        const colors = {
-            'building': 'rgba(255, 0, 0, 0.3)',
-            'object': 'rgba(0, 255, 0, 0.3)',
-            'car': 'rgba(0, 0, 255, 0.3)'
-        };
-        
-        const strokeColors = {
-            'building': 'rgba(255, 0, 0, 0.8)',
-            'object': 'rgba(0, 255, 0, 0.8)',
-            'car': 'rgba(0, 0, 255, 0.8)'
-        };
-        
-        rects.forEach(rect => {
-            ctx.fillStyle = colors[rect.type] || 'rgba(255, 255, 255, 0.3)';
-            ctx.strokeStyle = strokeColors[rect.type] || 'rgba(255, 255, 255, 0.8)';
-            ctx.lineWidth = 2;
+            ctx.save();
             
-            ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
-            ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
-        });
-        
-        ctx.restore();
-    }
-};
+            const rects = MadNight.collision.getCollisionRects();
+            
+            const colors = {
+                'building': 'rgba(255, 0, 0, 0.3)',
+                'object': 'rgba(0, 255, 0, 0.3)',
+                'car': 'rgba(0, 0, 255, 0.3)',
+                'wall': 'rgba(255, 255, 0, 0.3)'
+            };
+            
+            rects.forEach(rect => {
+                ctx.fillStyle = colors[rect.type] || 'rgba(255, 255, 255, 0.3)';
+                ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+                
+                ctx.strokeStyle = colors[rect.type] || 'rgba(255, 255, 255, 0.8)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+            });
+            
+            ctx.restore();
+        }
+    };
+    
+    // Exportar módulo
+    MadNight.renderer = renderer;
+    
+    console.log('Módulo Renderer carregado');
+    
+})();
