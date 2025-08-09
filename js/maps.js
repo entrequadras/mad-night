@@ -150,9 +150,6 @@ MadNight.maps = {
             hasLayers: true
         },
 
-==================================================
-ARQUIVO 3/5: js/maps.js (PARTE 2 - continuação)
-==================================================
         // Mapa 2 - Fronteira com o Komando Satânico
         {
             name: "Fronteira com o Komando Satânico",
