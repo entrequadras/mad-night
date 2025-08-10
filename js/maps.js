@@ -105,7 +105,17 @@
             width: 3000,
             height: 868,
             enemies: [],
-            trees: [],
+            trees: [
+                // Linha de árvores na parte inferior (530x1500 até 1130x1500)
+                {type: 'arvorebloco001', x: 530, y: 1420},
+                {type: 'arvore001', x: 884, y: 1450},
+                {type: 'arvore003', x: 980, y: 1440},
+                {type: 'arvore002', x: 1050, y: 1455},
+                
+                // Duas árvores no topo (1180x50)
+                {type: 'arvore004', x: 1180, y: 50},
+                {type: 'arvore001', x: 1280, y: 45}
+            ],
             streetLights: [],
             objects: [],
             walls: [
