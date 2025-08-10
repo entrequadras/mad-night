@@ -138,14 +138,18 @@ MadNight.renderer = {
             this.renderCampo(map);
         }
         
-        // SOMBRAS DO MAPA KS - renderizar ANTES dos prédios
-        if (MadNight.game && MadNight.game.state && 
-            MadNight.game.state.currentMap === 2) {
-            this.renderKSShadows(ctx);
-        }
-        
         // Carros estacionados
         this.renderParkedCars(map, visibleArea);
+        
+        // ENTIDADES (player/inimigos) ANTES das sombras no mapa 2
+        if (MadNight.game && MadNight.game.state && 
+            MadNight.game.state.currentMap === 2) {
+            // Renderizar entidades primeiro
+            this.renderEntities(visibleArea);
+            
+            // DEPOIS renderizar sombras por cima deles
+            this.renderKSShadows(ctx);
+        }
         
         // Objetos e estruturas
         this.renderObjects(map, visibleArea);
@@ -173,27 +177,10 @@ MadNight.renderer = {
     renderEntities: function(visibleArea) {
         const ctx = this.ctx;
         
-        // No mapa 2 (KS), renderizar player ANTES dos prédios top
+        // No mapa 2, as entidades são renderizadas em renderMapLayers
         if (MadNight.game && MadNight.game.state && 
             MadNight.game.state.currentMap === 2) {
-            // Ordem especial para mapa KS
-            
-            // 1. Projéteis
-            if (MadNight.projectiles && MadNight.projectiles.render) {
-                MadNight.projectiles.render(ctx, visibleArea);
-            }
-            
-            // 2. Inimigos
-            if (MadNight.enemies && MadNight.enemies.render) {
-                MadNight.enemies.render(ctx, visibleArea);
-            }
-            
-            // 3. Player ANTES dos prédios
-            if (MadNight.player && MadNight.player.render) {
-                MadNight.player.render(ctx);
-            }
-            
-            // Player já foi renderizado, não renderizar de novo
+            // Já foi renderizado em renderMapLayers, pular
             return;
         }
         
