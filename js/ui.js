@@ -107,10 +107,10 @@
                 ctx.fillText(map.subtitle, ctx.canvas.width/2, 90);
             }
             
-            // Versão
+            // Versão (SEMPRE VISÍVEL)
             ctx.fillStyle = '#666';
             this.setPixelFont(ctx, 8);
-            ctx.fillText(MadNight.config.versionName || 'v1.40', ctx.canvas.width/2, 115);
+            ctx.fillText('Revisão Alpha-12', ctx.canvas.width/2, 115);
             ctx.textAlign = 'left';
         },
         
