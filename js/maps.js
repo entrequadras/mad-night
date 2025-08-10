@@ -392,6 +392,7 @@
             }
             
             console.log(`${this.list.length} mapas carregados`);
+            return true;
         },
         
         // Obter mapa por índice
