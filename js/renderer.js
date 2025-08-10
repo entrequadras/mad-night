@@ -579,7 +579,10 @@ MadNight.renderer = {
             {x: 1230, y: 2, radius: 300},
             {x: 75, y: 970, radius: 350},
             // Sombra média
-            {x: 1665, y: 678, radius: 200}
+            {x: 1665, y: 678, radius: 200},
+            // NOVAS SOMBRAS
+            {x: 745, y: 1350, radius: 250},
+            {x: 160, y: 610, radius: 250}
         ];
         
         // Renderizar cada sombra com gradiente suave (como o campo)
