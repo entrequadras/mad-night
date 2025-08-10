@@ -145,10 +145,14 @@ MadNight.renderer = {
         this.renderObjects(map, visibleArea);
         this.renderBuildings(map, visibleArea, 'bottom');
         this.renderWalls(map, visibleArea);
-        this.renderSpecialObjects(map);
         
         // Elementos superiores
         this.renderBuildings(map, visibleArea, 'top');
+        
+        // Objetos especiais (orelhão, lixeira) DEPOIS dos prédios
+        this.renderSpecialObjects(map);
+        
+        // Árvores e postes por cima de tudo
         this.renderTrees(map, visibleArea);
         this.renderStreetLights(map, visibleArea);
         
@@ -309,22 +313,41 @@ MadNight.renderer = {
         const ctx = this.ctx;
         const player = MadNight.player;
         
-        map.buildings.forEach(building => {
-            if (!MadNight.camera || !MadNight.camera.isVisible || 
-                MadNight.camera.isVisible(building)) {
-                
-                const buildingAsset = MadNight.assets.get(building.type);
-                if (buildingAsset && buildingAsset.loaded && buildingAsset.img) {
-                    const cutLine = building.y + buildingAsset.height * 0.75;
-                    const playerBottom = player.y + player.height;
+        // No mapa 2 (KS), prédios sempre acima
+        if (MadNight.game && MadNight.game.state && 
+            MadNight.game.state.currentMap === 2) {
+            // Só renderizar na camada 'top'
+            if (layer === 'top') {
+                map.buildings.forEach(building => {
+                    if (!MadNight.camera || !MadNight.camera.isVisible || 
+                        MadNight.camera.isVisible(building)) {
+                        
+                        const buildingAsset = MadNight.assets.get(building.type);
+                        if (buildingAsset && buildingAsset.loaded && buildingAsset.img) {
+                            ctx.drawImage(buildingAsset.img, building.x, building.y);
+                        }
+                    }
+                });
+            }
+        } else {
+            // Outros mapas - sistema de corte dinâmico
+            map.buildings.forEach(building => {
+                if (!MadNight.camera || !MadNight.camera.isVisible || 
+                    MadNight.camera.isVisible(building)) {
                     
-                    if ((layer === 'bottom' && playerBottom > cutLine) ||
-                        (layer === 'top' && playerBottom <= cutLine)) {
-                        ctx.drawImage(buildingAsset.img, building.x, building.y);
+                    const buildingAsset = MadNight.assets.get(building.type);
+                    if (buildingAsset && buildingAsset.loaded && buildingAsset.img) {
+                        const cutLine = building.y + buildingAsset.height * 0.75;
+                        const playerBottom = player.y + player.height;
+                        
+                        if ((layer === 'bottom' && playerBottom > cutLine) ||
+                            (layer === 'top' && playerBottom <= cutLine)) {
+                            ctx.drawImage(buildingAsset.img, building.x, building.y);
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     },
     
     // Renderizar objetos
