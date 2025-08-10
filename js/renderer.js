@@ -151,6 +151,12 @@ MadNight.renderer = {
         this.renderBuildings(map, visibleArea, 'top');
         this.renderTrees(map, visibleArea);
         this.renderStreetLights(map, visibleArea);
+        
+        // Traves do campo (acima do player) - mapa 0
+        if (MadNight.game && MadNight.game.state && 
+            MadNight.game.state.currentMap === 0) {
+            this.renderCampoTraves(map);
+        }
     },
     
     // Renderizar entidades
@@ -249,6 +255,16 @@ MadNight.renderer = {
             const campoX = (map.width - 800) / 2;
             const campoY = (map.height - 462) / 2;
             this.ctx.drawImage(campoAsset.img, campoX, campoY);
+        }
+    },
+    
+    // Renderizar traves do campo (acima do player)
+    renderCampoTraves: function(map) {
+        const travesAsset = MadNight.assets.get('campoTraves');
+        if (travesAsset && travesAsset.loaded && travesAsset.img) {
+            const campoX = (map.width - 800) / 2;
+            const campoY = (map.height - 462) / 2;
+            this.ctx.drawImage(travesAsset.img, campoX, campoY);
         }
     },
     
@@ -385,11 +401,18 @@ MadNight.renderer = {
         
         // Orelhão
         if (map.orelhao) {
-            ctx.fillStyle = '#00f';
-            ctx.fillRect(map.orelhao.x, map.orelhao.y, map.orelhao.w, map.orelhao.h);
-            ctx.fillStyle = '#fff';
-            this.setPixelFont(8);
-            ctx.fillText('TEL', map.orelhao.x + 5, map.orelhao.y + 30);
+            const orelhaoAsset = MadNight.assets.get('orelhao001');
+            if (orelhaoAsset && orelhaoAsset.loaded && orelhaoAsset.img) {
+                // Usar sprite do orelhão
+                this.ctx.drawImage(orelhaoAsset.img, map.orelhao.x, map.orelhao.y);
+            } else {
+                // Fallback se não carregar
+                ctx.fillStyle = '#00f';
+                ctx.fillRect(map.orelhao.x, map.orelhao.y, map.orelhao.w, map.orelhao.h);
+                ctx.fillStyle = '#fff';
+                this.setPixelFont(8);
+                ctx.fillText('TEL', map.orelhao.x + 5, map.orelhao.y + 30);
+            }
         }
         
         // Lixeira
