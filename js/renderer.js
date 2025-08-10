@@ -251,6 +251,7 @@ MadNight.renderer = {
     
     // Renderizar tiles
     renderTiles: function(map, visibleArea) {
+        // SEMPRE renderizar tiles, mesmo com background
         if (!map.tiles || !MadNight.assets) return;
         
         const ctx = this.ctx;
@@ -278,6 +279,8 @@ MadNight.renderer = {
         
         const bgAsset = MadNight.assets.get(map.backgroundAsset);
         if (bgAsset && bgAsset.loaded && bgAsset.img) {
+            // Background deve ser renderizado como base, não como overlay
+            this.ctx.globalAlpha = 1.0; // Garantir opacidade total
             this.ctx.drawImage(bgAsset.img, 0, 0);
         }
     },
