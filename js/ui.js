@@ -110,7 +110,7 @@
             // Versão (SEMPRE VISÍVEL)
             ctx.fillStyle = '#666';
             this.setPixelFont(ctx, 8);
-            ctx.fillText('Revisão Alpha-24', ctx.canvas.width/2, 115);
+            ctx.fillText('Revisão Alpha-25', ctx.canvas.width/2, 115);
             ctx.textAlign = 'left';
         },
         
