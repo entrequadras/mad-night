@@ -289,5 +289,31 @@ MadNight.collision = {
         }
         
         return rects;
+    },
+    
+    // Verificar colisão genérica (alias para checkRectCollision)
+    checkCollision: function(obj1, obj2) {
+        // Adaptar para diferentes formatos de objetos
+        const rect1 = {
+            x: obj1.x,
+            y: obj1.y,
+            width: obj1.width || obj1.w,
+            height: obj1.height || obj1.h
+        };
+        
+        const rect2 = {
+            x: obj2.x,
+            y: obj2.y,
+            w: obj2.w || obj2.width,
+            h: obj2.h || obj2.height
+        };
+        
+        return this.checkRectCollision(rect1, rect2);
+    },
+
+    // Inicializar sistema de colisão
+    init: function() {
+        console.log('Sistema de colisão inicializado');
+        return true;
     }
 };
