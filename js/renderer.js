@@ -200,6 +200,17 @@ MadNight.renderer = {
     renderEffects: function(map, visibleArea) {
         const ctx = this.ctx;
         
+        // Calcular área visível correta
+        if (!visibleArea || !visibleArea.left) {
+            const camera = MadNight.camera || {};
+            visibleArea = {
+                left: camera.x || 0,
+                top: camera.y || 0,
+                right: (camera.x || 0) + (camera.width || this.canvas.width),
+                bottom: (camera.y || 0) + (camera.height || this.canvas.height)
+            };
+        }
+        
         // Iluminação
         if (MadNight.lighting) {
             if (MadNight.lighting.renderTreeShadows) {
@@ -210,6 +221,10 @@ MadNight.renderer = {
             }
             if (MadNight.lighting.renderStreetLights) {
                 MadNight.lighting.renderStreetLights(ctx, map);
+            }
+            // IMPORTANTE: Renderizar luzes customizadas do mapa (Eixão)
+            if (MadNight.lighting.renderMapLights) {
+                MadNight.lighting.renderMapLights(ctx, map, visibleArea);
             }
         }
         
