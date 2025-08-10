@@ -141,16 +141,6 @@ MadNight.renderer = {
         // Carros estacionados
         this.renderParkedCars(map, visibleArea);
         
-        // ENTIDADES (player/inimigos) ANTES das sombras no mapa 2
-        if (MadNight.game && MadNight.game.state && 
-            MadNight.game.state.currentMap === 2) {
-            // Renderizar entidades primeiro
-            this.renderEntities(visibleArea);
-            
-            // DEPOIS renderizar sombras por cima deles
-            this.renderKSShadows(ctx);
-        }
-        
         // Objetos e estruturas
         this.renderObjects(map, visibleArea);
         this.renderBuildings(map, visibleArea, 'bottom');
@@ -177,14 +167,6 @@ MadNight.renderer = {
     renderEntities: function(visibleArea) {
         const ctx = this.ctx;
         
-        // No mapa 2, as entidades são renderizadas em renderMapLayers
-        if (MadNight.game && MadNight.game.state && 
-            MadNight.game.state.currentMap === 2) {
-            // Já foi renderizado em renderMapLayers, pular
-            return;
-        }
-        
-        // Outros mapas - ordem normal
         // Projéteis
         if (MadNight.projectiles && MadNight.projectiles.render) {
             MadNight.projectiles.render(ctx, visibleArea);
@@ -198,6 +180,12 @@ MadNight.renderer = {
         // Player
         if (MadNight.player && MadNight.player.render) {
             MadNight.player.render(ctx);
+        }
+        
+        // Sombras do mapa KS (DEPOIS do player, ANTES dos prédios)
+        if (MadNight.game && MadNight.game.state && 
+            MadNight.game.state.currentMap === 2) {
+            this.renderKSShadows(ctx);
         }
         
         // Overlay do Eixão (camada 2) ANTES do tráfego
@@ -644,3 +632,5 @@ MadNight.renderer = {
         ctx.restore();
     }
 };
+
+console.log('Módulo Renderer carregado');
