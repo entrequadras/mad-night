@@ -1,4 +1,4 @@
-// player.js - Sistema do player (Revisão Alpha-12)
+// player.js - Sistema do player (Revisão Alpha-13 - Corrigida)
 
 (function() {
     'use strict';
@@ -27,6 +27,10 @@
         inShadow: false,
         isMoving: false,
         
+        // Controle de animação
+        lastFrameTime: 0,
+        lastRechargeTime: 0,
+        
         // Inicializar player
         init: function() {
             this.width = MadNight.config.player.width;
@@ -38,6 +42,7 @@
             this.sprites = MadNight.assets.sprites.madmax || [];
             this.reset();
             console.log('Player inicializado');
+            return true;
         },
         
         // Resetar player
@@ -51,6 +56,9 @@
             this.frame = 0;
             this.inShadow = false;
             this.isMoving = false;
+            this.lastMove = Date.now();
+            this.lastFrameTime = 0;
+            this.lastRechargeTime = 0;
         },
         
         // Matar player
@@ -60,6 +68,12 @@
             this.isDead = true;
             this.isDashing = false;
             this.deathFrame = Math.floor(Math.random() * 4) + 12;
+            
+            // Verificar se game existe antes de acessar
+            if (!MadNight.game || !MadNight.game.state) {
+                console.error('Game não inicializado ao matar player');
+                return;
+            }
             
             // Incrementar contador de mortes
             const gameState = MadNight.game.state;
@@ -82,8 +96,8 @@
                 console.log('GAME OVER! Máximo de mortes atingido');
                 // Game over após mostrar mensagem
                 setTimeout(() => {
-                    if (MadNight.game.handleGameOver) {
-                        MadNight.game.handleGameOver();
+                    if (MadNight.game.handlePlayerDeath) {
+                        MadNight.game.handlePlayerDeath();
                     } else if (MadNight.game.restart) {
                         MadNight.game.restart();
                     }
@@ -98,6 +112,11 @@
         
         // Respawn do player
         respawn: function() {
+            if (!MadNight.game || !MadNight.game.state) {
+                console.error('Game não inicializado ao respawnar');
+                return;
+            }
+            
             const gameState = MadNight.game.state;
             
             console.log(`Respawnando... (Morte ${gameState.deathCount}/${MadNight.config.gameplay.maxDeaths})`);
@@ -113,6 +132,11 @@
         // Atualizar player
         update: function(keys) {
             if (this.isDead) return;
+            
+            // Verificar se game está inicializado
+            if (!MadNight.game || !MadNight.game.state) {
+                return;
+            }
             
             const gameState = MadNight.game.state;
             
@@ -132,22 +156,22 @@
                 this.processDash();
             } else {
                 // Movimento normal
-                if (keys['ArrowUp']) {
+                if (keys && keys['ArrowUp']) {
                     dy = -1;
                     this.direction = 'up';
                     moving = true;
                 }
-                if (keys['ArrowDown']) {
+                if (keys && keys['ArrowDown']) {
                     dy = 1;
                     this.direction = 'down';
                     moving = true;
                 }
-                if (keys['ArrowLeft']) {
+                if (keys && keys['ArrowLeft']) {
                     dx = -1;
                     this.direction = 'left';
                     moving = true;
                 }
-                if (keys['ArrowRight']) {
+                if (keys && keys['ArrowRight']) {
                     dx = 1;
                     this.direction = 'right';
                     moving = true;
@@ -171,7 +195,7 @@
                 }
                 
                 // Iniciar dash
-                if (keys[' '] && gameState.pedalPower > 0 && 
+                if (keys && keys[' '] && gameState.pedalPower > 0 && 
                     !this.isDashing && gameState.dashUnlocked) {
                     this.startDash();
                 }
@@ -210,6 +234,8 @@
         
         // Iniciar dash
         startDash: function() {
+            if (!MadNight.game || !MadNight.game.state) return;
+            
             const gameState = MadNight.game.state;
             
             if (gameState.pedalPower <= 0) return;
@@ -266,6 +292,8 @@
         
         // Atualizar pedal power
         updatePedalPower: function() {
+            if (!MadNight.game || !MadNight.game.state) return;
+            
             const gameState = MadNight.game.state;
             const config = MadNight.config.gameplay;
             
@@ -326,19 +354,23 @@
                 }
                 
                 // Atender telefone
-                if (MadNight.collision && MadNight.collision.checkRectCollision &&
-                    MadNight.collision.checkRectCollision(this, map.orelhao)) {
+                if (MadNight.collision && MadNight.collision.checkCollision &&
+                    MadNight.collision.checkCollision(this, map.orelhao)) {
                     gameState.dashUnlocked = true;
                     if (MadNight.audio && MadNight.audio.stopLoopSFX) {
                         MadNight.audio.stopLoopSFX('phone_ring');
                     }
                     console.log('Dash desbloqueado!');
+                    
+                    if (MadNight.ui && MadNight.ui.showMessage) {
+                        MadNight.ui.showMessage("DASH DESBLOQUEADO!\nPressione ESPAÇO para usar", 3000);
+                    }
                 }
             }
             
             // Verificar lixeira para bomba
-            if (map.lixeira && MadNight.collision && MadNight.collision.checkRectCollision &&
-                MadNight.collision.checkRectCollision(this, map.lixeira)) {
+            if (map.lixeira && MadNight.collision && MadNight.collision.checkCollision &&
+                MadNight.collision.checkCollision(this, map.lixeira)) {
                 
                 const aliveEnemies = MadNight.enemies ? MadNight.enemies.getAliveCount() : 0;
                 
@@ -351,12 +383,21 @@
                         MadNight.audio.playMusic('fuga');
                     }
                     console.log('Bomba plantada! FUJA!');
+                    
+                    if (MadNight.ui && MadNight.ui.showMessage) {
+                        MadNight.ui.showMessage("BOMBA PLANTADA!\nFUJA!", 3000);
+                    }
+                    
+                    // Recarregar mapa em modo fuga
+                    if (MadNight.game && MadNight.game.loadMap) {
+                        MadNight.game.loadMap(gameState.currentMap, true);
+                    }
                 }
             }
             
             // Verificar saída do mapa
-            if (map.exit && MadNight.collision && MadNight.collision.checkRectCollision &&
-                MadNight.collision.checkRectCollision(this, map.exit)) {
+            if (map.exit && MadNight.collision && MadNight.collision.checkCollision &&
+                MadNight.collision.checkCollision(this, map.exit)) {
                 
                 if (MadNight.game && MadNight.game.handleMapExit) {
                     MadNight.game.handleMapExit();
@@ -384,6 +425,8 @@
         
         // Renderizar player
         render: function(ctx) {
+            if (!ctx) return;
+            
             // Verificar se sprites estão carregados
             if (MadNight.assets && MadNight.assets.areSpritesLoaded && 
                 MadNight.assets.areSpritesLoaded('madmax')) {
@@ -395,6 +438,11 @@
                     // Aplicar transparência se na sombra
                     if (this.inShadow) {
                         ctx.globalAlpha = 0.5;
+                    }
+                    
+                    // Piscar se invulnerável após respawn
+                    if (this.isDead) {
+                        ctx.globalAlpha = 0.3;
                     }
                     
                     ctx.drawImage(sprite, this.x, this.y, this.width, this.height);
@@ -411,6 +459,8 @@
         
         // Renderizar fallback (quadrado colorido)
         renderFallback: function(ctx) {
+            if (!ctx) return;
+            
             ctx.save();
             
             ctx.fillStyle = this.isDashing ? '#ff0' : 
@@ -451,6 +501,15 @@
             this.y = y;
             this.isDead = false;
             this.isDashing = false;
+        },
+        
+        // Handlers de input (opcionais, caso game.js não os chame)
+        handleKeyDown: function(e) {
+            // Pode ser usado para ações especiais
+        },
+        
+        handleKeyUp: function(e) {
+            // Pode ser usado para ações especiais
         }
     };
     
