@@ -167,6 +167,31 @@ MadNight.renderer = {
     renderEntities: function(visibleArea) {
         const ctx = this.ctx;
         
+        // No mapa 2 (KS), renderizar player ANTES dos prédios top
+        if (MadNight.game && MadNight.game.state && 
+            MadNight.game.state.currentMap === 2) {
+            // Ordem especial para mapa KS
+            
+            // 1. Projéteis
+            if (MadNight.projectiles && MadNight.projectiles.render) {
+                MadNight.projectiles.render(ctx, visibleArea);
+            }
+            
+            // 2. Inimigos
+            if (MadNight.enemies && MadNight.enemies.render) {
+                MadNight.enemies.render(ctx, visibleArea);
+            }
+            
+            // 3. Player ANTES dos prédios
+            if (MadNight.player && MadNight.player.render) {
+                MadNight.player.render(ctx);
+            }
+            
+            // Player já foi renderizado, não renderizar de novo
+            return;
+        }
+        
+        // Outros mapas - ordem normal
         // Projéteis
         if (MadNight.projectiles && MadNight.projectiles.render) {
             MadNight.projectiles.render(ctx, visibleArea);
@@ -223,6 +248,12 @@ MadNight.renderer = {
                 if (MadNight.lighting.renderFieldShadow) {
                     MadNight.lighting.renderFieldShadow(ctx, map);
                 }
+            }
+            
+            // Sombras customizadas do mapa KS (mapa 2)
+            if (MadNight.game && MadNight.game.state && 
+                MadNight.game.state.currentMap === 2) {
+                this.renderKSShadows(ctx);
             }
             
             if (MadNight.lighting.renderNightOverlay) {
@@ -550,6 +581,74 @@ MadNight.renderer = {
             ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
             ctx.lineWidth = 1;
             ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+        });
+        
+        ctx.restore();
+    },
+    
+    // Renderizar sombras customizadas do mapa KS
+    renderKSShadows: function(ctx) {
+        ctx.save();
+        
+        // Sombras grandes
+        const largeShadows = [
+            {x: 1700, y: 1600, radius: 150},
+            {x: 855, y: 1000, radiusX: 200, radiusY: 150}, // sombra larga
+            {x: 1900, y: 520, radius: 140},
+            {x: 1845, y: 40, radius: 130},
+            {x: 780, y: 5, radius: 120},
+            {x: 1230, y: 2, radius: 120},
+            {x: 75, y: 970, radius: 140}
+        ];
+        
+        // Sombras médias
+        const mediumShadows = [
+            {x: 1665, y: 678, radius: 80}
+        ];
+        
+        // Renderizar sombras grandes
+        largeShadows.forEach(shadow => {
+            const gradient = ctx.createRadialGradient(
+                shadow.x, shadow.y, 0,
+                shadow.x, shadow.y, 
+                shadow.radiusX || shadow.radius
+            );
+            gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+            gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.3)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            
+            ctx.fillStyle = gradient;
+            if (shadow.radiusX) {
+                // Sombra elíptica
+                ctx.save();
+                ctx.scale(1, shadow.radiusY / shadow.radiusX);
+                ctx.beginPath();
+                ctx.arc(shadow.x, shadow.y * (shadow.radiusX / shadow.radiusY), 
+                       shadow.radiusX, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            } else {
+                // Sombra circular
+                ctx.beginPath();
+                ctx.arc(shadow.x, shadow.y, shadow.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        });
+        
+        // Renderizar sombras médias
+        mediumShadows.forEach(shadow => {
+            const gradient = ctx.createRadialGradient(
+                shadow.x, shadow.y, 0,
+                shadow.x, shadow.y, shadow.radius
+            );
+            gradient.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
+            gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.25)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(shadow.x, shadow.y, shadow.radius, 0, Math.PI * 2);
+            ctx.fill();
         });
         
         ctx.restore();
