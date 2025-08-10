@@ -182,7 +182,7 @@
             ],
             tiles: null, // Será gerado
             hasBackground: true,
-            backgroundAsset: 'entradaKS01',
+            backgroundAsset: 'entradaKS01', // PNG com transparência sobre os tiles
             buildings: [
                 {
                     type: 'predio0002',
