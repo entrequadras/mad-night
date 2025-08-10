@@ -141,6 +141,23 @@ MadNight.renderer = {
         // Carros estacionados
         this.renderParkedCars(map, visibleArea);
         
+        // NO MAPA 2 (KS): Renderizar player/inimigos ANTES dos prédios
+        if (MadNight.game && MadNight.game.state && 
+            MadNight.game.state.currentMap === 2) {
+            // Player e inimigos primeiro
+            if (MadNight.projectiles && MadNight.projectiles.render) {
+                MadNight.projectiles.render(ctx, visibleArea);
+            }
+            if (MadNight.enemies && MadNight.enemies.render) {
+                MadNight.enemies.render(ctx, visibleArea);
+            }
+            if (MadNight.player && MadNight.player.render) {
+                MadNight.player.render(ctx);
+            }
+            // Sombras por cima do player
+            this.renderKSShadows(ctx);
+        }
+        
         // Objetos e estruturas
         this.renderObjects(map, visibleArea);
         this.renderBuildings(map, visibleArea, 'bottom');
@@ -167,6 +184,13 @@ MadNight.renderer = {
     renderEntities: function(visibleArea) {
         const ctx = this.ctx;
         
+        // No mapa 2, as entidades já foram renderizadas em renderMapLayers
+        if (MadNight.game && MadNight.game.state && 
+            MadNight.game.state.currentMap === 2) {
+            return; // Pular para não renderizar duas vezes
+        }
+        
+        // Outros mapas - renderizar normalmente
         // Projéteis
         if (MadNight.projectiles && MadNight.projectiles.render) {
             MadNight.projectiles.render(ctx, visibleArea);
@@ -180,12 +204,6 @@ MadNight.renderer = {
         // Player
         if (MadNight.player && MadNight.player.render) {
             MadNight.player.render(ctx);
-        }
-        
-        // Sombras do mapa KS (DEPOIS do player, ANTES dos prédios)
-        if (MadNight.game && MadNight.game.state && 
-            MadNight.game.state.currentMap === 2) {
-            this.renderKSShadows(ctx);
         }
         
         // Overlay do Eixão (camada 2) ANTES do tráfego
