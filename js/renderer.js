@@ -1,4 +1,5 @@
 // renderer.js - Sistema de renderização (Revisão Alpha-11)
+// SUBSTITUA TODO O SEU renderer.js POR ESTE ARQUIVO
 
 (function() {
     'use strict';
@@ -106,6 +107,13 @@
                 // Renderizar overlay do Eixão (camada 2)
                 this.renderEixaoOverlay();
                 
+                // Renderizar tráfego DEPOIS do overlay (carros ficam acima)
+                if (MadNight.game && MadNight.game.state && 
+                    MadNight.game.state.currentMap === 1 && 
+                    MadNight.traffic && MadNight.traffic.render) {
+                    MadNight.traffic.render(ctx, visibleArea);
+                }
+                
                 // Renderizar efeitos e overlays
                 this.renderEffects(map, visibleArea);
                 
@@ -194,13 +202,6 @@
             // Player
             if (MadNight.player && MadNight.player.render) {
                 MadNight.player.render(ctx);
-            }
-            
-            // Tráfego (apenas no Eixão)
-            if (MadNight.game && MadNight.game.state && 
-                MadNight.game.state.currentMap === 1 && 
-                MadNight.traffic && MadNight.traffic.render) {
-                MadNight.traffic.render(ctx, visibleArea);
             }
         },
         
@@ -401,9 +402,9 @@
                         MadNight.assets.get(light.type) : null;
                     
                     if (lightAsset && lightAsset.loaded && lightAsset.img) {
-                        // Usar tamanho fixo para postes
-                        const width = 80;
-                        const height = 240;
+                        // POSTES PEQUENOS - tamanho original dividido por 2
+                        const width = 20;   // Era 40, agora 20
+                        const height = 60;  // Era 120, agora 60
                         
                         if (light.rotation) {
                             ctx.save();
