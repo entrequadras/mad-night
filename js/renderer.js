@@ -472,14 +472,40 @@ MadNight.renderer = {
                         map.lixeira.x + 2, map.lixeira.y + 25);
         }
         
-        // Saída
+        // Saída com setas direcionais
         if (map.exit) {
-            ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#0f0';
-            ctx.fillRect(map.exit.x, map.exit.y, map.exit.w, map.exit.h);
-            ctx.fillStyle = '#fff';
-            this.setPixelFont(8);
-            ctx.fillText(gameState.phase === 'escape' ? 'VOLTA' : 'SAÍDA', 
-                        map.exit.x + 5, map.exit.y + 20);
+            // Determinar qual seta usar baseado na direção do mapa
+            const arrowMap = {
+                'right': 'setadireita',
+                'left': 'setaesquerda',
+                'up': 'setanorte',
+                'down': 'setasul'
+            };
+            
+            const arrowAssetName = arrowMap[map.direction] || 'setadireita';
+            const arrowAsset = MadNight.assets.get(arrowAssetName);
+            
+            if (arrowAsset && arrowAsset.loaded && arrowAsset.img) {
+                // Background da saída (verde ou vermelho)
+                ctx.fillStyle = gameState.phase === 'escape' ? 
+                    'rgba(255, 0, 0, 0.3)' : 'rgba(0, 255, 0, 0.3)';
+                ctx.fillRect(map.exit.x, map.exit.y, map.exit.w, map.exit.h);
+                
+                // Centralizar seta na área de saída
+                const centerX = map.exit.x + (map.exit.w - arrowAsset.width) / 2;
+                const centerY = map.exit.y + (map.exit.h - arrowAsset.height) / 2;
+                
+                // Renderizar seta
+                ctx.drawImage(arrowAsset.img, centerX, centerY);
+            } else {
+                // Fallback se a seta não carregar
+                ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#0f0';
+                ctx.fillRect(map.exit.x, map.exit.y, map.exit.w, map.exit.h);
+                ctx.fillStyle = '#fff';
+                this.setPixelFont(8);
+                ctx.fillText(gameState.phase === 'escape' ? 'VOLTA' : 'SAÍDA', 
+                            map.exit.x + 5, map.exit.y + 20);
+            }
         }
     },
     
