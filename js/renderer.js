@@ -104,7 +104,28 @@
                 // Renderizar entidades
                 this.renderEntities(visibleArea);
                 
-                // Renderizar overlay do Eixão (camada 2)
+                // Renderizar campo de futebol
+        renderCampo: function(map) {
+            const campoAsset = MadNight.assets.get('campo');
+            if (campoAsset && campoAsset.loaded && campoAsset.img) {
+                const campoX = (map.width - 800) / 2;
+                const campoY = (map.height - 462) / 2;
+                ctx.drawImage(campoAsset.img, campoX, campoY);
+            }
+        },
+        
+        // Renderizar traves do campo
+        renderCampoTraves: function() {
+            const map = MadNight.maps.getCurrentMap();
+            const travesAsset = MadNight.assets.get('campoTraves');
+            if (travesAsset && travesAsset.loaded && travesAsset.img) {
+                const campoX = (map.width - 800) / 2;
+                const campoY = (map.height - 462) / 2;
+                ctx.drawImage(travesAsset.img, campoX, campoY);
+            }
+        },
+        
+        // Renderizar overlay do Eixão (camada 2)
                 this.renderEixaoOverlay();
                 
                 // Renderizar tráfego DEPOIS do overlay (carros ficam acima)
@@ -158,6 +179,12 @@
                 this.renderBackground(map);
             }
             
+            // Renderizar campo de futebol no Maconhão (mapa 0)
+            if (MadNight.game && MadNight.game.state && 
+                MadNight.game.state.currentMap === 0) {
+                this.renderCampo(map);
+            }
+            
             // Renderizar carros estacionados (IMPORTANTE para mapa 2)
             this.renderParkedCars(map, visibleArea);
             
@@ -173,6 +200,12 @@
             this.renderBuildings(map, visibleArea, 'top');
             this.renderTrees(map, visibleArea);
             this.renderStreetLights(map, visibleArea);
+            
+            // Renderizar traves do campo por cima (mapa 0)
+            if (MadNight.game && MadNight.game.state && 
+                MadNight.game.state.currentMap === 0) {
+                this.renderCampoTraves();
+            }
         },
         
         // Renderizar overlay do Eixão
@@ -402,9 +435,9 @@
                         MadNight.assets.get(light.type) : null;
                     
                     if (lightAsset && lightAsset.loaded && lightAsset.img) {
-                        // POSTES PEQUENOS - tamanho original dividido por 2
-                        const width = 20;   // Era 40, agora 20
-                        const height = 60;  // Era 120, agora 60
+                        // POSTES - tamanho correto (40x120)
+                        const width = 40;   
+                        const height = 120;
                         
                         if (light.rotation) {
                             ctx.save();
@@ -448,11 +481,17 @@
             
             // Orelhão
             if (map.orelhao) {
-                ctx.fillStyle = '#00f';
-                ctx.fillRect(map.orelhao.x, map.orelhao.y, map.orelhao.w, map.orelhao.h);
-                ctx.fillStyle = '#fff';
-                this.setPixelFont(8);
-                ctx.fillText('TEL', map.orelhao.x + 5, map.orelhao.y + 30);
+                const orelhaoAsset = MadNight.assets.get('orelhao001');
+                if (orelhaoAsset && orelhaoAsset.loaded && orelhaoAsset.img) {
+                    ctx.drawImage(orelhaoAsset.img, map.orelhao.x, map.orelhao.y);
+                } else {
+                    // Fallback
+                    ctx.fillStyle = '#00f';
+                    ctx.fillRect(map.orelhao.x, map.orelhao.y, map.orelhao.w, map.orelhao.h);
+                    ctx.fillStyle = '#fff';
+                    this.setPixelFont(8);
+                    ctx.fillText('TEL', map.orelhao.x + 5, map.orelhao.y + 30);
+                }
             }
             
             // Lixeira
@@ -465,14 +504,48 @@
                             map.lixeira.x + 2, map.lixeira.y + 25);
             }
             
-            // Saída
+            // Saída com setas direcionais
             if (map.exit) {
-                ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#0f0';
-                ctx.fillRect(map.exit.x, map.exit.y, map.exit.w, map.exit.h);
-                ctx.fillStyle = '#fff';
-                this.setPixelFont(8);
-                ctx.fillText(gameState.phase === 'escape' ? 'VOLTA' : 'SAÍDA', 
-                            map.exit.x + 5, map.exit.y + 20);
+                // Determinar qual seta usar baseado na direção do mapa
+                const arrowMap = {
+                    'right': 'setadireita',
+                    'left': 'setaesquerda',
+                    'up': 'setanorte',
+                    'down': 'setasul'
+                };
+                
+                const arrowAssetName = arrowMap[map.direction] || 'setadireita';
+                const arrowAsset = MadNight.assets.get(arrowAssetName);
+                
+                if (arrowAsset && arrowAsset.loaded && arrowAsset.img) {
+                    // Centralizar seta na área de saída
+                    const centerX = map.exit.x + (map.exit.w - arrowAsset.width) / 2;
+                    const centerY = map.exit.y + (map.exit.h - arrowAsset.height) / 2;
+                    
+                    // Durante fuga, tingir de vermelho
+                    if (gameState.phase === 'escape') {
+                        ctx.save();
+                        ctx.globalCompositeOperation = 'multiply';
+                        ctx.fillStyle = '#ff0000';
+                        ctx.fillRect(map.exit.x, map.exit.y, map.exit.w, map.exit.h);
+                        ctx.globalCompositeOperation = 'source-over';
+                        ctx.drawImage(arrowAsset.img, centerX, centerY);
+                        ctx.restore();
+                    } else {
+                        // Normal - verde
+                        ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
+                        ctx.fillRect(map.exit.x, map.exit.y, map.exit.w, map.exit.h);
+                        ctx.drawImage(arrowAsset.img, centerX, centerY);
+                    }
+                } else {
+                    // Fallback
+                    ctx.fillStyle = gameState.phase === 'escape' ? '#f00' : '#0f0';
+                    ctx.fillRect(map.exit.x, map.exit.y, map.exit.w, map.exit.h);
+                    ctx.fillStyle = '#fff';
+                    this.setPixelFont(8);
+                    ctx.fillText(gameState.phase === 'escape' ? 'VOLTA' : 'SAÍDA', 
+                                map.exit.x + 5, map.exit.y + 20);
+                }
             }
         },
         
