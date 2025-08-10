@@ -1,4 +1,4 @@
-// renderer.js - Sistema de renderização (Recuperação Alpha-13)
+// renderer.js - Sistema de renderização (Revisão Alpha-25 - Limpa)
 
 MadNight.renderer = {
     // Contexto do canvas
@@ -19,7 +19,7 @@ MadNight.renderer = {
     
     // Helper para definir fonte pixel
     setPixelFont: function(size) {
-        this.ctx.font = `${size}px "Press Start 2P"`;
+        this.ctx.font = size + 'px "Press Start 2P"';
         this.ctx.textBaseline = 'top';
         this.ctx.textAlign = 'left';
     },
@@ -127,7 +127,7 @@ MadNight.renderer = {
             // Eixão - usar imagem de fundo
             this.renderEixaoBackground();
         } else {
-            // Outros mapas - tiles
+            // Outros mapas - tiles primeiro, depois background
             this.renderTiles(map, visibleArea);
             this.renderBackground(map);
         }
@@ -256,7 +256,7 @@ MadNight.renderer = {
         
         const ctx = this.ctx;
         
-        map.tiles.forEach(tile => {
+        map.tiles.forEach(function(tile) {
             if (!MadNight.camera || !MadNight.camera.isVisible || 
                 MadNight.camera.isVisible(tile)) {
                 
@@ -327,7 +327,7 @@ MadNight.renderer = {
         
         const ctx = this.ctx;
         
-        map.trees.forEach(tree => {
+        map.trees.forEach(function(tree) {
             if (!MadNight.camera || !MadNight.camera.isVisible || 
                 MadNight.camera.isVisible(tree)) {
                 
@@ -351,7 +351,7 @@ MadNight.renderer = {
             MadNight.game.state.currentMap === 2) {
             // Só renderizar na camada 'top'
             if (layer === 'top') {
-                map.buildings.forEach(building => {
+                map.buildings.forEach(function(building) {
                     if (!MadNight.camera || !MadNight.camera.isVisible || 
                         MadNight.camera.isVisible(building)) {
                         
@@ -364,7 +364,7 @@ MadNight.renderer = {
             }
         } else {
             // Outros mapas - sistema de corte dinâmico
-            map.buildings.forEach(building => {
+            map.buildings.forEach(function(building) {
                 if (!MadNight.camera || !MadNight.camera.isVisible || 
                     MadNight.camera.isVisible(building)) {
                     
@@ -389,7 +389,7 @@ MadNight.renderer = {
         
         const ctx = this.ctx;
         
-        map.objects.forEach(obj => {
+        map.objects.forEach(function(obj) {
             if (!MadNight.camera || !MadNight.camera.isVisible || 
                 MadNight.camera.isVisible(obj)) {
                 
@@ -417,7 +417,7 @@ MadNight.renderer = {
         
         const ctx = this.ctx;
         
-        map.streetLights.forEach(light => {
+        map.streetLights.forEach(function(light) {
             if (!MadNight.camera || !MadNight.camera.isVisible || 
                 MadNight.camera.isVisible(light)) {
                 
@@ -439,7 +439,7 @@ MadNight.renderer = {
         ctx.fillStyle = '#666';
         
         if (map.walls) {
-            map.walls.forEach(wall => {
+            map.walls.forEach(function(wall) {
                 if (!MadNight.camera || !MadNight.camera.isVisible || 
                     MadNight.camera.isVisible(wall)) {
                     if (!wall.invisible) {
@@ -528,7 +528,7 @@ MadNight.renderer = {
             
             const carros = MadNight.maps.getParkedCarsForMap2();
             
-            carros.forEach(car => {
+            carros.forEach(function(car) {
                 if (!MadNight.camera || !MadNight.camera.isVisible || 
                     MadNight.camera.isVisible(car)) {
                     
@@ -553,7 +553,7 @@ MadNight.renderer = {
         
         const rects = MadNight.collision.getCollisionRects();
         
-        rects.forEach(rect => {
+        rects.forEach(function(rect) {
             ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
             ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
             ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
@@ -586,7 +586,7 @@ MadNight.renderer = {
         ];
         
         // Renderizar cada sombra com gradiente suave (como o campo)
-        shadows.forEach(shadow => {
+        shadows.forEach(function(shadow) {
             const gradient = ctx.createRadialGradient(
                 shadow.x, shadow.y, 0,
                 shadow.x, shadow.y, shadow.radius
@@ -617,7 +617,7 @@ MadNight.renderer = {
             {x: 1920, y: 1610, radius: 400}
         ];
         
-        cornerShadows.forEach(corner => {
+        cornerShadows.forEach(function(corner) {
             const gradient = ctx.createRadialGradient(
                 corner.x, corner.y, 0,
                 corner.x, corner.y, corner.radius
