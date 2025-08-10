@@ -138,6 +138,12 @@ MadNight.renderer = {
             this.renderCampo(map);
         }
         
+        // SOMBRAS DO MAPA KS - renderizar ANTES dos prédios
+        if (MadNight.game && MadNight.game.state && 
+            MadNight.game.state.currentMap === 2) {
+            this.renderKSShadows(ctx);
+        }
+        
         // Carros estacionados
         this.renderParkedCars(map, visibleArea);
         
@@ -248,12 +254,6 @@ MadNight.renderer = {
                 if (MadNight.lighting.renderFieldShadow) {
                     MadNight.lighting.renderFieldShadow(ctx, map);
                 }
-            }
-            
-            // Sombras customizadas do mapa KS (mapa 2)
-            if (MadNight.game && MadNight.game.state && 
-                MadNight.game.state.currentMap === 2) {
-                this.renderKSShadows(ctx);
             }
             
             if (MadNight.lighting.renderNightOverlay) {
@@ -586,69 +586,72 @@ MadNight.renderer = {
         ctx.restore();
     },
     
-    // Renderizar sombras customizadas do mapa KS
+    // Renderizar sombras customizadas do mapa KS (estilo Maconhão)
     renderKSShadows: function(ctx) {
         ctx.save();
         
-        // Sombras grandes
-        const largeShadows = [
-            {x: 1700, y: 1600, radius: 150},
-            {x: 855, y: 1000, radiusX: 200, radiusY: 150}, // sombra larga
-            {x: 1900, y: 520, radius: 140},
-            {x: 1845, y: 40, radius: 130},
-            {x: 780, y: 5, radius: 120},
-            {x: 1230, y: 2, radius: 120},
-            {x: 75, y: 970, radius: 140}
+        // Usar mesmo estilo das sombras do Maconhão
+        const shadows = [
+            // Sombras grandes (como as do campo)
+            {x: 1700, y: 1600, radius: 400},
+            {x: 855, y: 1000, radius: 450}, // sombra bem larga
+            {x: 1900, y: 520, radius: 350},
+            {x: 1845, y: 40, radius: 300},
+            {x: 780, y: 5, radius: 300},
+            {x: 1230, y: 2, radius: 300},
+            {x: 75, y: 970, radius: 350},
+            // Sombra média
+            {x: 1665, y: 678, radius: 200}
         ];
         
-        // Sombras médias
-        const mediumShadows = [
-            {x: 1665, y: 678, radius: 80}
-        ];
-        
-        // Renderizar sombras grandes
-        largeShadows.forEach(shadow => {
-            const gradient = ctx.createRadialGradient(
-                shadow.x, shadow.y, 0,
-                shadow.x, shadow.y, 
-                shadow.radiusX || shadow.radius
-            );
-            gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-            gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.3)');
-            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            
-            ctx.fillStyle = gradient;
-            if (shadow.radiusX) {
-                // Sombra elíptica
-                ctx.save();
-                ctx.scale(1, shadow.radiusY / shadow.radiusX);
-                ctx.beginPath();
-                ctx.arc(shadow.x, shadow.y * (shadow.radiusX / shadow.radiusY), 
-                       shadow.radiusX, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            } else {
-                // Sombra circular
-                ctx.beginPath();
-                ctx.arc(shadow.x, shadow.y, shadow.radius, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        });
-        
-        // Renderizar sombras médias
-        mediumShadows.forEach(shadow => {
+        // Renderizar cada sombra com gradiente suave (como o campo)
+        shadows.forEach(shadow => {
             const gradient = ctx.createRadialGradient(
                 shadow.x, shadow.y, 0,
                 shadow.x, shadow.y, shadow.radius
             );
-            gradient.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
-            gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.25)');
+            
+            // Mesmo gradiente do renderFieldShadow
+            gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+            gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.54)');
+            gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.42)');
+            gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.24)');
+            gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.12)');
             gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
             
             ctx.fillStyle = gradient;
-            ctx.beginPath();
-            ctx.arc(shadow.x, shadow.y, shadow.radius, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.fillRect(
+                shadow.x - shadow.radius,
+                shadow.y - shadow.radius,
+                shadow.radius * 2,
+                shadow.radius * 2
+            );
+        });
+        
+        // Adicionar sombras nos cantos (como no Maconhão)
+        const cornerShadows = [
+            {x: 0, y: 0, radius: 400},
+            {x: 1920, y: 0, radius: 400},
+            {x: 0, y: 1610, radius: 400},
+            {x: 1920, y: 1610, radius: 400}
+        ];
+        
+        cornerShadows.forEach(corner => {
+            const gradient = ctx.createRadialGradient(
+                corner.x, corner.y, 0,
+                corner.x, corner.y, corner.radius
+            );
+            gradient.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
+            gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(
+                corner.x - corner.radius,
+                corner.y - corner.radius,
+                corner.radius * 2,
+                corner.radius * 2
+            );
         });
         
         ctx.restore();
