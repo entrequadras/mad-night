@@ -1,4 +1,4 @@
-// renderer.js - Sistema de renderização (Revisão Alpha-05)
+// renderer.js - Sistema de renderização (Revisão Alpha-11)
 
 (function() {
     'use strict';
@@ -103,6 +103,9 @@
                 // Renderizar entidades
                 this.renderEntities(visibleArea);
                 
+                // Renderizar overlay do Eixão (camada 2)
+                this.renderEixaoOverlay();
+                
                 // Renderizar efeitos e overlays
                 this.renderEffects(map, visibleArea);
                 
@@ -133,9 +136,22 @@
         
         // Renderizar camadas do mapa
         renderMapLayers: function(map, visibleArea) {
-            // Camada 1: Base (tiles, background)
-            this.renderTiles(map, visibleArea);
-            this.renderBackground(map);
+            // IMPORTANTE: Renderizar camadas do Eixão PRIMEIRO se for o mapa 1
+            if (MadNight.game && MadNight.game.state && 
+                MadNight.game.state.currentMap === 1) {
+                // Camada 1 do Eixão (fundo)
+                const eixao1 = MadNight.assets.get('eixaoCamada1');
+                if (eixao1 && eixao1.loaded && eixao1.img) {
+                    ctx.drawImage(eixao1.img, 0, 0);
+                }
+            } else {
+                // Outros mapas: renderizar tiles normalmente
+                this.renderTiles(map, visibleArea);
+                this.renderBackground(map);
+            }
+            
+            // Renderizar carros estacionados (IMPORTANTE para mapa 2)
+            this.renderParkedCars(map, visibleArea);
             
             // Camada 2: Objetos estáticos
             this.renderObjects(map, visibleArea);
@@ -149,6 +165,18 @@
             this.renderBuildings(map, visibleArea, 'top');
             this.renderTrees(map, visibleArea);
             this.renderStreetLights(map, visibleArea);
+        },
+        
+        // Renderizar overlay do Eixão
+        renderEixaoOverlay: function() {
+            if (MadNight.game && MadNight.game.state && 
+                MadNight.game.state.currentMap === 1) {
+                // Camada 2 do Eixão (sobreposição)
+                const eixao2 = MadNight.assets.get('eixaoCamada2');
+                if (eixao2 && eixao2.loaded && eixao2.img) {
+                    ctx.drawImage(eixao2.img, 0, 0);
+                }
+            }
         },
         
         // Renderizar entidades
@@ -234,6 +262,61 @@
             }
         },
         
+        // Renderizar carros estacionados
+        renderParkedCars: function(map, visibleArea) {
+            // Carros especiais do mapa 2 (Fronteira com KS)
+            if (MadNight.game && MadNight.game.state && 
+                MadNight.game.state.currentMap === 2) {
+                
+                // Obter lista de carros do mapa 2
+                const carros = MadNight.maps.getParkedCarsForMap2();
+                
+                carros.forEach(car => {
+                    // Verificar se o carro está visível
+                    if (!MadNight.camera || !MadNight.camera.isVisible || 
+                        MadNight.camera.isVisible(car)) {
+                        
+                        const carAsset = MadNight.assets.get(car.type);
+                        
+                        if (carAsset && carAsset.loaded && carAsset.img) {
+                            // Renderizar imagem do carro
+                            ctx.drawImage(carAsset.img, car.x, car.y);
+                        } else {
+                            // Fallback: desenhar retângulo colorido
+                            ctx.fillStyle = '#444';
+                            ctx.fillRect(car.x, car.y, 150, 100);
+                            
+                            // Debug: mostrar nome do asset que faltou
+                            if (MadNight.config.debug.showCollisions) {
+                                ctx.fillStyle = '#f00';
+                                ctx.font = '10px Arial';
+                                ctx.fillText(car.type, car.x, car.y - 5);
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Carros normais de outros mapas (se houver)
+            if (map.parkedCars) {
+                map.parkedCars.forEach(car => {
+                    if (!MadNight.camera || !MadNight.camera.isVisible || 
+                        MadNight.camera.isVisible(car)) {
+                        
+                        const carAsset = MadNight.assets.get(car.type);
+                        
+                        if (carAsset && carAsset.loaded && carAsset.img) {
+                            ctx.drawImage(carAsset.img, car.x, car.y);
+                        } else {
+                            // Fallback
+                            ctx.fillStyle = '#333';
+                            ctx.fillRect(car.x, car.y, 120, 80);
+                        }
+                    }
+                });
+            }
+        },
+        
         // Renderizar objetos
         renderObjects: function(map, visibleArea) {
             if (!map.objects || !MadNight.assets) return;
@@ -306,7 +389,7 @@
             });
         },
         
-        // Renderizar postes de luz
+        // Renderizar postes de luz (COM TAMANHO CORRIGIDO)
         renderStreetLights: function(map, visibleArea) {
             if (!map.streetLights || !MadNight.assets) return;
             
@@ -318,16 +401,21 @@
                         MadNight.assets.get(light.type) : null;
                     
                     if (lightAsset && lightAsset.loaded && lightAsset.img) {
+                        // Usar tamanho fixo para postes
+                        const width = 80;
+                        const height = 240;
+                        
                         if (light.rotation) {
                             ctx.save();
-                            const centerX = light.x + lightAsset.width / 2;
-                            const centerY = light.y + lightAsset.height / 2;
+                            const centerX = light.x + width / 2;
+                            const centerY = light.y + height / 2;
                             ctx.translate(centerX, centerY);
                             ctx.rotate(light.rotation * Math.PI / 180);
-                            ctx.drawImage(lightAsset.img, -lightAsset.width / 2, -lightAsset.height / 2);
+                            ctx.drawImage(lightAsset.img, -width / 2, -height / 2, width, height);
                             ctx.restore();
                         } else {
-                            ctx.drawImage(lightAsset.img, light.x, light.y);
+                            // Renderizar com tamanho específico
+                            ctx.drawImage(lightAsset.img, light.x, light.y, width, height);
                         }
                     }
                 }
