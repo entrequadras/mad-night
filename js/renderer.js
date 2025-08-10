@@ -182,17 +182,17 @@ MadNight.renderer = {
             MadNight.player.render(ctx);
         }
         
-        // Tráfego (Eixão)
+        // Overlay do Eixão (camada 2) ANTES do tráfego
+        if (MadNight.game && MadNight.game.state && 
+            MadNight.game.state.currentMap === 1) {
+            this.renderEixaoOverlay();
+        }
+        
+        // Tráfego DEPOIS do overlay (carros por cima)
         if (MadNight.game && MadNight.game.state && 
             MadNight.game.state.currentMap === 1 && 
             MadNight.traffic && MadNight.traffic.render) {
             MadNight.traffic.render(ctx, visibleArea);
-        }
-        
-        // Overlay do Eixão (camada 2)
-        if (MadNight.game && MadNight.game.state && 
-            MadNight.game.state.currentMap === 1) {
-            this.renderEixaoOverlay();
         }
     },
     
@@ -216,6 +216,15 @@ MadNight.renderer = {
             if (MadNight.lighting.renderTreeShadows) {
                 MadNight.lighting.renderTreeShadows(ctx, map, visibleArea);
             }
+            
+            // Sombras especiais do campo (mapa 0)
+            if (MadNight.game && MadNight.game.state && 
+                MadNight.game.state.currentMap === 0) {
+                if (MadNight.lighting.renderFieldShadow) {
+                    MadNight.lighting.renderFieldShadow(ctx, map);
+                }
+            }
+            
             if (MadNight.lighting.renderNightOverlay) {
                 MadNight.lighting.renderNightOverlay(ctx, MadNight.camera);
             }
