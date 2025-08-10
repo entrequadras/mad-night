@@ -644,5 +644,3 @@ MadNight.renderer = {
         ctx.restore();
     }
 };
-
-console.log('Módulo Renderer carregado');
