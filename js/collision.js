@@ -120,8 +120,13 @@ MadNight.collision = {
     
     // Verificar colisão com carros estacionados
     checkParkedCarsCollision: function(testEntity) {
+        // Verificar se o game está inicializado
+        if (!MadNight.game || !MadNight.game.state) return false;
+        
         const gameState = MadNight.game.state;
         const map = MadNight.maps.getCurrentMap();
+        
+        if (!map) return false;
         
         if (map.parkedCars || gameState.currentMap === 2) {
             const carros = gameState.currentMap === 2 ? [
@@ -257,8 +262,9 @@ MadNight.collision = {
         }
         
         // Colisões de carros
-        const gameState = MadNight.game.state;
-        if (map.parkedCars || gameState.currentMap === 2) {
+        if (MadNight.game && MadNight.game.state) {
+            const gameState = MadNight.game.state;
+            if (map.parkedCars || gameState.currentMap === 2) {
             const carros = gameState.currentMap === 2 ? [
                 {type: 'carro002frente', x: 34, y: 1472},
                 {type: 'carrolateral_04', x: 1770, y: 1210},
