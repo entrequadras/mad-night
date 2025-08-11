@@ -1,4 +1,4 @@
-// renderer.js - Sistema de renderização (Revisão Alpha-25 - Limpa)
+// renderer.js - Sistema de renderização (Revisão Alpha-26 - Layers Maconhão)
 
 MadNight.renderer = {
     // Contexto do canvas
@@ -89,6 +89,9 @@ MadNight.renderer = {
             // Renderizar entidades
             this.renderEntities(visibleArea);
             
+            // Renderizar elementos superiores (árvores e traves no Mapa 0)
+            this.renderUpperLayers(map, visibleArea);
+            
             // Renderizar efeitos
             this.renderEffects(map, visibleArea);
             
@@ -132,7 +135,7 @@ MadNight.renderer = {
             this.renderBackground(map);
         }
         
-        // Campo de futebol (mapa 0)
+        // Campo de futebol BASE (mapa 0) - sem as traves
         if (MadNight.game && MadNight.game.state && 
             MadNight.game.state.currentMap === 0) {
             this.renderCampo(map);
@@ -169,14 +172,13 @@ MadNight.renderer = {
         // Objetos especiais (orelhão, lixeira) DEPOIS dos prédios
         this.renderSpecialObjects(map);
         
-        // Árvores e postes por cima de tudo
-        this.renderTrees(map, visibleArea);
-        this.renderStreetLights(map, visibleArea);
-        
-        // Traves do campo (acima do player) - mapa 0
+        // NO MAPA 0: NÃO renderizar árvores e postes aqui
+        // Eles serão renderizados em renderUpperLayers DEPOIS do player
         if (MadNight.game && MadNight.game.state && 
-            MadNight.game.state.currentMap === 0) {
-            this.renderCampoTraves(map);
+            MadNight.game.state.currentMap !== 0) {
+            // Outros mapas - renderizar normalmente
+            this.renderTrees(map, visibleArea);
+            this.renderStreetLights(map, visibleArea);
         }
     },
     
@@ -217,6 +219,23 @@ MadNight.renderer = {
             MadNight.game.state.currentMap === 1 && 
             MadNight.traffic && MadNight.traffic.render) {
             MadNight.traffic.render(ctx, visibleArea);
+        }
+    },
+    
+    // NOVO: Renderizar camadas superiores (árvores e traves no Mapa 0)
+    renderUpperLayers: function(map, visibleArea) {
+        // Apenas no Mapa 0 (Maconhão)
+        if (MadNight.game && MadNight.game.state && 
+            MadNight.game.state.currentMap === 0) {
+            
+            // Árvores por cima do player (com transparência nas copas)
+            this.renderTrees(map, visibleArea);
+            
+            // Postes
+            this.renderStreetLights(map, visibleArea);
+            
+            // Traves do campo por cima do player
+            this.renderCampoTraves(map);
         }
     },
     
@@ -303,7 +322,7 @@ MadNight.renderer = {
         }
     },
     
-    // Renderizar campo de futebol
+    // Renderizar campo de futebol (sem as traves)
     renderCampo: function(map) {
         const campoAsset = MadNight.assets.get('campo');
         if (campoAsset && campoAsset.loaded && campoAsset.img) {
