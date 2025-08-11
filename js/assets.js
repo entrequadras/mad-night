@@ -23,8 +23,8 @@ MadNight.assets = {
         // Objetos do parquinho
         parquinho: { width: 199, height: 241 },
         banco01: { width: 61, height: 50 },
-        banco03: { width: 60, height: 46 },
-        banco04: { width: 60, height: 49 },
+        banco03: { width: 66, height: 51 },
+        banco04: { width: 66, height: 55 },
         
         // Objetos pequenos
         caixadeluz: { width: 45, height: 45 },
