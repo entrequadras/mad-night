@@ -209,27 +209,26 @@ renderTVLight: function(ctx, map, visibleArea) {
     // Ajustar posição para ficar alinhado com a janela
     const adjustedX = 360;
     const adjustedY = 110;
-    const tvRadius = 80;
+    const tvRadius = 50; // Reduzir um pouco o raio
     
     ctx.save();
     
-    // TESTE: Desenhar um retângulo sólido azul para debug
-    ctx.fillStyle = 'rgba(100, 150, 255, 0.5)';
-    ctx.fillRect(adjustedX - tvRadius, adjustedY - tvRadius, tvRadius * 2, tvRadius * 2);
-    
-    // Depois adicionar o efeito de luz normal
+    // Usar 'screen' para efeito de luz
     ctx.globalCompositeOperation = 'screen';
     const intensity = this.updateFlicker('ks_window1');
     
+    // Gradiente azulado de TV
     const gradient = ctx.createRadialGradient(
         adjustedX, adjustedY, 0,
         adjustedX, adjustedY, tvRadius
     );
     
-    gradient.addColorStop(0, `rgba(100, 150, 255, ${0.8 * intensity})`);
-    gradient.addColorStop(0.3, `rgba(80, 120, 255, ${0.6 * intensity})`);
-    gradient.addColorStop(0.6, `rgba(60, 100, 255, ${0.4 * intensity})`);
-    gradient.addColorStop(1, 'rgba(40, 80, 255, 0)');
+    // Cores azuladas com mais variação para simular TV
+    gradient.addColorStop(0, `rgba(120, 170, 255, ${0.6 * intensity})`);
+    gradient.addColorStop(0.2, `rgba(100, 150, 255, ${0.5 * intensity})`);
+    gradient.addColorStop(0.4, `rgba(80, 120, 255, ${0.3 * intensity})`);
+    gradient.addColorStop(0.7, `rgba(60, 100, 220, ${0.15 * intensity})`);
+    gradient.addColorStop(1, 'rgba(40, 80, 200, 0)');
     
     ctx.fillStyle = gradient;
     ctx.fillRect(
