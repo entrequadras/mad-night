@@ -150,12 +150,5 @@ MadNight.projectiles = {
                 }
                 break;
         }
-    },
-    
-    // Inicializar sistema de projéteis
-    init: function() {
-        console.log('Sistema de projéteis inicializado');
-        this.list = [];
-        return true;
     }
 };
