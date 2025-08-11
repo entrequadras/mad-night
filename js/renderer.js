@@ -393,8 +393,8 @@
                     
                     const buildingAsset = MadNight.assets.get(building.type);
                     if (buildingAsset && buildingAsset.loaded && buildingAsset.img) {
-                        // Linha de corte em 75% da altura do prédio
-                        const cutLine = building.y + buildingAsset.height * 0.75;
+                        // Linha de corte em 35% da altura do prédio
+                        const cutLine = building.y + buildingAsset.height * 0.35;
                         const playerBottom = player.y + player.height;
                         
                         // Renderizar prédio baseado na posição do player
