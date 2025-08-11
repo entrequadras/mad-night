@@ -233,7 +233,7 @@
             
             // Árvores por cima do player (com transparência nas copas - 30% opacidade)
             this.ctx.save();
-            this.ctx.globalAlpha = 0.3; // 70% transparente, 30% visível
+            this.ctx.globalAlpha = 0.7; // 30% transparente, 70% visível
             this.renderTrees(map, visibleArea);
             this.ctx.restore();
             
