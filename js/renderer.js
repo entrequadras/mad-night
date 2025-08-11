@@ -164,6 +164,13 @@
             this.renderKSShadows(ctx);
         }
         
+        // Luz de TV (ANTES dos prédios no mapa 2)
+        if (MadNight.game && MadNight.game.state && 
+            MadNight.game.state.currentMap === 2 &&
+            MadNight.lighting && MadNight.lighting.renderTVLight) {
+            MadNight.lighting.renderTVLight(this.ctx, map, visibleArea);
+        }
+        
         // Objetos e estruturas
         this.renderObjects(map, visibleArea);
         this.renderBuildings(map, visibleArea, 'bottom');
@@ -231,7 +238,7 @@
         if (MadNight.game && MadNight.game.state && 
             MadNight.game.state.currentMap === 0) {
             
-            // Árvores por cima do player (com transparência nas copas - 30% opacidade)
+            // Árvores por cima do player (com transparência nas copas - 70% opacidade)
             this.ctx.save();
             this.ctx.globalAlpha = 0.7; // 30% transparente, 70% visível
             this.renderTrees(map, visibleArea);
