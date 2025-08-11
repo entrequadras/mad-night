@@ -252,7 +252,7 @@
             ],
             walls: [],
             lights: [
-                {x: 360, y: 100, radius: 120, id: 'ks_window1'}
+                {x: 360, y: 100, radius: 120, id: 'ks_window1'},
                 {x: 1740, y: 290, radius: 120, id: 'ks_window2'}
             ],
             shadows: [],
