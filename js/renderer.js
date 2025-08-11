@@ -159,20 +159,6 @@
                 if (MadNight.lighting && MadNight.lighting.renderTVLight) {
                     MadNight.lighting.renderTVLight(ctx, map, visibleArea);
                 }
-                
-                // 2. Player e inimigos
-                if (MadNight.projectiles && MadNight.projectiles.render) {
-                    MadNight.projectiles.render(ctx, visibleArea);
-                }
-                if (MadNight.enemies && MadNight.enemies.render) {
-                    MadNight.enemies.render(ctx, visibleArea);
-                }
-                if (MadNight.player && MadNight.player.render) {
-                    MadNight.player.render(ctx);
-                }
-                
-                // 3. Sombras por cima
-                this.renderKSShadows(ctx);
             }
             
             // Objetos e estruturas
@@ -200,13 +186,7 @@
         renderEntities: function(visibleArea) {
             const ctx = this.ctx;
             
-            // No mapa 2, as entidades já foram renderizadas em renderMapLayers
-            if (MadNight.game && MadNight.game.state && 
-                MadNight.game.state.currentMap === 2) {
-                return; // Pular para não renderizar duas vezes
-            }
-            
-            // Outros mapas - renderizar normalmente
+            // Renderizar para todos os mapas normalmente
             // Projéteis
             if (MadNight.projectiles && MadNight.projectiles.render) {
                 MadNight.projectiles.render(ctx, visibleArea);
@@ -220,6 +200,12 @@
             // Player
             if (MadNight.player && MadNight.player.render) {
                 MadNight.player.render(ctx);
+            }
+            
+            // Sombras especiais do mapa 2 KS
+            if (MadNight.game && MadNight.game.state && 
+                MadNight.game.state.currentMap === 2) {
+                this.renderKSShadows(ctx);
             }
             
             // Overlay do Eixão (camada 2) ANTES do tráfego
@@ -400,41 +386,25 @@
             const ctx = this.ctx;
             const player = MadNight.player;
             
-            // No mapa 2 (KS), prédios sempre acima
-            if (MadNight.game && MadNight.game.state && 
-                MadNight.game.state.currentMap === 2) {
-                // Só renderizar na camada 'top'
-                if (layer === 'top') {
-                    map.buildings.forEach(function(building) {
-                        if (!MadNight.camera || !MadNight.camera.isVisible || 
-                            MadNight.camera.isVisible(building)) {
-                            
-                            const buildingAsset = MadNight.assets.get(building.type);
-                            if (buildingAsset && buildingAsset.loaded && buildingAsset.img) {
-                                ctx.drawImage(buildingAsset.img, building.x, building.y);
-                            }
-                        }
-                    });
-                }
-            } else {
-                // Outros mapas - sistema de corte dinâmico
-                map.buildings.forEach(function(building) {
-                    if (!MadNight.camera || !MadNight.camera.isVisible || 
-                        MadNight.camera.isVisible(building)) {
+            // Aplicar sistema de corte dinâmico em TODOS os mapas
+            map.buildings.forEach(function(building) {
+                if (!MadNight.camera || !MadNight.camera.isVisible || 
+                    MadNight.camera.isVisible(building)) {
+                    
+                    const buildingAsset = MadNight.assets.get(building.type);
+                    if (buildingAsset && buildingAsset.loaded && buildingAsset.img) {
+                        // Linha de corte em 75% da altura do prédio
+                        const cutLine = building.y + buildingAsset.height * 0.75;
+                        const playerBottom = player.y + player.height;
                         
-                        const buildingAsset = MadNight.assets.get(building.type);
-                        if (buildingAsset && buildingAsset.loaded && buildingAsset.img) {
-                            const cutLine = building.y + buildingAsset.height * 0.75;
-                            const playerBottom = player.y + player.height;
-                            
-                            if ((layer === 'bottom' && playerBottom > cutLine) ||
-                                (layer === 'top' && playerBottom <= cutLine)) {
-                                ctx.drawImage(buildingAsset.img, building.x, building.y);
-                            }
+                        // Renderizar prédio baseado na posição do player
+                        if ((layer === 'bottom' && playerBottom > cutLine) ||
+                            (layer === 'top' && playerBottom <= cutLine)) {
+                            ctx.drawImage(buildingAsset.img, building.x, building.y);
                         }
                     }
-                });
-            }
+                }
+            });
         },
         
         // Renderizar objetos
