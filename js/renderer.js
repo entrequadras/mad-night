@@ -147,10 +147,16 @@
         // Carros estacionados
         this.renderParkedCars(map, visibleArea);
         
-        // NO MAPA 2 (KS): Renderizar player/inimigos ANTES dos prédios
+        // IMPORTANTE: Luz de TV no mapa 2 - DEPOIS do background, ANTES dos prédios
         if (MadNight.game && MadNight.game.state && 
             MadNight.game.state.currentMap === 2) {
-            // Player e inimigos primeiro
+            
+            // Renderizar luz de TV primeiro
+            if (MadNight.lighting && MadNight.lighting.renderTVLight) {
+                MadNight.lighting.renderTVLight(ctx, map, visibleArea);
+            }
+            
+            // Depois player/inimigos
             if (MadNight.projectiles && MadNight.projectiles.render) {
                 MadNight.projectiles.render(ctx, visibleArea);
             }
@@ -162,13 +168,6 @@
             }
             // Sombras por cima do player
             this.renderKSShadows(ctx);
-        }
-        
-        // Luz de TV (ANTES dos prédios no mapa 2)
-        if (MadNight.game && MadNight.game.state && 
-            MadNight.game.state.currentMap === 2 &&
-            MadNight.lighting && MadNight.lighting.renderTVLight) {
-            MadNight.lighting.renderTVLight(this.ctx, map, visibleArea);
         }
         
         // Objetos e estruturas
