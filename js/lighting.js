@@ -228,9 +228,9 @@
                 );
                 
                 // Cores azuladas típicas de TV
-                gradient.addColorStop(0, `rgba(100, 150, 255, ${0.5 * intensity})`);
-                gradient.addColorStop(0.3, `rgba(80, 120, 220, ${0.3 * intensity})`);
-                gradient.addColorStop(0.6, `rgba(60, 100, 200, ${0.15 * intensity})`);
+                gradient.addColorStop(0, `rgba(100, 150, 255, ${0.9 * intensity})`);
+                gradient.addColorStop(0.6, `rgba(80, 120, 220, ${0.6 * intensity})`);
+                gradient.addColorStop(0.6, `rgba(60, 100, 200, ${0.4 * intensity})`);
                 gradient.addColorStop(1, 'rgba(40, 80, 180, 0)');
                 
                 ctx.fillStyle = gradient;
