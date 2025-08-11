@@ -1,4 +1,4 @@
-// maps.js - Sistema de mapas (Revisão Alpha-03)
+// maps.js - Sistema de mapas (Revisão Alpha-04 - Eixão Corrigido)
 
 (function() {
     'use strict';
@@ -97,7 +97,7 @@
             direction: 'right'
         },
         
-        // Mapa 1 - Eixão da Morte
+        // Mapa 1 - Eixão da Morte (CORRIGIDO COM PAREDES ORIGINAIS)
         {
             name: "Eixão da Morte",
             displayName: "Eixão da Morte",
@@ -105,61 +105,58 @@
             width: 3000,
             height: 868,
             enemies: [],
-            trees: [
-                // Linha de árvores na parte inferior (530x1500 até 1130x1500)
-                {type: 'arvorebloco001', x: 530, y: 1420},
-                {type: 'arvore001', x: 884, y: 1450},
-                {type: 'arvore003', x: 980, y: 1440},
-                {type: 'arvore002', x: 1050, y: 1455},
-                
-                // Duas árvores no topo (1180x50)
-                {type: 'arvore004', x: 1180, y: 50},
-                {type: 'arvore001', x: 1280, y: 45}
-            ],
+            trees: [],
             streetLights: [],
             objects: [],
             walls: [
-                // Túnel em formato U
-                {x: 415, y: 80, w: 40, h: 182, invisible: true},
-                {x: 380, y: 632, w: 40, h: 188, invisible: true},
-                {x: 0, y: 222, w: 335, h: 340, invisible: true},
-                {x: 445, y: 80, w: 2335, h: 412, invisible: true},
-                {x: 0, y: 562, w: 3000, h: 226, invisible: true},
-                {x: 2865, y: 222, w: 135, h: 340, invisible: true},
-                {x: 2745, y: 80, w: 40, h: 182, invisible: true},
-                {x: 2780, y: 632, w: 40, h: 188, invisible: true},
+                // Parede superior esquerda (entrada)
+                {x: 0, y: 0, w: 420, h: 262, invisible: true},
                 
-                // Bordas do mapa
-                {x: 0, y: 0, w: 3000, h: 80, invisible: true},
-                {x: 0, y: 788, w: 3000, h: 80, invisible: true},
-                {x: 0, y: 0, w: 20, h: 868, invisible: true},
-                {x: 2980, y: 0, w: 20, h: 868, invisible: true}
+                // Parede inferior esquerda (entrada)
+                {x: 0, y: 632, w: 420, h: 236, invisible: true},
+                
+                // Coluna/pilar esquerdo
+                {x: 0, y: 262, w: 380, h: 370, invisible: true},
+                
+                // Teto do túnel (parte superior)
+                {x: 420, y: 0, w: 2360, h: 262, invisible: true},
+                
+                // Chão do túnel (parte inferior)
+                {x: 420, y: 632, w: 2360, h: 236, invisible: true},
+                
+                // Parede superior direita (saída)
+                {x: 2780, y: 0, w: 220, h: 262, invisible: true},
+                
+                // Parede inferior direita (saída)
+                {x: 2780, y: 632, w: 220, h: 236, invisible: true},
+                
+                // Coluna/pilar direito
+                {x: 2820, y: 262, w: 180, h: 370, invisible: true}
             ],
             lights: [
-                {x: 448, y: 185, radius: 100, id: 'eixao1'},
-                {x: 690, y: 165, radius: 100, id: 'eixao2'},
-                {x: 605, y: 348, radius: 100, id: 'eixao3'},
-                {x: 647, y: 611, radius: 100, id: 'eixao4'},
-                {x: 923, y: 245, radius: 100, id: 'eixao5'},
-                {x: 1106, y: 569, radius: 100, id: 'eixao6'},
-                {x: 1120, y: 245, radius: 100, id: 'eixao7'},
-                {x: 2125, y: 584, radius: 100, id: 'eixao8'},
-                {x: 2322, y: 581, radius: 100, id: 'eixao9'},
-                {x: 2114, y: 249, radius: 100, id: 'eixao10'},
-                {x: 2310, y: 245, radius: 100, id: 'eixao11'},
-                {x: 2541, y: 171, radius: 100, id: 'eixao12'},
-                {x: 2793, y: 197, radius: 100, id: 'eixao13'},
-                {x: 2628, y: 350, radius: 100, id: 'eixao14'},
-                {x: 2585, y: 102, radius: 100, id: 'eixao15'},
-                {x: 2584, y: 605, radius: 100, id: 'eixao16'},
-                {x: 2669, y: 828, radius: 100, id: 'eixao17'},
-                {x: 910, y: 574, radius: 100, id: 'eixao18'},
-                {x: 563, y: 834, radius: 100, id: 'eixao19'}
+                {x: 448, y: 400, radius: 100, id: 'eixao1'},
+                {x: 690, y: 400, radius: 100, id: 'eixao2'},
+                {x: 605, y: 450, radius: 100, id: 'eixao3'},
+                {x: 647, y: 450, radius: 100, id: 'eixao4'},
+                {x: 923, y: 400, radius: 100, id: 'eixao5'},
+                {x: 1106, y: 450, radius: 100, id: 'eixao6'},
+                {x: 1120, y: 400, radius: 100, id: 'eixao7'},
+                {x: 2125, y: 450, radius: 100, id: 'eixao8'},
+                {x: 2322, y: 450, radius: 100, id: 'eixao9'},
+                {x: 2114, y: 400, radius: 100, id: 'eixao10'},
+                {x: 2310, y: 400, radius: 100, id: 'eixao11'},
+                {x: 2541, y: 400, radius: 100, id: 'eixao12'},
+                {x: 2793, y: 400, radius: 100, id: 'eixao13'},
+                {x: 2628, y: 450, radius: 100, id: 'eixao14'},
+                {x: 2585, y: 350, radius: 100, id: 'eixao15'},
+                {x: 2584, y: 450, radius: 100, id: 'eixao16'},
+                {x: 910, y: 450, radius: 100, id: 'eixao17'},
+                {x: 563, y: 450, radius: 100, id: 'eixao18'}
             ],
             shadows: [],
-            playerStart: {x: 100, y: 100},
-            playerStartEscape: {x: 2900, y: 190},
-            exit: {x: 2950, y: 80, w: 50, h: 100},
+            playerStart: {x: 100, y: 400},
+            playerStartEscape: {x: 2700, y: 400},
+            exit: {x: 2920, y: 350, w: 60, h: 100},
             direction: 'right',
             hasLayers: true
         },
@@ -182,7 +179,7 @@
             ],
             tiles: null, // Será gerado
             hasBackground: true,
-            backgroundAsset: 'entradaKS01', // PNG com transparência sobre os tiles
+            backgroundAsset: 'entradaKS01',
             buildings: [
                 {
                     type: 'predio0002',
@@ -250,7 +247,13 @@
                 {type: 'parquinho', x: 1394, y: 668, rotation: 0},
                 {type: 'banco01', x: 1073, y: 544, rotation: 0}
             ],
-            walls: [],
+            walls: [
+                // Bordas do mapa
+                {x: 0, y: 0, w: 1920, h: 20, invisible: true},
+                {x: 0, y: 1590, w: 1920, h: 20, invisible: true},
+                {x: 0, y: 20, w: 20, h: 1570, invisible: true},
+                {x: 1900, y: 20, w: 20, h: 1570, invisible: true}
+            ],
             lights: [
                 {x: 360, y: 100, radius: 120, id: 'ks_window1'}
             ],
@@ -283,12 +286,18 @@
             streetLights: [],
             objects: [],
             walls: [
+                // Carros estacionados
                 {x: 80, y: 150, w: 120, h: 60},
                 {x: 400, y: 150, w: 120, h: 60},
                 {x: 80, y: 300, w: 120, h: 60},
                 {x: 400, y: 300, w: 120, h: 60},
                 {x: 80, y: 450, w: 120, h: 60},
-                {x: 400, y: 450, w: 120, h: 60}
+                {x: 400, y: 450, w: 120, h: 60},
+                // Bordas do mapa
+                {x: 0, y: 0, w: 600, h: 10, invisible: true},
+                {x: 0, y: 790, w: 600, h: 10, invisible: true},
+                {x: 0, y: 10, w: 10, h: 780, invisible: true},
+                {x: 590, y: 10, w: 10, h: 780, invisible: true}
             ],
             lights: [],
             shadows: [],
@@ -319,10 +328,16 @@
             streetLights: [],
             objects: [],
             walls: [
+                // Prédios
                 {x: 80, y: 120, w: 160, h: 160},
                 {x: 360, y: 120, w: 160, h: 160},
                 {x: 80, y: 500, w: 160, h: 160},
-                {x: 360, y: 500, w: 160, h: 160}
+                {x: 360, y: 500, w: 160, h: 160},
+                // Bordas do mapa
+                {x: 0, y: 0, w: 600, h: 10, invisible: true},
+                {x: 0, y: 790, w: 600, h: 10, invisible: true},
+                {x: 0, y: 10, w: 10, h: 780, invisible: true},
+                {x: 590, y: 10, w: 10, h: 780, invisible: true}
             ],
             lights: [],
             shadows: [],
@@ -349,10 +364,16 @@
             streetLights: [],
             objects: [],
             walls: [
+                // Carros/obstáculos
                 {x: 120, y: 200, w: 140, h: 80},
                 {x: 340, y: 200, w: 140, h: 80},
                 {x: 120, y: 400, w: 140, h: 80},
-                {x: 340, y: 400, w: 140, h: 80}
+                {x: 340, y: 400, w: 140, h: 80},
+                // Bordas do mapa
+                {x: 0, y: 0, w: 600, h: 10, invisible: true},
+                {x: 0, y: 790, w: 600, h: 10, invisible: true},
+                {x: 0, y: 10, w: 10, h: 780, invisible: true},
+                {x: 590, y: 10, w: 10, h: 780, invisible: true}
             ],
             lights: [],
             shadows: [],
