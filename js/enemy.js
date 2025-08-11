@@ -427,12 +427,5 @@ MadNight.enemies = {
             (corner.y < centerY ? 'down' : 'up');
         
         return enemy;
-    },
-    
-    // Inicializar sistema de inimigos
-    init: function() {
-        console.log('Sistema de inimigos inicializado');
-        this.list = [];
-        return true;
     }
 };
