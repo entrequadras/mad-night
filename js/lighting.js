@@ -34,7 +34,7 @@
             // TV flicker mais rápido e sutil
             if (lightId === 'ks_window1') {
                 // Flicker constante e rápido para simular TV
-                light.intensity = 0.7 + Math.sin(now * 0.008) * 0.15 + Math.sin(now * 0.03) * 0.15;
+                light.intensity = 0.8 + Math.sin(now * 0.008) * 0.15 + Math.sin(now * 0.03) * 0.15;
                 return light.intensity;
             }
             
@@ -224,7 +224,7 @@ renderTVLight: function(ctx, map, visibleArea) {
     );
     
     // Cores azuladas com mais variação para simular TV
-    gradient.addColorStop(0, `rgba(120, 170, 255, ${0.6 * intensity})`);
+    gradient.addColorStop(0, `rgba(120, 170, 255, ${0.9 * intensity})`);
     gradient.addColorStop(0.2, `rgba(100, 150, 255, ${0.5 * intensity})`);
     gradient.addColorStop(0.4, `rgba(80, 120, 255, ${0.3 * intensity})`);
     gradient.addColorStop(0.7, `rgba(60, 100, 220, ${0.15 * intensity})`);
