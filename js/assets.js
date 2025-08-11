@@ -75,7 +75,7 @@ MadNight.assets = {
         
         // Prédios do mapa KS
         predio0002: { width: 520, height: 592 },
-        predio0003: { width: 520, height: 592 },
+        predio0003: { width: 520, height: 567 },
         predio0006: { width: 400, height: 500 },
         predio0008: { width: 520, height: 479 },
         
