@@ -34,17 +34,6 @@ MadNight.traffic = {
         ]
     },
     
-    // Inicializar sistema de tráfego
-    init: function() {
-        console.log('Sistema de tráfego inicializado');
-        this.cars = [];
-        this.lastSpawn = {
-            mainNorthSouth: 0,
-            mainSouthNorth: 0
-        };
-        return true;
-    },
-    
     // Obter dimensões do carro
     getCarDimensions: function(spriteName) {
         const asset = MadNight.assets.get(spriteName);
