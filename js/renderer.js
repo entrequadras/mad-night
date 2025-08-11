@@ -231,13 +231,16 @@
         if (MadNight.game && MadNight.game.state && 
             MadNight.game.state.currentMap === 0) {
             
-            // Árvores por cima do player (com transparência nas copas)
+            // Árvores por cima do player (com transparência nas copas - 30% opacidade)
+            this.ctx.save();
+            this.ctx.globalAlpha = 0.3; // 70% transparente, 30% visível
             this.renderTrees(map, visibleArea);
+            this.ctx.restore();
             
-            // Postes
+            // Postes (sem transparência)
             this.renderStreetLights(map, visibleArea);
             
-            // Traves do campo por cima do player
+            // Traves do campo por cima do player (sem transparência)
             this.renderCampoTraves(map);
         }
     },
