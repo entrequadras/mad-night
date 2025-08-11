@@ -1,518 +1,515 @@
-// player.js - Sistema do player (Revisão Alpha-13 - Corrigida)
+// game.js - Lógica Principal do Jogo (Revisão Alpha-04)
 
 (function() {
     'use strict';
     
-    MadNight.player = {
-        // Propriedades do player
-        x: 100,
-        y: 300,
-        width: 56,
-        height: 56,
-        speed: 3.6,
-        direction: 'right',
-        frame: 0,
-        sprites: [],
+    // Estado do jogo (exposto para outros módulos)
+    const gameState = {
+        currentMap: 0,
+        phase: 'infiltration', // 'infiltration' ou 'escape'
+        dashUnlocked: false,
+        bombPlaced: false,
+        deathCount: 0,
+        pedalPower: 4,
+        lastPedalRecharge: 0,
+        isPaused: false,
+        isGameOver: false,
+        lastEnemySpawn: 0,
+        escapeEnemyCount: 0,
+        chacalDefeated: false
+    };
+    
+    // Referências dos módulos
+    let player = null;
+    let enemies = null;
+    let projectiles = null;
+    let camera = null;
+    let renderer = null;
+    let audio = null;
+    let maps = null;
+    let collision = null;
+    let lighting = null;
+    let traffic = null;
+    let ui = null;
+    
+    // Sistema de input
+    const keys = {};
+    
+    // Inicialização do módulo game
+    function init() {
+        console.log('🎮 Inicializando módulo Game...');
         
-        // Estado
-        isDead: false,
-        deathFrame: 12,
-        isDashing: false,
-        dashStart: 0,
-        dashDuration: 150,
-        dashDistance: 60,
-        dashStartX: 0,
-        dashStartY: 0,
-        lastMove: Date.now(),
-        inShadow: false,
-        isMoving: false,
+        // Obter referências dos outros módulos
+        player = MadNight.player;
+        enemies = MadNight.enemies;
+        projectiles = MadNight.projectiles;
+        camera = MadNight.camera;
+        renderer = MadNight.renderer;
+        audio = MadNight.audio;
+        maps = MadNight.maps;
+        collision = MadNight.collision;
+        lighting = MadNight.lighting;
+        traffic = MadNight.traffic;
+        ui = MadNight.ui;
         
-        // Controle de animação
-        lastFrameTime: 0,
-        lastRechargeTime: 0,
+        // IMPORTANTE: Obter referência do assets também!
+        const assets = MadNight.assets;
         
-        // Inicializar player
-        init: function() {
-            this.width = MadNight.config.player.width;
-            this.height = MadNight.config.player.height;
-            this.speed = MadNight.config.player.speed;
-            this.dashDuration = MadNight.config.player.dashDuration;
-            this.dashDistance = MadNight.config.player.dashDistance;
-            
-            this.sprites = MadNight.assets.sprites.madmax || [];
-            this.reset();
-            console.log('Player inicializado');
-            return true;
-        },
+        // Verificar módulos essenciais
+        if (!player || !maps) {
+            console.error('❌ Módulos essenciais não carregados!');
+            return false;
+        }
         
-        // Resetar player
-        reset: function() {
-            const startPos = MadNight.config.player.startPosition;
-            this.x = startPos.x;
-            this.y = startPos.y;
-            this.isDead = false;
-            this.isDashing = false;
-            this.direction = 'right';
-            this.frame = 0;
-            this.inShadow = false;
-            this.isMoving = false;
-            this.lastMove = Date.now();
-            this.lastFrameTime = 0;
-            this.lastRechargeTime = 0;
-        },
+        // Inicializar subsistemas (com verificação segura)
+        const modules = [
+            { name: 'assets', module: assets },  // ADICIONAR ASSETS PRIMEIRO!
+            { name: 'maps', module: maps },
+            { name: 'player', module: player },
+            { name: 'enemies', module: enemies },
+            { name: 'projectiles', module: projectiles },
+            { name: 'camera', module: camera },
+            { name: 'audio', module: audio },
+            { name: 'lighting', module: lighting },
+            { name: 'traffic', module: traffic },
+            { name: 'ui', module: ui }
+        ];
         
-        // Matar player
-        kill: function() {
-            if (this.isDead) return;
-            
-            this.isDead = true;
-            this.isDashing = false;
-            this.deathFrame = Math.floor(Math.random() * 4) + 12;
-            
-            // Verificar se game existe antes de acessar
-            if (!MadNight.game || !MadNight.game.state) {
-                console.error('Game não inicializado ao matar player');
-                return;
-            }
-            
-            // Incrementar contador de mortes
-            const gameState = MadNight.game.state;
-            gameState.deathCount++;
-            
-            console.log(`Player morreu! Mortes: ${gameState.deathCount}/${MadNight.config.gameplay.maxDeaths}`);
-            
-            // Tocar som de morte
-            if (MadNight.audio && MadNight.audio.playDeathSound) {
-                MadNight.audio.playDeathSound('player');
-            }
-            
-            // Shake da câmera
-            if (MadNight.camera && MadNight.camera.shake) {
-                MadNight.camera.shake(20);
-            }
-            
-            // Verificar game over ou respawn
-            if (gameState.deathCount >= MadNight.config.gameplay.maxDeaths) {
-                console.log('GAME OVER! Máximo de mortes atingido');
-                // Game over após mostrar mensagem
-                setTimeout(() => {
-                    if (MadNight.game.handlePlayerDeath) {
-                        MadNight.game.handlePlayerDeath();
-                    } else if (MadNight.game.restart) {
-                        MadNight.game.restart();
-                    }
-                }, 2000);
+        modules.forEach(({ name, module }) => {
+            if (module && module.init) {
+                console.log(`  Inicializando ${name}...`);
+                module.init();
+            } else if (module) {
+                console.log(`  ${name} não possui método init (ok)`);
             } else {
-                // Respawn após 2 segundos
-                setTimeout(() => {
-                    this.respawn();
-                }, 2000);
+                console.warn(`  ⚠️ Módulo ${name} não encontrado`);
             }
-        },
+        });
         
-        // Respawn do player
-        respawn: function() {
-            if (!MadNight.game || !MadNight.game.state) {
-                console.error('Game não inicializado ao respawnar');
-                return;
-            }
-            
-            const gameState = MadNight.game.state;
-            
-            console.log(`Respawnando... (Morte ${gameState.deathCount}/${MadNight.config.gameplay.maxDeaths})`);
-            
-            // Recarregar mapa atual mantendo o estado
-            if (MadNight.maps && MadNight.maps.loadCurrentMap) {
-                MadNight.maps.loadCurrentMap(gameState.phase === 'escape');
-            } else if (MadNight.game && MadNight.game.loadMap) {
-                MadNight.game.loadMap(gameState.currentMap, gameState.phase === 'escape');
-            }
-        },
-
-        // Atualizar player
-        update: function(keys) {
-            if (this.isDead) return;
-            
-            // Verificar se game está inicializado
-            if (!MadNight.game || !MadNight.game.state) {
-                return;
-            }
-            
-            const gameState = MadNight.game.state;
-            
-            // Verificar se está na sombra
-            const centerX = this.x + this.width / 2;
-            const centerY = this.y + this.height / 2;
-            
-            if (MadNight.lighting && MadNight.lighting.isInShadow) {
-                this.inShadow = MadNight.lighting.isInShadow(centerX, centerY);
-            }
-            
-            let moving = false;
-            let dx = 0, dy = 0;
-            
-            // Processar dash
-            if (this.isDashing) {
-                this.processDash();
-            } else {
-                // Movimento normal
-                if (keys && keys['ArrowUp']) {
-                    dy = -1;
-                    this.direction = 'up';
-                    moving = true;
-                }
-                if (keys && keys['ArrowDown']) {
-                    dy = 1;
-                    this.direction = 'down';
-                    moving = true;
-                }
-                if (keys && keys['ArrowLeft']) {
-                    dx = -1;
-                    this.direction = 'left';
-                    moving = true;
-                }
-                if (keys && keys['ArrowRight']) {
-                    dx = 1;
-                    this.direction = 'right';
-                    moving = true;
-                }
-                
-                // Aplicar movimento
-                if (dx !== 0) {
-                    const newX = this.x + dx * this.speed;
-                    if (!MadNight.collision || !MadNight.collision.checkWallCollision ||
-                        !MadNight.collision.checkWallCollision(this, newX, this.y)) {
-                        this.x = newX;
-                    }
-                }
-                
-                if (dy !== 0) {
-                    const newY = this.y + dy * this.speed;
-                    if (!MadNight.collision || !MadNight.collision.checkWallCollision ||
-                        !MadNight.collision.checkWallCollision(this, this.x, newY)) {
-                        this.y = newY;
-                    }
-                }
-                
-                // Iniciar dash
-                if (keys && keys[' '] && gameState.pedalPower > 0 && 
-                    !this.isDashing && gameState.dashUnlocked) {
-                    this.startDash();
-                }
-            }
-            
-            // Limitar aos bounds do mapa
-            const map = MadNight.maps ? MadNight.maps.getCurrentMap() : null;
-            if (map) {
-                this.x = Math.max(0, Math.min(map.width - this.width, this.x));
-                this.y = Math.max(0, Math.min(map.height - this.height, this.y));
-            }
-            
-            // Atualizar estado de movimento
-            this.isMoving = moving || this.isDashing;
-            
-            // Atualizar último movimento
-            if (this.isMoving) {
-                this.lastMove = Date.now();
-            }
-            
-            // Recarregar pedal power
-            this.updatePedalPower();
-            
-            // Atualizar frame de animação
-            if (moving && !this.isDashing) {
-                if (!this.lastFrameTime) this.lastFrameTime = Date.now();
-                if (Date.now() - this.lastFrameTime > MadNight.config.animation.frameDelay) {
-                    this.frame = (this.frame + 1) % 2;
-                    this.lastFrameTime = Date.now();
-                }
-            }
-            
-            // Verificar interações especiais
-            this.checkInteractions();
-        },
+        // Carregar primeiro mapa
+        loadMap(0);
         
-        // Iniciar dash
-        startDash: function() {
-            if (!MadNight.game || !MadNight.game.state) return;
-            
-            const gameState = MadNight.game.state;
-            
-            if (gameState.pedalPower <= 0) return;
-            
-            this.isDashing = true;
-            this.dashStart = Date.now();
-            this.dashStartX = this.x;
-            this.dashStartY = this.y;
-            
-            // Usar pedal power
-            if (MadNight.game.usePedal) {
-                MadNight.game.usePedal();
-            } else {
-                gameState.pedalPower--;
-            }
-            
-            // Tocar som
-            if (MadNight.audio && MadNight.audio.playSFX) {
-                MadNight.audio.playSFX('dash', 0.6);
-            }
-            
-            console.log(`Dash! Pedal Power: ${gameState.pedalPower}`);
-        },
+        // Configurar input handlers
+        setupInputHandlers();
         
-        // Processar movimento do dash
-        processDash: function() {
-            const progress = (Date.now() - this.dashStart) / this.dashDuration;
-            
-            if (progress >= 1) {
-                this.isDashing = false;
-                return;
-            }
-            
-            const dashSpeed = this.dashDistance / this.dashDuration * 16;
-            let dashDx = 0, dashDy = 0;
-            
-            switch(this.direction) {
-                case 'up': dashDy = -dashSpeed; break;
-                case 'down': dashDy = dashSpeed; break;
-                case 'left': dashDx = -dashSpeed; break;
-                case 'right': dashDx = dashSpeed; break;
-            }
-            
-            // Tentar mover com dash
-            if (!MadNight.collision || !MadNight.collision.checkWallCollision ||
-                !MadNight.collision.checkWallCollision(this, this.x + dashDx, this.y + dashDy)) {
-                this.x += dashDx;
-                this.y += dashDy;
-            } else {
-                // Parar dash se colidir
-                this.isDashing = false;
-            }
-        },
+        console.log('✅ Módulo Game inicializado');
+        return true;
+    }
+    
+    // Carregar mapa
+    function loadMap(mapIndex, isEscape = false) {
+        const map = maps.getMap(mapIndex);
+        if (!map) {
+            console.error(`Mapa ${mapIndex} não encontrado!`);
+            return;
+        }
         
-        // Atualizar pedal power
-        updatePedalPower: function() {
-            if (!MadNight.game || !MadNight.game.state) return;
-            
-            const gameState = MadNight.game.state;
-            const config = MadNight.config.gameplay;
-            
-            // Recarregar se parado
-            if (!this.isMoving && gameState.pedalPower < config.maxPedalPower) {
-                if (!this.lastRechargeTime) this.lastRechargeTime = Date.now();
-                
-                if (Date.now() - this.lastMove > config.pedalRechargeDelay) {
-                    if (Date.now() - this.lastRechargeTime > config.pedalRechargeTime) {
-                        gameState.pedalPower++;
-                        this.lastRechargeTime = Date.now();
-                        console.log(`Pedal recarregado: ${gameState.pedalPower}/${config.maxPedalPower}`);
-                    }
-                }
-            } else {
-                this.lastRechargeTime = Date.now();
-            }
-        },
+        console.log(`📍 Carregando mapa ${mapIndex}: ${map.name}`);
         
-        // Verificar interações com objetos especiais
-        checkInteractions: function() {
-            const map = MadNight.maps ? MadNight.maps.getCurrentMap() : null;
-            const gameState = MadNight.game ? MadNight.game.state : null;
-            
-            if (!map || !gameState) return;
-            
-            // Verificar proximidade do orelhão
-            if (map.orelhao && !gameState.dashUnlocked) {
-                const orelhaoCenter = {
-                    x: map.orelhao.x + map.orelhao.w / 2,
-                    y: map.orelhao.y + map.orelhao.h / 2
-                };
-                const playerCenter = {
-                    x: this.x + this.width / 2,
-                    y: this.y + this.height / 2
-                };
-                
-                const distance = Math.sqrt(
-                    Math.pow(playerCenter.x - orelhaoCenter.x, 2) + 
-                    Math.pow(playerCenter.y - orelhaoCenter.y, 2)
+        // Limpar entidades
+        if (enemies && enemies.clear) enemies.clear();
+        if (projectiles && projectiles.clear) projectiles.clear();
+        
+        // Posicionar player
+        const startPos = (isEscape && map.playerStartEscape) ? 
+            map.playerStartEscape : map.playerStart;
+        
+        if (player && player.setPosition) {
+            player.setPosition(startPos.x, startPos.y);
+        } else if (player) {
+            player.x = startPos.x;
+            player.y = startPos.y;
+        }
+        
+        // Reset player state
+        if (player) {
+            player.isDead = false;
+            player.isDashing = false;
+        }
+        
+        // Carregar inimigos
+        const enemyList = (isEscape && map.escapeEnemies) ? 
+            map.escapeEnemies : map.enemies;
+        
+        if (enemyList && enemies && enemies.create) {
+            enemyList.forEach(enemyData => {
+                const enemy = enemies.create(
+                    enemyData.x,
+                    enemyData.y,
+                    enemyData.type || 'faquinha'
                 );
-                
-                // Tocar telefone quando próximo
-                if (distance < 150) {
-                    if (MadNight.audio && MadNight.audio.sfx && 
-                        MadNight.audio.sfx.phone_ring && 
-                        MadNight.audio.sfx.phone_ring.paused) {
-                        MadNight.audio.sfx.phone_ring.play().catch(() => {});
-                    }
+                if (isEscape && enemy) {
+                    enemy.state = 'chase';
                 }
-                // Parar se afastar
-                else if (distance > 200) {
-                    if (MadNight.audio && MadNight.audio.sfx && 
-                        MadNight.audio.sfx.phone_ring && 
-                        !MadNight.audio.sfx.phone_ring.paused) {
-                        MadNight.audio.sfx.phone_ring.pause();
-                    }
-                }
-                
-                // Atender telefone
-                if (MadNight.collision && MadNight.collision.checkCollision &&
-                    MadNight.collision.checkCollision(this, map.orelhao)) {
-                    gameState.dashUnlocked = true;
-                    if (MadNight.audio && MadNight.audio.stopLoopSFX) {
-                        MadNight.audio.stopLoopSFX('phone_ring');
-                    }
-                    console.log('Dash desbloqueado!');
-                    
-                    if (MadNight.ui && MadNight.ui.showMessage) {
-                        MadNight.ui.showMessage("DASH DESBLOQUEADO!\nPressione ESPAÇO para usar", 3000);
-                    }
+            });
+        }
+        
+        // Atualizar câmera
+        if (camera && camera.setTarget) {
+            camera.setTarget(player);
+        }
+        
+        // Mostrar nome do mapa
+        if (ui && ui.showMapName) {
+            ui.showMapName(map.displayName || map.name);
+        }
+    }
+    
+    // Update principal
+    function update(deltaTime) {
+        if (gameState.isPaused || gameState.isGameOver) return;
+        
+        const map = maps.getMap(gameState.currentMap);
+        if (!map) return;
+        
+        // Atualizar sistemas (com verificação segura)
+        if (player && player.update) player.update(keys);
+        if (enemies && enemies.update) enemies.update(deltaTime);
+        if (projectiles && projectiles.update) projectiles.update(deltaTime);
+        if (camera && camera.update) camera.update(deltaTime);
+        if (lighting && lighting.update) lighting.update(deltaTime);
+        
+        // Sistema de tráfego no Eixão (mapa 1)
+        if (gameState.currentMap === 1 && traffic && traffic.update) {
+            traffic.update(deltaTime);
+        }
+        
+        // Verificar interações especiais
+        if (player && !player.isDead) {
+            checkSpecialInteractions();
+            checkMapTransition();
+        }
+        
+        // Sistema de spawn durante fuga
+        if (gameState.phase === 'escape') {
+            updateEscapeSpawns();
+        }
+        
+        // Atualizar recarga de pedal
+        updatePedalPower(deltaTime);
+        
+        // Atualizar UI
+        if (ui && ui.update) ui.update(deltaTime);
+    }
+    
+    // Verificar interações especiais
+    function checkSpecialInteractions() {
+        const map = maps.getMap(gameState.currentMap);
+        if (!map || !collision) return;
+        
+        // Orelhão - ativar dash
+        if (map.orelhao && !gameState.dashUnlocked) {
+            if (collision.checkCollision && collision.checkCollision(player, map.orelhao)) {
+                gameState.dashUnlocked = true;
+                if (audio && audio.playSound) audio.playSound('phone');
+                console.log('🏃 Dash desbloqueado!');
+                if (ui && ui.showMessage) {
+                    ui.showMessage("DASH DESBLOQUEADO!\nPressione ESPAÇO para usar");
                 }
             }
-            
-            // Verificar lixeira para bomba
-            if (map.lixeira && MadNight.collision && MadNight.collision.checkCollision &&
-                MadNight.collision.checkCollision(this, map.lixeira)) {
-                
-                const aliveEnemies = MadNight.enemies ? MadNight.enemies.getAliveCount() : 0;
-                
-                if (!gameState.bombPlaced && aliveEnemies === 0) {
+        }
+        
+        // Lixeira - plantar bomba
+        if (map.lixeira && !gameState.bombPlaced) {
+            if (collision.checkCollision && collision.checkCollision(player, map.lixeira)) {
+                // Verificar se todos os inimigos foram eliminados
+                const aliveEnemies = (enemies && enemies.getAlive) ? enemies.getAlive() : [];
+                if (aliveEnemies.length === 0) {
                     gameState.bombPlaced = true;
                     gameState.phase = 'escape';
                     gameState.lastEnemySpawn = Date.now();
                     
-                    if (MadNight.audio && MadNight.audio.playMusic) {
-                        MadNight.audio.playMusic('fuga');
-                    }
-                    console.log('Bomba plantada! FUJA!');
+                    if (audio && audio.playMusic) audio.playMusic('fuga');
+                    console.log('💣 Bomba plantada! FUGA!');
                     
-                    if (MadNight.ui && MadNight.ui.showMessage) {
-                        MadNight.ui.showMessage("BOMBA PLANTADA!\nFUJA!", 3000);
+                    if (ui && ui.showMessage) {
+                        ui.showMessage("BOMBA PLANTADA!\nFUJA!");
                     }
                     
                     // Recarregar mapa em modo fuga
-                    if (MadNight.game && MadNight.game.loadMap) {
-                        MadNight.game.loadMap(gameState.currentMap, true);
-                    }
-                }
-            }
-            
-            // Verificar saída do mapa
-            if (map.exit && MadNight.collision && MadNight.collision.checkCollision &&
-                MadNight.collision.checkCollision(this, map.exit)) {
-                
-                if (MadNight.game && MadNight.game.handleMapExit) {
-                    MadNight.game.handleMapExit();
-                }
-            }
-        },
-        
-        // Obter sprite atual
-        getSprite: function() {
-            if (!this.sprites || this.sprites.length === 0) return null;
-            
-            if (this.isDead) {
-                return this.sprites[this.deathFrame] || null;
-            }
-            
-            const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
-            const base = dirMap[this.direction] || 0;
-            
-            if (this.isDashing) {
-                return this.sprites[8 + base] || null;
-            }
-            
-            return this.sprites[base + this.frame * 4] || null;
-        },
-        
-        // Renderizar player
-        render: function(ctx) {
-            if (!ctx) return;
-            
-            // Verificar se sprites estão carregados
-            if (MadNight.assets && MadNight.assets.areSpritesLoaded && 
-                MadNight.assets.areSpritesLoaded('madmax')) {
-                
-                const sprite = this.getSprite();
-                if (sprite) {
-                    ctx.save();
-                    
-                    // Aplicar transparência se na sombra
-                    if (this.inShadow) {
-                        ctx.globalAlpha = 0.5;
-                    }
-                    
-                    // Piscar se invulnerável após respawn
-                    if (this.isDead) {
-                        ctx.globalAlpha = 0.3;
-                    }
-                    
-                    ctx.drawImage(sprite, this.x, this.y, this.width, this.height);
-                    ctx.restore();
+                    loadMap(gameState.currentMap, true);
                 } else {
-                    // Fallback se sprite específico não carregar
-                    this.renderFallback(ctx);
+                    if (ui && ui.showMessage) {
+                        ui.showMessage(`Elimine ${aliveEnemies.length} inimigo(s) primeiro!`);
+                    }
                 }
-            } else {
-                // Fallback se sprites não carregaram
-                this.renderFallback(ctx);
             }
-        },
-        
-        // Renderizar fallback (quadrado colorido)
-        renderFallback: function(ctx) {
-            if (!ctx) return;
-            
-            ctx.save();
-            
-            ctx.fillStyle = this.isDashing ? '#ff0' : 
-                          (this.isDead ? '#800' : '#f00');
-            
-            if (this.inShadow) {
-                ctx.globalAlpha = 0.5;
-            }
-            
-            ctx.fillRect(this.x, this.y, this.width, this.height);
-            
-            // Indicador de direção
-            ctx.fillStyle = '#fff';
-            const centerX = this.x + this.width / 2;
-            const centerY = this.y + this.height / 2;
-            
-            switch(this.direction) {
-                case 'up':
-                    ctx.fillRect(centerX - 2, this.y, 4, 10);
-                    break;
-                case 'down':
-                    ctx.fillRect(centerX - 2, this.y + this.height - 10, 4, 10);
-                    break;
-                case 'left':
-                    ctx.fillRect(this.x, centerY - 2, 10, 4);
-                    break;
-                case 'right':
-                    ctx.fillRect(this.x + this.width - 10, centerY - 2, 10, 4);
-                    break;
-            }
-            
-            ctx.restore();
-        },
-        
-        // Definir posição
-        setPosition: function(x, y) {
-            this.x = x;
-            this.y = y;
-            this.isDead = false;
-            this.isDashing = false;
-        },
-        
-        // Handlers de input (opcionais, caso game.js não os chame)
-        handleKeyDown: function(e) {
-            // Pode ser usado para ações especiais
-        },
-        
-        handleKeyUp: function(e) {
-            // Pode ser usado para ações especiais
         }
+    }
+    
+    // Verificar transição de mapa
+    function checkMapTransition() {
+        const map = maps.getMap(gameState.currentMap);
+        if (!map || !map.exit || !collision) return;
+        
+        if (collision.checkCollision && collision.checkCollision(player, map.exit)) {
+            handleMapTransition();
+        }
+    }
+    
+    // Transição entre mapas
+    function handleMapTransition() {
+        if (gameState.phase === 'escape') {
+            // Voltando durante a fuga
+            if (gameState.currentMap > 0) {
+                gameState.currentMap--;
+                loadMap(gameState.currentMap, true);
+            } else {
+                // Chegou ao início - vitória!
+                handleVictory();
+            }
+        } else if (gameState.phase === 'infiltration') {
+            // Avançando durante infiltração
+            if (gameState.currentMap < maps.getCount() - 1) {
+                gameState.currentMap++;
+                loadMap(gameState.currentMap);
+                
+                // Tocar música após primeiro mapa
+                if (gameState.currentMap === 1 && audio && audio.playMusic) {
+                    audio.playMusic('inicio');
+                }
+            }
+        }
+    }
+    
+    // Sistema de spawn durante fuga
+    function updateEscapeSpawns() {
+        if (gameState.currentMap !== 5 || !enemies) return; // Apenas no mapa 6 (índice 5)
+        
+        const now = Date.now();
+        const config = MadNight.config.gameplay;
+        
+        if (now - gameState.lastEnemySpawn > config.escapeEnemySpawnDelay) {
+            gameState.lastEnemySpawn = now;
+            gameState.escapeEnemyCount++;
+            
+            // Determinar quantidade de inimigos
+            let spawnCount = 2;
+            if (gameState.escapeEnemyCount > 3) spawnCount = 4;
+            if (gameState.escapeEnemyCount > 6) spawnCount = 8;
+            
+            // Spawnar inimigos
+            if (enemies.create) {
+                for (let i = 0; i < spawnCount; i++) {
+                    const enemy = enemies.create(
+                        2000 + Math.random() * 200,
+                        300 + Math.random() * 200,
+                        'faquinha'
+                    );
+                    if (enemy) enemy.state = 'chase';
+                }
+            }
+        }
+    }
+    
+    // Atualizar sistema de pedal
+    function updatePedalPower(deltaTime) {
+        const config = MadNight.config.gameplay;
+        
+        if (gameState.pedalPower < config.maxPedalPower) {
+            if (player && !player.isMoving && Date.now() - gameState.lastPedalRecharge > config.pedalRechargeDelay) {
+                gameState.lastPedalRecharge = Date.now();
+                gameState.pedalPower++;
+                console.log(`Pedal Power: ${gameState.pedalPower}/${config.maxPedalPower}`);
+            }
+        }
+    }
+    
+    // Configurar input handlers
+    function setupInputHandlers() {
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+    }
+    
+    function handleKeyDown(e) {
+        keys[e.key] = true;
+        
+        // Passar para o player
+        if (player && player.handleKeyDown) {
+            player.handleKeyDown(e);
+        }
+        
+        // Debug keys (se habilitado)
+        if (MadNight.config.debug.enableDebugKeys) {
+            handleDebugKeys(e.key);
+        }
+        
+        // Tentar tocar música na primeira interação
+        if (audio && !audio.currentMusic && gameState.currentMap > 0) {
+            if (audio.playMusic) audio.playMusic('inicio');
+        }
+    }
+    
+    function handleKeyUp(e) {
+        keys[e.key] = false;
+        
+        if (player && player.handleKeyUp) {
+            player.handleKeyUp(e);
+        }
+    }
+    
+    // Debug keys
+    function handleDebugKeys(key) {
+        switch(key.toLowerCase()) {
+            case 'k':
+                console.log('DEBUG: Matando player');
+                if (player && player.kill) player.kill();
+                break;
+                
+            case 'e':
+                console.log('DEBUG: Spawnando inimigo');
+                if (enemies && enemies.create && player) {
+                    enemies.create(player.x + 150, player.y, 'faquinha');
+                }
+                break;
+                
+            case 'm':
+                console.log('DEBUG: Alternando música');
+                if (audio && audio.playMusic) {
+                    audio.playMusic(gameState.phase === 'infiltration' ? 'fuga' : 'inicio');
+                }
+                break;
+                
+            case 'n':
+                console.log('DEBUG: Próximo mapa');
+                if (maps) {
+                    gameState.currentMap = (gameState.currentMap + 1) % maps.getCount();
+                    loadMap(gameState.currentMap);
+                }
+                break;
+                
+            case 'd':
+                console.log('DEBUG: Desbloqueando dash');
+                gameState.dashUnlocked = true;
+                break;
+                
+            case 'b':
+                console.log('DEBUG: Plantando bomba');
+                gameState.bombPlaced = true;
+                gameState.phase = 'escape';
+                if (audio && audio.playMusic) audio.playMusic('fuga');
+                break;
+                
+            case '`':
+            case '~':
+                MadNight.config.debug.showCollisions = !MadNight.config.debug.showCollisions;
+                console.log('DEBUG: Colisões:', MadNight.config.debug.showCollisions ? 'ON' : 'OFF');
+                break;
+        }
+    }
+    
+    // Lidar com morte do player
+    function handlePlayerDeath() {
+        gameState.deathCount++;
+        console.log(`Mortes: ${gameState.deathCount}/${MadNight.config.gameplay.maxDeaths}`);
+        
+        if (gameState.deathCount >= MadNight.config.gameplay.maxDeaths) {
+            handleGameOver();
+        } else {
+            // Recarregar mapa atual
+            setTimeout(() => {
+                loadMap(gameState.currentMap, gameState.phase === 'escape');
+            }, 2000);
+        }
+    }
+    
+    // Game Over
+    function handleGameOver() {
+        gameState.isGameOver = true;
+        console.log('💀 GAME OVER');
+        
+        if (ui && ui.showGameOver) {
+            ui.showGameOver();
+        }
+        
+        // Reiniciar após 5 segundos
+        setTimeout(() => {
+            restart();
+        }, 5000);
+    }
+    
+    // Vitória
+    function handleVictory() {
+        console.log('🎉 VITÓRIA!');
+        
+        if (audio && audio.playMusic) {
+            audio.playMusic('creditos');
+        }
+        
+        if (ui && ui.showVictory) {
+            ui.showVictory();
+        }
+    }
+    
+    // Reiniciar jogo
+    function restart() {
+        // Reset game state
+        gameState.currentMap = 0;
+        gameState.phase = 'infiltration';
+        gameState.dashUnlocked = false;
+        gameState.bombPlaced = false;
+        gameState.deathCount = 0;
+        gameState.pedalPower = 4;
+        gameState.isPaused = false;
+        gameState.isGameOver = false;
+        gameState.escapeEnemyCount = 0;
+        gameState.chacalDefeated = false;
+        
+        // Limpar entidades
+        if (enemies && enemies.clear) enemies.clear();
+        if (projectiles && projectiles.clear) projectiles.clear();
+        
+        // Parar música
+        if (audio && audio.stopMusic) audio.stopMusic();
+        
+        // Recarregar primeiro mapa
+        loadMap(0);
+    }
+    
+    // Toggle pause
+    function togglePause() {
+        gameState.isPaused = !gameState.isPaused;
+        console.log('Jogo', gameState.isPaused ? 'pausado' : 'despausado');
+        
+        if (ui && ui.showPause) {
+            ui.showPause(gameState.isPaused);
+        }
+    }
+    
+    // Exportar módulo
+    MadNight.game = {
+        // Estado exposto para outros módulos
+        state: gameState,
+        keys: keys,
+        
+        // Métodos principais
+        init: init,
+        update: update,
+        restart: restart,
+        togglePause: togglePause,
+        handlePlayerDeath: handlePlayerDeath,
+        handleMapExit: handleMapTransition,
+        loadMap: loadMap,  // Expor loadMap para outros módulos
+        
+        // Getters para outros módulos
+        getState: () => gameState,
+        getCurrentMap: () => gameState.currentMap,
+        getPhase: () => gameState.phase,
+        isDashUnlocked: () => gameState.dashUnlocked,
+        getPedalPower: () => gameState.pedalPower,
+        usePedal: () => {
+            if (gameState.pedalPower > 0) {
+                gameState.pedalPower--;
+                gameState.lastPedalRecharge = Date.now();
+                return true;
+            }
+            return false;
+        },
+        
+        // Propriedade para main.js
+        get isPaused() { return gameState.isPaused; }
     };
     
-    console.log('Módulo Player carregado');
+    console.log('Módulo Game carregado');
     
 })();
