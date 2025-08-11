@@ -1,6 +1,9 @@
 // renderer.js - Sistema de renderização (Revisão Alpha-26 - Layers Maconhão)
 
-MadNight.renderer = {
+(function() {
+    'use strict';
+    
+    MadNight.renderer = {
     // Contexto do canvas
     ctx: null,
     canvas: null,
@@ -675,5 +678,7 @@ MadNight.renderer = {
         ctx.restore();
     }
 };
-
-console.log('Módulo Renderer carregado');
+    
+    console.log('Módulo Renderer carregado');
+    
+})();
