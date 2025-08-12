@@ -249,8 +249,9 @@
     {type: 'arvore001', x: 1060, y: 1445},
     {type: 'arvore003', x: 1150, y: 1630},
     
-    // Duas árvores no topo
+    // Três árvores no topo
     {type: 'arvore004', x: 1200, y: -10},
+    {type: 'arvore003', x: 880, y: -15},
     {type: 'arvore002', x: 1100, y: -45}
 ],
             streetLights: [
