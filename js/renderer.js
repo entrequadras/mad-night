@@ -162,21 +162,17 @@
             // Objetos e estruturas
             this.renderObjects(map, visibleArea);
             
-            // Prédios - camada BOTTOM (atrás do player)
+            // IMPORTANTE: Prédios - camada BOTTOM (atrás do player)
             this.renderBuildings(map, visibleArea, 'bottom');
             
             this.renderWalls(map, visibleArea);
             
-            // Elementos superiores
+            // NÃO renderizar elementos superiores aqui - eles vão DEPOIS do player
             
-            // Prédios - camada TOP (na frente do player)
-            this.renderBuildings(map, visibleArea, 'top');
-            
-            // Objetos especiais (orelhão, lixeira) DEPOIS dos prédios
+            // Objetos especiais (orelhão, lixeira)
             this.renderSpecialObjects(map);
             
             // NO MAPA 0: NÃO renderizar árvores e postes aqui
-            // Eles serão renderizados em renderUpperLayers DEPOIS do player
             if (MadNight.game && MadNight.game.state && 
                 MadNight.game.state.currentMap !== 0) {
                 // Outros mapas - renderizar normalmente
@@ -203,6 +199,12 @@
             // Player
             if (MadNight.player && MadNight.player.render) {
                 MadNight.player.render(ctx);
+            }
+            
+            // APÓS O PLAYER: Renderizar prédios TOP (na frente do player)
+            const map = MadNight.maps.getCurrentMap();
+            if (map) {
+                this.renderBuildings(map, visibleArea, 'top');
             }
             
             // Sombras especiais do mapa 2 KS
