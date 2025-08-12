@@ -1,4 +1,4 @@
-// menu.js - Sistema de Menu Principal
+// menu.js - Sistema de Menu Principal (v1.57)
 
 (function() {
     'use strict';
@@ -7,15 +7,25 @@
         // Estado do menu
         active: true,
         currentOption: 0,
-        currentScreen: 'main', // 'main', 'options', 'credits', 'ranking', 'about'
+        currentScreen: 'main', // 'main', 'options', 'credits', 'ranking', 'about', 'nameEntry'
+        rankingTab: 0, // 0: tempo, 1: kills, 2: perfeito
+        
+        // Para entrada de nome (novo recorde)
+        nameEntry: {
+            active: false,
+            name: ['A', 'A', 'A', 'A'],
+            position: 0,
+            report: null,
+            newRecords: []
+        },
         
         // Opções do menu principal
         options: [
             { text: 'JOGAR', action: 'start' },
+            { text: 'RANKING', action: 'ranking' },
             { text: 'OPÇÕES', action: 'options' },
             { text: 'CRÉDITOS', action: 'credits' },
-            { text: 'RANKING', action: 'ranking' },
-            { text: 'SOBRE O FILME', action: 'about' }
+            { text: 'SOBRE', action: 'about' }
         ],
         
         // Configurações de layout
@@ -26,13 +36,6 @@
             cursorOffset: -40
         },
         
-        // Assets do menu
-        assets: {
-            logo: null,
-            cursor: null,
-            background: null
-        },
-        
         // Configurações de opções
         optionsMenu: {
             current: 0,
@@ -40,46 +43,55 @@
                 { text: 'VOLUME MÚSICA', type: 'slider', value: 70, min: 0, max: 100 },
                 { text: 'VOLUME EFEITOS', type: 'slider', value: 80, min: 0, max: 100 },
                 { text: 'TELA CHEIA', type: 'toggle', value: false },
+                { text: 'LIMPAR RANKINGS', type: 'action', action: 'clearRankings' },
                 { text: 'VOLTAR', action: 'back' }
             ]
         },
         
         // Textos dos créditos
         credits: [
-            'MAD NIGHT v1.40',
+            'MAD NIGHT v1.57',
+            '',
+            'UM JOGO SOBRE',
+            'GANGUES DE BRASÍLIA',
             '',
             'PROGRAMAÇÃO',
-            'Desenvolvido com JavaScript puro',
+            'JavaScript Puro + Canvas',
             '',
             'ARTE',
-            'Pixel art inspirado nos anos 80/90',
+            'Pixel Art Estilo Anos 80/90',
             '',
-            'MÚSICA',
-            'Trilhas de suspense e ação',
+            'INSPIRAÇÃO',
+            'Hotline Miami',
+            'Cultura BSB Underground',
             '',
-            'AGRADECIMENTOS',
-            'Hotline Miami pela inspiração',
-            'Gangues de Brasília dos anos 80',
+            'DESENVOLVIDO POR',
+            'Um Brasiliense Nostálgico',
+            '',
             '',
             'PRESSIONE ESC PARA VOLTAR'
         ],
         
-        // Texto sobre o filme
+        // Texto sobre
         aboutText: [
-            'MAD MAX: ALÉM DO EIXÃO',
+            'MAD NIGHT',
             '',
-            'Um filme sobre guerra de gangues',
-            'nas superquadras de Brasília.',
+            'BRASÍLIA, ANOS 80',
             '',
-            'Baseado em eventos reais dos',
-            'anos 80 e 90, quando jovens',
-            'disputavam território através',
-            'de pixações e confrontos.',
+            'Você é MADMAX, membro de uma',
+            'gangue de pixadores da Asa Sul.',
             '',
-            'O protagonista MadMax busca',
-            'vingança contra a gangue rival',
-            'Komando Satânico após terem',
-            'pixado por cima de sua arte.',
+            'O Komando Satânico (KS) pixou',
+            'por cima da sua arte.',
+            '',
+            'Agora é guerra.',
+            '',
+            'Infiltre-se no território rival,',
+            'plante uma bomba na lixeira',
+            'e fuja antes que seja tarde.',
+            '',
+            'Cuidado com o CHACAL.',
+            '',
             '',
             'PRESSIONE ESC PARA VOLTAR'
         ],
@@ -88,30 +100,15 @@
         init: function() {
             console.log('🎮 Inicializando menu principal...');
             
-            // Carregar assets do menu
-            this.loadMenuAssets();
-            
             // Configurar handlers de input
             this.setupInputHandlers();
             
-            // Tocar música do menu
+            // Tocar música do menu (usar música de início por enquanto)
             if (MadNight.audio && MadNight.audio.playMusic) {
-                // Por enquanto usar música de suspense
-                // Depois podemos adicionar uma música específica do menu
                 MadNight.audio.playMusic('inicio');
             }
             
             console.log('✅ Menu inicializado');
-        },
-        
-        // Carregar assets do menu
-        loadMenuAssets: function() {
-            // Logo do jogo
-            if (MadNight.assets && MadNight.assets.get) {
-                this.assets.logo = MadNight.assets.get('logo');
-                this.assets.cursor = MadNight.assets.get('cursor_skull');
-                this.assets.background = MadNight.assets.get('menu_bg');
-            }
         },
         
         // Configurar input handlers
@@ -130,6 +127,12 @@
         handleInput: function(e) {
             if (!this.active) return;
             
+            // Entrada de nome tem prioridade
+            if (this.nameEntry.active) {
+                this.handleNameEntry(e);
+                return;
+            }
+            
             switch(this.currentScreen) {
                 case 'main':
                     this.handleMainMenu(e);
@@ -137,9 +140,11 @@
                 case 'options':
                     this.handleOptionsMenu(e);
                     break;
+                case 'ranking':
+                    this.handleRankingMenu(e);
+                    break;
                 case 'credits':
                 case 'about':
-                case 'ranking':
                     this.handleInfoScreen(e);
                     break;
             }
@@ -217,10 +222,39 @@
                     if (option.action === 'back') {
                         this.currentScreen = 'main';
                         this.playConfirmSound();
+                    } else if (option.action === 'clearRankings') {
+                        if (confirm('Limpar todos os rankings?')) {
+                            MadNight.stats.clearAllScores();
+                            this.playConfirmSound();
+                        }
                     }
                     break;
                     
                 case 'Escape':
+                    this.currentScreen = 'main';
+                    this.playConfirmSound();
+                    break;
+            }
+        },
+        
+        // Input do menu de ranking
+        handleRankingMenu: function(e) {
+            switch(e.key) {
+                case 'ArrowLeft':
+                    this.rankingTab--;
+                    if (this.rankingTab < 0) this.rankingTab = 2;
+                    this.playSelectSound();
+                    break;
+                    
+                case 'ArrowRight':
+                    this.rankingTab++;
+                    if (this.rankingTab > 2) this.rankingTab = 0;
+                    this.playSelectSound();
+                    break;
+                    
+                case 'Escape':
+                case 'Enter':
+                case ' ':
                     this.currentScreen = 'main';
                     this.playConfirmSound();
                     break;
@@ -232,6 +266,57 @@
             if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
                 this.currentScreen = 'main';
                 this.playConfirmSound();
+            }
+        },
+        
+        // Input para entrada de nome (novo recorde)
+        handleNameEntry: function(e) {
+            switch(e.key) {
+                case 'ArrowUp':
+                    const currentChar = this.nameEntry.name[this.nameEntry.position];
+                    let charCode = currentChar.charCodeAt(0);
+                    charCode++;
+                    if (charCode > 90) charCode = 32; // Depois de Z, vai para espaço
+                    if (charCode === 33) charCode = 48; // Depois de espaço, vai para 0
+                    if (charCode > 57 && charCode < 65) charCode = 65; // Pula de 9 para A
+                    this.nameEntry.name[this.nameEntry.position] = String.fromCharCode(charCode);
+                    this.playSelectSound();
+                    break;
+                    
+                case 'ArrowDown':
+                    const currentChar2 = this.nameEntry.name[this.nameEntry.position];
+                    let charCode2 = currentChar2.charCodeAt(0);
+                    charCode2--;
+                    if (charCode2 < 32) charCode2 = 90; // Antes de espaço, vai para Z
+                    if (charCode2 === 47) charCode2 = 32; // Antes de 0, vai para espaço
+                    if (charCode2 > 57 && charCode2 < 65) charCode2 = 57; // Pula de A para 9
+                    this.nameEntry.name[this.nameEntry.position] = String.fromCharCode(charCode2);
+                    this.playSelectSound();
+                    break;
+                    
+                case 'ArrowLeft':
+                    this.nameEntry.position--;
+                    if (this.nameEntry.position < 0) this.nameEntry.position = 3;
+                    this.playSelectSound();
+                    break;
+                    
+                case 'ArrowRight':
+                    this.nameEntry.position++;
+                    if (this.nameEntry.position > 3) this.nameEntry.position = 0;
+                    this.playSelectSound();
+                    break;
+                    
+                case 'Enter':
+                case ' ':
+                    // Salvar recorde
+                    const name = this.nameEntry.name.join('').trim();
+                    if (name.length > 0) {
+                        MadNight.stats.addHighScore(name, this.nameEntry.report);
+                        this.nameEntry.active = false;
+                        this.currentScreen = 'ranking';
+                        this.playConfirmSound();
+                    }
+                    break;
             }
         },
         
@@ -253,6 +338,7 @@
                     break;
                 case 'ranking':
                     this.currentScreen = 'ranking';
+                    this.rankingTab = 0;
                     break;
                 case 'about':
                     this.currentScreen = 'about';
@@ -275,10 +361,10 @@
                 }
             } else if (option.text === 'TELA CHEIA') {
                 if (option.value) {
-                    document.documentElement.requestFullscreen();
+                    document.documentElement.requestFullscreen().catch(() => {});
                 } else {
                     if (document.fullscreenElement) {
-                        document.exitFullscreen();
+                        document.exitFullscreen().catch(() => {});
                     }
                 }
             }
@@ -290,24 +376,32 @@
             
             this.active = false;
             
-            // Parar música do menu
-            if (MadNight.audio && MadNight.audio.stopMusic) {
-                MadNight.audio.stopMusic();
-            }
-            
             // Remover handler do menu
             if (this.keydownHandler) {
                 window.removeEventListener('keydown', this.keydownHandler);
             }
             
-            // Inicializar e começar o jogo
-            if (MadNight.game && MadNight.game.init) {
-                MadNight.game.init();
-                MadNight.game.state.fromMenu = true;
+            // O jogo já foi inicializado pelo main.js
+            // Apenas começar o jogo
+            if (MadNight.game) {
+                MadNight.game.restart(); // Resetar e começar
             }
         },
         
-        // Voltar ao menu
+        // Mostrar tela de novo recorde
+        showNewRecord: function(report, newRecords) {
+            this.active = true;
+            this.nameEntry.active = true;
+            this.nameEntry.report = report;
+            this.nameEntry.newRecords = newRecords;
+            this.nameEntry.name = ['A', 'A', 'A', 'A'];
+            this.nameEntry.position = 0;
+            
+            // Reconfigurar input handlers
+            this.setupInputHandlers();
+        },
+        
+        // Voltar ao menu após game over
         backToMenu: function() {
             console.log('🔙 Voltando ao menu...');
             
@@ -326,15 +420,17 @@
         
         // Sons do menu
         playSelectSound: function() {
-            if (MadNight.audio && MadNight.audio.playSFX) {
-                MadNight.audio.playSFX('menu_select', 0.5);
-            }
+            // Por enquanto sem som, mas preparado
+            // if (MadNight.audio && MadNight.audio.playSound) {
+            //     MadNight.audio.playSound('menu_select');
+            // }
         },
         
         playConfirmSound: function() {
-            if (MadNight.audio && MadNight.audio.playSFX) {
-                MadNight.audio.playSFX('menu_confirm', 0.6);
-            }
+            // Por enquanto sem som, mas preparado
+            // if (MadNight.audio && MadNight.audio.playSound) {
+            //     MadNight.audio.playSound('menu_confirm');
+            // }
         },
         
         // Renderizar menu
@@ -347,28 +443,30 @@
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Background (se houver)
-            if (this.assets.background && this.assets.background.loaded) {
-                ctx.drawImage(this.assets.background.img, 0, 0);
-            }
+            // Efeito de scanlines
+            this.renderScanlines(ctx);
             
             // Renderizar tela atual
-            switch(this.currentScreen) {
-                case 'main':
-                    this.renderMainMenu(ctx);
-                    break;
-                case 'options':
-                    this.renderOptions(ctx);
-                    break;
-                case 'credits':
-                    this.renderCredits(ctx);
-                    break;
-                case 'ranking':
-                    this.renderRanking(ctx);
-                    break;
-                case 'about':
-                    this.renderAbout(ctx);
-                    break;
+            if (this.nameEntry.active) {
+                this.renderNameEntry(ctx);
+            } else {
+                switch(this.currentScreen) {
+                    case 'main':
+                        this.renderMainMenu(ctx);
+                        break;
+                    case 'options':
+                        this.renderOptions(ctx);
+                        break;
+                    case 'credits':
+                        this.renderCredits(ctx);
+                        break;
+                    case 'ranking':
+                        this.renderRanking(ctx);
+                        break;
+                    case 'about':
+                        this.renderAbout(ctx);
+                        break;
+                }
             }
         },
         
@@ -376,17 +474,21 @@
         renderMainMenu: function(ctx) {
             const canvas = ctx.canvas;
             
-            // Logo
-            if (this.assets.logo && this.assets.logo.loaded) {
-                const logoX = (canvas.width - this.assets.logo.width) / 2;
-                ctx.drawImage(this.assets.logo.img, logoX, this.layout.logoY);
-            } else {
-                // Fallback - texto
-                ctx.font = '48px "Press Start 2P"';
-                ctx.fillStyle = '#f00';
-                ctx.textAlign = 'center';
-                ctx.fillText('MAD NIGHT', canvas.width / 2, this.layout.logoY);
-            }
+            // Logo animado
+            ctx.save();
+            const pulse = Math.sin(Date.now() * 0.002) * 0.1 + 1;
+            ctx.scale(pulse, pulse);
+            ctx.font = '48px "Press Start 2P"';
+            ctx.fillStyle = '#f00';
+            ctx.textAlign = 'center';
+            ctx.fillText('MAD NIGHT', canvas.width / 2 / pulse, this.layout.logoY / pulse);
+            ctx.restore();
+            
+            // Subtítulo
+            ctx.font = '10px "Press Start 2P"';
+            ctx.fillStyle = '#666';
+            ctx.textAlign = 'center';
+            ctx.fillText('GUERRA DE GANGUES EM BRASÍLIA', canvas.width / 2, this.layout.logoY + 60);
             
             // Opções do menu
             ctx.font = '16px "Press Start 2P"';
@@ -399,14 +501,9 @@
                 if (index === this.currentOption) {
                     ctx.fillStyle = '#ff0';
                     
-                    // Cursor (caveira)
-                    if (this.assets.cursor && this.assets.cursor.loaded) {
-                        const cursorX = (canvas.width / 2) + this.layout.cursorOffset - 150;
-                        ctx.drawImage(this.assets.cursor.img, cursorX, y - 20, 24, 24);
-                    } else {
-                        // Fallback - seta
-                        ctx.fillText('>', (canvas.width / 2) - 150, y);
-                    }
+                    // Cursor animado
+                    const cursorX = (canvas.width / 2) - 150 + Math.sin(Date.now() * 0.005) * 5;
+                    ctx.fillText('►', cursorX, y);
                 } else {
                     ctx.fillStyle = '#fff';
                 }
@@ -418,7 +515,7 @@
             ctx.font = '10px "Press Start 2P"';
             ctx.fillStyle = '#666';
             ctx.textAlign = 'right';
-            ctx.fillText('v1.40', canvas.width - 20, canvas.height - 20);
+            ctx.fillText('v1.57', canvas.width - 20, canvas.height - 20);
         },
         
         // Renderizar menu de opções
@@ -468,13 +565,17 @@
                     ctx.textAlign = 'right';
                     ctx.fillStyle = item.value ? '#0f0' : '#f00';
                     ctx.fillText(item.value ? 'SIM' : 'NÃO', 600, y);
+                } else if (item.type === 'action') {
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = selected ? '#ff0' : '#888';
+                    ctx.fillText('[AÇÃO]', 600, y);
                 }
                 
                 // Cursor
                 if (selected) {
                     ctx.fillStyle = '#ff0';
                     ctx.textAlign = 'left';
-                    ctx.fillText('>', 70, y);
+                    ctx.fillText('►', 70, y);
                 }
             });
             
@@ -489,18 +590,21 @@
         renderCredits: function(ctx) {
             const canvas = ctx.canvas;
             
+            // Efeito de scroll
+            const scrollY = Math.sin(Date.now() * 0.001) * 10;
+            
             ctx.font = '14px "Press Start 2P"';
             ctx.textAlign = 'center';
             
             this.credits.forEach((line, index) => {
                 // Títulos em amarelo
-                if (line === line.toUpperCase() && line !== '') {
+                if (line === line.toUpperCase() && line !== '' && !line.includes(' ')) {
                     ctx.fillStyle = '#ff0';
                 } else {
                     ctx.fillStyle = '#fff';
                 }
                 
-                const y = 80 + (index * 25);
+                const y = 80 + (index * 25) + scrollY;
                 ctx.fillText(line, canvas.width / 2, y);
             });
         },
@@ -513,53 +617,85 @@
             ctx.font = '24px "Press Start 2P"';
             ctx.fillStyle = '#ff0';
             ctx.textAlign = 'center';
-            ctx.fillText('RANKING', canvas.width / 2, 60);
+            ctx.fillText('HALL DA FAMA', canvas.width / 2, 60);
             
             // Tabs
-            const tabs = ['TEMPO', 'KILLS', 'PERFEITO'];
+            const tabs = ['TEMPO', 'KILLS', 'SEM MORTES'];
             ctx.font = '12px "Press Start 2P"';
             
             tabs.forEach((tab, index) => {
-                const x = 200 + (index * 200);
-                ctx.fillStyle = index === 0 ? '#ff0' : '#666';
+                const x = (canvas.width / 3) * (index + 0.5);
+                ctx.fillStyle = index === this.rankingTab ? '#ff0' : '#666';
                 ctx.fillText(tab, x, 100);
             });
             
-            // Mostrar ranking de tempo (por enquanto)
-            const rankings = MadNight.stats ? MadNight.stats.getRankingDisplay('speedRun') : [];
+            // Mostrar ranking baseado na tab selecionada
+            let rankings = [];
+            let rankingType = 'speedRun';
             
-            ctx.font = '10px "Press Start 2P"';
+            switch(this.rankingTab) {
+                case 0: rankingType = 'speedRun'; break;
+                case 1: rankingType = 'enemyKills'; break;
+                case 2: rankingType = 'deathless'; break;
+            }
+            
+            if (MadNight.stats) {
+                rankings = MadNight.stats.getRankingDisplay(rankingType);
+            }
+            
+            ctx.font = '12px "Press Start 2P"';
             ctx.textAlign = 'left';
             
-            rankings.forEach((score, index) => {
-                const y = 140 + (index * 25);
-                
-                // Posição
-                ctx.fillStyle = index < 3 ? '#ff0' : '#fff';
-                ctx.fillText(`${score.position}.`, 150, y);
-                
-                // Nome
-                ctx.fillText(score.name, 200, y);
-                
-                // Tempo
-                ctx.textAlign = 'right';
-                ctx.fillText(score.display, 400, y);
-                
-                // Mortes
+            if (rankings.length === 0) {
                 ctx.fillStyle = '#666';
-                ctx.fillText(`${score.deaths} mortes`, 550, y);
-                
-                ctx.textAlign = 'left';
-            });
+                ctx.textAlign = 'center';
+                ctx.fillText('NENHUM RECORDE AINDA', canvas.width / 2, 200);
+            } else {
+                rankings.forEach((score, index) => {
+                    if (index >= 10) return; // Mostrar só top 10
+                    
+                    const y = 140 + (index * 30);
+                    
+                    // Cor baseada na posição
+                    if (index === 0) ctx.fillStyle = '#ff0'; // Ouro
+                    else if (index === 1) ctx.fillStyle = '#c0c0c0'; // Prata
+                    else if (index === 2) ctx.fillStyle = '#cd7f32'; // Bronze
+                    else ctx.fillStyle = '#fff';
+                    
+                    // Posição
+                    ctx.fillText(`${score.position}.`, 150, y);
+                    
+                    // Nome
+                    ctx.fillText(score.name, 200, y);
+                    
+                    // Valor
+                    ctx.textAlign = 'right';
+                    if (rankingType === 'speedRun') {
+                        ctx.fillText(score.display, 450, y);
+                        ctx.fillStyle = '#666';
+                        ctx.fillText(`${score.deaths} morte(s)`, 600, y);
+                    } else if (rankingType === 'enemyKills') {
+                        ctx.fillText(score.display, 450, y);
+                        ctx.fillStyle = '#666';
+                        ctx.fillText(score.time, 600, y);
+                    } else {
+                        ctx.fillText(score.time, 450, y);
+                        ctx.fillStyle = '#666';
+                        ctx.fillText(`${score.kills} kills`, 600, y);
+                    }
+                    
+                    ctx.textAlign = 'left';
+                });
+            }
             
-            // Instrução
+            // Instruções
             ctx.font = '10px "Press Start 2P"';
             ctx.fillStyle = '#666';
             ctx.textAlign = 'center';
-            ctx.fillText('ESC PARA VOLTAR', canvas.width / 2, canvas.height - 40);
+            ctx.fillText('← → MUDAR ABA    ESC VOLTAR', canvas.width / 2, canvas.height - 40);
         },
         
-        // Renderizar sobre o filme
+        // Renderizar sobre
         renderAbout: function(ctx) {
             const canvas = ctx.canvas;
             
@@ -567,8 +703,8 @@
             ctx.textAlign = 'center';
             
             this.aboutText.forEach((line, index) => {
-                // Título em amarelo
-                if (index === 0) {
+                // Títulos em amarelo
+                if (line === line.toUpperCase() && line !== '' && line.length < 20) {
                     ctx.fillStyle = '#ff0';
                 } else {
                     ctx.fillStyle = '#fff';
@@ -577,6 +713,83 @@
                 const y = 80 + (index * 25);
                 ctx.fillText(line, canvas.width / 2, y);
             });
+        },
+        
+        // Renderizar entrada de nome
+        renderNameEntry: function(ctx) {
+            const canvas = ctx.canvas;
+            
+            // Título
+            ctx.font = '32px "Press Start 2P"';
+            ctx.fillStyle = '#ff0';
+            ctx.textAlign = 'center';
+            ctx.fillText('NOVO RECORDE!', canvas.width / 2, 100);
+            
+            // Tipos de recordes
+            ctx.font = '16px "Press Start 2P"';
+            ctx.fillStyle = '#0f0';
+            let recordY = 160;
+            this.nameEntry.newRecords.forEach(record => {
+                ctx.fillText(record, canvas.width / 2, recordY);
+                recordY += 30;
+            });
+            
+            // Estatísticas
+            if (this.nameEntry.report) {
+                ctx.font = '12px "Press Start 2P"';
+                ctx.fillStyle = '#fff';
+                ctx.fillText(`Tempo: ${this.nameEntry.report.timeFormatted}`, canvas.width / 2, 250);
+                ctx.fillText(`Kills: ${this.nameEntry.report.kills.total}`, canvas.width / 2, 280);
+                ctx.fillText(`Mortes: ${this.nameEntry.report.deaths}`, canvas.width / 2, 310);
+            }
+            
+            // Entrada de nome
+            ctx.font = '24px "Press Start 2P"';
+            ctx.fillText('DIGITE SEU NOME:', canvas.width / 2, 380);
+            
+            // Caracteres do nome
+            ctx.font = '32px "Press Start 2P"';
+            const nameX = (canvas.width / 2) - 80;
+            
+            this.nameEntry.name.forEach((char, index) => {
+                const x = nameX + (index * 40);
+                const y = 440;
+                
+                // Destacar posição atual
+                if (index === this.nameEntry.position) {
+                    // Piscar
+                    if (Math.floor(Date.now() / 500) % 2) {
+                        ctx.fillStyle = '#ff0';
+                    } else {
+                        ctx.fillStyle = '#f00';
+                    }
+                } else {
+                    ctx.fillStyle = '#fff';
+                }
+                
+                ctx.fillText(char, x, y);
+                
+                // Underline na posição atual
+                if (index === this.nameEntry.position) {
+                    ctx.fillRect(x - 15, y + 10, 30, 3);
+                }
+            });
+            
+            // Instruções
+            ctx.font = '10px "Press Start 2P"';
+            ctx.fillStyle = '#666';
+            ctx.textAlign = 'center';
+            ctx.fillText('↑↓ MUDAR LETRA    ←→ MOVER    ENTER CONFIRMAR', canvas.width / 2, canvas.height - 40);
+        },
+        
+        // Efeito de scanlines (CRT)
+        renderScanlines: function(ctx) {
+            ctx.save();
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            for (let y = 0; y < ctx.canvas.height; y += 4) {
+                ctx.fillRect(0, y, ctx.canvas.width, 2);
+            }
+            ctx.restore();
         }
     };
     
