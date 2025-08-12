@@ -249,9 +249,9 @@
     {type: 'arvore001', x: 1060, y: 1445},
     {type: 'arvore003', x: 1150, y: 1660},
     
-    // Duas árvores no topo (1150x50 e 1200x20)
-    {type: 'arvore004', x: 1120, y: 05},
-    {type: 'arvore002', x: 1080, y: -12}
+    // Duas árvores no topo
+    {type: 'arvore004', x: 1200, y: 20},
+    {type: 'arvore002', x: 1100, y: -12}
 ],
             streetLights: [
                 {type: 'poste000', x: 695, y: 350, rotation: 0, lightRadius: 100, id: 'ks_post1'},
