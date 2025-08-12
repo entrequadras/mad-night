@@ -65,8 +65,15 @@
             for (let tree of map.trees) {
                 const treeAsset = MadNight.assets.get(tree.type);
                 if (treeAsset && treeAsset.loaded) {
-                    let shadowRadius = tree.type === 'arvorebloco001' ? 
-                        treeAsset.width * 0.35 : treeAsset.width * 0.5;
+                    // Árvores secas têm sombra menor
+                    let shadowRadius;
+                    if (tree.type === 'arvore006' || tree.type === 'arvore007' || tree.type === 'arvore008') {
+                        shadowRadius = treeAsset.width * 0.2; // Sombra bem pequena para árvores secas
+                    } else if (tree.type === 'arvorebloco001') {
+                        shadowRadius = treeAsset.width * 0.35;
+                    } else {
+                        shadowRadius = treeAsset.width * 0.5;
+                    }
                     
                     const shadowX = tree.x + treeAsset.width * 0.5;
                     const shadowY = tree.y + treeAsset.height * 0.85;
@@ -88,8 +95,20 @@
             map.trees.forEach(tree => {
                 const treeAsset = MadNight.assets.get(tree.type);
                 if (treeAsset && treeAsset.loaded) {
-                    let shadowRadius = tree.type === 'arvorebloco001' ? 
-                        treeAsset.width * 0.35 : treeAsset.width * 0.5;
+                    // Árvores secas têm sombra menor
+                    let shadowRadius;
+                    let shadowOpacity;
+                    
+                    if (tree.type === 'arvore006' || tree.type === 'arvore007' || tree.type === 'arvore008') {
+                        shadowRadius = treeAsset.width * 0.2; // Sombra bem pequena
+                        shadowOpacity = 0.3; // Sombra mais fraca
+                    } else if (tree.type === 'arvorebloco001') {
+                        shadowRadius = treeAsset.width * 0.35;
+                        shadowOpacity = 0.72;
+                    } else {
+                        shadowRadius = treeAsset.width * 0.5;
+                        shadowOpacity = 0.72;
+                    }
                     
                     const shadowX = tree.x + treeAsset.width * 0.5;
                     const shadowY = tree.y + treeAsset.height * 0.85;
@@ -103,9 +122,17 @@
                             shadowX, shadowY, 0,
                             shadowX, shadowY, shadowRadius
                         );
-                        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
-                        gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
-                        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                        
+                        // Gradiente ajustado para árvores secas
+                        if (tree.type === 'arvore006' || tree.type === 'arvore007' || tree.type === 'arvore008') {
+                            gradient.addColorStop(0, `rgba(0, 0, 0, ${shadowOpacity})`);
+                            gradient.addColorStop(0.8, `rgba(0, 0, 0, ${shadowOpacity * 0.3})`);
+                            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                        } else {
+                            gradient.addColorStop(0, `rgba(0, 0, 0, ${shadowOpacity})`);
+                            gradient.addColorStop(0.6, `rgba(0, 0, 0, ${shadowOpacity * 0.5})`);
+                            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                        }
                         
                         ctx.fillStyle = gradient;
                         ctx.fillRect(
@@ -217,12 +244,12 @@ renderTVLight: function(ctx, map, visibleArea) {
             tvX = 360;
             tvY = 110;
             tvRadius = 50;
-            tvIntensityBoost = 1.0; // Intensidade normal para TV 1
+            tvIntensityBoost = 1.0;
         } else if (light.id === 'ks_window2') {
-            tvX = 1740;  // Voltando para posição original
-            tvY = 290;   // Voltando para posição original
-            tvRadius = 100; // Raio um pouco maior
-            tvIntensityBoost = 2.5; // 50% mais forte que a TV 1
+            tvX = 1740;
+            tvY = 290;
+            tvRadius = 100; // RAIO MAIOR PARA TV 2
+            tvIntensityBoost = 1.5;
         }
         
         // Flicker independente para cada TV
@@ -236,14 +263,12 @@ renderTVLight: function(ctx, map, visibleArea) {
         
         // Cores mais fortes para TV 2
         if (light.id === 'ks_window2') {
-            // Cores mais intensas para TV 2
             gradient.addColorStop(0, `rgba(140, 190, 255, ${0.8 * intensity})`);
             gradient.addColorStop(0.2, `rgba(120, 170, 255, ${0.7 * intensity})`);
             gradient.addColorStop(0.4, `rgba(100, 150, 255, ${0.5 * intensity})`);
             gradient.addColorStop(0.7, `rgba(80, 120, 240, ${0.3 * intensity})`);
             gradient.addColorStop(1, 'rgba(60, 100, 220, 0)');
         } else {
-            // Cores normais para TV 1
             gradient.addColorStop(0, `rgba(120, 170, 255, ${0.6 * intensity})`);
             gradient.addColorStop(0.2, `rgba(100, 150, 255, ${0.5 * intensity})`);
             gradient.addColorStop(0.4, `rgba(80, 120, 255, ${0.3 * intensity})`);
