@@ -255,8 +255,8 @@
     {type: 'arvore002', x: 1100, y: -45}
 ],
             streetLights: [
-                {type: 'poste000', x: 695, y: 350, rotation: 0, lightRadius: 100, id: 'ks_post1'},
-                {type: 'poste000', x: 355, y: 204, rotation: 0, lightRadius: 100, id: 'ks_post2'},
+                {type: 'poste000', x: 700, y: 355, rotation: 0, lightRadius: 100, id: 'ks_post1'},
+                {type: 'poste000', x: 369, y: 214, rotation: 0, lightRadius: 100, id: 'ks_post2'},
                 {type: 'poste001', x: 1059, y: 170, rotation: 0, lightRadius: 100, id: 'ks_post3'},
                 {type: 'poste001', x: 1317, y: 637, rotation: 0, lightRadius: 100, id: 'ks_post4'},
                 {type: 'poste001', x: 1729, y: 1185, rotation: 0, lightRadius: 100, id: 'ks_post5'},
