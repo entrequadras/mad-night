@@ -256,13 +256,13 @@
                     {name: 'XARA', value: 58, display: '58 kills', date: '2024-12-13', time: '11:20'},
                     {name: 'KARO', value: 55, display: '55 kills', date: '2024-12-12', time: '14:15'},
                     {name: 'OHAN', value: 51, display: '51 kills', date: '2024-12-11', time: '10:45'},
-                    {name: 'IMP*', value: 49, display: '49 kills', date: '2024-12-10', time: '9:02'},
-                    {name: 'GAMA', value: 47, display: '47 kills', date: '2024-12-09', time: '10:08'},
-                    {name: 'KID_', value: 44, display: '44 kills', date: '2024-12-08', time: '11:52'}
+                    {name: 'SABA', value: 49, display: '49 kills', date: '2024-12-10', time: '9:02'},
+                    {name: 'PPOK', value: 47, display: '47 kills', date: '2024-12-09', time: '10:08'},
+                    {name: 'GAMB', value: 44, display: '44 kills', date: '2024-12-08', time: '11:52'}
                 ],
                 deathless: [
-                    {name: 'IMP*', time: '9:02', kills: 49, date: '2024-12-15'},
-                    {name: 'TATU', time: '10:45', kills: 45, date: '2024-12-13'}
+                    {name: 'RATI', time: '9:02', kills: 49, date: '2024-12-15'},
+                    {name: 'SHPO', time: '10:45', kills: 45, date: '2024-12-13'}
                 ]
             };
             
