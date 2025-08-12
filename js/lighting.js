@@ -246,8 +246,8 @@ renderTVLight: function(ctx, map, visibleArea) {
             tvRadius = 50;
             tvIntensityBoost = 1.0;
         } else if (light.id === 'ks_window2') {
-            tvX = 1727;  // NOVA POSIÇÃO
-            tvY = 277;   // NOVA POSIÇÃO
+            tvX = 1720;  // NOVA POSIÇÃO
+            tvY = 275;   // NOVA POSIÇÃO
             tvRadius = 85; // RAIO REDUZIDO (era 100)
             tvIntensityBoost = 1.8; // MAIS INTENSIDADE PARA FLICAR MAIS
         }
