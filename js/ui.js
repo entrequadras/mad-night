@@ -331,13 +331,25 @@
         showGameOver: function() {
             // Será renderizado no próximo frame através do render()
             console.log('Game Over UI');
-        },
+                // Voltar ao menu após 5 segundos
+    setTimeout(() => {
+        if (window.MadNightMain && window.MadNightMain.backToMenu) {
+            window.MadNightMain.backToMenu();
+        }
+    }, 5000);
+},
         
         // Mostrar tela de vitória
         showVictory: function() {
             // Será renderizado no próximo frame através do render()
             console.log('Victory UI');
-        },
+        // Voltar ao menu após 5 segundos
+    setTimeout(() => {
+        if (window.MadNightMain && window.MadNightMain.backToMenu) {
+            window.MadNightMain.backToMenu();
+        }
+    }, 5000);
+},
         
         // Mostrar/esconder pausa
         showPause: function(isPaused) {
