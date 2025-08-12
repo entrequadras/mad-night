@@ -246,8 +246,8 @@ renderTVLight: function(ctx, map, visibleArea) {
             tvRadius = 50;
             tvIntensityBoost = 1.0;
         } else if (light.id === 'ks_window2') {
-            tvX = 1740;
-            tvY = 290;
+            tvX = 1690;
+            tvY = 280;
             tvRadius = 100; // RAIO MAIOR PARA TV 2
             tvIntensityBoost = 1.5;
         }
