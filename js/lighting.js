@@ -207,7 +207,7 @@
             if (!tvLight) return;
             
             // Ajustar posição para ficar alinhado com a janela
-            const adjustedX = 360;
+            const adjustedX = 1360;
             const adjustedY = 100;
             const tvRadius = 80; // Aumentei um pouco o raio
             
