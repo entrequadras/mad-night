@@ -1,431 +1,437 @@
-// Mad Night v1.40 - Estrutura Modular
-// enemy.js - Sistema de inimigos
+// enemy.js - Sistema de Inimigos Completo (v1.57)
 
-// Classe Enemy
-MadNight.Enemy = class Enemy {
-    constructor(x, y, type = 'faquinha') {
-        this.x = x;
-        this.y = y;
-        this.originX = x;
-        this.originY = y;
-        this.type = type;
-        
-        // Configurações base
-        const config = MadNight.config.enemy;
-        const typeConfig = MadNight.config.enemyTypes[type] || {};
-        
-        this.width = config.width;
-        this.height = config.height;
-        this.speed = typeConfig.speed || config.baseSpeed;
-        this.patrolSpeed = config.patrolSpeed;
-        this.direction = 'down';
-        this.frame = 0;
-        this.state = 'patrol'; // patrol, chase, attack
-        this.isDead = false;
-        this.deathFrame = 12;
-        this.sprites = [];
-        
-        // Visão e detecção
-        this.visionRange = config.visionRange;
-        this.alertVisionRange = config.alertVisionRange;
-        this.patrolRadius = config.patrolRadius;
-        
-        // Patrulha
-        this.patrolDirection = this.getRandomDirection();
-        this.lastDirectionChange = Date.now();
-        this.directionChangeInterval = 2000 + Math.random() * 2000;
-        
-        // Ataque
-        this.attackRange = config.attackRange;
-        this.lastAttack = 0;
-        this.attackCooldown = config.attackCooldown;
-        
-        // Vida e invulnerabilidade
-        this.health = typeConfig.health || 1;
-        this.maxHealth = this.health;
-        this.isInvulnerable = false;
-        this.invulnerableTime = 0;
-        this.invulnerableDuration = typeConfig.invulnerableDuration || 500;
-        
-        // Tempo para remover após morte
-        this.removeTime = null;
-        
-        // Carregar sprites corretos
-        this.loadSprites();
-    }
+(function() {
+    'use strict';
     
-    loadSprites() {
-        this.sprites = MadNight.assets.sprites[this.type] || [];
-    }
-    
-    getRandomDirection() {
-        const dirs = ['up', 'down', 'left', 'right'];
-        return dirs[Math.floor(Math.random() * dirs.length)];
-    }
-    
-    throwStone() {
-        if (this.type !== 'janis' || Date.now() - this.lastAttack < this.attackCooldown) {
-            return;
+    // Classe base para inimigos
+    class Enemy {
+        constructor(x, y, type) {
+            this.x = x;
+            this.y = y;
+            this.type = type;
+            this.width = 40;
+            this.height = 40;
+            this.speed = 2;
+            this.health = 1;
+            this.state = 'patrol'; // patrol, alert, chase
+            this.direction = { x: 0, y: 0 };
+            this.patrolTarget = null;
+            this.alertTimer = 0;
+            this.lastSeen = null;
+            this.isDead = false;
+            this.deathTimer = 0;
+            this.viewAngle = Math.PI / 3; // 60 graus de visão
+            this.viewDistance = 150;
+            this.attackCooldown = 0;
+            this.attackRange = 50;
+            this.currentSprite = 'idle';
+            this.animationFrame = 0;
+            this.animationTimer = 0;
         }
         
-        const player = MadNight.player;
-        if (!player) return;
-        
-        const dx = player.x - this.x;
-        const dy = player.y - this.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        
-        if (dist < this.attackRange && !player.isDead) {
-            this.lastAttack = Date.now();
-            
-            // Criar projétil usando o sistema de projéteis
-            MadNight.projectiles.create(
-                this.x + this.width / 2,
-                this.y + this.height / 2,
-                player.x + player.width / 2,
-                player.y + player.height / 2
-            );
-            
-            MadNight.audio.playSFX('ataque_janis', 0.5);
-        }
-    }
-    
-    update() {
-        if (this.isDead) return;
-        
-        const player = MadNight.player;
-        if (!player) return;
-        
-        // Verificar invulnerabilidade
-        if (this.isInvulnerable && Date.now() - this.invulnerableTime > this.invulnerableDuration) {
-            this.isInvulnerable = false;
-        }
-        
-        const dx = player.x - this.x;
-        const dy = player.y - this.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        
-        // Ajustar visão baseado em sombras
-        let visionRange = this.state === 'chase' ? this.alertVisionRange : this.visionRange;
-        if (player.inShadow) {
-            visionRange *= 0.3;
-        }
-        
-        // Comportamento específico do Janis (atirador)
-        if (this.type === 'janis') {
-            if (dist < this.attackRange && !player.isDead) {
-                this.state = 'attack';
-                this.throwStone();
-                this.direction = Math.abs(dx) > Math.abs(dy) ? 
-                    (dx > 0 ? 'right' : 'left') : 
-                    (dy > 0 ? 'down' : 'up');
-            } else {
-                this.state = 'patrol';
+        update(deltaTime) {
+            if (this.isDead) {
+                this.deathTimer += deltaTime;
+                if (this.deathTimer > 2000) {
+                    return false; // Remover inimigo
+                }
+                return true;
             }
-        }
-        
-        // Comportamento específico do Chacal
-        if (this.type === 'chacal' && dist < 300 && !player.isDead) {
-            this.state = 'chase';
-        }
-        
-        // Detecção e perseguição para inimigos normais
-        if (this.type !== 'janis' && dist < visionRange && !player.isDead) {
-            let canSee = false;
-            const angleThreshold = 50;
             
-            // Verificar cone de visão
-            switch(this.direction) {
-                case 'up': 
-                    canSee = dy < 0 && Math.abs(dx) < angleThreshold;
+            // Atualizar cooldown de ataque
+            if (this.attackCooldown > 0) {
+                this.attackCooldown -= deltaTime;
+            }
+            
+            // Atualizar animação
+            this.animationTimer += deltaTime;
+            if (this.animationTimer > 200) {
+                this.animationTimer = 0;
+                this.animationFrame = (this.animationFrame + 1) % 2;
+            }
+            
+            // Comportamento baseado no estado
+            switch(this.state) {
+                case 'patrol':
+                    this.patrol(deltaTime);
                     break;
-                case 'down': 
-                    canSee = dy > 0 && Math.abs(dx) < angleThreshold;
+                case 'alert':
+                    this.alert(deltaTime);
                     break;
-                case 'left': 
-                    canSee = dx < 0 && Math.abs(dy) < angleThreshold;
-                    break;
-                case 'right': 
-                    canSee = dx > 0 && Math.abs(dy) < angleThreshold;
+                case 'chase':
+                    this.chase(deltaTime);
                     break;
             }
             
-            // Perseguir se viu ou já está perseguindo
-            if (this.state === 'chase' || canSee || this.type === 'chacal') {
+            // Verificar se vê o player
+            if (this.canSeePlayer()) {
                 this.state = 'chase';
-                
-                // Mover em direção ao player
-                const angle = Math.atan2(dy, dx);
-                const moveX = Math.cos(angle) * this.speed;
-                const moveY = Math.sin(angle) * this.speed;
-                
-                // Tentar mover horizontalmente
-                if (!MadNight.collision.checkWallCollision(this, this.x + moveX, this.y)) {
-                    this.x += moveX;
-                }
-                
-                // Tentar mover verticalmente
-                if (!MadNight.collision.checkWallCollision(this, this.x, this.y + moveY)) {
-                    this.y += moveY;
-                }
-                
-                // Atualizar direção
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    this.direction = dx > 0 ? 'right' : 'left';
-                } else {
-                    this.direction = dy > 0 ? 'down' : 'up';
-                }
-                
-                // Matar player se muito próximo
-                if (dist < 30) {
-                    MadNight.player.kill();
-                }
+                this.lastSeen = { 
+                    x: MadNight.player.x, 
+                    y: MadNight.player.y 
+                };
             }
-        } else if (this.type !== 'janis' || this.state !== 'attack') {
-            // Comportamento de patrulha
-            this.state = 'patrol';
-            this.patrol();
+            
+            // Verificar colisão com player
+            if (this.checkPlayerCollision()) {
+                this.attack();
+            }
+            
+            return true;
         }
         
-        // Verificar colisão com dash do player
-        if (player.isDashing && dist < 40 && !this.isInvulnerable) {
-            if (this.type === 'chacal') {
-                this.takeDamage();
+        patrol(deltaTime) {
+            // Movimento de patrulha básico
+            if (!this.patrolTarget) {
+                this.patrolTarget = {
+                    x: this.x + (Math.random() - 0.5) * 200,
+                    y: this.y + (Math.random() - 0.5) * 200
+                };
+            }
+            
+            const dx = this.patrolTarget.x - this.x;
+            const dy = this.patrolTarget.y - this.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist < 10) {
+                this.patrolTarget = null;
             } else {
+                this.direction.x = dx / dist;
+                this.direction.y = dy / dist;
+                this.move(deltaTime);
+            }
+        }
+        
+        alert(deltaTime) {
+            // Estado de alerta - procurando player
+            this.alertTimer += deltaTime;
+            
+            if (this.alertTimer > 3000) {
+                this.state = 'patrol';
+                this.alertTimer = 0;
+            }
+            
+            // Girar procurando
+            this.direction.x = Math.cos(this.alertTimer * 0.002);
+            this.direction.y = Math.sin(this.alertTimer * 0.002);
+        }
+        
+        chase(deltaTime) {
+            // Perseguir player
+            const player = MadNight.player;
+            if (!player || player.isDead) {
+                this.state = 'patrol';
+                return;
+            }
+            
+            const dx = player.x - this.x;
+            const dy = player.y - this.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist > this.viewDistance * 2) {
+                // Perdeu o player de vista
+                this.state = 'alert';
+                this.alertTimer = 0;
+            } else {
+                this.direction.x = dx / dist;
+                this.direction.y = dy / dist;
+                this.move(deltaTime);
+            }
+        }
+        
+        move(deltaTime) {
+            const moveSpeed = this.speed * (deltaTime / 16);
+            const newX = this.x + this.direction.x * moveSpeed;
+            const newY = this.y + this.direction.y * moveSpeed;
+            
+            // Verificar colisão antes de mover
+            if (!this.checkCollision(newX, newY)) {
+                this.x = newX;
+                this.y = newY;
+            }
+        }
+        
+        canSeePlayer() {
+            const player = MadNight.player;
+            if (!player || player.isDead) return false;
+            
+            // Verificar se está na sombra (invisível)
+            if (MadNight.lighting && MadNight.lighting.isInShadow) {
+                if (MadNight.lighting.isInShadow(player.x + player.width/2, player.y + player.height/2)) {
+                    return false;
+                }
+            }
+            
+            const dx = player.x - this.x;
+            const dy = player.y - this.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            // Verificar distância
+            if (dist > this.viewDistance) return false;
+            
+            // Verificar ângulo de visão
+            const angleToPlayer = Math.atan2(dy, dx);
+            const facingAngle = Math.atan2(this.direction.y, this.direction.x);
+            let angleDiff = Math.abs(angleToPlayer - facingAngle);
+            
+            if (angleDiff > Math.PI) {
+                angleDiff = 2 * Math.PI - angleDiff;
+            }
+            
+            return angleDiff < this.viewAngle / 2;
+        }
+        
+        checkPlayerCollision() {
+            const player = MadNight.player;
+            if (!player || player.isDead) return false;
+            
+            return this.x < player.x + player.width &&
+                   this.x + this.width > player.x &&
+                   this.y < player.y + player.height &&
+                   this.y + this.height > player.y;
+        }
+        
+        checkCollision(x, y) {
+            // Verificar colisão com paredes e objetos
+            if (MadNight.collision && MadNight.collision.checkCollision) {
+                return MadNight.collision.checkCollision(
+                    { x: x, y: y, w: this.width, h: this.height }
+                );
+            }
+            return false;
+        }
+        
+        attack() {
+            if (this.attackCooldown <= 0) {
+                const player = MadNight.player;
+                if (player && player.kill) {
+                    player.kill();
+                }
+                this.attackCooldown = 1000; // 1 segundo de cooldown
+            }
+        }
+        
+        takeDamage(damage) {
+            this.health -= damage;
+            if (this.health <= 0) {
                 this.die();
             }
         }
         
-        // Atualizar frame de animação
-        this.frame = Date.now() % 400 < 200 ? 0 : 1;
-    }
-    
-    patrol() {
-        // Mudar direção aleatoriamente
-        if (Date.now() - this.lastDirectionChange > this.directionChangeInterval) {
-            this.patrolDirection = this.getRandomDirection();
-            this.lastDirectionChange = Date.now();
-            this.directionChangeInterval = 2000 + Math.random() * 2000;
-            this.direction = this.patrolDirection;
-        }
-        
-        // Verificar distância da origem
-        const distFromOrigin = Math.sqrt(
-            Math.pow(this.x - this.originX, 2) + 
-            Math.pow(this.y - this.originY, 2)
-        );
-        
-        // Voltar se muito longe da origem
-        if (distFromOrigin > this.patrolRadius) {
-            const backDx = this.originX - this.x;
-            const backDy = this.originY - this.y;
-            this.patrolDirection = Math.abs(backDx) > Math.abs(backDy) ?
-                (backDx > 0 ? 'right' : 'left') :
-                (backDy > 0 ? 'down' : 'up');
-            this.direction = this.patrolDirection;
-            this.lastDirectionChange = Date.now();
-        }
-        
-        // Mover na direção de patrulha
-        let pdx = 0, pdy = 0;
-        switch(this.patrolDirection) {
-            case 'up': pdy = -this.patrolSpeed; break;
-            case 'down': pdy = this.patrolSpeed; break;
-            case 'left': pdx = -this.patrolSpeed; break;
-            case 'right': pdx = this.patrolSpeed; break;
-        }
-        
-        // Tentar mover, mudar direção se colidir
-        if (!MadNight.collision.checkWallCollision(this, this.x + pdx, this.y + pdy)) {
-            this.x += pdx;
-            this.y += pdy;
-        } else {
-            this.patrolDirection = this.getRandomDirection();
-            this.lastDirectionChange = Date.now();
-            this.direction = this.patrolDirection;
-        }
-    }
-    
-    takeDamage() {
-        if (this.isInvulnerable) return;
-        
-        this.health--;
-        this.isInvulnerable = true;
-        this.invulnerableTime = Date.now();
-        
-        if (this.health <= 0) {
-            this.die();
-        }
-    }
-    
-    die() {
-        if (this.isDead) return;
-        
-        this.isDead = true;
-        this.deathFrame = Math.floor(Math.random() * 4) + 12;
-        
-        // Tocar som de morte
-        MadNight.audio.playDeathSound(this.type);
-        
-        // Marcar para remoção
-        this.removeTime = Date.now() + MadNight.config.enemy.removeDelay;
-    }
-    
-    getSprite() {
-        if (this.isDead) {
-            return this.sprites[this.deathFrame];
-        }
-        
-        const dirMap = {'down': 0, 'right': 1, 'left': 2, 'up': 3};
-        const base = dirMap[this.direction];
-        const offset = (this.state === 'chase' || this.state === 'attack') ? 8 : this.frame * 4;
-        
-        return this.sprites[base + offset];
-    }
-    
-    render(ctx, visibleArea) {
-        // Verificar se está visível
-        if (!MadNight.camera.isVisible(this)) return;
-        
-        // Verificar se sprites estão carregados
-        if (MadNight.assets.areSpritesLoaded(this.type)) {
-            const sprite = this.getSprite();
-            if (sprite) {
-                ctx.save();
-                
-                // Aplicar transparência se estiver na sombra
-                if (MadNight.lighting.isInShadow(
-                    this.x + this.width / 2, 
-                    this.y + this.height / 2
-                )) {
-                    ctx.globalAlpha = 0.5;
-                }
-                
-                // Mostrar barra de vida do Chacal
-                if (this.type === 'chacal' && !this.isDead && this.health < this.maxHealth) {
-                    ctx.fillStyle = '#800';
-                    ctx.fillRect(this.x, this.y - 10, this.width, 5);
-                    ctx.fillStyle = '#f00';
-                    ctx.fillRect(this.x, this.y - 10, this.width * (this.health / this.maxHealth), 5);
-                }
-                
-                // Aplicar transparência se invulnerável
-                if (this.isInvulnerable) {
-                    ctx.globalAlpha = 0.5;
-                }
-                
-                // Renderizar sprite
-                ctx.drawImage(sprite, this.x, this.y, this.width, this.height);
-                
-                ctx.restore();
+        die() {
+            this.isDead = true;
+            this.deathTimer = 0;
+            
+            // IMPORTANTE: Registrar kill nas estatísticas
+            if (MadNight.stats && MadNight.stats.registerKill) {
+                MadNight.stats.registerKill(this.type);
             }
-        } else {
-            // Fallback se sprites não carregaram
-            if (!this.isDead) {
-                const colors = {
-                    'faquinha': '#808',
-                    'morcego': '#408',
-                    'caveirinha': '#c0c',
-                    'janis': '#0cc',
-                    'chacal': '#f80'
-                };
-                
-                ctx.fillStyle = this.state === 'chase' ? '#f0f' : colors[this.type];
+            
+            console.log(`💀 ${this.type} eliminado!`);
+        }
+        
+        render(ctx) {
+            if (this.isDead) {
+                ctx.save();
+                ctx.globalAlpha = 1 - (this.deathTimer / 2000);
+                ctx.fillStyle = '#f00';
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.restore();
+                return;
+            }
+            
+            // Renderizar sprite do inimigo
+            const sprite = MadNight.assets.get(this.type);
+            if (sprite && sprite.loaded && sprite.img) {
+                ctx.drawImage(sprite.img, this.x, this.y);
+            } else {
+                // Fallback - quadrado colorido
+                ctx.fillStyle = this.getColor();
                 ctx.fillRect(this.x, this.y, this.width, this.height);
             }
+            
+            // Debug - mostrar cone de visão
+            if (MadNight.config.debug.showCollisions) {
+                ctx.save();
+                ctx.strokeStyle = 'rgba(255, 255, 0, 0.3)';
+                ctx.beginPath();
+                ctx.moveTo(this.x + this.width/2, this.y + this.height/2);
+                const angle1 = Math.atan2(this.direction.y, this.direction.x) - this.viewAngle/2;
+                const angle2 = Math.atan2(this.direction.y, this.direction.x) + this.viewAngle/2;
+                ctx.lineTo(
+                    this.x + this.width/2 + Math.cos(angle1) * this.viewDistance,
+                    this.y + this.height/2 + Math.sin(angle1) * this.viewDistance
+                );
+                ctx.arc(
+                    this.x + this.width/2, 
+                    this.y + this.height/2, 
+                    this.viewDistance,
+                    angle1, angle2
+                );
+                ctx.closePath();
+                ctx.stroke();
+                ctx.restore();
+            }
         }
         
-        // Mostrar indicador de alerta durante fuga
-        const gameState = MadNight.game.state;
-        if (!this.isDead && gameState.phase === 'escape') {
-            ctx.fillStyle = '#f00';
-            ctx.font = '8px "Press Start 2P"';
-            ctx.fillText('!', this.x + 23, this.y - 5);
+        getColor() {
+            switch(this.type) {
+                case 'faquinha': return '#f0f';
+                case 'morcego': return '#800';
+                case 'caveirinha': return '#fff';
+                case 'janis': return '#0ff';
+                case 'chacal': return '#f80';
+                default: return '#f00';
+            }
         }
     }
-};
-
-// Sistema de gerenciamento de inimigos
-MadNight.enemies = {
-    list: [],
     
-    // Criar novo inimigo
-    create: function(x, y, type = 'faquinha') {
-        const enemy = new MadNight.Enemy(x, y, type);
-        this.list.push(enemy);
-        return enemy;
-    },
-    
-    // Atualizar todos os inimigos
-    update: function() {
-        this.list.forEach(enemy => {
-            enemy.update();
-        });
-        
-        // Remover inimigos mortos após delay
-        this.cleanup();
-    },
-    
-    // Limpar inimigos mortos
-    cleanup: function() {
-        const now = Date.now();
-        this.list = this.list.filter(enemy => {
-            return !enemy.removeTime || now < enemy.removeTime;
-        });
-    },
-    
-    // Renderizar todos os inimigos
-    render: function(ctx, visibleArea) {
-        this.list.forEach(enemy => {
-            enemy.render(ctx, visibleArea);
-        });
-    },
-    
-    // Limpar todos os inimigos
-    clear: function() {
-        this.list = [];
-    },
-    
-    // Obter número de inimigos vivos
-    getAliveCount: function() {
-        return this.list.filter(e => !e.isDead).length;
-    },
-    
-    // Spawnar inimigo de fuga
-    spawnEscapeEnemy: function() {
-        const map = MadNight.maps.getCurrentMap();
-        if (!map) return;
-        
-        const gameState = MadNight.game.state;
-        
-        const corners = [
-            {x: 50, y: 50, dir: 'down'},
-            {x: map.width - 100, y: 50, dir: 'down'},
-            {x: 50, y: map.height - 100, dir: 'up'},
-            {x: map.width - 100, y: map.height - 100, dir: 'up'}
-        ];
-        
-        const corner = corners[gameState.spawnCorner % 4];
-        gameState.spawnCorner++;
-        
-        const types = ['faquinha', 'morcego', 'caveirinha', 'caveirinha'];
-        const randomType = types[Math.floor(Math.random() * types.length)];
-        
-        const validPos = MadNight.collision.findValidSpawnPosition(
-            corner.x, corner.y, 46, 46
-        );
-        
-        const enemy = this.create(validPos.x, validPos.y, randomType);
-        enemy.state = 'chase';
-        enemy.alertVisionRange = 400;
-        
-        // Definir direção inicial
-        const centerX = map.width / 2;
-        const centerY = map.height / 2;
-        enemy.direction = Math.abs(corner.x - centerX) > Math.abs(corner.y - centerY) ?
-            (corner.x < centerX ? 'right' : 'left') :
-            (corner.y < centerY ? 'down' : 'up');
-        
-        return enemy;
+    // Tipos específicos de inimigos
+    class Faquinha extends Enemy {
+        constructor(x, y) {
+            super(x, y, 'faquinha');
+            this.speed = 2;
+            this.viewDistance = 120;
+        }
     }
-};
+    
+    class Morcego extends Enemy {
+        constructor(x, y) {
+            super(x, y, 'morcego');
+            this.speed = 3;
+            this.viewDistance = 150;
+        }
+    }
+    
+    class Caveirinha extends Enemy {
+        constructor(x, y) {
+            super(x, y, 'caveirinha');
+            this.speed = 2.5;
+            this.viewDistance = 140;
+        }
+    }
+    
+    class Janis extends Enemy {
+        constructor(x, y) {
+            super(x, y, 'janis');
+            this.speed = 1.5;
+            this.viewDistance = 200;
+            this.attackRange = 150; // Atira de longe
+            this.projectileCooldown = 0;
+        }
+        
+        attack() {
+            if (this.projectileCooldown <= 0) {
+                // Atirar pedra
+                const player = MadNight.player;
+                if (player && MadNight.projectiles) {
+                    const dx = player.x - this.x;
+                    const dy = player.y - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist <= this.attackRange) {
+                        MadNight.projectiles.create(
+                            this.x + this.width/2,
+                            this.y + this.height/2,
+                            dx / dist * 5,
+                            dy / dist * 5,
+                            'stone'
+                        );
+                        this.projectileCooldown = 2000; // 2 segundos
+                    }
+                }
+            }
+        }
+        
+        update(deltaTime) {
+            if (this.projectileCooldown > 0) {
+                this.projectileCooldown -= deltaTime;
+            }
+            return super.update(deltaTime);
+        }
+    }
+    
+    class Chacal extends Enemy {
+        constructor(x, y) {
+            super(x, y, 'chacal');
+            this.speed = 2.5;
+            this.health = 3; // Boss - aguenta 3 hits
+            this.viewDistance = 180;
+            this.width = 60;
+            this.height = 60;
+        }
+        
+        die() {
+            super.die();
+            // Marcar que o Chacal foi derrotado
+            if (MadNight.game && MadNight.game.state) {
+                MadNight.game.state.chacalDefeated = true;
+            }
+        }
+    }
+    
+    // Sistema de gerenciamento de inimigos
+    MadNight.enemies = {
+        list: [],
+        
+        init: function() {
+            console.log('Sistema de inimigos inicializado');
+        },
+        
+        create: function(x, y, type) {
+            let enemy;
+            
+            switch(type) {
+                case 'faquinha':
+                    enemy = new Faquinha(x, y);
+                    break;
+                case 'morcego':
+                    enemy = new Morcego(x, y);
+                    break;
+                case 'caveirinha':
+                    enemy = new Caveirinha(x, y);
+                    break;
+                case 'janis':
+                    enemy = new Janis(x, y);
+                    break;
+                case 'chacal':
+                    enemy = new Chacal(x, y);
+                    break;
+                default:
+                    enemy = new Enemy(x, y, type);
+            }
+            
+            this.list.push(enemy);
+            return enemy;
+        },
+        
+        update: function(deltaTime) {
+            this.list = this.list.filter(enemy => enemy.update(deltaTime));
+        },
+        
+        render: function(ctx) {
+            this.list.forEach(enemy => enemy.render(ctx));
+        },
+        
+        clear: function() {
+            this.list = [];
+        },
+        
+        getAlive: function() {
+            return this.list.filter(enemy => !enemy.isDead);
+        },
+        
+        checkCollision: function(rect) {
+            return this.list.some(enemy => {
+                if (enemy.isDead) return false;
+                return enemy.x < rect.x + rect.w &&
+                       enemy.x + enemy.width > rect.x &&
+                       enemy.y < rect.y + rect.h &&
+                       enemy.y + enemy.height > rect.y;
+            });
+        }
+    };
+    
+    console.log('Módulo Enemy carregado');
+    
+})();
