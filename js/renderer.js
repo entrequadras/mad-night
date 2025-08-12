@@ -151,22 +151,25 @@
             // Carros estacionados
             this.renderParkedCars(map, visibleArea);
             
-            // IMPORTANTE: No mapa 2 - ordem especial de renderização
+            // Luz de TV no mapa 2 (antes dos prédios)
             if (MadNight.game && MadNight.game.state && 
                 MadNight.game.state.currentMap === 2) {
-                
-                // 1. Luz de TV primeiro (atrás de tudo)
                 if (MadNight.lighting && MadNight.lighting.renderTVLight) {
-                    MadNight.lighting.renderTVLight(ctx, map, visibleArea);
+                    MadNight.lighting.renderTVLight(this.ctx, map, visibleArea);
                 }
             }
             
             // Objetos e estruturas
             this.renderObjects(map, visibleArea);
+            
+            // Prédios - camada BOTTOM (atrás do player)
             this.renderBuildings(map, visibleArea, 'bottom');
+            
             this.renderWalls(map, visibleArea);
             
             // Elementos superiores
+            
+            // Prédios - camada TOP (na frente do player)
             this.renderBuildings(map, visibleArea, 'top');
             
             // Objetos especiais (orelhão, lixeira) DEPOIS dos prédios
@@ -393,8 +396,8 @@
                     
                     const buildingAsset = MadNight.assets.get(building.type);
                     if (buildingAsset && buildingAsset.loaded && buildingAsset.img) {
-                        // Linha de corte em 35% da altura do prédio
-                        const cutLine = building.y + buildingAsset.height * 0.35;
+                        // Linha de corte em 75% da altura do prédio
+                        const cutLine = building.y + buildingAsset.height * 0.75;
                         const playerBottom = player.y + player.height;
                         
                         // Renderizar prédio baseado na posição do player
@@ -585,17 +588,24 @@
                 ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
             });
             
-            // Debug da luz de TV no mapa 2
-            if (MadNight.game && MadNight.game.state && 
-                MadNight.game.state.currentMap === 2) {
+            // Debug de colisões
+            if (MadNight.config && MadNight.config.debug && MadNight.config.debug.showCollisions) {
                 ctx.strokeStyle = '#00ff00';
                 ctx.lineWidth = 2;
+                
+                // Debug da primeira TV
                 ctx.beginPath();
-                ctx.arc(1360, 100, 80, 0, Math.PI * 2);
+                ctx.arc(360, 110, 50, 0, Math.PI * 2);
                 ctx.stroke();
                 ctx.fillStyle = '#00ff00';
                 ctx.font = '12px Arial';
-                ctx.fillText('TV LIGHT HERE', 1320, 90);
+                ctx.fillText('TV1', 340, 110);
+                
+                // Debug da segunda TV
+                ctx.beginPath();
+                ctx.arc(1740, 290, 50, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.fillText('TV2', 1720, 290);
             }
             
             ctx.restore();
