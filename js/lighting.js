@@ -198,64 +198,58 @@
             ctx.restore();
         },
         
-        // NOVO: Renderizar luz de TV (antes dos prédios)
-        renderTVLight: function(ctx, map, visibleArea) {
-            if (!map.lights || map.lights.length === 0) return;
-            
-            // Procurar especificamente pela luz da TV
-            const tvLight = map.lights.find(light => light.id === 'ks_window1');
-            if (!tvLight) return;
-            
-            // Ajustar posição para ficar alinhado com a janela
-            const adjustedX = 1360;
-            const adjustedY = 100;
-            const tvRadius = 80; // Aumentei um pouco o raio
-            
-            // Simplificar verificação de visibilidade para debug
-            ctx.save();
-            
-            // Tentar source-over com transparência ao invés de lighter
-            ctx.globalCompositeOperation = 'screen'; // ou 'lighter' ou 'source-over'
-            ctx.globalAlpha = 0.6; // Controlar opacidade geral
-            
-            const intensity = this.updateFlicker('ks_window1');
-            
-            // Gradiente azulado de TV
-            const gradient = ctx.createRadialGradient(
-                adjustedX, adjustedY, 0,
-                adjustedX, adjustedY, tvRadius
-            );
-            
-            // Cores mais fortes para debug
-            gradient.addColorStop(0, `rgba(100, 150, 255, ${1.0 * intensity})`);
-            gradient.addColorStop(0.3, `rgba(80, 120, 255, ${0.8 * intensity})`);
-            gradient.addColorStop(0.6, `rgba(60, 100, 255, ${0.5 * intensity})`);
-            gradient.addColorStop(1, 'rgba(40, 80, 255, 0)');
-            
-            ctx.fillStyle = gradient;
-            ctx.fillRect(
-                adjustedX - tvRadius,
-                adjustedY - tvRadius,
-                tvRadius * 2,
-                tvRadius * 2
-            );
-            
-            // Debug: desenhar um círculo sólido para ver se está renderizando
-            if (MadNight.config.debug.showCollisions) {
-                ctx.globalCompositeOperation = 'source-over';
-                ctx.globalAlpha = 1;
-                ctx.strokeStyle = '#00ff00';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(adjustedX, adjustedY, tvRadius, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.fillStyle = '#00ff00';
-                ctx.font = '12px Arial';
-                ctx.fillText('TV LIGHT', adjustedX - 30, adjustedY);
-            }
-            
-            ctx.restore();
-        },
+        // Renderizar luz de TV (antes dos prédios)
+renderTVLight: function(ctx, map, visibleArea) {
+    if (!map.lights || map.lights.length === 0) return;
+    
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    
+    // Renderizar cada TV encontrada
+    map.lights.forEach(light => {
+        // Verificar se é uma luz de TV
+        if (light.id !== 'ks_window1' && light.id !== 'ks_window2') return;
+        
+        // Configurações específicas para cada TV
+        let tvX, tvY, tvRadius;
+        
+        if (light.id === 'ks_window1') {
+            tvX = 360;
+            tvY = 110;
+            tvRadius = 50;
+        } else if (light.id === 'ks_window2') {
+            tvX = 1740;
+            tvY = 290;
+            tvRadius = 50;
+        }
+        
+        // Flicker independente para cada TV
+        const intensity = this.updateFlicker(light.id);
+        
+        // Gradiente azulado de TV
+        const gradient = ctx.createRadialGradient(
+            tvX, tvY, 0,
+            tvX, tvY, tvRadius
+        );
+        
+        // Cores azuladas típicas de TV
+        gradient.addColorStop(0, `rgba(120, 170, 255, ${0.6 * intensity})`);
+        gradient.addColorStop(0.2, `rgba(100, 150, 255, ${0.5 * intensity})`);
+        gradient.addColorStop(0.4, `rgba(80, 120, 255, ${0.3 * intensity})`);
+        gradient.addColorStop(0.7, `rgba(60, 100, 220, ${0.15 * intensity})`);
+        gradient.addColorStop(1, 'rgba(40, 80, 200, 0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(
+            tvX - tvRadius,
+            tvY - tvRadius,
+            tvRadius * 2,
+            tvRadius * 2
+        );
+    });
+    
+    ctx.restore();
+},
         
         // Renderizar luzes customizadas do mapa (exceto TV)
         renderMapLights: function(ctx, map, visibleArea) {
