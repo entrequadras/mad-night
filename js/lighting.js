@@ -221,8 +221,8 @@ renderTVLight: function(ctx, map, visibleArea) {
         } else if (light.id === 'ks_window2') {
             tvX = 1740;  // Voltando para posição original
             tvY = 290;   // Voltando para posição original
-            tvRadius = 60; // Raio um pouco maior
-            tvIntensityBoost = 1.5; // 50% mais forte que a TV 1
+            tvRadius = 100; // Raio um pouco maior
+            tvIntensityBoost = 2.5; // 50% mais forte que a TV 1
         }
         
         // Flicker independente para cada TV
