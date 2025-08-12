@@ -211,20 +211,22 @@ renderTVLight: function(ctx, map, visibleArea) {
         if (light.id !== 'ks_window1' && light.id !== 'ks_window2') return;
         
         // Configurações específicas para cada TV
-        let tvX, tvY, tvRadius;
+        let tvX, tvY, tvRadius, tvIntensityBoost;
         
         if (light.id === 'ks_window1') {
             tvX = 360;
             tvY = 110;
             tvRadius = 50;
+            tvIntensityBoost = 1.0; // Intensidade normal para TV 1
         } else if (light.id === 'ks_window2') {
-            tvX = 900;  // TESTE: mudando para posição visível
-            tvY = 900;  // TESTE: mudando para posição visível
-            tvRadius = 50;
+            tvX = 1740;  // Voltando para posição original
+            tvY = 290;   // Voltando para posição original
+            tvRadius = 60; // Raio um pouco maior
+            tvIntensityBoost = 1.5; // 50% mais forte que a TV 1
         }
         
         // Flicker independente para cada TV
-        const intensity = this.updateFlicker(light.id);
+        const intensity = this.updateFlicker(light.id) * tvIntensityBoost;
         
         // Gradiente azulado de TV
         const gradient = ctx.createRadialGradient(
@@ -232,12 +234,22 @@ renderTVLight: function(ctx, map, visibleArea) {
             tvX, tvY, tvRadius
         );
         
-        // Cores azuladas típicas de TV
-        gradient.addColorStop(0, `rgba(120, 170, 255, ${0.6 * intensity})`);
-        gradient.addColorStop(0.2, `rgba(100, 150, 255, ${0.5 * intensity})`);
-        gradient.addColorStop(0.4, `rgba(80, 120, 255, ${0.3 * intensity})`);
-        gradient.addColorStop(0.7, `rgba(60, 100, 220, ${0.15 * intensity})`);
-        gradient.addColorStop(1, 'rgba(40, 80, 200, 0)');
+        // Cores mais fortes para TV 2
+        if (light.id === 'ks_window2') {
+            // Cores mais intensas para TV 2
+            gradient.addColorStop(0, `rgba(140, 190, 255, ${0.8 * intensity})`);
+            gradient.addColorStop(0.2, `rgba(120, 170, 255, ${0.7 * intensity})`);
+            gradient.addColorStop(0.4, `rgba(100, 150, 255, ${0.5 * intensity})`);
+            gradient.addColorStop(0.7, `rgba(80, 120, 240, ${0.3 * intensity})`);
+            gradient.addColorStop(1, 'rgba(60, 100, 220, 0)');
+        } else {
+            // Cores normais para TV 1
+            gradient.addColorStop(0, `rgba(120, 170, 255, ${0.6 * intensity})`);
+            gradient.addColorStop(0.2, `rgba(100, 150, 255, ${0.5 * intensity})`);
+            gradient.addColorStop(0.4, `rgba(80, 120, 255, ${0.3 * intensity})`);
+            gradient.addColorStop(0.7, `rgba(60, 100, 220, ${0.15 * intensity})`);
+            gradient.addColorStop(1, 'rgba(40, 80, 200, 0)');
+        }
         
         ctx.fillStyle = gradient;
         ctx.fillRect(
