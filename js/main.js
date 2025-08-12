@@ -1,4 +1,4 @@
-// Mad Night v1.40 - Estrutura Modular
+// Mad Night v1.57 - Com Sistema de Menu
 // main.js - Ponto de entrada e loop principal
 
 (function() {
@@ -12,57 +12,105 @@
     // Referência do canvas
     let canvas = null;
     
+    // Estado do aplicativo
+    let appState = 'menu'; // 'menu' ou 'game'
+    
     // Inicialização
-function init() {
-    console.log('Mad Night v1.56 - Loading Progressivo');
-    console.log('Iniciando...');
-    
-    // Obter canvas
-    canvas = document.getElementById('gameCanvas');
-    if (!canvas) {
-        console.error('Canvas não encontrado!');
-        return;
+    function init() {
+        console.log('Mad Night v1.57 - Sistema de Menu e Rankings');
+        console.log('Iniciando...');
+        
+        // Obter canvas
+        canvas = document.getElementById('gameCanvas');
+        if (!canvas) {
+            console.error('Canvas não encontrado!');
+            return;
+        }
+        
+        // Configurar canvas
+        canvas.width = MadNight.config.canvas.width;
+        canvas.height = MadNight.config.canvas.height;
+        
+        // Inicializar renderer
+        MadNight.renderer.init(canvas);
+        
+        // Inicializar sistemas essenciais
+        if (MadNight.assets && MadNight.assets.init) {
+            MadNight.assets.init();
+        }
+        
+        // Inicializar stats (para rankings)
+        if (MadNight.stats && MadNight.stats.init) {
+            MadNight.stats.init();
+        }
+        
+        // Inicializar loader
+        if (MadNight.loader && MadNight.loader.init) {
+            MadNight.loader.init();
+        }
+        
+        // Mostrar tela de loading
+        const ctx = MadNight.renderer.ctx;
+        const loadingInterval = setInterval(() => {
+            if (MadNight.loader && MadNight.loader.renderLoadingScreen) {
+                MadNight.loader.renderLoadingScreen(ctx, canvas);
+            }
+        }, 100);
+        
+        // Carregar assets iniciais
+        if (MadNight.loader && MadNight.loader.loadInitial) {
+            MadNight.loader.loadInitial(() => {
+                clearInterval(loadingInterval);
+                
+                // Inicializar game (mas não começar ainda)
+                if (MadNight.game && MadNight.game.init) {
+                    MadNight.game.init();
+                }
+                
+                // Inicializar e mostrar menu
+                if (MadNight.menu && MadNight.menu.init) {
+                    MadNight.menu.init();
+                    appState = 'menu';
+                }
+                
+                // Aguardar fontes e começar
+                document.fonts.ready.then(() => {
+                    console.log('Fontes carregadas!');
+                    start();
+                }).catch(() => {
+                    console.log('Erro ao carregar fontes, usando fallback');
+                    start();
+                });
+            });
+        } else {
+            // Fallback se não houver loader
+            clearInterval(loadingInterval);
+            
+            // Inicializar game
+            if (MadNight.game && MadNight.game.init) {
+                MadNight.game.init();
+            }
+            
+            // Inicializar menu
+            if (MadNight.menu && MadNight.menu.init) {
+                MadNight.menu.init();
+                appState = 'menu';
+            }
+            
+            // Começar
+            document.fonts.ready.then(() => {
+                start();
+            }).catch(() => {
+                start();
+            });
+        }
     }
-    
-    // Configurar canvas
-    canvas.width = MadNight.config.canvas.width;
-    canvas.height = MadNight.config.canvas.height;
-    
-    // Inicializar renderer
-    MadNight.renderer.init(canvas);
-    
-    // Inicializar loader
-    MadNight.loader.init();
-    
-    // Mostrar tela de loading
-    const ctx = MadNight.renderer.ctx;
-    const loadingInterval = setInterval(() => {
-        MadNight.loader.renderLoadingScreen(ctx, canvas);
-    }, 100);
-    
-    // Carregar assets iniciais
-    MadNight.loader.loadInitial(() => {
-        clearInterval(loadingInterval);
-        
-        // Inicializar jogo após loading
-        MadNight.game.init();
-        
-        // Aguardar fontes e começar
-        document.fonts.ready.then(() => {
-            console.log('Fontes carregadas!');
-            start();
-        }).catch(() => {
-            console.log('Erro ao carregar fontes, usando fallback');
-            start();
-        });
-    });
-}
     
     // Iniciar loop do jogo
     function start() {
         if (isRunning) return;
         
-        console.log('Iniciando loop do jogo...');
+        console.log('Iniciando loop principal...');
         isRunning = true;
         lastTime = performance.now();
         gameLoop(lastTime);
@@ -72,7 +120,7 @@ function init() {
     function stop() {
         if (!isRunning) return;
         
-        console.log('Parando loop do jogo...');
+        console.log('Parando loop principal...');
         isRunning = false;
         
         if (animationId) {
@@ -92,29 +140,53 @@ function init() {
         // Limitar delta time para evitar saltos grandes
         const cappedDeltaTime = Math.min(deltaTime, 100);
         
-        // Update e render apenas se não estiver pausado
-        if (!MadNight.game.isPaused) {
-            // Update
-            MadNight.game.update(cappedDeltaTime);
+        // Update baseado no estado
+        if (appState === 'menu') {
+            // Menu não precisa de update, apenas render
+            if (MadNight.menu && MadNight.menu.active) {
+                // Limpar tela e renderizar menu
+                const ctx = MadNight.renderer.ctx;
+                if (ctx) {
+                    MadNight.menu.render(ctx);
+                }
+            } else {
+                // Menu desativado, mudar para jogo
+                appState = 'game';
+            }
+        } else if (appState === 'game') {
+            // Update do jogo apenas se não estiver pausado
+            if (MadNight.game && !MadNight.game.isPaused) {
+                MadNight.game.update(cappedDeltaTime);
+            }
+            
+            // Sempre renderizar (mesmo pausado)
+            if (MadNight.renderer && MadNight.renderer.render) {
+                MadNight.renderer.render();
+            }
         }
-        
-        // Sempre renderizar (mesmo pausado)
-        MadNight.renderer.render();
         
         // Continuar loop
         animationId = requestAnimationFrame(gameLoop);
+    }
+    
+    // Voltar ao menu
+    function backToMenu() {
+        appState = 'menu';
+        if (MadNight.menu && MadNight.menu.backToMenu) {
+            MadNight.menu.backToMenu();
+        }
     }
     
     // Tratamento de visibilidade da página
     function handleVisibilityChange() {
         if (document.hidden) {
             // Página ficou oculta - pausar música
-            if (MadNight.audio.currentMusic) {
+            if (MadNight.audio && MadNight.audio.currentMusic) {
                 MadNight.audio.currentMusic.pause();
             }
         } else {
             // Página ficou visível - retomar música
-            if (MadNight.audio.currentMusic) {
+            if (MadNight.audio && MadNight.audio.currentMusic) {
                 MadNight.audio.currentMusic.play().catch(() => {});
             }
         }
@@ -148,10 +220,12 @@ function init() {
         window.addEventListener('resize', handleResize);
         handleResize(); // Aplicar uma vez no início
         
-        // Tecla ESC para pausar
+        // Tecla ESC para pausar (apenas no jogo)
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                MadNight.game.togglePause();
+            if (e.key === 'Escape' && appState === 'game') {
+                if (MadNight.game && MadNight.game.togglePause) {
+                    MadNight.game.togglePause();
+                }
             }
         });
         
@@ -187,35 +261,56 @@ function init() {
             start: start,
             stop: stop,
             restart: () => MadNight.game.restart(),
+            backToMenu: backToMenu,
+            skipToGame: () => {
+                if (MadNight.menu) MadNight.menu.active = false;
+                appState = 'game';
+                if (MadNight.game) MadNight.game.restart();
+            },
             spawnEnemy: (type) => {
                 const player = MadNight.player;
-                MadNight.enemies.create(
-                    player.x + 100,
-                    player.y,
-                    type || 'faquinha'
-                );
+                if (player && MadNight.enemies) {
+                    MadNight.enemies.create(
+                        player.x + 100,
+                        player.y,
+                        type || 'faquinha'
+                    );
+                }
             },
             killAll: () => {
-                MadNight.enemies.list.forEach(e => e.die());
+                if (MadNight.enemies && MadNight.enemies.list) {
+                    MadNight.enemies.list.forEach(e => e.die());
+                }
             },
             godMode: false,
             toggleGodMode: function() {
                 this.godMode = !this.godMode;
                 // Sobrescrever função kill do player
-                if (this.godMode) {
+                if (this.godMode && MadNight.player) {
                     MadNight.player._originalKill = MadNight.player.kill;
                     MadNight.player.kill = () => {
                         console.log('God mode ativo - ignorando morte');
                     };
-                } else if (MadNight.player._originalKill) {
+                } else if (MadNight.player && MadNight.player._originalKill) {
                     MadNight.player.kill = MadNight.player._originalKill;
                 }
                 console.log(`God mode: ${this.godMode ? 'ATIVO' : 'DESATIVADO'}`);
+            },
+            forceVictory: () => {
+                if (MadNight.game && MadNight.game.handleVictory) {
+                    // Simular vitória para testar rankings
+                    MadNight.game.handleVictory();
+                }
             }
         };
         
         console.log('🔧 Debug mode ativo!');
         console.log('Use window.MadNightDebug para comandos de debug');
+        console.log('Comandos disponíveis:');
+        console.log('  .skipToGame() - Pular menu e ir direto ao jogo');
+        console.log('  .backToMenu() - Voltar ao menu');
+        console.log('  .forceVictory() - Forçar vitória (testar rankings)');
+        console.log('  .toggleGodMode() - Ativar/desativar god mode');
     }
     
     // Ponto de entrada
@@ -239,7 +334,9 @@ function init() {
         stop();
         
         // Parar áudio
-        MadNight.audio.stopMusic();
+        if (MadNight.audio && MadNight.audio.stopMusic) {
+            MadNight.audio.stopMusic();
+        }
         
         // Limpar recursos
         if (animationId) {
@@ -247,12 +344,14 @@ function init() {
         }
     });
     
-    // Exportar funções principais para debug
+    // Exportar funções principais
     window.MadNightMain = {
         init: init,
         start: start,
         stop: stop,
-        isRunning: () => isRunning
+        backToMenu: backToMenu,
+        isRunning: () => isRunning,
+        getState: () => appState
     };
     
 })();
