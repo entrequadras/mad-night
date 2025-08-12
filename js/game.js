@@ -1,4 +1,4 @@
-// game.js - Lógica Principal do Jogo (Revisão Alpha-04)
+// game.js - Lógica Principal do Jogo (v1.56 - Loading Progressivo)
 
 (function() {
     'use strict';
@@ -31,6 +31,7 @@
     let lighting = null;
     let traffic = null;
     let ui = null;
+    let loader = null; // NOVO: Referência do loader
     
     // Sistema de input
     const keys = {};
@@ -51,6 +52,7 @@
         lighting = MadNight.lighting;
         traffic = MadNight.traffic;
         ui = MadNight.ui;
+        loader = MadNight.loader; // NOVO: Obter referência do loader
         
         // IMPORTANTE: Obter referência do assets também!
         const assets = MadNight.assets;
@@ -63,7 +65,7 @@
         
         // Inicializar subsistemas (com verificação segura)
         const modules = [
-            { name: 'assets', module: assets },  // ADICIONAR ASSETS PRIMEIRO!
+            { name: 'assets', module: assets },
             { name: 'maps', module: maps },
             { name: 'player', module: player },
             { name: 'enemies', module: enemies },
@@ -86,7 +88,7 @@
             }
         });
         
-        // Carregar primeiro mapa
+        // Carregar primeiro mapa (já carregado pelo loader inicial)
         loadMap(0);
         
         // Configurar input handlers
@@ -98,6 +100,21 @@
     
     // Carregar mapa
     function loadMap(mapIndex, isEscape = false) {
+        // NOVO: Verificar se o mapa está carregado
+        if (loader && !loader.isMapLoaded(mapIndex)) {
+            console.log(`⏳ Mapa ${mapIndex} não carregado, carregando agora...`);
+            
+            // Mostrar mensagem de loading se houver UI
+            if (ui && ui.showMessage) {
+                ui.showMessage("Carregando área...");
+            }
+            
+            loader.loadMapAssets(mapIndex, () => {
+                loadMap(mapIndex, isEscape); // Tentar novamente após carregar
+            });
+            return;
+        }
+        
         const map = maps.getMap(mapIndex);
         if (!map) {
             console.error(`Mapa ${mapIndex} não encontrado!`);
@@ -105,6 +122,17 @@
         }
         
         console.log(`📍 Carregando mapa ${mapIndex}: ${map.name}`);
+        
+        // NOVO: Pré-carregar próximo mapa possível
+        if (loader) {
+            if (gameState.phase === 'infiltration' && mapIndex < 5) {
+                // Durante infiltração, pré-carregar próximo mapa
+                setTimeout(() => loader.preloadMap(mapIndex + 1), 2000);
+            } else if (gameState.phase === 'escape' && mapIndex > 0) {
+                // Durante fuga, pré-carregar mapa anterior
+                setTimeout(() => loader.preloadMap(mapIndex - 1), 2000);
+            }
+        }
         
         // Limpar entidades
         if (enemies && enemies.clear) enemies.clear();
@@ -152,6 +180,11 @@
         // Mostrar nome do mapa
         if (ui && ui.showMapName) {
             ui.showMapName(map.displayName || map.name);
+        }
+        
+        // NOVO: Limpar assets não utilizados para economizar memória
+        if (loader && loader.cleanupUnusedAssets) {
+            setTimeout(() => loader.cleanupUnusedAssets(mapIndex), 5000);
         }
     }
     
