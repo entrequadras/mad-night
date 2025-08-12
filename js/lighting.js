@@ -218,8 +218,8 @@ renderTVLight: function(ctx, map, visibleArea) {
             tvY = 110;
             tvRadius = 50;
         } else if (light.id === 'ks_window2') {
-            tvX = 1740;
-            tvY = 290;
+            tvX = 900;  // TESTE: mudando para posição visível
+            tvY = 900;  // TESTE: mudando para posição visível
             tvRadius = 50;
         }
         
@@ -239,7 +239,6 @@ renderTVLight: function(ctx, map, visibleArea) {
         gradient.addColorStop(0.7, `rgba(60, 100, 220, ${0.15 * intensity})`);
         gradient.addColorStop(1, 'rgba(40, 80, 200, 0)');
         
-        // IMPORTANTE: Aplicar o gradiente DEPOIS de criá-lo
         ctx.fillStyle = gradient;
         ctx.fillRect(
             tvX - tvRadius,
@@ -247,9 +246,6 @@ renderTVLight: function(ctx, map, visibleArea) {
             tvRadius * 2,
             tvRadius * 2
         );
-        
-        // DEBUG: Log para confirmar
-        console.log(`TV ${light.id} renderizada em ${tvX}, ${tvY}`);
     });
     
     ctx.restore();
