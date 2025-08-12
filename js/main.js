@@ -13,28 +13,41 @@
     let canvas = null;
     
     // Inicialização
-    function init() {
-        console.log('Mad Night v1.40 - Estrutura Modular');
-        console.log('Iniciando...');
+function init() {
+    console.log('Mad Night v1.56 - Loading Progressivo');
+    console.log('Iniciando...');
+    
+    // Obter canvas
+    canvas = document.getElementById('gameCanvas');
+    if (!canvas) {
+        console.error('Canvas não encontrado!');
+        return;
+    }
+    
+    // Configurar canvas
+    canvas.width = MadNight.config.canvas.width;
+    canvas.height = MadNight.config.canvas.height;
+    
+    // Inicializar renderer
+    MadNight.renderer.init(canvas);
+    
+    // Inicializar loader
+    MadNight.loader.init();
+    
+    // Mostrar tela de loading
+    const ctx = MadNight.renderer.ctx;
+    const loadingInterval = setInterval(() => {
+        MadNight.loader.renderLoadingScreen(ctx, canvas);
+    }, 100);
+    
+    // Carregar assets iniciais
+    MadNight.loader.loadInitial(() => {
+        clearInterval(loadingInterval);
         
-        // Obter canvas
-        canvas = document.getElementById('gameCanvas');
-        if (!canvas) {
-            console.error('Canvas não encontrado!');
-            return;
-        }
-        
-        // Configurar canvas
-        canvas.width = MadNight.config.canvas.width;
-        canvas.height = MadNight.config.canvas.height;
-        
-        // Inicializar renderer
-        MadNight.renderer.init(canvas);
-        
-        // Inicializar jogo
+        // Inicializar jogo após loading
         MadNight.game.init();
         
-        // Aguardar fontes carregarem
+        // Aguardar fontes e começar
         document.fonts.ready.then(() => {
             console.log('Fontes carregadas!');
             start();
@@ -42,7 +55,8 @@
             console.log('Erro ao carregar fontes, usando fallback');
             start();
         });
-    }
+    });
+}
     
     // Iniciar loop do jogo
     function start() {
