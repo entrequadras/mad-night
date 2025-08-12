@@ -1,4 +1,4 @@
-// game.js - Lógica Principal do Jogo (v1.56 - Loading Progressivo)
+// game.js - Lógica Principal do Jogo (v1.57 - Sistema de Rankings Completo)
 
 (function() {
     'use strict';
@@ -31,7 +31,8 @@
     let lighting = null;
     let traffic = null;
     let ui = null;
-    let loader = null; // NOVO: Referência do loader
+    let loader = null;
+    let stats = null; // NOVO: Referência do sistema de estatísticas
     
     // Sistema de input
     const keys = {};
@@ -52,7 +53,8 @@
         lighting = MadNight.lighting;
         traffic = MadNight.traffic;
         ui = MadNight.ui;
-        loader = MadNight.loader; // NOVO: Obter referência do loader
+        loader = MadNight.loader;
+        stats = MadNight.stats; // NOVO: Obter referência do stats
         
         // IMPORTANTE: Obter referência do assets também!
         const assets = MadNight.assets;
@@ -74,6 +76,7 @@
             { name: 'audio', module: audio },
             { name: 'lighting', module: lighting },
             { name: 'traffic', module: traffic },
+            { name: 'stats', module: stats }, // NOVO: Inicializar stats
             { name: 'ui', module: ui }
         ];
         
@@ -100,7 +103,7 @@
     
     // Carregar mapa
     function loadMap(mapIndex, isEscape = false) {
-        // NOVO: Verificar se o mapa está carregado
+        // Verificar se o mapa está carregado
         if (loader && !loader.isMapLoaded(mapIndex)) {
             console.log(`⏳ Mapa ${mapIndex} não carregado, carregando agora...`);
             
@@ -123,7 +126,7 @@
         
         console.log(`📍 Carregando mapa ${mapIndex}: ${map.name}`);
         
-        // NOVO: Pré-carregar próximo mapa possível
+        // Pré-carregar próximo mapa possível
         if (loader) {
             if (gameState.phase === 'infiltration' && mapIndex < 5) {
                 // Durante infiltração, pré-carregar próximo mapa
@@ -182,7 +185,7 @@
             ui.showMapName(map.displayName || map.name);
         }
         
-        // NOVO: Limpar assets não utilizados para economizar memória
+        // Limpar assets não utilizados para economizar memória
         if (loader && loader.cleanupUnusedAssets) {
             setTimeout(() => loader.cleanupUnusedAssets(mapIndex), 5000);
         }
@@ -428,6 +431,20 @@
                 MadNight.config.debug.showCollisions = !MadNight.config.debug.showCollisions;
                 console.log('DEBUG: Colisões:', MadNight.config.debug.showCollisions ? 'ON' : 'OFF');
                 break;
+                
+            case 'v':
+                console.log('DEBUG: Forçando vitória');
+                handleVictory();
+                break;
+                
+            case 'r':
+                console.log('DEBUG: Mostrando rankings');
+                if (stats) {
+                    console.log('Speed Run:', stats.getRankingDisplay('speedRun'));
+                    console.log('Enemy Kills:', stats.getRankingDisplay('enemyKills'));
+                    console.log('Deathless:', stats.getRankingDisplay('deathless'));
+                }
+                break;
         }
     }
     
@@ -436,9 +453,21 @@
         gameState.deathCount++;
         console.log(`Mortes: ${gameState.deathCount}/${MadNight.config.gameplay.maxDeaths}`);
         
+        // NOVO: Registrar morte nas estatísticas
+        if (stats && stats.registerDeath) {
+            stats.registerDeath();
+        }
+        
         if (gameState.deathCount >= MadNight.config.gameplay.maxDeaths) {
             handleGameOver();
         } else {
+            // Mostrar mensagem de morte
+            if (ui && ui.showDeathMessage) {
+                if (gameState.deathCount < MadNight.config.gameplay.maxDeaths) {
+                    ui.showDeathMessage("ah véi, se liga carái");
+                }
+            }
+            
             // Recarregar mapa atual
             setTimeout(() => {
                 loadMap(gameState.currentMap, gameState.phase === 'escape');
@@ -451,6 +480,11 @@
         gameState.isGameOver = true;
         console.log('💀 GAME OVER');
         
+        // Mostrar mensagem final
+        if (ui && ui.showDeathMessage) {
+            ui.showDeathMessage("sifudêu");
+        }
+        
         if (ui && ui.showGameOver) {
             ui.showGameOver();
         }
@@ -462,34 +496,38 @@
     }
     
     // Vitória
-function handleVictory() {
-    console.log('🎉 VITÓRIA!');
-    
-    // Finalizar estatísticas PRIMEIRO
-    const report = MadNight.stats.finishGame();
-    
-    // Verificar se é novo recorde
-    const newRecords = MadNight.stats.checkHighScore(report);
-    
-    if (audio && audio.playMusic) {
-        audio.playMusic('creditos');
+    function handleVictory() {
+        console.log('🎉 VITÓRIA!');
+        
+        // NOVO: Finalizar estatísticas
+        const report = stats ? stats.finishGame() : null;
+        
+        // NOVO: Verificar se é novo recorde
+        const newRecords = (stats && report) ? stats.checkHighScore(report) : [];
+        
+        // Tocar música de créditos
+        if (audio && audio.playMusic) {
+            audio.playMusic('creditos');
+        }
+        
+        if (newRecords.length > 0) {
+            // NOVO: Mostrar tela de novo recorde
+            if (ui && ui.showNewRecord) {
+                ui.showNewRecord(report, newRecords);
+            }
+        } else {
+            // Mostrar tela de vitória normal
+            if (ui && ui.showVictory) {
+                ui.showVictory();
+            }
+            // NOVO: Mostrar estatísticas finais após 3 segundos
+            if (ui && ui.showGameStats && report) {
+                setTimeout(() => {
+                    ui.showGameStats(report);
+                }, 3000);
+            }
+        }
     }
-    
-    if (newRecords.length > 0) {
-        // Mostrar tela de novo recorde
-        if (ui && ui.showNewRecord) {
-            ui.showNewRecord(report, newRecords);
-        }
-    } else {
-        // Mostrar estatísticas finais
-        if (ui && ui.showVictory) {
-            ui.showVictory();
-        }
-        if (ui && ui.showGameStats) {
-            ui.showGameStats(report);
-        }
-    }
-}
     
     // Reiniciar jogo
     function restart() {
@@ -504,6 +542,11 @@ function handleVictory() {
         gameState.isGameOver = false;
         gameState.escapeEnemyCount = 0;
         gameState.chacalDefeated = false;
+        
+        // NOVO: Resetar estatísticas da sessão
+        if (stats && stats.resetCurrent) {
+            stats.resetCurrent();
+        }
         
         // Limpar entidades
         if (enemies && enemies.clear) enemies.clear();
@@ -551,6 +594,10 @@ function handleVictory() {
             if (gameState.pedalPower > 0) {
                 gameState.pedalPower--;
                 gameState.lastPedalRecharge = Date.now();
+                // NOVO: Registrar uso de dash nas estatísticas
+                if (stats && stats.registerDash) {
+                    stats.registerDash();
+                }
                 return true;
             }
             return false;
