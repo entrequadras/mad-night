@@ -242,17 +242,16 @@
     {type: 'arvore006', x: 1078, y: 1077},
     
     // Linha de árvores na parte inferior (530x1500 até 1130x1500)
-    {type: 'arvorebloco001', x: 530, y: 1420},
-    {type: 'arvore001', x: 680, y: 1450},
+    {type: 'arvore001', x: 680, y: 1430},
     {type: 'arvore003', x: 780, y: 1440},
-    {type: 'arvore002', x: 850, y: 1455},
-    {type: 'arvore004', x: 950, y: 1435},
-    {type: 'arvore001', x: 1030, y: 1445},
-    {type: 'arvore003', x: 1100, y: 1460},
+    {type: 'arvore002', x: 850, y: 1595},
+    {type: 'arvore004', x: 960, y: 1425},
+    {type: 'arvore001', x: 1060, y: 1445},
+    {type: 'arvore003', x: 1150, y: 1660},
     
     // Duas árvores no topo (1150x50 e 1200x20)
-    {type: 'arvore004', x: 1150, y: 35},
-    {type: 'arvore002', x: 1200, y: 20}
+    {type: 'arvore004', x: 1120, y: 05},
+    {type: 'arvore002', x: 1080, y: -12}
 ],
             streetLights: [
                 {type: 'poste000', x: 695, y: 350, rotation: 0, lightRadius: 100, id: 'ks_post1'},
