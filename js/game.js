@@ -462,17 +462,34 @@
     }
     
     // Vitória
-    function handleVictory() {
-        console.log('🎉 VITÓRIA!');
-        
-        if (audio && audio.playMusic) {
-            audio.playMusic('creditos');
+function handleVictory() {
+    console.log('🎉 VITÓRIA!');
+    
+    // Finalizar estatísticas PRIMEIRO
+    const report = MadNight.stats.finishGame();
+    
+    // Verificar se é novo recorde
+    const newRecords = MadNight.stats.checkHighScore(report);
+    
+    if (audio && audio.playMusic) {
+        audio.playMusic('creditos');
+    }
+    
+    if (newRecords.length > 0) {
+        // Mostrar tela de novo recorde
+        if (ui && ui.showNewRecord) {
+            ui.showNewRecord(report, newRecords);
         }
-        
+    } else {
+        // Mostrar estatísticas finais
         if (ui && ui.showVictory) {
             ui.showVictory();
         }
+        if (ui && ui.showGameStats) {
+            ui.showGameStats(report);
+        }
     }
+}
     
     // Reiniciar jogo
     function restart() {
