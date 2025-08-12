@@ -245,6 +245,22 @@
                 // Traves do campo por cima do player (sem transparência)
                 this.renderCampoTraves(map);
             }
+            
+            // Renderizar orelhão sempre por cima (em todos os mapas que tiverem)
+            if (map.orelhao) {
+                const ctx = this.ctx;
+                const orelhaoAsset = MadNight.assets.get('orelhao001');
+                if (orelhaoAsset && orelhaoAsset.loaded && orelhaoAsset.img) {
+                    ctx.drawImage(orelhaoAsset.img, map.orelhao.x, map.orelhao.y);
+                } else {
+                    // Fallback se não carregar
+                    ctx.fillStyle = '#00f';
+                    ctx.fillRect(map.orelhao.x, map.orelhao.y, map.orelhao.w, map.orelhao.h);
+                    ctx.fillStyle = '#fff';
+                    this.setPixelFont(8);
+                    ctx.fillText('TEL', map.orelhao.x + 5, map.orelhao.y + 30);
+                }
+            }
         },
         
         // Renderizar efeitos
@@ -484,21 +500,8 @@
             const ctx = this.ctx;
             const gameState = MadNight.game ? MadNight.game.state : {};
             
-            // Orelhão
-            if (map.orelhao) {
-                const orelhaoAsset = MadNight.assets.get('orelhao001');
-                if (orelhaoAsset && orelhaoAsset.loaded && orelhaoAsset.img) {
-                    // Usar sprite do orelhão
-                    this.ctx.drawImage(orelhaoAsset.img, map.orelhao.x, map.orelhao.y);
-                } else {
-                    // Fallback se não carregar
-                    ctx.fillStyle = '#00f';
-                    ctx.fillRect(map.orelhao.x, map.orelhao.y, map.orelhao.w, map.orelhao.h);
-                    ctx.fillStyle = '#fff';
-                    this.setPixelFont(8);
-                    ctx.fillText('TEL', map.orelhao.x + 5, map.orelhao.y + 30);
-                }
-            }
+            // Orelhão será renderizado em renderUpperLayers (acima de tudo)
+            // Não renderizar aqui
             
             // Lixeira
             if (map.lixeira) {
