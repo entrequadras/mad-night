@@ -246,14 +246,22 @@ renderTVLight: function(ctx, map, visibleArea) {
             tvRadius = 50;
             tvIntensityBoost = 1.0;
         } else if (light.id === 'ks_window2') {
-            tvX = 1690;
-            tvY = 280;
-            tvRadius = 100; // RAIO MAIOR PARA TV 2
-            tvIntensityBoost = 1.5;
+            tvX = 1727;  // NOVA POSIÇÃO
+            tvY = 277;   // NOVA POSIÇÃO
+            tvRadius = 85; // RAIO REDUZIDO (era 100)
+            tvIntensityBoost = 1.8; // MAIS INTENSIDADE PARA FLICAR MAIS
         }
         
         // Flicker independente para cada TV
-        const intensity = this.updateFlicker(light.id) * tvIntensityBoost;
+        let intensity;
+        if (light.id === 'ks_window2') {
+            // Flicker mais intenso e rápido para TV 2
+            const now = Date.now();
+            intensity = 0.5 + Math.sin(now * 0.012) * 0.25 + Math.sin(now * 0.05) * 0.25;
+            intensity *= tvIntensityBoost;
+        } else {
+            intensity = this.updateFlicker(light.id) * tvIntensityBoost;
+        }
         
         // Gradiente azulado de TV
         const gradient = ctx.createRadialGradient(
