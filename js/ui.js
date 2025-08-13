@@ -1,4 +1,4 @@
-// ui.js - Interface do Usuário (Revisão Alpha-06)
+// ui.js - Interface do Usuário (Revisão Alpha-07 - Integração com Menu)
 
 (function() {
     'use strict';
@@ -10,6 +10,8 @@
     let mapNameText = '';
     let mapNameTime = 0;
     let mapNameDuration = 3000;
+    let deathMessageText = '';
+    let deathMessageTime = 0;
     
     // Criar módulo UI
     MadNight.ui = {
@@ -27,11 +29,19 @@
             if (mapNameTime > 0) {
                 mapNameTime -= deltaTime;
             }
+            if (deathMessageTime > 0) {
+                deathMessageTime -= deltaTime;
+            }
         },
         
         // Renderizar UI completa
         render: function(ctx) {
             if (!ctx) return;
+            
+            // NÃO renderizar UI se o menu estiver ativo
+            if (MadNight.menu && MadNight.menu.active) {
+                return;
+            }
             
             // Salvar contexto
             ctx.save();
@@ -72,14 +82,19 @@
                 this.renderMapNameOverlay(ctx, mapNameText);
             }
             
-            // Mensagem de morte
-            if (player && player.isDead) {
-                this.renderDeathMessage(ctx, gameState, config);
+            // Mensagem de morte (separada)
+            if (deathMessageTime > 0) {
+                this.renderDeathMessageOverlay(ctx, deathMessageText);
             }
             
             // Instruções iniciais
             if (gameState && gameState.currentMap === 0 && player && !player.lastMove) {
                 this.renderInstructions(ctx);
+            }
+            
+            // Pausa
+            if (gameState && gameState.isPaused) {
+                this.renderPauseOverlay(ctx);
             }
             
             // Restaurar contexto
@@ -110,7 +125,7 @@
             // Versão (SEMPRE VISÍVEL)
             ctx.fillStyle = '#666';
             this.setPixelFont(ctx, 8);
-            ctx.fillText('Revisão Alpha-26', ctx.canvas.width/2, 115);
+            ctx.fillText('v1.57', ctx.canvas.width/2, 115);
             ctx.textAlign = 'left';
         },
         
@@ -242,8 +257,8 @@
             this.lastFrameTime = Date.now();
         },
         
-        // Renderizar mensagem de morte
-        renderDeathMessage: function(ctx, gameState, config) {
+        // Renderizar overlay de morte
+        renderDeathMessageOverlay: function(ctx, message) {
             // Fundo escuro
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -252,19 +267,38 @@
             ctx.fillStyle = '#f00';
             this.setPixelFont(ctx, 24);
             ctx.textAlign = 'center';
-            
-            const maxDeaths = config ? config.gameplay.maxDeaths : 5;
-            const msg = gameState.deathCount < maxDeaths - 1 ? 
-                "Ah véi, se liga carái!" : 
-                "SIFUDEU";
-            
-            ctx.fillText(msg, ctx.canvas.width / 2, ctx.canvas.height / 2);
+            ctx.fillText(message, ctx.canvas.width / 2, ctx.canvas.height / 2);
             
             // Contador de mortes
+            const gameState = MadNight.game ? MadNight.game.state : null;
+            const config = MadNight.config;
+            if (gameState && config) {
+                const maxDeaths = config.gameplay.maxDeaths;
+                this.setPixelFont(ctx, 12);
+                ctx.fillStyle = '#fff';
+                ctx.fillText(`Mortes: ${gameState.deathCount}/${maxDeaths}`, 
+                            ctx.canvas.width / 2, ctx.canvas.height / 2 + 40);
+            }
+            
+            ctx.textAlign = 'left';
+        },
+        
+        // Renderizar overlay de pausa
+        renderPauseOverlay: function(ctx) {
+            // Fundo semi-transparente
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            
+            // Texto de pausa
+            ctx.fillStyle = '#ff0';
+            this.setPixelFont(ctx, 32);
+            ctx.textAlign = 'center';
+            ctx.fillText('PAUSADO', ctx.canvas.width / 2, ctx.canvas.height / 2 - 50);
+            
+            // Instruções
             this.setPixelFont(ctx, 12);
             ctx.fillStyle = '#fff';
-            ctx.fillText(`Mortes: ${gameState.deathCount}/${maxDeaths}`, 
-                        ctx.canvas.width / 2, ctx.canvas.height / 2 + 40);
+            ctx.fillText('Pressione ESC para continuar', ctx.canvas.width / 2, ctx.canvas.height / 2 + 20);
             
             ctx.textAlign = 'left';
         },
@@ -289,16 +323,22 @@
         // Renderizar mensagem temporária
         renderMessage: function(ctx, text) {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-            const width = text.length * 12 + 40;
+            const lines = text.split('\n');
+            const width = Math.max(...lines.map(l => l.length)) * 12 + 40;
+            const height = lines.length * 20 + 40;
             const x = (ctx.canvas.width - width) / 2;
-            const y = ctx.canvas.height / 2 - 50;
+            const y = ctx.canvas.height / 2 - height / 2;
             
-            ctx.fillRect(x, y, width, 60);
+            ctx.fillRect(x, y, width, height);
             
             ctx.fillStyle = '#ff0';
             this.setPixelFont(ctx, 12);
             ctx.textAlign = 'center';
-            ctx.fillText(text, ctx.canvas.width / 2, y + 20);
+            
+            lines.forEach((line, index) => {
+                ctx.fillText(line, ctx.canvas.width / 2, y + 20 + (index * 20));
+            });
+            
             ctx.textAlign = 'left';
         },
         
@@ -327,37 +367,79 @@
             mapNameTime = mapNameDuration;
         },
         
+        // Mostrar mensagem de morte
+        showDeathMessage: function(text) {
+            deathMessageText = text;
+            deathMessageTime = 3000;
+        },
+        
         // Mostrar tela de game over
         showGameOver: function() {
-            // Será renderizado no próximo frame através do render()
             console.log('Game Over UI');
-                // Voltar ao menu após 5 segundos
-    setTimeout(() => {
-        if (window.MadNightMain && window.MadNightMain.backToMenu) {
-            window.MadNightMain.backToMenu();
-        }
-    }, 5000);
-},
+            // Voltar ao menu após 5 segundos
+            setTimeout(() => {
+                if (window.MadNightMain && window.MadNightMain.backToMenu) {
+                    window.MadNightMain.backToMenu();
+                }
+            }, 5000);
+        },
         
         // Mostrar tela de vitória
         showVictory: function() {
-            // Será renderizado no próximo frame através do render()
             console.log('Victory UI');
-        // Voltar ao menu após 5 segundos
-    setTimeout(() => {
-        if (window.MadNightMain && window.MadNightMain.backToMenu) {
-            window.MadNightMain.backToMenu();
-        }
-    }, 5000);
-},
+            this.showMessage('VITÓRIA!\n\nVocê escapou com vida!', 5000);
+            
+            // Voltar ao menu após 5 segundos
+            setTimeout(() => {
+                if (window.MadNightMain && window.MadNightMain.backToMenu) {
+                    window.MadNightMain.backToMenu();
+                }
+            }, 5000);
+        },
+        
+        // Mostrar tela de novo recorde
+        showNewRecord: function(report, newRecords) {
+            console.log('Novo recorde!', newRecords);
+            
+            // Passar para o menu mostrar a tela de entrada de nome
+            if (MadNight.menu && MadNight.menu.showNewRecord) {
+                MadNight.menu.showNewRecord(report, newRecords);
+            }
+        },
+        
+        // Mostrar estatísticas do jogo
+        showGameStats: function(report) {
+            console.log('Estatísticas finais:', report);
+            
+            let statsText = 'ESTATÍSTICAS FINAIS\n\n';
+            statsText += `Tempo: ${report.timeFormatted}\n`;
+            statsText += `Kills: ${report.kills.total}\n`;
+            statsText += `Mortes: ${report.deaths}\n`;
+            
+            if (report.perfect) {
+                statsText += '\nRUN PERFEITA!';
+            }
+            
+            this.showMessage(statsText, 8000);
+            
+            // Voltar ao menu após mostrar stats
+            setTimeout(() => {
+                if (window.MadNightMain && window.MadNightMain.backToMenu) {
+                    window.MadNightMain.backToMenu();
+                }
+            }, 8000);
+        },
         
         // Mostrar/esconder pausa
         showPause: function(isPaused) {
-            if (isPaused) {
-                this.showMessage('PAUSADO', 999999);
-            } else {
-                messageTime = 0;
-            }
+            // A pausa agora é renderizada no renderPauseOverlay
+            console.log('Jogo', isPaused ? 'pausado' : 'despausado');
+        },
+        
+        // Atualizar progresso de loading
+        updateLoadingProgress: function(progress, assetName) {
+            // Pode ser usado para mostrar detalhes do loading se necessário
+            console.log(`Loading: ${assetName} (${Math.floor(progress)}%)`);
         }
     };
     
