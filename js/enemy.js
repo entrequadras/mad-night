@@ -1,4 +1,4 @@
-// enemy.js - Sistema de Inimigos Completo (v1.58 - Correção de Interface)
+// enemy.js - Sistema de Inimigos Completo (v1.59 - Correção de Renderização)
 
 (function() {
     'use strict';
@@ -9,8 +9,8 @@
             this.x = x;
             this.y = y;
             this.type = type;
-            this.width = 40;
-            this.height = 40;
+            this.width = 46;  // Tamanho padrão
+            this.height = 46;
             this.speed = 2;
             this.health = 1;
             this.state = 'patrol'; // patrol, alert, chase
@@ -243,7 +243,14 @@
             // Renderizar sprite do inimigo
             const sprite = MadNight.assets.get(this.type);
             if (sprite && sprite.loaded && sprite.img) {
-                ctx.drawImage(sprite.img, this.x, this.y);
+                // CORREÇÃO: Usar drawImage com tamanho específico
+                ctx.drawImage(
+                    sprite.img, 
+                    this.x, 
+                    this.y, 
+                    this.width,  // Forçar largura
+                    this.height   // Forçar altura
+                );
             } else {
                 // Fallback - quadrado colorido
                 ctx.fillStyle = this.getColor();
@@ -290,6 +297,8 @@
     class Faquinha extends Enemy {
         constructor(x, y) {
             super(x, y, 'faquinha');
+            this.width = 46;   // Definir tamanho específico
+            this.height = 46;
             this.speed = 2;
             this.viewDistance = 120;
         }
@@ -298,6 +307,8 @@
     class Morcego extends Enemy {
         constructor(x, y) {
             super(x, y, 'morcego');
+            this.width = 46;   // Definir tamanho específico
+            this.height = 46;
             this.speed = 3;
             this.viewDistance = 150;
         }
@@ -306,6 +317,8 @@
     class Caveirinha extends Enemy {
         constructor(x, y) {
             super(x, y, 'caveirinha');
+            this.width = 46;   // Definir tamanho específico
+            this.height = 46;
             this.speed = 2.5;
             this.viewDistance = 140;
         }
@@ -314,6 +327,8 @@
     class Janis extends Enemy {
         constructor(x, y) {
             super(x, y, 'janis');
+            this.width = 46;   // Definir tamanho específico
+            this.height = 46;
             this.speed = 1.5;
             this.viewDistance = 200;
             this.attackRange = 150; // Atira de longe
@@ -354,11 +369,11 @@
     class Chacal extends Enemy {
         constructor(x, y) {
             super(x, y, 'chacal');
+            this.width = 60;   // Boss - tamanho maior
+            this.height = 60;
             this.speed = 2.5;
             this.health = 3; // Boss - aguenta 3 hits
             this.viewDistance = 180;
-            this.width = 60;
-            this.height = 60;
         }
         
         die() {
@@ -421,7 +436,7 @@
             return this.list.filter(enemy => !enemy.isDead);
         },
         
-        // NOVO: Método para obter apenas a contagem de inimigos vivos
+        // Método para obter apenas a contagem de inimigos vivos
         getAliveCount: function() {
             return this.list.filter(enemy => !enemy.isDead).length;
         },
