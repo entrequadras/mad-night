@@ -1,4 +1,4 @@
-// enemy.js - Sistema de Inimigos Completo (v1.59 - Correção de Renderização)
+// enemy.js - Sistema de Inimigos Completo (v1.62 - Versão Restaurada com Correções Mínimas)
 
 (function() {
     'use strict';
@@ -9,7 +9,7 @@
             this.x = x;
             this.y = y;
             this.type = type;
-            this.width = 46;  // Tamanho padrão
+            this.width = 46;
             this.height = 46;
             this.speed = 2;
             this.health = 1;
@@ -144,8 +144,13 @@
             const newX = this.x + this.direction.x * moveSpeed;
             const newY = this.y + this.direction.y * moveSpeed;
             
-            // Verificar colisão antes de mover
-            if (!this.checkCollision(newX, newY)) {
+            // CORREÇÃO PRINCIPAL: Usar o sistema de colisão correto
+            if (MadNight.collision && MadNight.collision.checkWallCollision) {
+                if (!MadNight.collision.checkWallCollision(this, newX, newY)) {
+                    this.x = newX;
+                    this.y = newY;
+                }
+            } else {
                 this.x = newX;
                 this.y = newY;
             }
@@ -191,45 +196,6 @@
                    this.y + this.height > player.y;
         }
         
-        // Adicione este método na classe Enemy (depois do método checkCollision):
-
-checkCollision(x, y) {
-    // Verificar limites do mapa primeiro
-    const map = MadNight.maps ? MadNight.maps.getCurrentMap() : null;
-    if (map) {
-        // Usar limites do mapa se definidos
-        const bounds = map.bounds || { 
-            minX: 0, 
-            minY: 0, 
-            maxX: map.width || 3000, 
-            maxY: map.height || 1800 
-        };
-        
-        // Verificar se está dentro dos limites
-        if (x < bounds.minX || 
-            y < bounds.minY || 
-            x + this.width > bounds.maxX || 
-            y + this.height > bounds.maxY) {
-            return true; // Colidiu com limite do mapa
-        }
-    }
-    
-    // Verificar colisão com paredes e objetos
-    if (MadNight.collision && MadNight.collision.checkCollision) {
-        const mapCollisions = MadNight.maps ? MadNight.maps.getCurrentMapCollisions() : [];
-        for (let wall of mapCollisions) {
-            if (x < wall.x + wall.w &&
-                x + this.width > wall.x &&
-                y < wall.y + wall.h &&
-                y + this.height > wall.y) {
-                return true; // Colidiu
-            }
-        }
-    }
-    
-    return false;
-}
-        
         attack() {
             if (this.attackCooldown <= 0) {
                 const player = MadNight.player;
@@ -272,13 +238,12 @@ checkCollision(x, y) {
             // Renderizar sprite do inimigo
             const sprite = MadNight.assets.get(this.type);
             if (sprite && sprite.loaded && sprite.img) {
-                // CORREÇÃO: Usar drawImage com tamanho específico
                 ctx.drawImage(
                     sprite.img, 
                     this.x, 
                     this.y, 
-                    this.width,  // Forçar largura
-                    this.height   // Forçar altura
+                    this.width,  // Forçar tamanho correto
+                    this.height
                 );
             } else {
                 // Fallback - quadrado colorido
@@ -326,7 +291,7 @@ checkCollision(x, y) {
     class Faquinha extends Enemy {
         constructor(x, y) {
             super(x, y, 'faquinha');
-            this.width = 46;   // Definir tamanho específico
+            this.width = 46;
             this.height = 46;
             this.speed = 2;
             this.viewDistance = 120;
@@ -336,7 +301,7 @@ checkCollision(x, y) {
     class Morcego extends Enemy {
         constructor(x, y) {
             super(x, y, 'morcego');
-            this.width = 46;   // Definir tamanho específico
+            this.width = 46;
             this.height = 46;
             this.speed = 3;
             this.viewDistance = 150;
@@ -346,7 +311,7 @@ checkCollision(x, y) {
     class Caveirinha extends Enemy {
         constructor(x, y) {
             super(x, y, 'caveirinha');
-            this.width = 46;   // Definir tamanho específico
+            this.width = 46;
             this.height = 46;
             this.speed = 2.5;
             this.viewDistance = 140;
@@ -356,7 +321,7 @@ checkCollision(x, y) {
     class Janis extends Enemy {
         constructor(x, y) {
             super(x, y, 'janis');
-            this.width = 46;   // Definir tamanho específico
+            this.width = 46;
             this.height = 46;
             this.speed = 1.5;
             this.viewDistance = 200;
@@ -398,7 +363,7 @@ checkCollision(x, y) {
     class Chacal extends Enemy {
         constructor(x, y) {
             super(x, y, 'chacal');
-            this.width = 60;   // Boss - tamanho maior
+            this.width = 60;
             this.height = 60;
             this.speed = 2.5;
             this.health = 3; // Boss - aguenta 3 hits
@@ -465,7 +430,7 @@ checkCollision(x, y) {
             return this.list.filter(enemy => !enemy.isDead);
         },
         
-        // Método para obter apenas a contagem de inimigos vivos
+        // ADIÇÃO NECESSÁRIA: Método que faltava
         getAliveCount: function() {
             return this.list.filter(enemy => !enemy.isDead).length;
         },
