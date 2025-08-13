@@ -285,23 +285,47 @@
         
         // Renderizar overlay de pausa
         renderPauseOverlay: function(ctx) {
-            // Fundo semi-transparente
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            
-            // Texto de pausa
+    // Fundo semi-transparente
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    
+    // Título
+    ctx.fillStyle = '#ff0';
+    this.setPixelFont(ctx, 32);
+    ctx.textAlign = 'center';
+    ctx.fillText('PAUSADO', ctx.canvas.width / 2, ctx.canvas.height / 2 - 120);
+    
+    // Opções do menu
+    const gameState = MadNight.game ? MadNight.game.state : null;
+    const options = [
+        'CONTINUAR',
+        `ÁUDIO: ${gameState && gameState.audioEnabled ? 'LIGADO' : 'DESLIGADO'}`,
+        'SAIR PARA MENU'
+    ];
+    
+    this.setPixelFont(ctx, 16);
+    options.forEach((option, index) => {
+        if (gameState && index === gameState.pauseOption) {
             ctx.fillStyle = '#ff0';
-            this.setPixelFont(ctx, 32);
-            ctx.textAlign = 'center';
-            ctx.fillText('PAUSADO', ctx.canvas.width / 2, ctx.canvas.height / 2 - 50);
-            
-            // Instruções
-            this.setPixelFont(ctx, 12);
+            ctx.fillText('→ ' + option, ctx.canvas.width / 2, ctx.canvas.height / 2 - 20 + index * 40);
+        } else {
             ctx.fillStyle = '#fff';
-            ctx.fillText('Pressione ESC para continuar', ctx.canvas.width / 2, ctx.canvas.height / 2 + 20);
-            
-            ctx.textAlign = 'left';
-        },
+            ctx.fillText(option, ctx.canvas.width / 2 + 20, ctx.canvas.height / 2 - 20 + index * 40);
+        }
+    });
+    
+    // Instruções
+    this.setPixelFont(ctx, 10);
+    ctx.fillStyle = '#888';
+    ctx.fillText('↑↓ Selecionar   ENTER Confirmar', ctx.canvas.width / 2, ctx.canvas.height / 2 + 120);
+    
+    // Controles do jogo
+    ctx.fillText('CONTROLES:', ctx.canvas.width / 2, ctx.canvas.height / 2 + 160);
+    ctx.fillStyle = '#666';
+    ctx.fillText('SETAS - Mover   ESPAÇO - Dash (quando desbloqueado)', ctx.canvas.width / 2, ctx.canvas.height / 2 + 180);
+    
+    ctx.textAlign = 'left';
+},
         
         // Renderizar instruções iniciais
         renderInstructions: function(ctx) {
