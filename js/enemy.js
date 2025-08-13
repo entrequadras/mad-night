@@ -1,4 +1,4 @@
-// enemy.js - Sistema de Inimigos Completo (v1.57)
+// enemy.js - Sistema de Inimigos Completo (v1.58 - Correção de Interface)
 
 (function() {
     'use strict';
@@ -419,6 +419,11 @@
         
         getAlive: function() {
             return this.list.filter(enemy => !enemy.isDead);
+        },
+        
+        // NOVO: Método para obter apenas a contagem de inimigos vivos
+        getAliveCount: function() {
+            return this.list.filter(enemy => !enemy.isDead).length;
         },
         
         checkCollision: function(rect) {
