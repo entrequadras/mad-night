@@ -171,12 +171,20 @@ if (ctx) {
     }
     
     // Voltar ao menu
-    function backToMenu() {
-        appState = 'menu';
-        if (MadNight.menu && MadNight.menu.backToMenu) {
-            MadNight.menu.backToMenu();
+function backToMenu() {
+    appState = 'menu';
+    if (MadNight.menu) {
+        MadNight.menu.active = true;
+        MadNight.menu.currentScreen = 'main'; // Voltar para tela principal do menu
+        if (MadNight.menu.playMenuMusic) {
+            MadNight.menu.playMenuMusic(); // Tocar música do menu
         }
     }
+    // Parar o jogo
+    if (MadNight.game && MadNight.game.restart) {
+        MadNight.game.restart(); // Resetar o jogo para próxima vez
+    }
+}
     
     // Tratamento de visibilidade da página
     function handleVisibilityChange() {
