@@ -1,4 +1,4 @@
-// menu.js - Sistema de Menu Principal (v1.60 - Correção do Rankings)
+// menu.js - Sistema de Menu Principal (v1.64 - Menu com Arte)
 
 (function() {
     'use strict';
@@ -12,6 +12,11 @@
         lastKeyTime: 0,
         keyDelay: 200,
         
+        // Animação do background
+        bgFrame: 0,
+        bgAnimTimer: 0,
+        bgAnimDelay: 500, // Trocar frame a cada 500ms
+        
         // Para entrada de nome
         playerName: '',
         nameCharIndex: 0,
@@ -20,10 +25,67 @@
         pendingReport: null,
         pendingRecords: null,
         
+        // Imagens do menu
+        backgrounds: {
+            main: [null, null], // Dois frames para animação
+            scores: null,
+            credits: null
+        },
+        
         // Inicializar menu
         init: function() {
             console.log('🎮 Menu inicializado');
             this.setupInputHandlers();
+            this.loadMenuAssets();
+            this.playMenuMusic();
+        },
+        
+        // Carregar assets do menu
+        loadMenuAssets: function() {
+            // Carregar backgrounds do menu principal (2 frames)
+            const bgFrame1 = new Image();
+            bgFrame1.src = 'assets/menu/menu_bg_frame1.png';
+            bgFrame1.onload = () => {
+                this.backgrounds.main[0] = bgFrame1;
+                console.log('Menu BG frame 1 carregado');
+            };
+            
+            const bgFrame2 = new Image();
+            bgFrame2.src = 'assets/menu/menu_bg_frame2.png';
+            bgFrame2.onload = () => {
+                this.backgrounds.main[1] = bgFrame2;
+                console.log('Menu BG frame 2 carregado');
+            };
+            
+            // Carregar background dos scores
+            const scoresBg = new Image();
+            scoresBg.src = 'assets/menu/scores_bg.png';
+            scoresBg.onload = () => {
+                this.backgrounds.scores = scoresBg;
+                console.log('Scores BG carregado');
+            };
+            
+            // Carregar background dos créditos
+            const creditsBg = new Image();
+            creditsBg.src = 'assets/menu/credits_bg.png';
+            creditsBg.onload = () => {
+                this.backgrounds.credits = creditsBg;
+                console.log('Credits BG carregado');
+            };
+        },
+        
+        // Tocar música do menu
+        playMenuMusic: function() {
+            if (MadNight.audio && MadNight.audio.playMusic) {
+                MadNight.audio.playMusic('menu');
+            }
+        },
+        
+        // Parar música do menu
+        stopMenuMusic: function() {
+            if (MadNight.audio && MadNight.audio.stopMusic) {
+                MadNight.audio.stopMusic();
+            }
         },
         
         // Configurar handlers de input
@@ -171,6 +233,7 @@
         startGame: function() {
             console.log('🎮 Iniciando jogo...');
             this.active = false;
+            this.stopMenuMusic(); // Parar música do menu
             
             // Chamar função do main.js para iniciar o jogo
             if (window.MadNightMain && window.MadNightMain.startGame) {
@@ -220,11 +283,23 @@
             }, 5000);
         },
         
+        // Update para animação
+        update: function(deltaTime) {
+            if (!this.active) return;
+            
+            // Atualizar animação do background
+            this.bgAnimTimer += deltaTime || 16;
+            if (this.bgAnimTimer > this.bgAnimDelay) {
+                this.bgAnimTimer = 0;
+                this.bgFrame = (this.bgFrame + 1) % 2;
+            }
+        },
+        
         // Renderizar menu
         render: function(ctx) {
             if (!this.active) return;
             
-            // Background
+            // Limpar tela
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
             
@@ -245,37 +320,54 @@
         },
         
         renderMainMenu: function(ctx) {
-            // Logo
-            ctx.fillStyle = '#f00';
-            ctx.font = '64px "Press Start 2P"';
-            ctx.textAlign = 'center';
-            ctx.fillText('MAD NIGHT', ctx.canvas.width / 2, 200);
+            // Renderizar background animado
+            if (this.backgrounds.main[this.bgFrame]) {
+                ctx.drawImage(this.backgrounds.main[this.bgFrame], 0, 0, ctx.canvas.width, ctx.canvas.height);
+            } else {
+                // Fallback se a imagem não carregou
+                ctx.fillStyle = '#111';
+                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            }
             
-            // Versão
-            ctx.fillStyle = '#666';
-            ctx.font = '12px "Press Start 2P"';
-            ctx.fillText('v1.60', ctx.canvas.width / 2, 240);
+            // Opções do menu (230 pixels mais à esquerda)
+            const menuX = ctx.canvas.width / 2 - 230; // Ajustado 230px para esquerda
             
-            // Opções
             ctx.font = '24px "Press Start 2P"';
+            ctx.textAlign = 'left'; // Mudado para left já que ajustamos manualmente
+            
             this.options.forEach((option, index) => {
                 if (index === this.currentOption) {
                     // Destacar opção selecionada
                     ctx.fillStyle = '#ff0';
-                    ctx.fillText('→ ' + option, ctx.canvas.width / 2, 350 + index * 60);
+                    ctx.fillText('→ ' + option, menuX - 30, 350 + index * 60);
                 } else {
                     ctx.fillStyle = '#fff';
-                    ctx.fillText(option, ctx.canvas.width / 2, 350 + index * 60);
+                    ctx.fillText(option, menuX, 350 + index * 60);
                 }
             });
             
             // Instruções
             ctx.fillStyle = '#888';
             ctx.font = '10px "Press Start 2P"';
+            ctx.textAlign = 'center';
             ctx.fillText('Use ↑↓ para navegar, ENTER para selecionar', ctx.canvas.width / 2, ctx.canvas.height - 40);
+            
+            // Versão (canto inferior direito)
+            ctx.fillStyle = '#666';
+            ctx.font = '8px "Press Start 2P"';
+            ctx.textAlign = 'right';
+            ctx.fillText('v1.64', ctx.canvas.width - 10, ctx.canvas.height - 10);
         },
         
         renderRankings: function(ctx) {
+            // Renderizar background dos scores
+            if (this.backgrounds.scores) {
+                ctx.drawImage(this.backgrounds.scores, 0, 0, ctx.canvas.width, ctx.canvas.height);
+            } else {
+                ctx.fillStyle = '#001';
+                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            }
+            
             ctx.fillStyle = '#ff0';
             ctx.font = '32px "Press Start 2P"';
             ctx.textAlign = 'center';
@@ -285,7 +377,7 @@
             const speedRuns = MadNight.stats ? MadNight.stats.getRankingDisplay('speedRun') : [];
             const killRankings = MadNight.stats ? MadNight.stats.getRankingDisplay('enemyKills') : [];
             
-            // Definir colunas (apenas 2 agora)
+            // Definir colunas (apenas 2)
             const columns = [
                 { title: 'TEMPO', x: ctx.canvas.width / 3, data: speedRuns },
                 { title: 'KILLS', x: (ctx.canvas.width / 3) * 2, data: killRankings }
@@ -330,6 +422,14 @@
         },
         
         renderCredits: function(ctx) {
+            // Renderizar background dos créditos
+            if (this.backgrounds.credits) {
+                ctx.drawImage(this.backgrounds.credits, 0, 0, ctx.canvas.width, ctx.canvas.height);
+            } else {
+                ctx.fillStyle = '#010';
+                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            }
+            
             ctx.fillStyle = '#ff0';
             ctx.font = '32px "Press Start 2P"';
             ctx.textAlign = 'center';
@@ -369,6 +469,17 @@
         },
         
         renderEnterName: function(ctx) {
+            // Usar background principal ou preto
+            if (this.backgrounds.main[0]) {
+                ctx.drawImage(this.backgrounds.main[0], 0, 0, ctx.canvas.width, ctx.canvas.height);
+                // Escurecer para destacar texto
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            } else {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            }
+            
             ctx.fillStyle = '#ff0';
             ctx.font = '32px "Press Start 2P"';
             ctx.textAlign = 'center';
