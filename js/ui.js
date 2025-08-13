@@ -299,7 +299,7 @@
     const gameState = MadNight.game ? MadNight.game.state : null;
     const options = [
         'CONTINUAR',
-        `ÁUDIO: ${gameState && gameState.audioEnabled ? 'LIGADO' : 'DESLIGADO'}`,
+        `MÚSICA: ${gameState && gameState.musicEnabled ? 'LIGADA' : 'DESLIGADA'}`,
         'SAIR PARA MENU'
     ];
     
