@@ -204,14 +204,14 @@
        
        const map = maps.getMap(gameState.currentMap);
        if (!map) return;
-       
+         }
        // Atualizar sistemas (com verificação segura)
        if (player && player.update) player.update(keys);
        if (enemies && enemies.update) enemies.update(deltaTime);
        if (projectiles && projectiles.update) projectiles.update(deltaTime);
        if (camera && camera.update) camera.update(deltaTime);
        if (lighting && lighting.update) lighting.update(deltaTime);
-       
+         }
        // Sistema de tráfego no Eixão (mapa 1)
        if (gameState.currentMap === 1 && traffic && traffic.update) {
            traffic.update(deltaTime);
