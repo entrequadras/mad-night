@@ -320,14 +320,15 @@
         },
         
         renderMainMenu: function(ctx) {
-            // Renderizar background animado
-            if (this.backgrounds.main[this.bgFrame]) {
-                ctx.drawImage(this.backgrounds.main[this.bgFrame], 0, 0, ctx.canvas.width, ctx.canvas.height);
-            } else {
-                // Fallback se a imagem não carregou
-                ctx.fillStyle = '#111';
-                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            }
+    // Renderizar background animado (1920x1080)
+    if (this.backgrounds.main[this.bgFrame]) {
+        // Como o canvas é 1920x1080 (960x540 com zoom 2x), desenhar direto
+        ctx.drawImage(this.backgrounds.main[this.bgFrame], 0, 0, 1920, 1080);
+    } else {
+        // Fallback se a imagem não carregou
+        ctx.fillStyle = '#111';
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    }
             
             // Opções do menu (230 pixels mais à esquerda)
             const menuX = ctx.canvas.width / 2 - 230; // Ajustado 230px para esquerda
@@ -362,8 +363,8 @@
         renderRankings: function(ctx) {
             // Renderizar background dos scores
             if (this.backgrounds.scores) {
-                ctx.drawImage(this.backgrounds.scores, 0, 0, ctx.canvas.width, ctx.canvas.height);
-            } else {
+    ctx.drawImage(this.backgrounds.scores, 0, 0, 1920, 1080);
+} else {
                 ctx.fillStyle = '#001';
                 ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
             }
@@ -424,8 +425,8 @@
         renderCredits: function(ctx) {
             // Renderizar background dos créditos
             if (this.backgrounds.credits) {
-                ctx.drawImage(this.backgrounds.credits, 0, 0, ctx.canvas.width, ctx.canvas.height);
-            } else {
+    ctx.drawImage(this.backgrounds.credits, 0, 0, 1920, 1080);
+} else {
                 ctx.fillStyle = '#010';
                 ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
             }
