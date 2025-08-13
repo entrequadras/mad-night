@@ -76,12 +76,12 @@
                 {type: 'poste000', x: 650, y: 60, rotation: 0, lightRadius: 100, id: 'post5'}
             ],
             objects: [
-                {type: 'caixadeluz', x: 1750, y: 560, rotation: 0},
-                {type: 'banco03', x: 630, y: 200, rotation: 0},
-                {type: 'banco04', x: 680, y: 200, rotation: 0},
-                {type: 'garrafaquebrada01', x: 655, y: 240, rotation: 0},
-                {type: 'cadeiradepraia01', x: 210, y: 1000, rotation: 0},
-                {type: 'garrafaquebrada02', x: 1520, y: 1015, rotation: 0}
+                {type: 'caixadeluz', x: 1750, y: 560},
+                {type: 'banco03', x: 630, y: 200},
+                {type: 'banco04', x: 680, y: 200},
+                {type: 'garrafaquebrada01', x: 655, y: 240},
+                {type: 'cadeiradepraia01', x: 210, y: 1000},
+                {type: 'garrafaquebrada02', x: 1520, y: 1015}
             ],
             walls: [
                 {x: 0, y: 0, w: 1920, h: 20, invisible: true},
