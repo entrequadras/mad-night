@@ -146,14 +146,14 @@ if (appState === 'menu') {
         MadNight.menu.update(cappedDeltaTime); // Update com deltaTime limitado
         
         // Limpar tela e renderizar menu
-        const ctx = MadNight.renderer.ctx;
-        if (ctx) {
-            MadNight.menu.render(ctx);
-        }
-            } else {
-                // Menu desativado, mudar para jogo
-                appState = 'game';
-            }
+const ctx = MadNight.renderer.ctx;
+if (ctx) {
+    MadNight.menu.render(ctx);
+}
+} else {
+    // Menu desativado, mudar para jogo
+    appState = 'game';
+}
         } else if (appState === 'game') {
             // Update do jogo apenas se não estiver pausado
             if (MadNight.game && !MadNight.game.isPaused) {
