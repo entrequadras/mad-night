@@ -235,11 +235,15 @@
             this.active = false;
             this.stopMenuMusic(); // Parar música do menu
             
-            // Chamar função do main.js para iniciar o jogo
-            if (window.MadNightMain && window.MadNightMain.startGame) {
-                window.MadNightMain.startGame();
-            }
-        },
+            if (MadNight.audio && MadNight.audio.playMusic) {
+        MadNight.audio.playMusic('inicio');
+    }
+    
+    // Chamar função do main.js para iniciar o jogo
+    if (window.MadNightMain && window.MadNightMain.startGame) {
+        window.MadNightMain.startGame();
+    }
+},
         
         showRankings: function() {
             this.currentScreen = 'rankings';
