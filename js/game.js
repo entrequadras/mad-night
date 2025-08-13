@@ -620,11 +620,13 @@ function handlePauseMenu(key) {
                    break;
                case 2: // Sair para menu
                    gameState.isPaused = false;
-                   restart();
-                   if (window.MadNightMain && window.MadNightMain.backToMenu) {
-                       window.MadNightMain.backToMenu();
-                   }
-                   break;
+                   if (audio && audio.stopMusic) {
+        audio.stopMusic();
+    }
+    if (window.MadNightMain && window.MadNightMain.backToMenu) {
+        window.MadNightMain.backToMenu();
+    }
+    break;
            }
            break;
    }
