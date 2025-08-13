@@ -281,39 +281,63 @@
         
         // Mapa 3 - Na área da KS
         {
-            name: "Na área da KS",
-            displayName: "Na área da KS",
-            subtitle: "Estacionamento estreito",
-            width: 600,
-            height: 800,
-            enemies: [
-                {x: 300, y: 200, type: 'morcego'},
-                {x: 200, y: 500, type: 'faquinha'}
-            ],
-            escapeEnemies: [
-                {x: 150, y: 350, type: 'caveirinha'},
-                {x: 450, y: 250, type: 'caveirinha'},
-                {x: 300, y: 600, type: 'faquinha'}
-            ],
-            tiles: null, // Será gerado
-            trees: [],
-            streetLights: [],
-            objects: [],
-            walls: [
-                {x: 80, y: 150, w: 120, h: 60},
-                {x: 400, y: 150, w: 120, h: 60},
-                {x: 80, y: 300, w: 120, h: 60},
-                {x: 400, y: 300, w: 120, h: 60},
-                {x: 80, y: 450, w: 120, h: 60},
-                {x: 400, y: 450, w: 120, h: 60}
-            ],
-            lights: [],
-            shadows: [],
-            playerStart: {x: 300, y: 650},
-            playerStartEscape: {x: 300, y: 50},
-            exit: {x: 250, y: 10, w: 100, h: 30},
-            direction: 'up'
-        },
+            name: 'Na área da KS',
+    displayName: 'Na área da KS',
+    width: 1247,
+    height: 2200,
+    playerStart: {x: 300, y: 650},
+    playerStartEscape: {x: 300, y: 50},
+    exit: {x: 250, y: 10, w: 100, h: 30},
+    direction: 'up',
+    
+    // Tiles de asfalto como base
+    tiles: (function() {
+        const tiles = [];
+        const tileSize = 120;
+        for (let y = 0; y < 2200; y += tileSize) {
+            for (let x = 0; x < 1247; x += tileSize) {
+                const tileTypes = ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005'];
+                tiles.push({
+                    type: tileTypes[Math.floor(Math.random() * tileTypes.length)],
+                    x: x,
+                    y: y
+                });
+            }
+        }
+        return tiles;
+    })(),
+    
+    // Camada de overlay
+    overlays: [
+        {type: 'area_da_ks_chao', x: 0, y: 0, opacity: 0.8}
+    ],
+    
+    // Prédios e estruturas
+    buildings: [],
+    
+    // Árvores para sombras
+    trees: [],
+    
+    // Postes de luz
+    streetLights: [],
+    
+    // Luzes e sombras
+    lights: [],
+    shadows: [],
+    
+    // Objetos do cenário
+    objects: [],
+    
+    // Inimigos
+    enemies: [
+        // Adicionar inimigos conforme necessário
+    ],
+    
+    // Inimigos durante fuga
+    escapeEnemies: [
+        // Adicionar inimigos de fuga se necessário
+    ]
+}
         
         // Mapa 4 - Entre Prédios
         {
