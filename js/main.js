@@ -150,8 +150,6 @@ if (appState === 'menu') {
         if (ctx) {
             MadNight.menu.render(ctx);
         }
-    }
-}
             } else {
                 // Menu desativado, mudar para jogo
                 appState = 'game';
