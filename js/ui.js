@@ -300,7 +300,7 @@
     const options = [
         'CONTINUAR',
         `MÚSICA: ${gameState && gameState.musicEnabled ? 'LIGADA' : 'DESLIGADA'}`,
-        'SAIR PARA MENU'
+        'REINICIAR'
     ];
     
     this.setPixelFont(ctx, 16);
