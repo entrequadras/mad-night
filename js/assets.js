@@ -25,7 +25,7 @@
             // Objetos do parquinho
             parquinho: { width: 199, height: 241 },
             banco01: { width: 61, height: 50 },
-            banco03: { width: 80, height: 62 },
+            banco03: { width: 120, height: 100 },
             banco04: { width: 66, height: 55 },
             
             // Objetos pequenos
