@@ -313,7 +313,27 @@
     ],
     
     // Prédios e estruturas
-    buildings: [],
+buildings: [
+    // Prédios normais
+    {type: 'predio0005', x: 5, y: 1646, 
+     collisionRects: [{x: 5, y: 1646, w: 540, h: 561}]},
+    
+    {type: 'predio0002', x: 383, y: 403,
+     collisionRects: [{x: 383, y: 403, w: 520, h: 592}]},
+    
+    {type: 'predio0004', x: 15, y: 998,
+     collisionRects: [{x: 15, y: 998, w: 520, h: 592}]},
+    
+    // Prédios virados (fora da tela parcialmente)
+    {type: 'predio0004_vira', x: -80, y: -30,
+     collisionRects: [{x: 0, y: 0, w: 440, h: 562}]}, // Colisão ajustada para parte visível
+    
+    {type: 'predio0005_vira', x: 1245, y: 857, // Ajustado para caber (1247 - 540)
+     collisionRects: [{x: 1245, y: 857, w: 540, h: 561}]},
+    
+    {type: 'predio0002_vira', x: 1636, y: 1470, // Ajustado para caber (1247 - 520)
+     collisionRects: [{x: 1636, y: 1470, w: 520, h: 592}]}
+],
     
     // Árvores para sombras
     trees: [],
