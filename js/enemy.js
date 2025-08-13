@@ -191,15 +191,44 @@
                    this.y + this.height > player.y;
         }
         
-        checkCollision(x, y) {
-            // Verificar colisão com paredes e objetos
-            if (MadNight.collision && MadNight.collision.checkCollision) {
-                return MadNight.collision.checkCollision(
-                    { x: x, y: y, w: this.width, h: this.height }
-                );
-            }
-            return false;
+        // Adicione este método na classe Enemy (depois do método checkCollision):
+
+checkCollision(x, y) {
+    // Verificar limites do mapa primeiro
+    const map = MadNight.maps ? MadNight.maps.getCurrentMap() : null;
+    if (map) {
+        // Usar limites do mapa se definidos
+        const bounds = map.bounds || { 
+            minX: 0, 
+            minY: 0, 
+            maxX: map.width || 3000, 
+            maxY: map.height || 1800 
+        };
+        
+        // Verificar se está dentro dos limites
+        if (x < bounds.minX || 
+            y < bounds.minY || 
+            x + this.width > bounds.maxX || 
+            y + this.height > bounds.maxY) {
+            return true; // Colidiu com limite do mapa
         }
+    }
+    
+    // Verificar colisão com paredes e objetos
+    if (MadNight.collision && MadNight.collision.checkCollision) {
+        const mapCollisions = MadNight.maps ? MadNight.maps.getCurrentMapCollisions() : [];
+        for (let wall of mapCollisions) {
+            if (x < wall.x + wall.w &&
+                x + this.width > wall.x &&
+                y < wall.y + wall.h &&
+                y + this.height > wall.y) {
+                return true; // Colidiu
+            }
+        }
+    }
+    
+    return false;
+}
         
         attack() {
             if (this.attackCooldown <= 0) {
