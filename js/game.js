@@ -14,6 +14,8 @@
         lastPedalRecharge: 0,
         isPaused: false,
         isGameOver: false,
+        pauseOption: 0,
+audioEnabled: true,
         lastEnemySpawn: 0,
         escapeEnemyCount: 0,
         chacalDefeated: false
@@ -357,8 +359,20 @@
         window.addEventListener('keyup', handleKeyUp);
     }
     
-    function handleKeyDown(e) {
-        keys[e.key] = true;
+   function handleKeyDown(e) {
+    keys[e.key] = true;
+    
+    // Se pausado, lidar com menu de pausa
+    if (gameState.isPaused) {
+        handlePauseMenu(e.key);
+        return;
+    }
+    
+    // Tecla ESC para pausar
+    if (e.key === 'Escape') {
+        togglePause();
+        return;
+    }
         
         // Passar para o player
         if (player && player.handleKeyDown) {
@@ -561,13 +575,59 @@
     
     // Toggle pause
     function togglePause() {
-        gameState.isPaused = !gameState.isPaused;
-        console.log('Jogo', gameState.isPaused ? 'pausado' : 'despausado');
-        
-        if (ui && ui.showPause) {
-            ui.showPause(gameState.isPaused);
-        }
+    gameState.isPaused = !gameState.isPaused;
+    
+    if (gameState.isPaused) {
+        gameState.pauseOption = 0; // Reset para primeira opção
+        console.log('Jogo pausado');
+    } else {
+        console.log('Jogo despausado');
     }
+    
+    if (ui && ui.showPause) {
+        ui.showPause(gameState.isPaused);
+    }
+}
+
+function handlePauseMenu(key) {
+    if (!gameState.isPaused) return;
+    
+    switch(key) {
+        case 'ArrowUp':
+            gameState.pauseOption = (gameState.pauseOption - 1 + 3) % 3;
+            break;
+        case 'ArrowDown':
+            gameState.pauseOption = (gameState.pauseOption + 1) % 3;
+            break;
+        case 'Enter':
+        case ' ':
+            switch(gameState.pauseOption) {
+                case 0: // Continuar
+                    togglePause();
+                    break;
+                case 1: // Audio On/Off
+                    gameState.audioEnabled = !gameState.audioEnabled;
+                    if (audio) {
+                        if (gameState.audioEnabled) {
+                            audio.setMusicVolume(MadNight.config.audio.musicVolume);
+                            audio.setSFXVolume(MadNight.config.audio.sfxVolume);
+                        } else {
+                            audio.setMusicVolume(0);
+                            audio.setSFXVolume(0);
+                        }
+                    }
+                    break;
+                case 2: // Sair para menu
+                    gameState.isPaused = false;
+                    restart();
+                    if (window.MadNightMain && window.MadNightMain.backToMenu) {
+                        window.MadNightMain.backToMenu();
+                    }
+                    break;
+            }
+            break;
+    }
+}
     
     // Exportar módulo
     MadNight.game = {
