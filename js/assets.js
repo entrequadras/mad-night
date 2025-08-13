@@ -74,12 +74,18 @@
             
             // Assets do mapa KS
             entradaKS01: { width: 1920, height: 1610 },
+            area_da_ks_chao: { width: 1247, height: 2200 },
             
             // Prédios do mapa KS
             predio0002: { width: 520, height: 592 },
             predio0003: { width: 520, height: 567 },
             predio0006: { width: 400, height: 500 },
             predio0008: { width: 520, height: 479 },
+            predio0004: { width: 520, height: 592 },
+            predio0005: { width: 540, height: 561 },
+            predio0004_vira: { width: 520, height: 592 },
+            predio0005_vira: { width: 540, height: 561 },
+            predio0002_vira: { width: 520, height: 592 },
             
             // Setas direcionais
             setaesquerda: { width: 50, height: 59 },
@@ -234,12 +240,18 @@
             
             // Carregar assets do mapa KS
             this.loadImage('entradaKS01', 'assets/floors/entrada_ks_01.png');
+            this.loadImage('area_da_ks_chao', 'assets/floors/area_da_ks_chao.png');
             
             // Carregar prédios
             this.loadImage('predio0002', 'assets/buildings/predio0002.png');
             this.loadImage('predio0003', 'assets/buildings/predio0003.png');
             this.loadImage('predio0006', 'assets/buildings/predio0006.png');
             this.loadImage('predio0008', 'assets/buildings/predio0008.png');
+            this.loadImage('predio0004', 'assets/buildings/predio0004.png');
+            this.loadImage('predio0005', 'assets/buildings/predio0005.png');
+            this.loadImage('predio0004_vira', 'assets/buildings/predio0004_vira.png');
+            this.loadImage('predio0005_vira', 'assets/buildings/predio0005_vira.png');
+            this.loadImage('predio0002_vira', 'assets/buildings/predio0002_vira.png');
             
             // Carregar setas
             this.loadImage('setaesquerda', 'assets/icons/setaesquerda.png');
