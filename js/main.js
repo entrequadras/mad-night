@@ -138,17 +138,20 @@
         lastTime = currentTime;
         
         // Limitar delta time para evitar saltos grandes
-        const cappedDeltaTime = Math.min(deltaTime, 100);
+const cappedDeltaTime = Math.min(deltaTime, 100);
+
+// Update baseado no estado
+if (appState === 'menu') {
+    if (MadNight.menu && MadNight.menu.active) {
+        MadNight.menu.update(cappedDeltaTime); // Update com deltaTime limitado
         
-        // Update baseado no estado
-        if (appState === 'menu') {
-            // Menu não precisa de update, apenas render
-            if (MadNight.menu && MadNight.menu.active) {
-                // Limpar tela e renderizar menu
-                const ctx = MadNight.renderer.ctx;
-                if (ctx) {
-                    MadNight.menu.render(ctx);
-                }
+        // Limpar tela e renderizar menu
+        const ctx = MadNight.renderer.ctx;
+        if (ctx) {
+            MadNight.menu.render(ctx);
+        }
+    }
+}
             } else {
                 // Menu desativado, mudar para jogo
                 appState = 'game';
