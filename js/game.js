@@ -15,7 +15,7 @@
         isPaused: false,
         isGameOver: false,
         pauseOption: 0,
-audioEnabled: true,
+        musicEnabled: true,
         lastEnemySpawn: 0,
         escapeEnemyCount: 0,
         chacalDefeated: false
@@ -605,15 +605,19 @@ function handlePauseMenu(key) {
                 case 0: // Continuar
                     togglePause();
                     break;
-                case 1: // Audio On/Off
-                    gameState.audioEnabled = !gameState.audioEnabled;
+                case 1: // Música On/Off
+                    gameState.musicEnabled = !gameState.musicEnabled;
                     if (audio) {
-                        if (gameState.audioEnabled) {
-                            audio.setMusicVolume(MadNight.config.audio.musicVolume);
-                            audio.setSFXVolume(MadNight.config.audio.sfxVolume);
+                        if (gameState.musicEnabled) {
+                            // Retomar música atual
+                            if (gameState.phase === 'escape') {
+                                audio.playMusic('fuga');
+                            } else if (gameState.currentMap > 0) {
+                                audio.playMusic('inicio');
+                            }
                         } else {
-                            audio.setMusicVolume(0);
-                            audio.setSFXVolume(0);
+                            // Parar música
+                            audio.stopMusic();
                         }
                     }
                     break;
