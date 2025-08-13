@@ -29,6 +29,7 @@ MadNight.audio = {
    
    // Música atual tocando
    currentMusic: null,
+   ambientMusic: null,
    
    // Carregar um efeito sonoro
    loadSFX: function(name, loop = false) {
@@ -90,52 +91,72 @@ MadNight.audio = {
    },
    
    // Parar som em loop
-   stopLoopSFX: function(soundName) {
-       if (this.sfx[soundName] && !this.sfx[soundName].paused) {
-           this.sfx[soundName].pause();
-           this.sfx[soundName].currentTime = 0;
-       }
-   },
-   
-   // Tocar música
-   playMusic: function(phase) {
-       if (this.currentMusic) {
-           this.currentMusic.pause();
-           this.currentMusic.currentTime = 0;
-       }
-       
-       if (phase === 'inicio' && this.musicas.inicio) {
-           this.musicas.inicio.play().catch(() => {});
-           this.currentMusic = this.musicas.inicio;
-       } else if (phase === 'fuga' && this.musicas.fuga) {
-           this.musicas.fuga.play().catch(() => {});
-           this.currentMusic = this.musicas.fuga;
-       } else if (phase === 'creditos' && this.musicas.creditos) {
-           this.musicas.creditos.play().catch(() => {});
-           this.currentMusic = this.musicas.creditos;
-       } else if (phase === 'menu' && this.musicas.menu) {  // ADICIONADO
-           this.musicas.menu.play().catch(() => {});
-           this.currentMusic = this.musicas.menu;
-       }
-   },
-   
-   // Parar todas as músicas
-   stopMusic: function() {
-       if (this.currentMusic) {
-           this.currentMusic.pause();
-           this.currentMusic.currentTime = 0;
-           this.currentMusic = null;
-       }
-   },
-   
-   // Toggle música (para debug)
-   toggleMusic: function() {
-       if (this.currentMusic && !this.currentMusic.paused) {
-           this.currentMusic.pause();
-       } else if (this.currentMusic) {
-           this.currentMusic.play().catch(() => {});
-       }
-   },
+stopLoopSFX: function(soundName) {
+    if (this.sfx[soundName] && !this.sfx[soundName].paused) {
+        this.sfx[soundName].pause();
+        this.sfx[soundName].currentTime = 0;
+    }
+},
+
+// Tocar música
+playMusic: function(phase) {
+    if (this.currentMusic) {
+        this.currentMusic.pause();
+        this.currentMusic.currentTime = 0;
+    }
+    
+    if (phase === 'inicio' && this.musicas.inicio) {
+        this.musicas.inicio.play().catch(() => {});
+        this.currentMusic = this.musicas.inicio;
+    } else if (phase === 'fuga' && this.musicas.fuga) {
+        this.musicas.fuga.play().catch(() => {});
+        this.currentMusic = this.musicas.fuga;
+    } else if (phase === 'creditos' && this.musicas.creditos) {
+        this.musicas.creditos.play().catch(() => {});
+        this.currentMusic = this.musicas.creditos;
+    } else if (phase === 'menu' && this.musicas.menu) {
+        this.musicas.menu.play().catch(() => {});
+        this.currentMusic = this.musicas.menu;
+    }
+},
+
+// Tocar música ambiente (volume baixo) - NOVO
+playAmbient: function(volume = 0.15) {
+    if (this.musicas.menu && this.musicas.menu !== this.currentMusic) {
+        this.ambientMusic = this.musicas.menu;
+        this.ambientMusic.volume = volume;
+        this.ambientMusic.loop = true;
+        this.ambientMusic.play().catch(() => {});
+    }
+},
+
+// Parar música ambiente - NOVO
+stopAmbient: function() {
+    if (this.ambientMusic) {
+        this.ambientMusic.pause();
+        this.ambientMusic.currentTime = 0;
+        this.ambientMusic = null;
+    }
+},
+
+// Parar todas as músicas (modificado - não para o ambient)
+stopMusic: function() {
+    if (this.currentMusic) {
+        this.currentMusic.pause();
+        this.currentMusic.currentTime = 0;
+        this.currentMusic = null;
+    }
+    // Não para o ambientMusic
+},
+
+// Toggle música (para debug)
+toggleMusic: function() {
+    if (this.currentMusic && !this.currentMusic.paused) {
+        this.currentMusic.pause();
+    } else if (this.currentMusic) {
+        this.currentMusic.play().catch(() => {});
+    }
+},
    
    // Atualizar volume dos SFX
    setSFXVolume: function(volume) {
