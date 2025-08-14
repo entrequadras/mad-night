@@ -459,6 +459,80 @@ showGameStats: function(report) {
     this.showMessage(statsText, 8000);
 
 },
+
+    // Mostrar tela de estatísticas com fundo customizado
+    showStatsScreen: function(report) {
+    const ctx = MadNight.renderer.ctx;
+    
+    // Carregar o PNG de fundo
+    const bgImage = new Image();
+    bgImage.src = 'assets/menu/stats_bg.png';
+    
+    bgImage.onload = () => {
+        // Flag para indicar que está mostrando stats
+        this.showingStats = true;
+        
+        // Função para renderizar a tela
+        this.renderStatsScreen = () => {
+            if (!this.showingStats) return;
+            
+            // Limpar e desenhar fundo
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.drawImage(bgImage, 0, 0, ctx.canvas.width, ctx.canvas.height);
+            
+            // Configurar texto
+            ctx.fillStyle = '#fff';
+            ctx.font = '24px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            
+            // Título
+            ctx.fillStyle = '#ff0';
+            ctx.fillText('SUAS ESTATÍSTICAS', ctx.canvas.width/2, 200);
+            
+            // Estatísticas
+            ctx.fillStyle = '#fff';
+            ctx.font = '20px "Press Start 2P"';
+            ctx.fillText(`TEMPO: ${report.timeFormatted}`, ctx.canvas.width/2, 300);
+            ctx.fillText(`KILLS: ${report.kills.total}`, ctx.canvas.width/2, 360);
+            ctx.fillText(`MORTES: ${report.deaths}`, ctx.canvas.width/2, 420);
+            
+            // Detalhes dos kills
+            if (report.kills.breakdown) {
+                ctx.font = '14px "Press Start 2P"';
+                ctx.fillStyle = '#0ff';
+                ctx.fillText('DETALHES:', ctx.canvas.width/2, 500);
+                ctx.fillStyle = '#ccc';
+                ctx.fillText(`Piolhos: ${report.kills.breakdown['Piolho'] || 0}`, ctx.canvas.width/2, 540);
+                ctx.fillText(`Morcegos: ${report.kills.breakdown['Morcego'] || 0}`, ctx.canvas.width/2, 570);
+                ctx.fillText(`Caveirinhas: ${report.kills.breakdown['Caveirinha'] || 0}`, ctx.canvas.width/2, 600);
+                ctx.fillText(`Janis: ${report.kills.breakdown['Janis (Pedras)'] || 0}`, ctx.canvas.width/2, 630);
+                ctx.fillText(`Chacal: ${report.kills.breakdown['Chacal (Boss)'] || 0}`, ctx.canvas.width/2, 660);
+            }
+            
+            if (report.perfect) {
+                ctx.fillStyle = '#ff0';
+                ctx.font = '18px "Press Start 2P"';
+                ctx.fillText('⭐ SEM MORTES! ⭐', ctx.canvas.width/2, 720);
+            }
+        };
+        
+        // Renderizar imediatamente
+        this.renderStatsScreen();
+    };
+    
+    // Fallback se a imagem não carregar
+    bgImage.onerror = () => {
+        console.error('Erro ao carregar stats_bg.png, usando fallback');
+        this.showGameStats(report); // Volta pro método antigo
+    };
+},
+
+// Método para esconder a tela de stats
+hideStatsScreen: function() {
+    this.showingStats = false;
+    this.renderStatsScreen = null;
+},
         
         // Mostrar/esconder pausa
         showPause: function(isPaused) {
