@@ -70,22 +70,25 @@
         },
         
         // Carregar assets base + primeiro mapa (SEM DELAY)
-        loadInitial: function(callback) {
-            console.log('🎮 Iniciando carregamento...');
-            this.state.isLoading = true;
-            this.state.currentPhase = 'initial';
-            this.state.progress = 0;
-            
-            // Marcar todos os mapas como carregados instantaneamente
-            for (let i = 0; i <= 5; i++) {
-                this.state.loadedMaps.add(i);
-            }
-            
-            this.state.isLoading = false;
-            console.log('✅ Carregamento completo!');
-            
-            if (callback) callback();
-        },
+loadInitial: function(callback) {
+    console.log('🎮 Iniciando carregamento...');
+    this.state.isLoading = true;
+    this.state.currentPhase = 'initial';
+    this.state.progress = 0;
+    
+    // Marcar todos os mapas como carregados instantaneamente
+    for (let i = 0; i <= 5; i++) {
+        this.state.loadedMaps.add(i);
+    }
+    
+    // ÚNICA MUDANÇA: Dar tempo para assets carregarem
+    setTimeout(() => {
+        this.state.isLoading = false;
+        console.log('✅ Carregamento completo!');
+        
+        if (callback) callback();
+    }, 500); // ← MUDOU DE instantâneo PARA 500ms
+},
         
         // Carregar batch de assets (REMOVIDO DELAY)
         loadAssetBatch: function(assetList, callback) {
