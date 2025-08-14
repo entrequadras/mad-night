@@ -62,10 +62,6 @@
             MadNight.loader.loadInitial(() => {
                 clearInterval(loadingInterval);
                 
-                // Inicializar game (mas não começar ainda)
-                if (MadNight.game && MadNight.game.init) {
-                    MadNight.game.init();
-                }
                 
                 // Inicializar e mostrar menu
                 if (MadNight.menu && MadNight.menu.init) {
@@ -355,12 +351,19 @@ function backToMenu() {
     
     // Exportar funções principais
     window.MadNightMain = {
-        init: init,
-        start: start,
-        stop: stop,
-        backToMenu: backToMenu,
-        isRunning: () => isRunning,
-        getState: () => appState
-    };
+    init: init,
+    start: start,
+    stop: stop,
+    backToMenu: backToMenu,
+    startGame: function() {  // ← ADICIONAR ESTA FUNÇÃO
+        // Inicializar o game apenas quando clicar em JOGAR
+        if (MadNight.game && !MadNight.game.state.initialized) {
+            MadNight.game.init();
+        }
+        appState = 'game';
+    },
+    isRunning: () => isRunning,
+    getState: () => appState
+};
     
 })();
