@@ -230,7 +230,7 @@
             }
         },
         
-    startGame: function() {
+        startGame: function() {
             console.log('🎮 Iniciando jogo...');
             this.active = false;
             
