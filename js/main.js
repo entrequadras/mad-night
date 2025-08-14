@@ -16,90 +16,91 @@
     let appState = 'menu'; // 'menu' ou 'game'
     
     // Inicialização
-    function init() {
-        console.log('Mad Night v1.57 - Sistema de Menu e Rankings');
-        console.log('Iniciando...');
-        
-        // Obter canvas
-        canvas = document.getElementById('gameCanvas');
-        if (!canvas) {
-            console.error('Canvas não encontrado!');
-            return;
+function init() {
+    console.log('Mad Night v1.57 - Sistema de Menu e Rankings');
+    console.log('Iniciando...');
+    
+    // Obter canvas
+    canvas = document.getElementById('gameCanvas');
+    if (!canvas) {
+        console.error('Canvas não encontrado!');
+        return;
+    }
+    
+    // Configurar canvas
+    canvas.width = MadNight.config.canvas.width;
+    canvas.height = MadNight.config.canvas.height;
+    
+    // Inicializar renderer
+    MadNight.renderer.init(canvas);
+    
+    // Inicializar sistemas essenciais SEMPRE (independente de ter loader ou não)
+    if (MadNight.assets && MadNight.assets.init) {
+        MadNight.assets.init();
+    }
+    
+    // Inicializar maps também (necessário para renderer)
+    if (MadNight.maps && MadNight.maps.init) {
+        MadNight.maps.init();
+    }
+    
+    // Inicializar stats (para rankings)
+    if (MadNight.stats && MadNight.stats.init) {
+        MadNight.stats.init();
+    }
+    
+    // Inicializar loader
+    if (MadNight.loader && MadNight.loader.init) {
+        MadNight.loader.init();
+    }
+    
+    // Mostrar tela de loading
+    const ctx = MadNight.renderer.ctx;
+    const loadingInterval = setInterval(() => {
+        if (MadNight.loader && MadNight.loader.renderLoadingScreen) {
+            MadNight.loader.renderLoadingScreen(ctx, canvas);
         }
-        
-        // Configurar canvas
-        canvas.width = MadNight.config.canvas.width;
-        canvas.height = MadNight.config.canvas.height;
-        
-        // Inicializar renderer
-        MadNight.renderer.init(canvas);
-        
-        // Inicializar sistemas essenciais
-        if (MadNight.assets && MadNight.assets.init) {
-            MadNight.assets.init();
-        }
-        
-        // Inicializar stats (para rankings)
-        if (MadNight.stats && MadNight.stats.init) {
-            MadNight.stats.init();
-        }
-        
-        // Inicializar loader
-        if (MadNight.loader && MadNight.loader.init) {
-            MadNight.loader.init();
-        }
-        
-        // Mostrar tela de loading
-        const ctx = MadNight.renderer.ctx;
-        const loadingInterval = setInterval(() => {
-            if (MadNight.loader && MadNight.loader.renderLoadingScreen) {
-                MadNight.loader.renderLoadingScreen(ctx, canvas);
+    }, 100);
+    
+    // Carregar assets iniciais
+    if (MadNight.loader && MadNight.loader.loadInitial) {
+        MadNight.loader.loadInitial(() => {
+            clearInterval(loadingInterval);
+            
+            // Inicializar e mostrar menu
+            if (MadNight.menu && MadNight.menu.init) {
+                MadNight.menu.init();
+                appState = 'menu';
             }
-        }, 100);
-        
-        // Carregar assets iniciais
-if (MadNight.loader && MadNight.loader.loadInitial) {
-    MadNight.loader.loadInitial(() => {
+            
+            // Aguardar fontes e começar
+            document.fonts.ready.then(() => {
+                console.log('Fontes carregadas!');
+                start();
+            }).catch(() => {
+                console.log('Erro ao carregar fontes, usando fallback');
+                start();
+            });
+        });
+    } else {
+        // Fallback se não houver loader
         clearInterval(loadingInterval);
         
-        // Inicializar e mostrar menu
+        // Assets e maps já foram inicializados acima, não repetir!
+        
+        // Inicializar menu
         if (MadNight.menu && MadNight.menu.init) {
             MadNight.menu.init();
             appState = 'menu';
         }
         
-        // Aguardar fontes e começar
+        // Começar
         document.fonts.ready.then(() => {
-            console.log('Fontes carregadas!');
             start();
         }).catch(() => {
-            console.log('Erro ao carregar fontes, usando fallback');
             start();
         });
-    });
-} else {
-    // Fallback se não houver loader
-    clearInterval(loadingInterval);
-    
-    // NÃO INICIALIZAR GAME AQUI! Só assets e menu
-    
-    // Inicializar assets manualmente
-    if (MadNight.assets && MadNight.assets.init) {
-        MadNight.assets.init();  // ← ADICIONAR
     }
-    
-    // Inicializar menu
-    if (MadNight.menu && MadNight.menu.init) {
-        MadNight.menu.init();
-        appState = 'menu';
-    }
-    
-    // Começar
-    document.fonts.ready.then(() => {
-        start();
-    }).catch(() => {
-        start();
-    });
 }
     
     // Iniciar loop do jogo
