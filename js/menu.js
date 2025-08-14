@@ -231,34 +231,29 @@
         },
         
         startGame: function() {
-            console.log('🎮 Iniciando jogo...');
-            this.active = false;
-            
-            // Parar música do menu
-            if (MadNight.audio) {
-                MadNight.audio.stopMusic();
-            }
-            
-            // IMPORTANTE: Resetar o jogo antes de começar nova partida
-            if (MadNight.game && MadNight.game.restart) {
-                MadNight.game.restart();
-            }
-            
-            // Chamar função do main.js para iniciar o jogo
-            if (window.MadNightMain && window.MadNightMain.startGame) {
-                window.MadNightMain.startGame();
-            } else {
-                console.error('❌ MadNightMain.startGame não encontrado!');
-            }
-            
-            // Iniciar música do jogo DEPOIS de chamar startGame
-            setTimeout(() => {
-                if (MadNight.audio) {
-                    MadNight.audio.playAmbient(0.15);
-                    MadNight.audio.playMusic('inicio');
-                }
-            }, 100);
-        },
+    console.log('🎮 Iniciando jogo...');
+    this.active = false;
+    
+    // Parar música do menu
+    if (MadNight.audio) {
+        MadNight.audio.stopMusic();
+    }
+    
+    // Chamar função do main.js para iniciar o jogo
+    if (window.MadNightMain && window.MadNightMain.startGame) {
+        window.MadNightMain.startGame();
+    } else {
+        console.error('❌ MadNightMain.startGame não encontrado!');
+    }
+    
+    // Iniciar música do jogo DEPOIS de chamar startGame
+    setTimeout(() => {
+        if (MadNight.audio) {
+            MadNight.audio.playAmbient(0.15);
+            MadNight.audio.playMusic('inicio');
+        }
+    }, 100);
+},
         
         showRankings: function() {
             this.currentScreen = 'rankings';
