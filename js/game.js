@@ -492,6 +492,7 @@
    
    // Game Over
 // Game Over
+// Game Over
 function handleGameOver() {
     gameState.isGameOver = true;
     console.log('💀 GAME OVER');
@@ -517,15 +518,15 @@ function handleGameOver() {
         
         // Depois de 8 segundos, ir para rankings
         setTimeout(() => {
-            // IMPORTANTE: Esconder tela de stats PRIMEIRO
+            // Esconder tela de stats
             if (ui && ui.hideStatsScreen) {
                 ui.hideStatsScreen();
             }
             
-            // IMPORTANTE: NÃO chamar restart() aqui!
-            // Apenas mudar para o menu, o restart será chamado quando clicar em JOGAR novamente
+            // Parar o jogo e ir para menu
+            gameState.isGameOver = false;
+            gameState.isPaused = false;
             
-            // Ir para menu de rankings
             if (MadNight.menu) {
                 MadNight.menu.active = true;
                 MadNight.menu.currentScreen = 'rankings';
@@ -533,8 +534,6 @@ function handleGameOver() {
                     window.MadNightMain.setAppState('menu');
                 }
             }
-            
-            // REMOVIDO: restart(); ← NÃO CHAMAR AQUI!
         }, 8000);
     }, 3000);
 }
