@@ -668,13 +668,15 @@ function handlePauseMenu(key) {
        keys: keys,
        
        // Métodos principais
-       init: init,
-       update: update,
-       restart: restart,
-       togglePause: togglePause,
-       handlePlayerDeath: handlePlayerDeath,
-       handleMapExit: handleMapTransition,
-       loadMap: loadMap,  // Expor loadMap para outros módulos
+    init: init,
+    update: update,
+    restart: restart,
+    togglePause: togglePause,
+    handlePlayerDeath: handlePlayerDeath,
+    handleVictory: handleVictory,
+    handleGameOver: handleGameOver,
+    handleMapExit: handleMapTransition,
+    loadMap: loadMap,  // Expor loadMap para outros módulos
        
        // Getters para outros módulos
        getState: () => gameState,
