@@ -59,7 +59,7 @@
         'area_da_ks_chao',
         'predio0002', 'predio0004', 'predio0005',
         'predio0002_vira', 'predio0004_vira', 'predio0005_vira'
-    ],
+            ],
             4: [], // Placeholder
             5: []  // Placeholder
         },
