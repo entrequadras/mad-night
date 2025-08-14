@@ -567,8 +567,7 @@
     }, 6000); // 6 segundos para ler as estatísticas
 }
    
-   ✅ CÓDIGO CORRIGIDO para a função restart():
-javascript// Reiniciar jogo
+// Reiniciar jogo
 function restart() {
     // Reset game state (MAS NÃO RESETAR initialized!)
     // gameState.initialized mantém true para evitar re-inicialização
