@@ -208,7 +208,7 @@
        
        const map = maps.getMap(gameState.currentMap);
        if (!map) return;
-         }
+      
        // Atualizar sistemas (com verificação segura)
        if (player && player.update) player.update(keys);
        if (enemies && enemies.update) enemies.update(deltaTime);
