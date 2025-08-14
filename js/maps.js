@@ -426,7 +426,7 @@ buildings: [
     ];
     
     // Exportar módulo
-    MadNight.maps = {
+MadNight.maps = {
     // Lista de mapas
     list: mapsList,
     
@@ -462,75 +462,56 @@ buildings: [
     
     // Obter mapa atual
     getCurrentMap: function() {
-        // Silencioso durante fase de menu/loading
+        // Se game não existe, retorna mapa 0
         if (!MadNight.game || !MadNight.game.state) {
-            return this.list[0];  // Normal durante inicialização
-        }
-        
-        const mapIndex = MadNight.game.state.currentMap;
-        
-        // Warning só se tentar acessar mapa inválido
-        if (!this.list[mapIndex]) {
-            console.warn(`⚠️ Mapa ${mapIndex} não existe!`);
             return this.list[0];
         }
-        
-        return this.list[mapIndex];
+        // Se game existe, retorna o mapa correto
+        return this.list[MadNight.game.state.currentMap] || this.list[0];
     },
     
-    // Obter quantidade de mapas ← FUNÇÃO ADICIONADA!
+    // Obter quantidade de mapas
     getCount: function() {
         return this.list.length;
     },
     
-    const mapIndex = MadNight.game.state.currentMap;
+    // Obter carros estacionados para o mapa 2
+    getParkedCarsForMap2: function() {
+        return [
+            {type: 'carro002frente', x: 34, y: 1472},
+            {type: 'carrolateral_04', x: 1770, y: 1210},
+            {type: 'carrolateral_06', x: 602, y: 523},
+            {type: 'carrolateral_02', x: 527, y: 474},
+            {type: 'carrolateral_03', x: 299, y: 378},
+            {type: 'carrolateral_07', x: 89, y: 299},
+            {type: 'carrolateral_08', x: 238, y: 704}
+        ];
+    },
     
-    // Warning só se tentar acessar mapa inválido
-    if (!this.list[mapIndex]) {
-        console.warn(`⚠️ Mapa ${mapIndex} não existe!`);
-        return this.list[0];
-    }
-    
-    return this.list[mapIndex];
-},
-        
-        // Obter carros estacionados para o mapa 2
-        getParkedCarsForMap2: function() {
-            return [
-                {type: 'carro002frente', x: 34, y: 1472},
-                {type: 'carrolateral_04', x: 1770, y: 1210},
-                {type: 'carrolateral_06', x: 602, y: 523},
-                {type: 'carrolateral_02', x: 527, y: 474},
-                {type: 'carrolateral_03', x: 299, y: 378},
-                {type: 'carrolateral_07', x: 89, y: 299},
-                {type: 'carrolateral_08', x: 238, y: 704}
-            ];
-        },
-        
-        // Carregar mapa atual (para respawn)
-        loadCurrentMap: function(isEscape = false) {
-            if (!MadNight.game || !MadNight.game.state) {
-                console.error('Game não inicializado');
-                return;
-            }
-            
-            const currentMapIndex = MadNight.game.state.currentMap;
-            
-            // Delegar para o game.js fazer o carregamento
-            if (MadNight.game.loadMap) {
-                MadNight.game.loadMap(currentMapIndex, isEscape);
-            }
-        },
-        
-        // Método alternativo para carregar mapa
-        loadMap: function(mapIndex, isEscape = false) {
-            // Delegar para o game.js
-            if (MadNight.game && MadNight.game.loadMap) {
-                MadNight.game.loadMap(mapIndex, isEscape);
-            }
+    // Carregar mapa atual (para respawn)
+    loadCurrentMap: function(isEscape = false) {
+        if (!MadNight.game || !MadNight.game.state) {
+            console.error('Game não inicializado');
+            return;
         }
-    };
+        
+        const currentMapIndex = MadNight.game.state.currentMap;
+        
+        // Delegar para o game.js fazer o carregamento
+        if (MadNight.game.loadMap) {
+            MadNight.game.loadMap(currentMapIndex, isEscape);
+        }
+    },
     
-    console.log('Módulo Maps carregado');
-    
+    // Método alternativo para carregar mapa
+    loadMap: function(mapIndex, isEscape = false) {
+        // Delegar para o game.js
+        if (MadNight.game && MadNight.game.loadMap) {
+            MadNight.game.loadMap(mapIndex, isEscape);
+        }
+    }
+};
+
+console.log('Módulo Maps carregado');
+
 })();
