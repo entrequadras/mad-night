@@ -230,13 +230,18 @@
             }
         },
         
-        startGame: function() {
+    startGame: function() {
     console.log('🎮 Iniciando jogo...');
     this.active = false;
     
     // Parar música do menu
     if (MadNight.audio) {
         MadNight.audio.stopMusic();
+    }
+    
+    // IMPORTANTE: Resetar o jogo antes de começar nova partida
+    if (MadNight.game && MadNight.game.restart) {
+        MadNight.game.restart();
     }
     
     // Chamar função do main.js para iniciar o jogo
