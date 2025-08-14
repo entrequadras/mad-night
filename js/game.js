@@ -495,32 +495,42 @@ function handleGameOver() {
     gameState.isGameOver = true;
     console.log('💀 GAME OVER');
     
-    // Finalizar estatísticas MESMO NA DERROTA
     const report = stats ? stats.finishGame() : null;
     
-    // Mostrar mensagem de morte
+    // Mostrar SIFUDÊU
     if (ui && ui.showDeathMessage) {
         ui.showDeathMessage("SIFUDÊU");
     }
     
-    // Esperar 3 segundos para mensagem sumir, DEPOIS mostrar estatísticas
+    // Após 3 segundos, trocar para tela de estatísticas
     setTimeout(() => {
-        if (ui && ui.showGameStats && report) {
-            ui.showGameStats(report);
+        // Esconder mensagem de morte
+        if (ui && ui.showingDeathMessage) {
+            ui.showingDeathMessage = false;
         }
         
-        // Depois de mais 8 segundos, ir para rankings
+        // Mostrar tela de estatísticas com PNG
+        if (ui && ui.showStatsScreen && report) {
+            ui.showStatsScreen(report);
+        }
+        
+        // Depois de 8 segundos, ir para rankings
         setTimeout(() => {
+            // Esconder tela de stats
+            if (ui && ui.hideStatsScreen) {
+                ui.hideStatsScreen();
+            }
+            
+            // Ir para menu de rankings
             if (MadNight.menu) {
                 MadNight.menu.active = true;
                 MadNight.menu.currentScreen = 'rankings';
-                // Mudar estado da aplicação para menu
                 if (window.MadNightMain && window.MadNightMain.setAppState) {
                     window.MadNightMain.setAppState('menu');
                 }
             }
-            restart(); // Resetar o jogo
-        }, 8000);  // ← AUMENTEI de 5000 para 8000
+            restart();
+        }, 8000);
     }, 3000);
 }
    
