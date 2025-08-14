@@ -491,7 +491,7 @@
    }
    
    // Game Over
-   function handleGameOver() {
+function handleGameOver() {
     gameState.isGameOver = true;
     console.log('💀 GAME OVER');
     
@@ -503,23 +503,24 @@
         ui.showDeathMessage("SIFUDÊU");
     }
     
-    // Esperar 3 segundos, depois mostrar estatísticas
+    // Esperar 3 segundos para mensagem sumir, DEPOIS mostrar estatísticas
     setTimeout(() => {
         if (ui && ui.showGameStats && report) {
             ui.showGameStats(report);
         }
         
-        // Depois de mais 5 segundos, ir para rankings
+        // Depois de mais 8 segundos, ir para rankings
         setTimeout(() => {
             if (MadNight.menu) {
                 MadNight.menu.active = true;
                 MadNight.menu.currentScreen = 'rankings';
-                if (window.MadNightMain) {
+                // Mudar estado da aplicação para menu
+                if (window.MadNightMain && window.MadNightMain.setAppState) {
                     window.MadNightMain.setAppState('menu');
                 }
             }
             restart(); // Resetar o jogo
-        }, 5000);
+        }, 8000);  // ← AUMENTEI de 5000 para 8000
     }, 3000);
 }
    
