@@ -55,7 +55,11 @@
                 'carro002frente', 'carrolateral_02', 'carrolateral_03',
                 'carrolateral_04', 'carrolateral_06', 'carrolateral_07', 'carrolateral_08'
             ],
-            3: [], // Placeholder
+            3: [ // Na área da KS
+        'area_da_ks_chao',
+        'predio0002', 'predio0004', 'predio0005',
+        'predio0002_vira', 'predio0004_vira', 'predio0005_vira'
+    ],
             4: [], // Placeholder
             5: []  // Placeholder
         },
