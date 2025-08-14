@@ -58,49 +58,49 @@
         }, 100);
         
         // Carregar assets iniciais
-        if (MadNight.loader && MadNight.loader.loadInitial) {
-            MadNight.loader.loadInitial(() => {
-                clearInterval(loadingInterval);
-                
-                
-                // Inicializar e mostrar menu
-                if (MadNight.menu && MadNight.menu.init) {
-                    MadNight.menu.init();
-                    appState = 'menu';
-                }
-                
-                // Aguardar fontes e começar
-                document.fonts.ready.then(() => {
-                    console.log('Fontes carregadas!');
-                    start();
-                }).catch(() => {
-                    console.log('Erro ao carregar fontes, usando fallback');
-                    start();
-                });
-            });
-        } else {
-            // Fallback se não houver loader
-            clearInterval(loadingInterval);
-            
-            // Inicializar game
-            if (MadNight.game && MadNight.game.init) {
-                MadNight.game.init();
-            }
-            
-            // Inicializar menu
-            if (MadNight.menu && MadNight.menu.init) {
-                MadNight.menu.init();
-                appState = 'menu';
-            }
-            
-            // Começar
-            document.fonts.ready.then(() => {
-                start();
-            }).catch(() => {
-                start();
-            });
+if (MadNight.loader && MadNight.loader.loadInitial) {
+    MadNight.loader.loadInitial(() => {
+        clearInterval(loadingInterval);
+        
+        // Inicializar e mostrar menu
+        if (MadNight.menu && MadNight.menu.init) {
+            MadNight.menu.init();
+            appState = 'menu';
         }
+        
+        // Aguardar fontes e começar
+        document.fonts.ready.then(() => {
+            console.log('Fontes carregadas!');
+            start();
+        }).catch(() => {
+            console.log('Erro ao carregar fontes, usando fallback');
+            start();
+        });
+    });
+} else {
+    // Fallback se não houver loader
+    clearInterval(loadingInterval);
+    
+    // NÃO INICIALIZAR GAME AQUI! Só assets e menu
+    
+    // Inicializar assets manualmente
+    if (MadNight.assets && MadNight.assets.init) {
+        MadNight.assets.init();  // ← ADICIONAR
     }
+    
+    // Inicializar menu
+    if (MadNight.menu && MadNight.menu.init) {
+        MadNight.menu.init();
+        appState = 'menu';
+    }
+    
+    // Começar
+    document.fonts.ready.then(() => {
+        start();
+    }).catch(() => {
+        start();
+    });
+}
     
     // Iniciar loop do jogo
     function start() {
