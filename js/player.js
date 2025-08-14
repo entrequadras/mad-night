@@ -54,47 +54,28 @@
         },
         
         // Matar player
-        kill: function() {
-            if (this.isDead) return;
-            
-            this.isDead = true;
-            this.isDashing = false;
-            this.deathFrame = Math.floor(Math.random() * 4) + 12;
-            
-            // Incrementar contador de mortes
-            const gameState = MadNight.game.state;
-            gameState.deathCount++;
-            
-            console.log(`Player morreu! Mortes: ${gameState.deathCount}/${MadNight.config.gameplay.maxDeaths}`);
-            
-            // Tocar som de morte
-            if (MadNight.audio && MadNight.audio.playDeathSound) {
-                MadNight.audio.playDeathSound('player');
-            }
-            
-            // Shake da câmera
-            if (MadNight.camera && MadNight.camera.shake) {
-                MadNight.camera.shake(20);
-            }
-            
-            // Verificar game over ou respawn
-            if (gameState.deathCount >= MadNight.config.gameplay.maxDeaths) {
-                console.log('GAME OVER! Máximo de mortes atingido');
-                // Game over após mostrar mensagem
-                setTimeout(() => {
-                    if (MadNight.game.handleGameOver) {
-                        MadNight.game.handleGameOver();
-                    } else if (MadNight.game.restart) {
-                        MadNight.game.restart();
-                    }
-                }, 2000);
-            } else {
-                // Respawn após 2 segundos
-                setTimeout(() => {
-                    this.respawn();
-                }, 2000);
-            }
-        },
+kill: function() {
+    if (this.isDead) return;
+    
+    this.isDead = true;
+    this.isDashing = false;
+    this.deathFrame = Math.floor(Math.random() * 4) + 12;
+    
+    // Tocar som de morte
+    if (MadNight.audio && MadNight.audio.playDeathSound) {
+        MadNight.audio.playDeathSound('player');
+    }
+    
+    // Shake da câmera
+    if (MadNight.camera && MadNight.camera.shake) {
+        MadNight.camera.shake(20);
+    }
+    
+    // IMPORTANTE: Delegar o controle de mortes para o game.js
+    if (MadNight.game && MadNight.game.handlePlayerDeath) {
+        MadNight.game.handlePlayerDeath();
+    }
+},
         
         // Respawn do player
         respawn: function() {
