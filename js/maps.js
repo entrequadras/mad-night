@@ -357,7 +357,7 @@ buildings: [
     escapeEnemies: [
         // Adicionar inimigos de fuga se necessário
     ]
-}
+},
         
         // Mapa 4 - Entre Prédios
         {
