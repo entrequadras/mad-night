@@ -540,29 +540,29 @@ function handleGameOver() {
 }
    
    // Vitória
-   function handleVictory() {
+function handleVictory() {
     console.log('🎉 VITÓRIA!');
     
-    // Finalizar estatísticas
     const report = stats ? stats.finishGame() : null;
-    
-    // Verificar se é novo recorde
     const newRecords = (stats && report) ? stats.checkHighScore(report) : [];
     
-    // Tocar música de créditos
     if (audio && audio.playMusic) {
         audio.playMusic('creditos');
     }
     
-    // SEMPRE mostrar estatísticas primeiro
-    if (ui && ui.showGameStats && report) {
-        ui.showGameStats(report);
+    if (ui && ui.showStatsScreen && report) {
+        ui.showStatsScreen(report);
     }
     
-    // Depois de 8 segundos, ir para rankings
     setTimeout(() => {
+        // Esconder tela de stats
+        if (ui && ui.hideStatsScreen) {
+            ui.hideStatsScreen();
+        }
+        
+        // NÃO chamar restart() aqui!
+        
         if (newRecords.length > 0) {
-            // Se tem recorde, mostrar tela de entrada de nome
             if (MadNight.menu) {
                 MadNight.menu.active = true;
                 MadNight.menu.showNewRecord(report, newRecords);
@@ -571,7 +571,6 @@ function handleGameOver() {
                 }
             }
         } else {
-            // Se não tem recorde, ir direto para rankings
             if (MadNight.menu) {
                 MadNight.menu.active = true;
                 MadNight.menu.currentScreen = 'rankings';
@@ -580,7 +579,7 @@ function handleGameOver() {
                 }
             }
         }
-    }, 6000); // 6 segundos para ler as estatísticas
+    }, 8000);
 }
    
 // Reiniciar jogo
