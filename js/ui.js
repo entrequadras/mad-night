@@ -431,28 +431,34 @@
             }
         },
         
-        // Mostrar estatísticas do jogo
-        showGameStats: function(report) {
-            console.log('Estatísticas finais:', report);
-            
-            let statsText = 'ESTATÍSTICAS FINAIS\n\n';
-            statsText += `Tempo: ${report.timeFormatted}\n`;
-            statsText += `Kills: ${report.kills.total}\n`;
-            statsText += `Mortes: ${report.deaths}\n`;
-            
-            if (report.perfect) {
-                statsText += '\nRUN PERFEITA!';
-            }
-            
-            this.showMessage(statsText, 8000);
-            
-            // Voltar ao menu após mostrar stats
-            setTimeout(() => {
-                if (window.MadNightMain && window.MadNightMain.backToMenu) {
-                    window.MadNightMain.backToMenu();
-                }
-            }, 8000);
-        },
+// Mostrar estatísticas do jogo
+showGameStats: function(report) {
+    console.log('Estatísticas finais:', report);
+    
+    let statsText = 'CABULOSO?\n\n';
+    statsText += `TEMPO: ${report.timeFormatted}\n`;
+    statsText += `KILLS TOTAL: ${report.kills.total}\n`;
+    
+    // ADICIONAR DETALHAMENTO
+    if (report.kills.breakdown) {
+        statsText += '\nOTÁRIOS:\n';
+        statsText += `  Piolhos: ${report.kills.breakdown['Piolho'] || 0}\n`;
+        statsText += `  Morcegos: ${report.kills.breakdown['Morcego'] || 0}\n`;
+        statsText += `  Caveirinhas: ${report.kills.breakdown['Caveirinha'] || 0}\n`;
+        statsText += `  Janis: ${report.kills.breakdown['Janis (Pedras)'] || 0}\n`;
+        statsText += `  Chacal: ${report.kills.breakdown['Chacal (Boss)'] || 0}\n`;
+    }
+    
+    statsText += `\nMORTES: ${report.deaths}`;
+    
+    if (report.perfect) {
+        statsText += '\n\n⭐ NINJA! ⭐';
+    }
+    
+    // Apenas mostrar a mensagem, NÃO controlar o fluxo
+    this.showMessage(statsText, 8000);
+
+},
         
         // Mostrar/esconder pausa
         showPause: function(isPaused) {
