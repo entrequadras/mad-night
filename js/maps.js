@@ -462,18 +462,21 @@ buildings: [
         
         // Obter mapa atual
         getCurrentMap: function() {
-            // Verificar se game está inicializado
-            if (!MadNight.game || !MadNight.game.state) {
-                console.warn('Game não inicializado, retornando mapa 0');
-                return this.list[0];
-            }
-            return this.list[MadNight.game.state.currentMap] || this.list[0];
-        },
-        
-        // Obter quantidade de mapas
-        getCount: function() {
-            return this.list.length;
-        },
+    // Silencioso durante fase de menu/loading
+    if (!MadNight.game || !MadNight.game.state) {
+        return this.list[0];  // Normal durante inicialização
+    }
+    
+    const mapIndex = MadNight.game.state.currentMap;
+    
+    // Warning só se tentar acessar mapa inválido
+    if (!this.list[mapIndex]) {
+        console.warn(`⚠️ Mapa ${mapIndex} não existe!`);
+        return this.list[0];
+    }
+    
+    return this.list[mapIndex];
+},
         
         // Obter carros estacionados para o mapa 2
         getParkedCarsForMap2: function() {
