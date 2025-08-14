@@ -69,25 +69,48 @@
             console.log('Sistema de Loading inicializado');
         },
         
-        // Carregar assets base + primeiro mapa (SEM DELAY)
+// Carregar assets base + primeiro mapa
 loadInitial: function(callback) {
     console.log('🎮 Iniciando carregamento...');
     this.state.isLoading = true;
     this.state.currentPhase = 'initial';
     this.state.progress = 0;
     
-    // Marcar todos os mapas como carregados instantaneamente
+    // Marcar mapas como carregados
     for (let i = 0; i <= 5; i++) {
         this.state.loadedMaps.add(i);
     }
     
-    // ÚNICA MUDANÇA: Dar tempo para assets carregarem
-    setTimeout(() => {
-        this.state.isLoading = false;
-        console.log('✅ Carregamento completo!');
-        
-        if (callback) callback();
-    }, 500); // ← MUDOU DE instantâneo PARA 500ms
+    // Verificar carregamento REAL dos assets
+    const checkAssetsLoaded = () => {
+        if (MadNight.assets && MadNight.assets.images) {
+            const totalAssets = Object.keys(MadNight.assets.images).length;
+            const loadedAssets = Object.values(MadNight.assets.images)
+                .filter(img => img && img.loaded).length;
+            
+            this.state.progress = Math.floor((loadedAssets / totalAssets) * 100);
+            
+            // Se carregou pelo menos 80% ou passou 3 segundos, continuar
+            if (loadedAssets >= totalAssets * 0.8 || Date.now() - startTime > 3000) {
+                this.state.isLoading = false;
+                console.log(`✅ Carregamento completo! ${loadedAssets}/${totalAssets} assets`);
+                if (callback) callback();
+            } else {
+                // Verificar novamente em 100ms
+                setTimeout(checkAssetsLoaded, 100);
+            }
+        } else {
+            // Se não tem assets, continuar após 500ms
+            setTimeout(() => {
+                this.state.isLoading = false;
+                console.log('✅ Carregamento completo (sem assets para verificar)');
+                if (callback) callback();
+            }, 500);
+        }
+    };
+    
+    const startTime = Date.now();
+    checkAssetsLoaded();
 },
         
         // Carregar batch de assets (REMOVIDO DELAY)
