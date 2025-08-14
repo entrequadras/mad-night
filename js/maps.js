@@ -427,45 +427,61 @@ buildings: [
     
     // Exportar módulo
     MadNight.maps = {
-        // Lista de mapas
-        list: mapsList,
+    // Lista de mapas
+    list: mapsList,
+    
+    // Inicializar mapas (chamado pelo game.js)
+    init: function() {
+        console.log('Inicializando sistema de mapas...');
         
-        // Inicializar mapas (chamado pelo game.js)
-        init: function() {
-            console.log('Inicializando sistema de mapas...');
-            
-            // Gerar tiles para os mapas que precisam
-            this.list[0].tiles = generateTiles(
-                1920, 1080, 120, 
-                ['grama000', 'grama001', 'grama002', 'grama003', 'grama004']
-            );
-            
-            this.list[2].tiles = generateTiles(
-                1920, 1610, 120,
+        // Gerar tiles para os mapas que precisam
+        this.list[0].tiles = generateTiles(
+            1920, 1080, 120, 
+            ['grama000', 'grama001', 'grama002', 'grama003', 'grama004']
+        );
+        
+        this.list[2].tiles = generateTiles(
+            1920, 1610, 120,
+            ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
+        );
+        
+        for (let i = 3; i <= 5; i++) {
+            this.list[i].tiles = generateTiles(
+                600, 800, 120,
                 ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
             );
-            
-            for (let i = 3; i <= 5; i++) {
-                this.list[i].tiles = generateTiles(
-                    600, 800, 120,
-                    ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
-                );
-            }
-            
-            console.log(`${this.list.length} mapas carregados`);
-        },
+        }
         
-        // Obter mapa por índice
-        getMap: function(index) {
-            return this.list[index] || null;
-        },
+        console.log(`${this.list.length} mapas carregados`);
+    },
+    
+    // Obter mapa por índice
+    getMap: function(index) {
+        return this.list[index] || null;
+    },
+    
+    // Obter mapa atual
+    getCurrentMap: function() {
+        // Silencioso durante fase de menu/loading
+        if (!MadNight.game || !MadNight.game.state) {
+            return this.list[0];  // Normal durante inicialização
+        }
         
-        // Obter mapa atual
-        getCurrentMap: function() {
-    // Silencioso durante fase de menu/loading
-    if (!MadNight.game || !MadNight.game.state) {
-        return this.list[0];  // Normal durante inicialização
-    }
+        const mapIndex = MadNight.game.state.currentMap;
+        
+        // Warning só se tentar acessar mapa inválido
+        if (!this.list[mapIndex]) {
+            console.warn(`⚠️ Mapa ${mapIndex} não existe!`);
+            return this.list[0];
+        }
+        
+        return this.list[mapIndex];
+    },
+    
+    // Obter quantidade de mapas ← FUNÇÃO ADICIONADA!
+    getCount: function() {
+        return this.list.length;
+    },
     
     const mapIndex = MadNight.game.state.currentMap;
     
