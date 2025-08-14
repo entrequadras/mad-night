@@ -5,6 +5,7 @@
    
    // Estado do jogo (exposto para outros módulos)
    const gameState = {
+       initialized: false,
        currentMap: 0,
        phase: 'infiltration', // 'infiltration' ou 'escape'
        dashUnlocked: false,
@@ -41,6 +42,9 @@
    
    // Inicialização do módulo game
    function init() {
+       if (gameState.initialized) return true;
+       gameState.initialized = true;
+    
        console.log('🎮 Inicializando módulo Game...');
        
        // Obter referências dos outros módulos
@@ -488,76 +492,102 @@
    
    // Game Over
    function handleGameOver() {
-       gameState.isGameOver = true;
-       console.log('💀 GAME OVER');
-       
-       // Mostrar mensagem final
-       if (ui && ui.showDeathMessage) {
-           ui.showDeathMessage("sifudêu");
-       }
-       
-       if (ui && ui.showGameOver) {
-           ui.showGameOver();
-       }
-       
-       // Reiniciar após 5 segundos
-       setTimeout(() => {
-           restart();
-       }, 5000);
-   }
+    gameState.isGameOver = true;
+    console.log('💀 GAME OVER');
+    
+    // Finalizar estatísticas MESMO NA DERROTA
+    const report = stats ? stats.finishGame() : null;
+    
+    // Mostrar mensagem de morte
+    if (ui && ui.showDeathMessage) {
+        ui.showDeathMessage("SIFUDÊU");
+    }
+    
+    // Esperar 3 segundos, depois mostrar estatísticas
+    setTimeout(() => {
+        if (ui && ui.showGameStats && report) {
+            ui.showGameStats(report);
+        }
+        
+        // Depois de mais 5 segundos, ir para rankings
+        setTimeout(() => {
+            if (MadNight.menu) {
+                MadNight.menu.active = true;
+                MadNight.menu.currentScreen = 'rankings';
+                if (window.MadNightMain) {
+                    window.MadNightMain.setAppState('menu');
+                }
+            }
+            restart(); // Resetar o jogo
+        }, 5000);
+    }, 3000);
+}
    
    // Vitória
    function handleVictory() {
-       console.log('🎉 VITÓRIA!');
-       
-       // NOVO: Finalizar estatísticas
-       const report = stats ? stats.finishGame() : null;
-       
-       // NOVO: Verificar se é novo recorde
-       const newRecords = (stats && report) ? stats.checkHighScore(report) : [];
-       
-       // Tocar música de créditos
-       if (audio && audio.playMusic) {
-           audio.playMusic('creditos');
-       }
-       
-       if (newRecords.length > 0) {
-           // NOVO: Mostrar tela de novo recorde
-           if (ui && ui.showNewRecord) {
-               ui.showNewRecord(report, newRecords);
-           }
-       } else {
-           // Mostrar tela de vitória normal
-           if (ui && ui.showVictory) {
-               ui.showVictory();
-           }
-           // NOVO: Mostrar estatísticas finais após 3 segundos
-           if (ui && ui.showGameStats && report) {
-               setTimeout(() => {
-                   ui.showGameStats(report);
-               }, 3000);
-           }
-       }
-   }
+    console.log('🎉 VITÓRIA!');
+    
+    // Finalizar estatísticas
+    const report = stats ? stats.finishGame() : null;
+    
+    // Verificar se é novo recorde
+    const newRecords = (stats && report) ? stats.checkHighScore(report) : [];
+    
+    // Tocar música de créditos
+    if (audio && audio.playMusic) {
+        audio.playMusic('creditos');
+    }
+    
+    // SEMPRE mostrar estatísticas primeiro
+    if (ui && ui.showGameStats && report) {
+        ui.showGameStats(report);
+    }
+    
+    // Depois de 8 segundos, ir para rankings
+    setTimeout(() => {
+        if (newRecords.length > 0) {
+            // Se tem recorde, mostrar tela de entrada de nome
+            if (MadNight.menu) {
+                MadNight.menu.active = true;
+                MadNight.menu.showNewRecord(report, newRecords);
+                if (window.MadNightMain) {
+                    window.MadNightMain.setAppState('menu');
+                }
+            }
+        } else {
+            // Se não tem recorde, ir direto para rankings
+            if (MadNight.menu) {
+                MadNight.menu.active = true;
+                MadNight.menu.currentScreen = 'rankings';
+                if (window.MadNightMain) {
+                    window.MadNightMain.setAppState('menu');
+                }
+            }
+        }
+    }, 6000); // 6 segundos para ler as estatísticas
+}
    
-   // Reiniciar jogo
-   function restart() {
-       // Reset game state
-       gameState.currentMap = 0;
-       gameState.phase = 'infiltration';
-       gameState.dashUnlocked = false;
-       gameState.bombPlaced = false;
-       gameState.deathCount = 0;
-       gameState.pedalPower = 4;
-       gameState.isPaused = false;
-       gameState.isGameOver = false;
-       gameState.escapeEnemyCount = 0;
-       gameState.chacalDefeated = false;
-       
-       // NOVO: Resetar estatísticas da sessão
-       if (stats && stats.resetCurrent) {
-           stats.resetCurrent();
-       }
+   ✅ CÓDIGO CORRIGIDO para a função restart():
+javascript// Reiniciar jogo
+function restart() {
+    // Reset game state (MAS NÃO RESETAR initialized!)
+    // gameState.initialized mantém true para evitar re-inicialização
+    gameState.currentMap = 0;
+    gameState.phase = 'infiltration';
+    gameState.dashUnlocked = false;
+    gameState.bombPlaced = false;
+    gameState.deathCount = 0;
+    gameState.pedalPower = 4;
+    gameState.isPaused = false;
+    gameState.isGameOver = false;
+    gameState.escapeEnemyCount = 0;
+    gameState.chacalDefeated = false;
+    // NÃO ADICIONAR: gameState.initialized = false; ← IMPORTANTE!
+    
+    // NOVO: Resetar estatísticas da sessão
+    if (stats && stats.resetCurrent) {
+        stats.resetCurrent();
+    }
        
        // Limpar entidades
        if (enemies && enemies.clear) enemies.clear();
