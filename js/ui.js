@@ -35,71 +35,76 @@
         },
         
         // Renderizar UI completa
-        render: function(ctx) {
-            if (!ctx) return;
-            
-            // NÃO renderizar UI se o menu estiver ativo
-            if (MadNight.menu && MadNight.menu.active) {
-                return;
-            }
-            
-            // Salvar contexto
-            ctx.save();
-            
-            // Resetar transformações
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            
-            // Obter referências necessárias
-            const map = MadNight.maps ? MadNight.maps.getCurrentMap() : null;
-            const gameState = MadNight.game ? MadNight.game.state : null;
-            const player = MadNight.player;
-            const config = MadNight.config;
-            
-            if (!map || !gameState) {
-                ctx.restore();
-                return;
-            }
-            
-            // Renderizar componentes da UI
-            this.renderMapTitle(ctx, map, gameState);
-            this.renderGameStatus(ctx, gameState);
-            this.renderLives(ctx, gameState, config);
-            this.renderPedalPower(ctx, gameState);
-            this.renderInfoTexts(ctx, map, gameState, player);
-            
-            // Debug info
-            if (config && config.debug && config.debug.showCollisions) {
-                this.renderDebugInfo(ctx, player);
-            }
-            
-            // Mensagem temporária
-            if (messageTime > 0) {
-                this.renderMessage(ctx, messageText);
-            }
-            
-            // Nome do mapa (ao entrar)
-            if (mapNameTime > 0) {
-                this.renderMapNameOverlay(ctx, mapNameText);
-            }
-            
-            // Mensagem de morte (separada)
-            if (deathMessageTime > 0) {
-                this.renderDeathMessageOverlay(ctx, deathMessageText);
-            }
-            
-            // Instruções iniciais
-            if (gameState && gameState.currentMap === 0 && player && !player.lastMove) {
-                this.renderInstructions(ctx);
-            }
-            
-            // Pausa
-            if (gameState && gameState.isPaused) {
-                this.renderPauseOverlay(ctx);
-            }
-            
-            // Restaurar contexto
-            ctx.restore();
-        },
+render: function(ctx) {
+    if (!ctx) return;
+    
+    // NÃO renderizar UI se o menu estiver ativo
+    if (MadNight.menu && MadNight.menu.active) {
+        return;
+    }
+    
+    // Salvar contexto
+    ctx.save();
+    
+    // Resetar transformações
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    
+    // Obter referências necessárias
+    const map = MadNight.maps ? MadNight.maps.getCurrentMap() : null;
+    const gameState = MadNight.game ? MadNight.game.state : null;
+    const player = MadNight.player;
+    const config = MadNight.config;
+    
+    if (!map || !gameState) {
+        ctx.restore();
+        return;
+    }
+    
+    // Renderizar componentes da UI
+    this.renderMapTitle(ctx, map, gameState);
+    this.renderGameStatus(ctx, gameState);
+    this.renderLives(ctx, gameState, config);
+    this.renderPedalPower(ctx, gameState);
+    this.renderInfoTexts(ctx, map, gameState, player);
+    
+    // Debug info
+    if (config && config.debug && config.debug.showCollisions) {
+        this.renderDebugInfo(ctx, player);
+    }
+    
+    // Mensagem temporária
+    if (messageTime > 0) {
+        this.renderMessage(ctx, messageText);
+    }
+    
+    // Nome do mapa (ao entrar)
+    if (mapNameTime > 0) {
+        this.renderMapNameOverlay(ctx, mapNameText);
+    }
+    
+    // Mensagem de morte (separada)
+    if (deathMessageTime > 0) {
+        this.renderDeathMessageOverlay(ctx, deathMessageText);
+    }
+    
+    // Instruções iniciais
+    if (gameState && gameState.currentMap === 0 && player && !player.lastMove) {
+        this.renderInstructions(ctx);
+    }
+    
+    // Pausa
+    if (gameState && gameState.isPaused) {
+        this.renderPauseOverlay(ctx);
+    }
+    
+    // Restaurar contexto
+    ctx.restore();
+    
+    // ADICIONADO: Renderizar tela de estatísticas se estiver ativa
+    if (this.showingStats && this.renderStatsScreen) {
+        this.renderStatsScreen();
+    }
+},
         
         // Helper para definir fonte pixel
         setPixelFont: function(ctx, size) {
