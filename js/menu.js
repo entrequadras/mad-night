@@ -244,30 +244,26 @@
         console.log('Resetando jogo para nova partida...');
         MadNight.game.restart();
     }
-    
-    // Limpar mensagens da UI que ficaram na tela
-    if (MadNight.ui) {
-        if (MadNight.ui.hideStatsScreen) {
-            MadNight.ui.hideStatsScreen();
-        }
-        // Limpar qualquer mensagem de morte
-        MadNight.ui.showingDeathMessage = false;
+
+    // Limpar TODAS as mensagens da UI
+    if (MadNight.ui && MadNight.ui.clearAllMessages) {
+        MadNight.ui.clearAllMessages();
     }
-    
+
     // Chamar função do main.js para iniciar o jogo
     if (window.MadNightMain && window.MadNightMain.startGame) {
         window.MadNightMain.startGame();
     } else {
         console.error('❌ MadNightMain.startGame não encontrado!');
     }
-    
+
     // Iniciar música do jogo DEPOIS de chamar startGame
     setTimeout(() => {
-        if (MadNight.audio) {
-            MadNight.audio.playAmbient(0.15);
-            MadNight.audio.playMusic('inicio');
-        }
-    }, 100);
+    if (MadNight.audio) {
+        MadNight.audio.playAmbient(0.15);
+        MadNight.audio.playMusic('inicio');
+    }
+}, 100);
 },
         
         showRankings: function() {
