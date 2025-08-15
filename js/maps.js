@@ -280,8 +280,8 @@
         },
         
         // Mapa 3 - Na área da KS
-        {
-            name: 'Na área da KS',
+{
+    name: 'Na área da KS',
     displayName: 'Na área da KS',
     width: 1247,
     height: 2200,
@@ -290,73 +290,68 @@
     exit: {x: 250, y: 10, w: 100, h: 30},
     direction: 'up',
     
-    // Tiles de asfalto como base
-    tiles: (function() {
-        const tiles = [];
-        const tileSize = 120;
-        for (let y = 0; y < 2200; y += tileSize) {
-            for (let x = 0; x < 1247; x += tileSize) {
-                const tileTypes = ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005'];
-                tiles.push({
-                    type: tileTypes[Math.floor(Math.random() * tileTypes.length)],
-                    x: x,
-                    y: y
-                });
-            }
-        }
-        return tiles;
-    })(),
+    tiles: null, // Será gerado como no mapa 2
+    hasBackground: true,
+    backgroundAsset: 'area_da_ks_chao', // PNG com transparência sobre os tiles
     
-    // Camada de overlay
-    overlays: [
-        {type: 'area_da_ks_chao', x: 0, y: 0, opacity: 0.8}
+    buildings: [
+        {
+            type: 'predio0005',
+            x: 5,
+            y: 1646,
+            collisionRects: [
+                {x: 45, y: 1686, w: 460, h: 480}
+            ]
+        },
+        {
+            type: 'predio0002',
+            x: 383,
+            y: 403,
+            collisionRects: [
+                {x: 423, y: 443, w: 440, h: 510}
+            ]
+        },
+        {
+            type: 'predio0004',
+            x: 15,
+            y: 998,
+            collisionRects: [
+                {x: 55, y: 1038, w: 440, h: 510}
+            ]
+        },
+        {
+            type: 'predio0004_vira',
+            x: -80,
+            y: -30,
+            collisionRects: [
+                {x: 0, y: 0, w: 360, h: 480}
+            ]
+        },
+        {
+            type: 'predio0005_vira',
+            x: 1245,
+            y: 857,
+            collisionRects: [
+                {x: 1285, y: 897, w: 460, h: 480}
+            ]
+        },
+        {
+            type: 'predio0002_vira',
+            x: 1636,
+            y: 1470,
+            collisionRects: [
+                {x: 1676, y: 1510, w: 440, h: 510}
+            ]
+        }
     ],
     
-    // Prédios e estruturas
-buildings: [
-    // Prédios normais
-    {type: 'predio0005', x: 5, y: 1646, 
-     collisionRects: [{x: 5, y: 1646, w: 540, h: 561}]},
-    
-    {type: 'predio0002', x: 383, y: 403,
-     collisionRects: [{x: 383, y: 403, w: 520, h: 592}]},
-    
-    {type: 'predio0004', x: 15, y: 998,
-     collisionRects: [{x: 15, y: 998, w: 520, h: 592}]},
-    
-    // Prédios virados (fora da tela parcialmente)
-    {type: 'predio0004_vira', x: -80, y: -30,
-     collisionRects: [{x: 0, y: 0, w: 440, h: 562}]}, // Colisão ajustada para parte visível
-    
-    {type: 'predio0005_vira', x: 1245, y: 857, // Ajustado para caber (1247 - 540)
-     collisionRects: [{x: 1245, y: 857, w: 540, h: 561}]},
-    
-    {type: 'predio0002_vira', x: 1636, y: 1470, // Ajustado para caber (1247 - 520)
-     collisionRects: [{x: 1636, y: 1470, w: 520, h: 592}]}
-],
-    
-    // Árvores para sombras
     trees: [],
-    
-    // Postes de luz
     streetLights: [],
-    
-    // Luzes e sombras
     lights: [],
     shadows: [],
-    
-    // Objetos do cenário
     objects: [],
-    
-    // Inimigos
-    enemies: [
-        // Adicionar inimigos conforme necessário
-    ],
-    
-    // Inimigos durante fuga
-    escapeEnemies: [
-        // Adicionar inimigos de fuga se necessário
-    ]
+    enemies: [],
+    escapeEnemies: []
 },
         
         // Mapa 4 - Entre Prédios
