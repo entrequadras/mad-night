@@ -351,18 +351,31 @@ function backToMenu() {
     });
     
     // Exportar funções principais
-    window.MadNightMain = {
+window.MadNightMain = {
     init: init,
     start: start,
     stop: stop,
     backToMenu: backToMenu,
-    startGame: function() {  // ← ADICIONAR ESTA FUNÇÃO
+    startGame: function() {
         // Inicializar o game apenas quando clicar em JOGAR
         if (MadNight.game && !MadNight.game.state.initialized) {
             MadNight.game.init();
         }
         appState = 'game';
     },
+    
+    // FUNÇÃO NOVA ADICIONADA:
+    setAppState: function(newState) {
+        console.log('Mudando estado de', appState, 'para', newState);
+        appState = newState;
+        
+        // Se mudando para menu, garantir que está configurado
+        if (newState === 'menu' && MadNight.menu) {
+            MadNight.menu.active = true;
+            // Não mudar currentScreen aqui, deixar como está (rankings ou main)
+        }
+    },
+    
     isRunning: () => isRunning,
     getState: () => appState
 };
