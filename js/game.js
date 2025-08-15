@@ -579,8 +579,15 @@ function handleVictory() {
    
 // Reiniciar jogo
 function restart() {
-    // Reset game state (MAS NÃO RESETAR initialized!)
-    // gameState.initialized mantém true para evitar re-inicialização
+    // IMPORTANTE: Re-obter referências dos módulos que podem ter sido perdidas
+    if (!maps) maps = MadNight.maps;
+    if (!player) player = MadNight.player;
+    if (!enemies) enemies = MadNight.enemies;
+    if (!ui) ui = MadNight.ui;
+    if (!audio) audio = MadNight.audio;
+    if (!stats) stats = MadNight.stats;
+    
+    // Reset game state
     gameState.currentMap = 0;
     gameState.phase = 'infiltration';
     gameState.dashUnlocked = false;
@@ -591,23 +598,22 @@ function restart() {
     gameState.isGameOver = false;
     gameState.escapeEnemyCount = 0;
     gameState.chacalDefeated = false;
-    // NÃO ADICIONAR: gameState.initialized = false; ← IMPORTANTE!
     
     // NOVO: Resetar estatísticas da sessão
     if (stats && stats.resetCurrent) {
         stats.resetCurrent();
     }
-       
-       // Limpar entidades
-       if (enemies && enemies.clear) enemies.clear();
-       if (projectiles && projectiles.clear) projectiles.clear();
-       
-       // Parar música
-       if (audio && audio.stopMusic) audio.stopMusic();
-       
-       // Recarregar primeiro mapa
-       loadMap(0);
-   }
+    
+    // Limpar entidades
+    if (enemies && enemies.clear) enemies.clear();
+    if (projectiles && projectiles.clear) projectiles.clear();
+    
+    // Parar música
+    if (audio && audio.stopMusic) audio.stopMusic();
+    
+    // Recarregar primeiro mapa
+    loadMap(0);
+}
    
    // Toggle pause
    function togglePause() {
