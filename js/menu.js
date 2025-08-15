@@ -239,6 +239,21 @@
         MadNight.audio.stopMusic();
     }
     
+    // IMPORTANTE: SEMPRE resetar o jogo ao clicar em JOGAR
+    if (MadNight.game && MadNight.game.restart) {
+        console.log('Resetando jogo para nova partida...');
+        MadNight.game.restart();
+    }
+    
+    // Limpar mensagens da UI que ficaram na tela
+    if (MadNight.ui) {
+        if (MadNight.ui.hideStatsScreen) {
+            MadNight.ui.hideStatsScreen();
+        }
+        // Limpar qualquer mensagem de morte
+        MadNight.ui.showingDeathMessage = false;
+    }
+    
     // Chamar função do main.js para iniciar o jogo
     if (window.MadNightMain && window.MadNightMain.startGame) {
         window.MadNightMain.startGame();
