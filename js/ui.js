@@ -530,10 +530,23 @@ showGameStats: function(report) {
     };
 },
 
-// Método para esconder a tela de stats
-hideStatsScreen: function() {
-    this.showingStats = false;
-    this.renderStatsScreen = null;
+    // Método para esconder a tela de stats
+    hideStatsScreen: function() {
+        this.showingStats = false;
+        this.renderStatsScreen = null;
+},
+
+    // Limpar todas as mensagens da UI
+    clearAllMessages: function() {
+        messageTime = 0;
+        messageText = '';
+        mapNameTime = 0;
+        mapNameText = '';
+        deathMessageTime = 0;
+        deathMessageText = '';
+        this.showingStats = false;
+        this.showingDeathMessage = false;
+        console.log('UI limpa!');
 },
         
         // Mostrar/esconder pausa
