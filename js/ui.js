@@ -264,9 +264,6 @@ render: function(ctx) {
         
         // Renderizar overlay de morte
         renderDeathMessageOverlay: function(ctx, message) {
-            // Fundo escuro
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
             
             // Mensagem
             ctx.fillStyle = '#f00';
