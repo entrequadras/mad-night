@@ -463,35 +463,34 @@
        }
    }
    
-   // Lidar com morte do player
+      // Lidar com morte do player
    function handlePlayerDeath() {
        gameState.deathCount++;
        console.log(`Mortes: ${gameState.deathCount}/${MadNight.config.gameplay.maxDeaths}`);
-       
+    
        // NOVO: Registrar morte nas estatísticas
        if (stats && stats.registerDeath) {
-           stats.registerDeath();
-       }
-       
+        stats.registerDeath();
+    }
+    
        if (gameState.deathCount >= MadNight.config.gameplay.maxDeaths) {
-           handleGameOver();
-       } else {
-           // Mostrar mensagem de morte
-           if (ui && ui.showDeathMessage) {
-               if (gameState.deathCount < MadNight.config.gameplay.maxDeaths) {
-                   ui.showDeathMessage("ah véi, se liga carái");
-               }
-           }
-           
-           // Recarregar mapa atual
-           setTimeout(() => {
-               loadMap(gameState.currentMap, gameState.phase === 'escape');
-           }, 2000);
-       }
-   }
+        handleGameOver();
+    } else {
+        // Mostrar mensagem de morte
+        if (ui && ui.showDeathMessage) {
+            ui.showDeathMessage("ah véi, se liga carái");
+        }
+        
+        // Recarregar mapa atual
+        setTimeout(() => {
+            // SÓ recarregar se o jogo NÃO acabou
+            if (!gameState.isGameOver) {
+                loadMap(gameState.currentMap, gameState.phase === 'escape');
+            }
+        }, 2000);
+    }
+}
    
-   // Game Over
-// Game Over
 // Game Over
 function handleGameOver() {
     gameState.isGameOver = true;
@@ -523,10 +522,7 @@ function handleGameOver() {
                 ui.hideStatsScreen();
             }
             
-            // Parar o jogo e ir para menu
-            gameState.isGameOver = false;
-            gameState.isPaused = false;
-            
+            // Ir para menu de rankings
             if (MadNight.menu) {
                 MadNight.menu.active = true;
                 MadNight.menu.currentScreen = 'rankings';
