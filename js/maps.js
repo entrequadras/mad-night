@@ -290,7 +290,7 @@
     exit: {x: 250, y: 10, w: 100, h: 30},
     direction: 'up',
     
-    tiles: null, // Será gerado como no mapa 2
+    tiles: generateTiles(1247, 2200, 120, ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']),
     hasBackground: true,
     backgroundAsset: 'area_da_ks_chao', // PNG com transparência sobre os tiles
     
