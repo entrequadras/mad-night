@@ -440,7 +440,7 @@ MadNight.maps = {
             ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
         );
         
-        for (let i = 3; i <= 5; i++) {
+        for (let i = 4; i <= 5; i++) {
             this.list[i].tiles = generateTiles(
                 600, 800, 120,
                 ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
