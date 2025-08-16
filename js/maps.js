@@ -331,9 +331,9 @@
         {
             type: 'predio0005',
             x: 680,
-            y: 700,
+            y: 650,
             collisionRects: [
-                {x: 720, y: 736, w: 200, h: 60},
+                {x: 720, y: 706, w: 200, h: 60},
                 {x: 750, y: 806, w: 220, h: 40},
                 {x: 820, y: 836, w: 220, h: 40},
                 {x: 850, y: 886, w: 200, h: 60}
@@ -379,7 +379,7 @@
     walls: [],
     lights: [],
     shadows: [],
-    playerStart: {x: 1220, y: 2420},
+    playerStart: {x: 1870, y: 50},
     playerStartEscape: {x: 1220, y: 50},
     exit: {x: 860, y: 10, w: 200, h: 30},
     direction: 'up'
