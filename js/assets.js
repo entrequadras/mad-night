@@ -74,7 +74,7 @@
             
             // Assets do mapa KS
             entradaKS01: { width: 1920, height: 1610 },
-            area_da_ks_chao: { width: 1247, height: 2200 },
+            area_da_ks_chao: { width: 1920, height: 3000 },
             
             // Prédios do mapa KS
             predio0002: { width: 520, height: 592 },
