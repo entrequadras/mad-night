@@ -457,30 +457,40 @@ MadNight.maps = {
     list: mapsList,
     
     // Inicializar mapas (chamado pelo game.js)
-    init: function() {
-        console.log('Inicializando sistema de mapas...');
-        
-        // Gerar tiles para os mapas que precisam
-        this.list[0].tiles = generateTiles(
-            1920, 1080, 120, 
-            ['grama000', 'grama001', 'grama002', 'grama003', 'grama004']
-        );
-        
-        // Gerar tiles para o mapa 3
-        this.list[2].tiles = generateTiles(
-            1920, 3000, 120,
+init: function() {
+    console.log('Inicializando sistema de mapas...');
+    
+    // Mapa 0 - Maconhão
+    this.list[0].tiles = generateTiles(
+        1920, 1080, 120, 
+        ['grama000', 'grama001', 'grama002', 'grama003', 'grama004']
+    );
+    
+    // Mapa 1 - Eixão (não precisa de tiles, tem tráfego)
+    // this.list[1].tiles = null;
+    
+    // Mapa 2 - Fronteira com KS
+    this.list[1].tiles = generateTiles(
+        1920, 1610, 120,
+        ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
+    );
+    
+    // Mapa 3 - Na área da KS
+    this.list[2].tiles = generateTiles(
+        1920, 3000, 120,
+        ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
+    );
+    
+    // Mapas 4 e 5 - Mapas pequenos
+    for (let i = 3; i <= 4; i++) {
+        this.list[i].tiles = generateTiles(
+            600, 800, 120,
             ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
         );
-        
-        for (let i = 4; i <= 5; i++) {
-            this.list[i].tiles = generateTiles(
-                600, 800, 120,
-                ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
-            );
-        }
-        
-        console.log(`${this.list.length} mapas carregados`);
-    },
+    }
+    
+    console.log(`${this.list.length} mapas carregados`);
+},
     
     // Obter mapa por índice
     getMap: function(index) {
