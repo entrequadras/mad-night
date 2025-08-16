@@ -381,13 +381,12 @@
     {type: 'kitmalhacao', x: 1336, y: 492, rotation: 0},
         
         // Carros estacionados
-    {type: 'carrolateral_09', x: 401, y: 1033, rotation: 0},
-    {type: 'carrolateral_11', x: 1770, y: 355, rotation: 0},  // Ajustei X de 2430 para 1770 (mapa é 1920 de largura)
+    {type: 'carrolateral_09', x: 400, y: 1033, rotation: 0},
+    {type: 'carrolateral_11', x: 340, y:2480, rotation: 0},
     {type: 'carrolateral_07', x: 307, y: 1847, rotation: 0},
     {type: 'carro002frente', x: 58, y: 2067, rotation: 0},
     {type: 'carrolateral_03', x: 380, y: 1372, rotation: 0},
     {type: 'carro003frente', x: 881, y: 670, rotation: 0},
-    {type: 'carro001fundos', x: 1000, y: 650, rotation: 0},
     {type: 'carro002fundos', x: 664, y: 572, rotation: 0},
     {type: 'carrolateral_07', x: 567, y: 327, rotation: 0}
 ],
