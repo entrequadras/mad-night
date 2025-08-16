@@ -379,7 +379,7 @@
     walls: [],
     lights: [],
     shadows: [],
-    playerStart: {x: 1870, y: 2930},
+    playerStart: {x: 1830, y: 2800},
     playerStartEscape: {x: 1220, y: 50},
     exit: {x: 860, y: 10, w: 200, h: 30},
     direction: 'up'
