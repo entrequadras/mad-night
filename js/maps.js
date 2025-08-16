@@ -306,6 +306,15 @@
         }
         return tiles;
     })(),
+
+    // texturas e calçadas em png transparente
+    floorOverlay: {
+        type: 'area_da_ks_chao',
+        x: 0,
+        y: 0,
+        width: 1920,
+        height: 3000
+    },
     
     // Prédios com colisões diagonais
     buildings: [
