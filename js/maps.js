@@ -284,7 +284,7 @@
     name: 'Na área da KS',
     displayName: 'Na área da KS',
     width: 1920,
-    height: 2500,
+    height: 3000,
     playerStart: {x: 1220, y: 2420},
     playerStartEscape: {x: 1220, y: 50},
     exit: {x: 860, y: 10, w: 200, h: 30},
@@ -294,7 +294,7 @@
     tiles: (function() {
         const tiles = [];
         const tileSize = 120;
-        for (let y = 0; y < 2500; y += tileSize) {
+        for (let y = 0; y < 3000; y += tileSize) {
             for (let x = 0; x < 1920; x += tileSize) {
                 const tileTypes = ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005'];
                 tiles.push({
@@ -333,24 +333,24 @@
         },
         {
             type: 'predio0005_vira',
-            x: 1590,
+            x: 1170,
             y: 1166,
             collisionRects: [
-                {x: 1630, y: 1206, w: 200, h: 60},
-                {x: 1680, y: 1266, w: 220, h: 40},
-                {x: 1730, y: 1306, w: 220, h: 40},
-                {x: 1780, y: 1346, w: 200, h: 60}
+                {x: 1230, y: 1206, w: 200, h: 60},
+                {x: 1280, y: 1266, w: 220, h: 40},
+                {x: 1330, y: 1306, w: 220, h: 40},
+                {x: 1380, y: 1346, w: 200, h: 60}
             ]
         },
         {
             type: 'predio0005',
             x: 340,
-            y: 1946,
+            y: 732,
             collisionRects: [
-                {x: 380, y: 1986, w: 200, h: 60},
-                {x: 430, y: 2046, w: 220, h: 40},
-                {x: 480, y: 2086, w: 220, h: 40},
-                {x: 530, y: 2126, w: 200, h: 60}
+                {x: 380, y: 786, w: 200, h: 60},
+                {x: 430, y: 846, w: 220, h: 40},
+                {x: 480, y: 886, w: 220, h: 40},
+                {x: 530, y: 926, w: 200, h: 60}
             ]
         },
         {
