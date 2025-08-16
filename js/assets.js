@@ -241,6 +241,7 @@
             // Carregar carros laterais
             for (let i = 1; i <= 8; i++) {
                 this.loadImage(`carrolateral_0${i}`, `assets/scenary/carrolateral_0${i}.png`);
+                this.loadImage(`carrolateral_1${i}`, `assets/scenary/carrolateral_0${i}.png`);
             }
             
             // Carregar assets do mapa KS
