@@ -239,10 +239,10 @@
             this.loadImage('carro004fundos', 'assets/scenary/carro004-fundos.png');
             
             // Carregar carros laterais
-            for (let i = 1; i <= 8; i++) {
-                this.loadImage(`carrolateral_0${i}`, `assets/scenary/carrolateral_0${i}.png`);
-                this.loadImage(`carrolateral_1${i}`, `assets/scenary/carrolateral_0${i}.png`);
-            }
+            for (let i = 1; i <= 11; i++) {  // ← ATÉ 11!
+    const num = i.toString().padStart(2, '0');  // Formata 01, 02... 09, 10, 11
+    this.loadImage(`carrolateral_${num}`, `assets/scenary/carrolateral_${num}.png`);
+}
             
             // Carregar assets do mapa KS
             this.loadImage('entradaKS01', 'assets/floors/entrada_ks_01.png');
