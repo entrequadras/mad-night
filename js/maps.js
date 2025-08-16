@@ -378,8 +378,8 @@
     objects: [
     // Objetos de decoração
     {type: 'parquinho', x: 5, y: 1500, rotation: 0},
-    {type: 'kit_malhacao', x: 1336, y: 492, rotation: 0},
-        ],
+    {type: 'kitmalhacao', x: 1336, y: 492, rotation: 0},
+        
         // Carros estacionados
     {type: 'carrolateral_09', x: 401, y: 1033, rotation: 0},
     {type: 'carrolateral_11', x: 1770, y: 355, rotation: 0},  // Ajustei X de 2430 para 1770 (mapa é 1920 de largura)
