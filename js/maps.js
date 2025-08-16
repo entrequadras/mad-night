@@ -283,14 +283,14 @@
 {
     name: 'Na área da KS',
     displayName: 'Na área da KS',
-    width: 1247,
-    height: 2200,
+    width: 1920,
+    height: 2220,
     playerStart: {x: 300, y: 650},
     playerStartEscape: {x: 300, y: 50},
     exit: {x: 250, y: 10, w: 100, h: 30},
     direction: 'up',
     
-    tiles: generateTiles(1247, 2200, 120, ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']),
+    tiles: generateTiles(1920, 2200, 120, ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']),
     hasBackground: true,
     backgroundAsset: 'area_da_ks_chao', // PNG com transparência sobre os tiles
     
