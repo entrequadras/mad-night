@@ -295,55 +295,63 @@
     backgroundAsset: 'area_da_ks_chao', // PNG com transparência sobre os tiles
     
     buildings: [
-        {
-            type: 'predio0005',
-            x: 5,
-            y: 1646,
-            collisionRects: [
-                {x: 45, y: 1686, w: 460, h: 480}
-            ]
-        },
-        {
-            type: 'predio0002',
-            x: 383,
-            y: 403,
-            collisionRects: [
-                {x: 423, y: 443, w: 440, h: 510}
-            ]
-        },
-        {
-            type: 'predio0004',
-            x: 15,
-            y: 998,
-            collisionRects: [
-                {x: 55, y: 1038, w: 440, h: 510}
-            ]
-        },
-        {
-            type: 'predio0004_vira',
-            x: -80,
-            y: -30,
-            collisionRects: [
-                {x: 0, y: 0, w: 360, h: 480}
-            ]
-        },
-        {
-            type: 'predio0005_vira',
-            x: 1245,
-            y: 857,
-            collisionRects: [
-                {x: 1285, y: 897, w: 460, h: 480}
-            ]
-        },
-        {
-            type: 'predio0002_vira',
-            x: 1636,
-            y: 1470,
-            collisionRects: [
-                {x: 1676, y: 1510, w: 440, h: 510}
-            ]
-        }
-    ],
+    {
+        type: 'predio0005',
+        x: 340,
+        y: 1646,
+        collisionRects: [
+            {x: 380, y: 1686, w: 460, h: 480}
+        ]
+    },
+    {
+        type: 'predio0005_vira',
+        x: 1590,
+        y: 857,
+        collisionRects: [
+            {x: 1630, y: 897, w: 460, h: 480}
+        ]
+    },
+    {
+        type: 'predio0005_vira',
+        x: 1493,
+        y: 1682,
+        collisionRects: [
+            {x: 1533, y: 1722, w: 460, h: 480}
+        ]
+    },
+    {
+        type: 'predio0002_vira',
+        x: 1636,
+        y: 1470,
+        collisionRects: [
+            {x: 1676, y: 1510, w: 440, h: 510}
+        ]
+    },
+    {
+        type: 'predio0002',
+        x: 719,
+        y: 403,
+        collisionRects: [
+            {x: 759, y: 443, w: 440, h: 510}
+        ]
+    },
+    {
+        type: 'predio0004',
+        x: 352,
+        y: 998,
+        collisionRects: [
+            {x: 392, y: 1038, w: 440, h: 510}
+        ]
+    },
+    {
+        type: 'predio0004_vira',
+        x: 166,
+        y: -30,
+        collisionRects: [
+            {x: 206, y: 10, w: 440, h: 510}
+        ]
+    }
+],
     
     trees: [],
     streetLights: [],
