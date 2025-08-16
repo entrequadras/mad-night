@@ -223,7 +223,7 @@
             this.loadImage('cadeiradepraia01', 'assets/objects/cadeiradepraia01.png');
             this.loadImage('parquinho', 'assets/objects/parquinho.png');
             this.loadImage('orelhao001', 'assets/objects/orelhao001.png');
-            this.loadImage('parquinho', 'assets/objects/kitmalhacao.png');
+            this.loadImage('kitmalhacao', 'assets/objects/kitmalhacao.png');
             
             // Carregar assets do Eixão
             this.loadImage('eixaoCamada1', 'assets/floors/eixao_da_morte_camada1.png');
