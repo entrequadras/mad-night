@@ -284,81 +284,118 @@
     name: 'Na área da KS',
     displayName: 'Na área da KS',
     width: 1920,
-    height: 2220,
-    playerStart: {x: 300, y: 650},
-    playerStartEscape: {x: 300, y: 50},
-    exit: {x: 250, y: 10, w: 100, h: 30},
+    height: 2500,
+    playerStart: {x: 1220, y: 2420},
+    playerStartEscape: {x: 1220, y: 50},
+    exit: {x: 860, y: 10, w: 200, h: 30},
     direction: 'up',
     
-    tiles: generateTiles(1920, 2200, 120, ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']),
-    hasBackground: true,
-    backgroundAsset: 'area_da_ks_chao', // PNG com transparência sobre os tiles
+    // Tiles de asfalto como base
+    tiles: (function() {
+        const tiles = [];
+        const tileSize = 120;
+        for (let y = 0; y < 2500; y += tileSize) {
+            for (let x = 0; x < 1920; x += tileSize) {
+                const tileTypes = ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005'];
+                tiles.push({
+                    type: tileTypes[Math.floor(Math.random() * tileTypes.length)],
+                    x: x,
+                    y: y
+                });
+            }
+        }
+        return tiles;
+    })(),
     
+    // Prédios com colisões diagonais
     buildings: [
-    {
-        type: 'predio0005',
-        x: 340,
-        y: 1646,
-        collisionRects: [
-            {x: 380, y: 1686, w: 460, h: 480}
-        ]
-    },
-    {
-        type: 'predio0005_vira',
-        x: 1590,
-        y: 857,
-        collisionRects: [
-            {x: 1630, y: 897, w: 460, h: 480}
-        ]
-    },
-    {
-        type: 'predio0005_vira',
-        x: 1493,
-        y: 1682,
-        collisionRects: [
-            {x: 1533, y: 1722, w: 460, h: 480}
-        ]
-    },
-    {
-        type: 'predio0002_vira',
-        x: 1636,
-        y: 1470,
-        collisionRects: [
-            {x: 1676, y: 1510, w: 440, h: 510}
-        ]
-    },
-    {
-        type: 'predio0002',
-        x: 719,
-        y: 403,
-        collisionRects: [
-            {x: 759, y: 443, w: 440, h: 510}
-        ]
-    },
-    {
-        type: 'predio0004',
-        x: 352,
-        y: 998,
-        collisionRects: [
-            {x: 392, y: 1038, w: 440, h: 510}
-        ]
-    },
-    {
-        type: 'predio0004_vira',
-        x: 166,
-        y: -30,
-        collisionRects: [
-            {x: 206, y: 10, w: 440, h: 510}
-        ]
-    }
-],
+        {
+            type: 'predio0005',
+            x: 340,
+            y: 1946,
+            collisionRects: [
+                {x: 380, y: 1986, w: 200, h: 60},
+                {x: 430, y: 2046, w: 220, h: 40},
+                {x: 480, y: 2086, w: 220, h: 40},
+                {x: 530, y: 2126, w: 200, h: 60}
+            ]
+        },
+        {
+            type: 'predio0005_vira',
+            x: 1493,
+            y: 1978,
+            collisionRects: [
+                {x: 1533, y: 2018, w: 200, h: 60},
+                {x: 1583, y: 2078, w: 220, h: 40},
+                {x: 1633, y: 2118, w: 220, h: 40},
+                {x: 1683, y: 2158, w: 200, h: 60}
+            ]
+        },
+        {
+            type: 'predio0005_vira',
+            x: 1590,
+            y: 1166,
+            collisionRects: [
+                {x: 1630, y: 1206, w: 200, h: 60},
+                {x: 1680, y: 1266, w: 220, h: 40},
+                {x: 1730, y: 1306, w: 220, h: 40},
+                {x: 1780, y: 1346, w: 200, h: 60}
+            ]
+        },
+        {
+            type: 'predio0002_vira',
+            x: 1660,
+            y: 1750,
+            collisionRects: [
+                {x: 1700, y: 1790, w: 180, h: 50},
+                {x: 1750, y: 1840, w: 200, h: 40},
+                {x: 1800, y: 1880, w: 200, h: 40},
+                {x: 1850, y: 1920, w: 180, h: 50}
+            ]
+        },
+        {
+            type: 'predio0002',
+            x: 719,
+            y: 303,
+            collisionRects: [
+                {x: 759, y: 343, w: 180, h: 50},
+                {x: 809, y: 393, w: 200, h: 40},
+                {x: 859, y: 433, w: 200, h: 40},
+                {x: 909, y: 473, w: 180, h: 50}
+            ]
+        },
+        {
+            type: 'predio0004',
+            x: 352,
+            y: 1298,
+            collisionRects: [
+                {x: 392, y: 1338, w: 190, h: 55},
+                {x: 442, y: 1393, w: 210, h: 40},
+                {x: 492, y: 1433, w: 210, h: 40},
+                {x: 542, y: 1473, w: 190, h: 55}
+            ]
+        },
+        {
+            type: 'predio0004_vira',
+            x: 686,
+            y: 230,
+            collisionRects: [
+                {x: 726, y: 270, w: 190, h: 55},
+                {x: 776, y: 325, w: 210, h: 40},
+                {x: 826, y: 365, w: 210, h: 40},
+                {x: 876, y: 405, w: 190, h: 55}
+            ]
+        }
+    ],
     
     trees: [],
     streetLights: [],
     lights: [],
     shadows: [],
     objects: [],
-    enemies: [],
+    enemies: [
+        {type: 'faquinha', x: 675, y: 1029}
+    ],
     escapeEnemies: []
 },
         
