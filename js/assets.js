@@ -27,6 +27,7 @@
             banco01: { width: 61, height: 50 },
             banco03: { width: 120, height: 100 },
             banco04: { width: 66, height: 55 },
+            kitmalhacao: { width: 178, height: 219 },
             
             // Objetos pequenos
             caixadeluz: { width: 45, height: 45 },
@@ -71,6 +72,9 @@
             carrolateral_06: { width: 166, height: 89 },
             carrolateral_07: { width: 166, height: 89 },
             carrolateral_08: { width: 177, height: 127 },
+            carrolateral_09: { width: 160, height: 129 },
+            carrolateral_10: { width: 160, height: 129 },
+            carrolateral_11: { width: 150, height: 106 },
             
             // Assets do mapa KS
             entradaKS01: { width: 1920, height: 1610 },
