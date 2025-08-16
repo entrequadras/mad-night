@@ -281,52 +281,29 @@
         
         // Mapa 3 - Na área da KS
 {
-    name: 'Na área da KS',
-    displayName: 'Na área da KS',
+    name: "Na área da KS",
+    displayName: "Na área da KS",
+    subtitle: "Estacionamento estreito",
     width: 1920,
     height: 3000,
-    playerStart: {x: 1220, y: 2420},
-    playerStartEscape: {x: 1220, y: 50},
-    exit: {x: 860, y: 10, w: 200, h: 30},
-    direction: 'up',
-    
-    // Tiles de asfalto como base
-    tiles: (function() {
-        const tiles = [];
-        const tileSize = 120;
-        for (let y = 0; y < 3000; y += tileSize) {
-            for (let x = 0; x < 1920; x += tileSize) {
-                const tileTypes = ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005'];
-                tiles.push({
-                    type: tileTypes[Math.floor(Math.random() * tileTypes.length)],
-                    x: x,
-                    y: y
-                });
-            }
-        }
-        return tiles;
-    })(),
-
-    // texturas e calçadas em png transparente
-    floorOverlay: {
-        type: 'area_da_ks_chao',
-        x: 0,
-        y: 0,
-        width: 1920,
-        height: 3000
-    },
-    
-    // Prédios com colisões diagonais
+    enemies: [
+         {x: 267, y: 1524, type: 'faquinha'},
+        {x: 675, y: 1029, type: 'faquinha'}
+    ],
+    escapeEnemies: [],
+    tiles: null, // Será gerado
+    hasBackground: true,
+    backgroundAsset: 'area_da_ks_chao', // PNG com transparência sobre os tiles
     buildings: [
         {
-             type: 'predio0002_vira',
-            x: 1150, 
+            type: 'predio0002_vira',
+            x: 1150,
             y: 1750,
             collisionRects: [
-            {x: 1190, y: 1790, w: 180, h: 50},
-            {x: 1240, y: 1840, w: 200, h: 40},
-            {x: 1290, y: 1880, w: 200, h: 40},
-            {x: 1340, y: 1920, w: 180, h: 50}
+                {x: 1190, y: 1790, w: 180, h: 50},
+                {x: 1240, y: 1840, w: 200, h: 40},
+                {x: 1290, y: 1880, w: 200, h: 40},
+                {x: 1340, y: 1920, w: 180, h: 50}
             ]
         },
         {
@@ -389,23 +366,23 @@
             x: 166,
             y: 230,
             collisionRects: [
-            {x: 206, y: 270, w: 190, h: 55},
-            {x: 256, y: 325, w: 210, h: 40},
-            {x: 306, y: 365, w: 210, h: 40},
-            {x: 356, y: 405, w: 190, h: 55}
+                {x: 206, y: 270, w: 190, h: 55},
+                {x: 256, y: 325, w: 210, h: 40},
+                {x: 306, y: 365, w: 210, h: 40},
+                {x: 356, y: 405, w: 190, h: 55}
             ]
         }
     ],
-    
     trees: [],
     streetLights: [],
+    objects: [],
+    walls: [],
     lights: [],
     shadows: [],
-    objects: [],
-    enemies: [
-        {type: 'faquinha', x: 675, y: 1029}
-    ],
-    escapeEnemies: []
+    playerStart: {x: 1220, y: 2420},
+    playerStartEscape: {x: 1220, y: 50},
+    exit: {x: 860, y: 10, w: 200, h: 30},
+    direction: 'up'
 },
         
         // Mapa 4 - Entre Prédios
