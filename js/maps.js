@@ -330,13 +330,13 @@
         },
         {
             type: 'predio0005',
-            x: 680,
+            x: 650,
             y: 650,
             collisionRects: [
-                {x: 720, y: 706, w: 200, h: 60},
-                {x: 750, y: 806, w: 220, h: 40},
-                {x: 820, y: 836, w: 220, h: 40},
-                {x: 850, y: 886, w: 200, h: 60}
+                {x: 600, y: 706, w: 200, h: 60},
+                {x: 600, y: 806, w: 220, h: 40},
+                {x: 560, y: 836, w: 220, h: 40},
+                {x: 550, y: 886, w: 200, h: 60}
             ]
         },
         {
@@ -379,7 +379,7 @@
     walls: [],
     lights: [],
     shadows: [],
-    playerStart: {x: 1870, y: 50},
+    playerStart: {x: 1870, y: 2930},
     playerStartEscape: {x: 1220, y: 50},
     exit: {x: 860, y: 10, w: 200, h: 30},
     direction: 'up'
@@ -470,19 +470,19 @@ init: function() {
     // this.list[1].tiles = null;
     
     // Mapa 2 - Fronteira com KS
-    this.list[1].tiles = generateTiles(
+    this.list[2].tiles = generateTiles(
         1920, 1610, 120,
         ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
     );
     
-    // Mapa 3 - Na área da KS
-    this.list[2].tiles = generateTiles(
-        1920, 3000, 120,
+    // Mapa 3 - Na área da KS (ÍNDICE 3, NÃO 2!)
+    this.list[3].tiles = generateTiles(
+        1920, 3000, 120,  // ← TAMANHO CORRETO: 1920x3000
         ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
     );
     
     // Mapas 4 e 5 - Mapas pequenos
-    for (let i = 3; i <= 4; i++) {
+    for (let i = 4; i <= 5; i++) {
         this.list[i].tiles = generateTiles(
             600, 800, 120,
             ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
