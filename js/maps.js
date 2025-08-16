@@ -466,8 +466,9 @@ MadNight.maps = {
             ['grama000', 'grama001', 'grama002', 'grama003', 'grama004']
         );
         
+        // Gerar tiles para o mapa 3
         this.list[2].tiles = generateTiles(
-            1920, 1610, 120,
+            1920, 3000, 120,
             ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
         );
         
