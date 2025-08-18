@@ -199,8 +199,8 @@
             this.loadImage('arvore003', 'assets/scenary/arvore003.png');
             this.loadImage('arvore004', 'assets/scenary/arvore004.png');
             this.loadImage('arvore006', 'assets/scenary/arvore006.png');
-            this.loadImage('arvore007', 'assets/scenary/arvore006.png');
-            this.loadImage('arvore008', 'assets/scenary/arvore006.png');
+            this.loadImage('arvore007', 'assets/scenary/arvore007.png');
+            this.loadImage('arvore008', 'assets/scenary/arvore008.png');
             this.loadImage('arvorebloco001', 'assets/scenary/arvorebloco001.png');
             
             // Carregar postes
