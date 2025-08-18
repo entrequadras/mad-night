@@ -241,7 +241,7 @@
             // Carregar carros laterais
             for (let i = 1; i <= 11; i++) {  // ← ATÉ 11!
     const num = i.toString().padStart(2, '0');  // Formata 01, 02... 09, 10, 11
-    this.loadImage(`carrolateral_${num}`, `assets/scenary/carrolateral_${num}.png`);
+    this.loadImage(`carrolateral_${num}`, `assets/objects/carrolateral_${num}.png`);
 }
             
             // Carregar assets do mapa KS
