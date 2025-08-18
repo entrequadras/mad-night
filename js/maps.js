@@ -400,11 +400,11 @@
         {type: 'arvore003', x: 380, y: 910},
         {type: 'arvore002', x: 250, y: 800},
         {type: 'arvore004', x: 360, y: 789},
-        {type: 'arvore004', x: 1400, y: 2340},
+        {type: 'arvore004', x: 1510, y: 2342},
         {type: 'arvore001', x: 460, y: 778},
         {type: 'arvore003', x: 500, y: 759},
-        {type: 'arvore003', x: 1750, y: 1400},
-        {type: 'arvore003', x: 1790, y: 2800},
+        {type: 'arvore003', x: 1740, y: 1400},
+        {type: 'arvore003', x: 1740, y: 2700},
     
         // Três árvores no topo
         {type: 'arvore004', x: 100, y: -10},
@@ -412,12 +412,13 @@
         {type: 'arvore002', x: 60, y: -35}
         ],
     streetLights: [
-            {type: 'poste000', x: 279, y: 799, rotation: 0, lightRadius: 100, id: 'ks_post1'},
-            {type: 'poste000', x: 519, y: 945, rotation: 0, lightRadius: 100, id: 'ks_post2'},
-            {type: 'poste001', x: 1283, y: 765, rotation: 0, lightRadius: 100, id: 'ks_post3'},
-            {type: 'poste001', x: 1341, y: 1332, rotation: 0, lightRadius: 100, id: 'ks_post4'},
-            {type: 'poste001', x: 635, y: 1600, rotation: 0, lightRadius: 100, id: 'ks_post5'},
-            {type: 'poste001', x: 340, y: 2548, rotation: 0, lightRadius: 100, id: 'ks_post6'}
+            {type: 'poste000', x: 266, y: 760, rotation: 0, lightRadius: 100, id: 'ks_post1'},
+            {type: 'poste000', x: 520, y: 949, rotation: 0, lightRadius: 100, id: 'ks_post2'},
+            {type: 'poste001', x: 1300, y: 765, rotation: 0, lightRadius: 100, id: 'ks_post3'},
+            {type: 'poste001', x: 1141, y: 1332, rotation: 0, lightRadius: 100, id: 'ks_post4'},
+            {type: 'poste001', x: 635, y: 1800, rotation: 0, lightRadius: 100, id: 'ks_post5'},
+            {type: 'poste001', x: 340, y: 2548, rotation: 0, lightRadius: 100, id: 'ks_post6'},
+            {type: 'poste000', x: 1800, y: 150, rotation: 0, lightRadius: 100, id: 'ks_post7'},
             ],
     objects: [
     // Objetos de decoração
@@ -437,11 +438,11 @@
     walls: [],
     powerups: [
     {type: 'm2000power', x: 50, y: 1420, collected: false},
-    {type: 'm2000power', x: 1900, y: 1620, collected: false}
+    {type: 'm2000power', x: 1900, y: 2900, collected: false}
 ],
     lights: [],
     shadows: [],
-    playerStart: {x: 1830, y: 2800},
+    playerStart: {x: 1730, y: 2800},
     playerStartEscape: {x: 1220, y: 50},
     exit: {x: 860, y: 10, w: 200, h: 30},
     direction: 'up'
