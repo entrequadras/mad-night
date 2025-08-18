@@ -16,6 +16,8 @@
             arvore003: { width: 162, height: 200 },
             arvore004: { width: 150, height: 190 },
             arvore006: { width: 169, height: 194 },
+            arvore007: { width: 169, height: 194 },
+            arvore008: { width: 169, height: 194 },
             arvorebloco001: { width: 354, height: 186 },
             
             // Postes
@@ -197,6 +199,8 @@
             this.loadImage('arvore003', 'assets/scenary/arvore003.png');
             this.loadImage('arvore004', 'assets/scenary/arvore004.png');
             this.loadImage('arvore006', 'assets/scenary/arvore006.png');
+            this.loadImage('arvore007', 'assets/scenary/arvore006.png');
+            this.loadImage('arvore008', 'assets/scenary/arvore006.png');
             this.loadImage('arvorebloco001', 'assets/scenary/arvorebloco001.png');
             
             // Carregar postes
