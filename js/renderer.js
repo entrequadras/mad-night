@@ -158,8 +158,6 @@
                 }
             }
             
-    },
-            
             // Objetos e estruturas
             this.renderObjects(map, visibleArea);
             
