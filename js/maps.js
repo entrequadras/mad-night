@@ -402,8 +402,8 @@
         {type: 'arvore004', x: 360, y: 789},
         {type: 'arvore001', x: 460, y: 778},
         {type: 'arvore003', x: 500, y: 759},
-        {type: 'arvore003', x: 1900, y: 1400},
-        {type: 'arvore003', x: 1900, y: 2809},
+        {type: 'arvore003', x: 1750, y: 1400},
+        {type: 'arvore003', x: 1790, y: 2800},
     
         // Três árvores no topo
         {type: 'arvore004', x: 100, y: -10},
@@ -411,11 +411,11 @@
         {type: 'arvore002', x: 60, y: -35}
         ],
     streetLights: [
-            {type: 'poste000', x: 379, y: 799, rotation: 0, lightRadius: 100, id: 'ks_post1'},
-            {type: 'poste000', x: 719, y: 945, rotation: 0, lightRadius: 100, id: 'ks_post2'},
-            {type: 'poste001', x: 1083, y: 765, rotation: 0, lightRadius: 100, id: 'ks_post3'},
-            {type: 'poste001', x: 1341, y: 1232, rotation: 0, lightRadius: 100, id: 'ks_post4'},
-            {type: 'poste001', x: 435, y: 1838, rotation: 0, lightRadius: 100, id: 'ks_post5'},
+            {type: 'poste000', x: 279, y: 799, rotation: 0, lightRadius: 100, id: 'ks_post1'},
+            {type: 'poste000', x: 519, y: 945, rotation: 0, lightRadius: 100, id: 'ks_post2'},
+            {type: 'poste001', x: 1283, y: 765, rotation: 0, lightRadius: 100, id: 'ks_post3'},
+            {type: 'poste001', x: 1341, y: 1332, rotation: 0, lightRadius: 100, id: 'ks_post4'},
+            {type: 'poste001', x: 635, y: 1600, rotation: 0, lightRadius: 100, id: 'ks_post5'},
             {type: 'poste001', x: 340, y: 2548, rotation: 0, lightRadius: 100, id: 'ks_post6'}
             ],
     objects: [
