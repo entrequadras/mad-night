@@ -378,7 +378,7 @@
     objects: [
     // Objetos de decoração
     {type: 'parquinho', x: 5, y: 1500, rotation: 0},
-    {type: 'kitmalhacao', x: 1500, y: 800, rotation: 0},
+    {type: 'kitmalhacao', x: 1505, y: 700, rotation: 0},
         
         // Carros estacionados
     {type: 'carrolateral_09', x: 400, y: 1033, rotation: 0},
