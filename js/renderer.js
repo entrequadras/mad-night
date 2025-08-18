@@ -161,15 +161,16 @@
             
             // Renderizar power-ups
             if (map.powerups) {
-            map.powerups.forEach(powerup => {
-            if (!powerup.collected) {
-            const img = assets.get('objects', powerup.type);
-            if (img && img.complete) {
-                ctx.drawImage(img, powerup.x, powerup.y, 40, 35);
-                }
+                const assets = MadNight.assets;  // ← ADICIONAR ESTA LINHA!
+                map.powerups.forEach(powerup => {
+                    if (!powerup.collected) {
+                    const img = assets.get('objects', powerup.type);
+                    if (img && img.complete) {
+                        ctx.drawImage(img, powerup.x, powerup.y, 40, 35);
+                    }
             }
-    });
-}
+        });
+    }
             
             // Objetos e estruturas
             this.renderObjects(map, visibleArea);
