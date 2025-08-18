@@ -386,7 +386,8 @@
     
         // Linha de árvores travando estacionamento
      
-        {type: 'arvorebloco001', x: -10, y: 489},
+        {type: 'arvorebloco001', x: -15, y: 489},
+          {type: 'arvorebloco001', x: 1, y: 889}
         {type: 'arvore002', x: 10, y: 649},
         {type: 'arvore004', x: 160, y: 819},
         {type: 'arvore001', x: 280, y: 890},
@@ -397,9 +398,9 @@
         {type: 'arvore003', x: 500, y: 759},
     
         // Três árvores no topo
-        {type: 'arvore004', x: 800, y: -10},
-        {type: 'arvore003', x: 880, y: -15},
-        {type: 'arvore002', x: 1100, y: -45}
+        {type: 'arvore004', x: 100, y: -10},
+        {type: 'arvore003', x: 180, y: -15},
+        {type: 'arvore002', x: 60, y: -35}
         ],
     streetLights: [],
     objects: [
