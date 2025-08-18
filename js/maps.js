@@ -383,7 +383,9 @@
         {type: 'arvore008', x: 1480, y: 420},
         {type: 'arvore007', x: 1675, y: 17},
     
-        // Linha de árvores na parte inferior (530x1500 até 1130x1500)
+        // Linha de árvores travando estacionamento
+        {type: 'arvore002', x: 10, y: 1189},
+        {type: 'arvore004', x: 160, y: 1219},
         {type: 'arvore001', x: 280, y: 1290},
         {type: 'arvore003', x: 380, y: 1310},
         {type: 'arvore002', x: 250, y: 1400},
