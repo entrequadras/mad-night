@@ -387,14 +387,14 @@
         // Linha de árvores travando estacionamento
      
         {type: 'arvorebloco001', x: -10, y: 489},
-        {type: 'arvore002', x: 10, y: 1189},
-        {type: 'arvore004', x: 160, y: 1219},
-        {type: 'arvore001', x: 280, y: 1290},
-        {type: 'arvore003', x: 380, y: 1310},
-        {type: 'arvore002', x: 250, y: 1400},
-        {type: 'arvore004', x: 360, y: 1189},
-        {type: 'arvore001', x: 460, y: 1278},
-        {type: 'arvore003', x: 500, y: 1359},
+        {type: 'arvore002', x: 10, y: 649},
+        {type: 'arvore004', x: 160, y: 819},
+        {type: 'arvore001', x: 280, y: 890},
+        {type: 'arvore003', x: 380, y: 910},
+        {type: 'arvore002', x: 250, y: 800},
+        {type: 'arvore004', x: 360, y: 789},
+        {type: 'arvore001', x: 460, y: 778},
+        {type: 'arvore003', x: 500, y: 759},
     
         // Três árvores no topo
         {type: 'arvore004', x: 800, y: -10},
