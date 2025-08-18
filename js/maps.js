@@ -434,6 +434,10 @@
     {type: 'carrolateral_07', x: 567, y: 327, rotation: 0}
 ],
     walls: [],
+    powerups: [
+    {type: 'm2000power', x: 50, y: 1420, collected: false}
+    {type: 'm2000power', x: 1900, y: 1620, collected: false}
+],
     lights: [],
     shadows: [],
     playerStart: {x: 1830, y: 2800},
