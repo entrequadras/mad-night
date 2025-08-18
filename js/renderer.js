@@ -125,7 +125,6 @@
                 ctx.font = '20px Arial';
                 ctx.fillText(error.message, this.canvas.width/2, this.canvas.height/2 + 40);
             }
-        },
         
         // Renderizar camadas do mapa
         renderMapLayers: function(map, visibleArea) {
@@ -159,6 +158,16 @@
                 }
             }
             
+    },
+            
+            // Objetos e estruturas
+            this.renderObjects(map, visibleArea);
+            
+            // IMPORTANTE: Prédios - camada BOTTOM (atrás do player)
+            this.renderBuildings(map, visibleArea, 'bottom');
+            
+            this.renderWalls(map, visibleArea);
+
             // Renderizar power-ups
             if (map.powerups) {
                 const assets = MadNight.assets;  // ← ADICIONAR ESTA LINHA!
@@ -170,15 +179,6 @@
                     }
             }
         });
-    }
-            
-            // Objetos e estruturas
-            this.renderObjects(map, visibleArea);
-            
-            // IMPORTANTE: Prédios - camada BOTTOM (atrás do player)
-            this.renderBuildings(map, visibleArea, 'bottom');
-            
-            this.renderWalls(map, visibleArea);
             
             // NÃO renderizar elementos superiores aqui - eles vão DEPOIS do player
             
