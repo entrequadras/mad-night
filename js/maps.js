@@ -374,19 +374,25 @@
         }
     ],
     trees: [
-        // Árvore central
-        {type: 'arvore006', x: 1078, y: 1077},
+        // Ipês
+        {type: 'arvore006', x: 1145, y: 1689},
+        {type: 'arvore007', x: 900, y: 1303},
+        {type: 'arvore008', x: 1292, y: 920},
+        {type: 'arvore010', x: 1421, y: 886},
+        {type: 'arvore006', x: 1344, y: 600},
+        {type: 'arvore008', x: 1480, y: 420},
+        {type: 'arvore007', x: 1675, y: 17},
     
         // Linha de árvores na parte inferior (530x1500 até 1130x1500)
-        {type: 'arvore001', x: 680, y: 1430},
-        {type: 'arvore003', x: 780, y: 1440},
-        {type: 'arvore002', x: 850, y: 1575},
-        {type: 'arvore004', x: 960, y: 1425},
-        {type: 'arvore001', x: 1060, y: 1445},
-        {type: 'arvore003', x: 1150, y: 1630},
+        {type: 'arvore001', x: 280, y: 1090},
+        {type: 'arvore003', x: 380, y: 1110},
+        {type: 'arvore002', x: 250, y: 1200},
+        {type: 'arvore004', x: 360, y: 1039},
+        {type: 'arvore001', x: 460, y: 1078},
+        {type: 'arvore003', x: 500, y: 1059},
     
         // Três árvores no topo
-        {type: 'arvore004', x: 1200, y: -10},
+        {type: 'arvore004', x: 800, y: -10},
         {type: 'arvore003', x: 880, y: -15},
         {type: 'arvore002', x: 1100, y: -45}
         ],
