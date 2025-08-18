@@ -283,7 +283,7 @@
 {
     name: "Na área da KS",
     displayName: "Na área da KS",
-    subtitle: "Estacionamento estreito",
+    subtitle: "Vai nas mocó",
     width: 1920,
     height: 3000,
     enemies: [
@@ -391,6 +391,7 @@
         {type: 'arvorebloco001', x: -15, y: 2900},
         {type: 'arvorebloco001', x: 100, y: 2700},
         {type: 'arvorebloco001', x: 1, y: 889},
+        {type: 'arvorebloco001', x: 1861, y: 1500},
         {type: 'arvore002', x: 10, y: 649},
         {type: 'arvore004', x: -20, y: 819},
         {type: 'arvore004', x: -35, y: 1010},
@@ -401,6 +402,7 @@
         {type: 'arvore004', x: 360, y: 789},
         {type: 'arvore001', x: 460, y: 778},
         {type: 'arvore003', x: 500, y: 759},
+        {type: 'arvore003', x: 1900, y: 1400},
         {type: 'arvore003', x: 1900, y: 2809},
     
         // Três árvores no topo
@@ -421,7 +423,7 @@
     {type: 'carro002frente', x: 58, y: 2067, rotation: 0},
     {type: 'carrolateral_03', x: 380, y: 1372, rotation: 0},
     {type: 'carro003frente', x: 881, y: 670, rotation: 0},
-    {type: 'carro002fundos', x: 664, y: 572, rotation: 0},
+    {type: 'carro004fundos', x: 664, y: 572, rotation: 0},
     {type: 'carrolateral_07', x: 567, y: 327, rotation: 0}
 ],
     walls: [],
