@@ -238,22 +238,22 @@
                 }
             ],
           trees: [
-    // Árvore central
-    {type: 'arvore006', x: 1078, y: 1077},
+        // Árvore central
+        {type: 'arvore006', x: 1078, y: 1077},
     
-    // Linha de árvores na parte inferior (530x1500 até 1130x1500)
-    {type: 'arvore001', x: 680, y: 1430},
-    {type: 'arvore003', x: 780, y: 1440},
-    {type: 'arvore002', x: 850, y: 1575},
-    {type: 'arvore004', x: 960, y: 1425},
-    {type: 'arvore001', x: 1060, y: 1445},
-    {type: 'arvore003', x: 1150, y: 1630},
+        // Linha de árvores na parte inferior (530x1500 até 1130x1500)
+        {type: 'arvore001', x: 680, y: 1430},
+        {type: 'arvore003', x: 780, y: 1440},
+        {type: 'arvore002', x: 850, y: 1575},
+        {type: 'arvore004', x: 960, y: 1425},
+        {type: 'arvore001', x: 1060, y: 1445},
+        {type: 'arvore003', x: 1150, y: 1630},
     
-    // Três árvores no topo
-    {type: 'arvore004', x: 1200, y: -10},
-    {type: 'arvore003', x: 880, y: -15},
-    {type: 'arvore002', x: 1100, y: -45}
-],
+        // Três árvores no topo
+        {type: 'arvore004', x: 1200, y: -10},
+        {type: 'arvore003', x: 880, y: -15},
+        {type: 'arvore002', x: 1100, y: -45}
+        ],
             streetLights: [
                 {type: 'poste000', x: 700, y: 355, rotation: 0, lightRadius: 100, id: 'ks_post1'},
                 {type: 'poste000', x: 365, y: 220, rotation: 0, lightRadius: 100, id: 'ks_post2'},
@@ -373,7 +373,23 @@
             ]
         }
     ],
-    trees: [],
+    trees: [
+        // Árvore central
+        {type: 'arvore006', x: 1078, y: 1077},
+    
+        // Linha de árvores na parte inferior (530x1500 até 1130x1500)
+        {type: 'arvore001', x: 680, y: 1430},
+        {type: 'arvore003', x: 780, y: 1440},
+        {type: 'arvore002', x: 850, y: 1575},
+        {type: 'arvore004', x: 960, y: 1425},
+        {type: 'arvore001', x: 1060, y: 1445},
+        {type: 'arvore003', x: 1150, y: 1630},
+    
+        // Três árvores no topo
+        {type: 'arvore004', x: 1200, y: -10},
+        {type: 'arvore003', x: 880, y: -15},
+        {type: 'arvore002', x: 1100, y: -45}
+        ],
     streetLights: [],
     objects: [
     // Objetos de decoração
