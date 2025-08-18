@@ -37,6 +37,7 @@
             garrafaquebrada02: { width: 40, height: 24 },
             cadeiradepraia01: { width: 29, height: 40 },
             orelhao001: { width: 40, height: 60 },
+            m2000power: { width: 40, height: 35 },
             
             // Tiles de grama
             grama000: { width: 120, height: 120 },
@@ -227,6 +228,7 @@
             this.loadImage('cadeiradepraia01', 'assets/objects/cadeiradepraia01.png');
             this.loadImage('parquinho', 'assets/objects/parquinho.png');
             this.loadImage('orelhao001', 'assets/objects/orelhao001.png');
+            this.loadImage('m2000power', 'assets/objects/m2000power.png');
             this.loadImage('kitmalhacao', 'assets/objects/kitmalhacao.png');
             
             // Carregar assets do Eixão
