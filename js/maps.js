@@ -382,8 +382,11 @@
         {type: 'arvore006', x: 1344, y: 600},
         {type: 'arvore008', x: 1480, y: 420},
         {type: 'arvore007', x: 1675, y: 17},
+         {type: 'arvore007', x: 205, y: 29},
     
         // Linha de árvores travando estacionamento
+     
+        {type: 'arvorebloco001', x: -10, y: 489},
         {type: 'arvore002', x: 10, y: 1189},
         {type: 'arvore004', x: 160, y: 1219},
         {type: 'arvore001', x: 280, y: 1290},
