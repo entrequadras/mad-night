@@ -19,7 +19,9 @@
        musicEnabled: true,
        lastEnemySpawn: 0,
        escapeEnemyCount: 0,
-       chacalDefeated: false
+       chacalDefeated: false,
+       infiniteDashTime: 0,  // ADICIONADO
+       infiniteDashActive: false  // ADICIONADO
    };
    
    // Referências dos módulos
@@ -235,6 +237,15 @@
        // Atualizar recarga de pedal
        updatePedalPower(deltaTime);
        
+       // ADICIONADO - Atualizar power-up de dash infinito
+       if (gameState.infiniteDashActive) {
+           gameState.infiniteDashTime -= deltaTime;
+           if (gameState.infiniteDashTime <= 0) {
+               gameState.infiniteDashActive = false;
+               console.log('Dash infinito acabou!');
+           }
+       }
+       
        // Atualizar UI
        if (ui && ui.update) ui.update(deltaTime);
    }
@@ -243,6 +254,38 @@
    function checkSpecialInteractions() {
        const map = maps.getMap(gameState.currentMap);
        if (!map || !collision) return;
+       
+       // ADICIONADO - Verificar power-ups
+       if (map.powerups) {
+           map.powerups.forEach((powerup, index) => {
+               if (!powerup.collected && collision.checkCollision && 
+                   collision.checkCollision(player, {
+                       x: powerup.x,
+                       y: powerup.y,
+                       w: 40,
+                       h: 35
+                   })) {
+                   // Marcar como coletado
+                   powerup.collected = true;
+                   
+                   // Ativar dash infinito por 5 segundos
+                   gameState.infiniteDashActive = true;
+                   gameState.infiniteDashTime = 5000; // 5 segundos
+                   
+                   // Tocar som
+                   if (audio && audio.playSound) {
+                       audio.playSound('muleque');
+                   }
+                   
+                   console.log('🚀 DASH INFINITO ATIVADO!');
+                   
+                   // Mostrar mensagem
+                   if (ui && ui.showMessage) {
+                       ui.showMessage("DASH INFINITO! 5 SEGUNDOS!");
+                   }
+               }
+           });
+       }
        
        // Orelhão - ativar dash
        if (map.orelhao && !gameState.dashUnlocked) {
@@ -598,6 +641,8 @@ function restart() {
     gameState.isGameOver = false;
     gameState.escapeEnemyCount = 0;
     gameState.chacalDefeated = false;
+    gameState.infiniteDashTime = 0;  // ADICIONADO
+    gameState.infiniteDashActive = false;  // ADICIONADO
     
     // NOVO: Resetar estatísticas da sessão
     if (stats && stats.resetCurrent) {
@@ -701,6 +746,15 @@ function handlePauseMenu(key) {
        isDashUnlocked: () => gameState.dashUnlocked,
        getPedalPower: () => gameState.pedalPower,
        usePedal: () => {
+           // MODIFICADO - Se dash infinito ativo, não gasta pedal
+           if (gameState.infiniteDashActive) {
+               if (stats && stats.registerDash) {
+                   stats.registerDash();
+               }
+               return true;
+           }
+           
+           // Comportamento normal
            if (gameState.pedalPower > 0) {
                gameState.pedalPower--;
                gameState.lastPedalRecharge = Date.now();
