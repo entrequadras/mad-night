@@ -418,10 +418,10 @@
     streetLights: [
             {type: 'poste000', x: 230, y: 750, rotation: 0, lightRadius: 100, id: 'ks_post1'},
             {type: 'poste000', x: 520, y: 950, rotation: 0, lightRadius: 100, id: 'ks_post2'},
-            {type: 'poste001', x: 1450, y: 800, rotation: 0, lightRadius: 100, id: 'ks_post3'},
-            {type: 'poste001', x: 1441, y: 1200, rotation: 0, lightRadius: 100, id: 'ks_post4'},
-            {type: 'poste001', x: 640, y: 1830, rotation: 0, lightRadius: 100, id: 'ks_post5'},
-            {type: 'poste001', x: 440, y: 2348, rotation: 0, lightRadius: 100, id: 'ks_post6'},
+            {type: 'poste001', x: 1400, y: 760, rotation: 0, lightRadius: 100, id: 'ks_post3'},
+            {type: 'poste001', x: 1400, y: 1500, rotation: 0, lightRadius: 100, id: 'ks_post4'},
+            {type: 'poste001', x: 640, y: 1800, rotation: 0, lightRadius: 100, id: 'ks_post5'},
+            {type: 'poste001', x: 500, y: 2400, rotation: 0, lightRadius: 100, id: 'ks_post6'},
             {type: 'poste000', x: 1800, y: 150, rotation: 0, lightRadius: 100, id: 'ks_post7'},
             ],
     objects: [
