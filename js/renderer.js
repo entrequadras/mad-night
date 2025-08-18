@@ -152,36 +152,37 @@
             
             // Luz de TV no mapa 2 (antes dos prédios)
             if (MadNight.game && MadNight.game.state && 
-                MadNight.game.state.currentMap === 2) {
-                if (MadNight.lighting && MadNight.lighting.renderTVLight) {
-                    MadNight.lighting.renderTVLight(this.ctx, map, visibleArea);
-                }
+            MadNight.game.state.currentMap === 2) {
+            if (MadNight.lighting && MadNight.lighting.renderTVLight) {
+            MadNight.lighting.renderTVLight(this.ctx, map, visibleArea);
             }
-            
+        }
+
             // Objetos e estruturas
             this.renderObjects(map, visibleArea);
-            
+
             // IMPORTANTE: Prédios - camada BOTTOM (atrás do player)
             this.renderBuildings(map, visibleArea, 'bottom');
-            
+
             this.renderWalls(map, visibleArea);
 
             // Renderizar power-ups
             if (map.powerups) {
-                const assets = MadNight.assets;  // ← ADICIONAR ESTA LINHA!
-                map.powerups.forEach(powerup => {
-                    if (!powerup.collected) {
-                    const img = assets.get('objects', powerup.type);
-                    if (img && img.complete) {
-                        ctx.drawImage(img, powerup.x, powerup.y, 40, 35);
-                    }
+            const assets = MadNight.assets;
+            map.powerups.forEach(powerup => {
+            if (!powerup.collected) {
+            const img = assets.get('objects', powerup.type);
+            if (img && img.complete) {
+                ctx.drawImage(img, powerup.x, powerup.y, 40, 35);
             }
-        });
-            
-            // NÃO renderizar elementos superiores aqui - eles vão DEPOIS do player
-            
-            // Objetos especiais (orelhão, lixeira)
-            this.renderSpecialObjects(map);
+        }
+    });
+}
+
+// NÃO renderizar elementos superiores aqui - eles vão DEPOIS do player
+
+// Objetos especiais (orelhão, lixeira)
+this.renderSpecialObjects(map);
             
             // NO MAPA 0: NÃO renderizar árvores e postes aqui
             if (MadNight.game && MadNight.game.state && 
