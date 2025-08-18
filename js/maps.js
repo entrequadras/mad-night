@@ -410,7 +410,14 @@
         {type: 'arvore003', x: 180, y: -15},
         {type: 'arvore002', x: 60, y: -35}
         ],
-    streetLights: [],
+    streetLights: [
+            {type: 'poste000', x: 379, y: 799, rotation: 0, lightRadius: 100, id: 'ks_post1'},
+            {type: 'poste000', x: 719, y: 945, rotation: 0, lightRadius: 100, id: 'ks_post2'},
+            {type: 'poste001', x: 1083, y: 765, rotation: 0, lightRadius: 100, id: 'ks_post3'},
+            {type: 'poste001', x: 1341, y: 1232, rotation: 0, lightRadius: 100, id: 'ks_post4'},
+            {type: 'poste001', x: 435, y: 1838, rotation: 0, lightRadius: 100, id: 'ks_post5'},
+            {type: 'poste001', x: 340, y: 2548, rotation: 0, lightRadius: 100, id: 'ks_post6'}
+            ],
     objects: [
     // Objetos de decoração
     {type: 'parquinho', x: 5, y: 1500, rotation: 0},
