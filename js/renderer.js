@@ -124,7 +124,8 @@
                 ctx.fillText('ERRO NO RENDER', this.canvas.width/2, this.canvas.height/2);
                 ctx.font = '20px Arial';
                 ctx.fillText(error.message, this.canvas.width/2, this.canvas.height/2 + 40);
-            }
+             }
+         },
         
         // Renderizar camadas do mapa
         renderMapLayers: function(map, visibleArea) {
