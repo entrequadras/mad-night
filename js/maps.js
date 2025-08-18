@@ -384,12 +384,12 @@
         {type: 'arvore007', x: 1675, y: 17},
     
         // Linha de árvores na parte inferior (530x1500 até 1130x1500)
-        {type: 'arvore001', x: 280, y: 1090},
-        {type: 'arvore003', x: 380, y: 1110},
-        {type: 'arvore002', x: 250, y: 1200},
-        {type: 'arvore004', x: 360, y: 1039},
-        {type: 'arvore001', x: 460, y: 1078},
-        {type: 'arvore003', x: 500, y: 1059},
+        {type: 'arvore001', x: 280, y: 1290},
+        {type: 'arvore003', x: 380, y: 1310},
+        {type: 'arvore002', x: 250, y: 1400},
+        {type: 'arvore004', x: 360, y: 1189},
+        {type: 'arvore001', x: 460, y: 1278},
+        {type: 'arvore003', x: 500, y: 1359},
     
         // Três árvores no topo
         {type: 'arvore004', x: 800, y: -10},
