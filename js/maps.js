@@ -378,7 +378,7 @@
         {type: 'arvore006', x: 1145, y: 1689},
         {type: 'arvore007', x: 900, y: 1303},
         {type: 'arvore008', x: 1292, y: 920},
-        {type: 'arvore010', x: 1421, y: 886},
+        {type: 'arvore007', x: 1421, y: 886},
         {type: 'arvore006', x: 1344, y: 600},
         {type: 'arvore008', x: 1480, y: 420},
         {type: 'arvore007', x: 1675, y: 17},
