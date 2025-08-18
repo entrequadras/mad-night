@@ -392,6 +392,7 @@
         {type: 'arvorebloco001', x: 100, y: 2700},
         {type: 'arvorebloco001', x: 1, y: 889},
         {type: 'arvorebloco001', x: 1861, y: 1500},
+        {type: 'arvorebloco001', x: 1681, y: 2040},
         {type: 'arvore002', x: 10, y: 649},
         {type: 'arvore004', x: -20, y: 819},
         {type: 'arvore004', x: -35, y: 1010},
@@ -400,7 +401,9 @@
         {type: 'arvore003', x: 380, y: 910},
         {type: 'arvore002', x: 250, y: 800},
         {type: 'arvore004', x: 360, y: 789},
+        {type: 'arvore004', x: 1440, y: 2333},
         {type: 'arvore004', x: 1510, y: 2342},
+        {type: 'arvore001', x: 1530, y: 2369},
         {type: 'arvore001', x: 460, y: 778},
         {type: 'arvore003', x: 500, y: 759},
         {type: 'arvore003', x: 1740, y: 1400},
@@ -412,12 +415,12 @@
         {type: 'arvore002', x: 60, y: -35}
         ],
     streetLights: [
-            {type: 'poste000', x: 266, y: 760, rotation: 0, lightRadius: 100, id: 'ks_post1'},
+            {type: 'poste000', x: 233, y: 750, rotation: 0, lightRadius: 100, id: 'ks_post1'},
             {type: 'poste000', x: 520, y: 949, rotation: 0, lightRadius: 100, id: 'ks_post2'},
-            {type: 'poste001', x: 1300, y: 765, rotation: 0, lightRadius: 100, id: 'ks_post3'},
+            {type: 'poste001', x: 1650, y: 865, rotation: 0, lightRadius: 100, id: 'ks_post3'},
             {type: 'poste001', x: 1141, y: 1332, rotation: 0, lightRadius: 100, id: 'ks_post4'},
             {type: 'poste001', x: 635, y: 1800, rotation: 0, lightRadius: 100, id: 'ks_post5'},
-            {type: 'poste001', x: 340, y: 2548, rotation: 0, lightRadius: 100, id: 'ks_post6'},
+            {type: 'poste001', x: 440, y: 2348, rotation: 0, lightRadius: 100, id: 'ks_post6'},
             {type: 'poste000', x: 1800, y: 150, rotation: 0, lightRadius: 100, id: 'ks_post7'},
             ],
     objects: [
