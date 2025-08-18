@@ -287,7 +287,9 @@
     width: 1920,
     height: 3000,
     enemies: [
-         {x: 267, y: 1524, type: 'faquinha'},
+        {x: 100, y: 424, type: 'morcego'},
+        {x: 267, y: 1524, type: 'faquinha'},
+        {x: 250, y: 1520, type: 'faquinha'},
         {x: 675, y: 1029, type: 'faquinha'}
     ],
     escapeEnemies: [],
@@ -386,16 +388,20 @@
     
         // Linha de árvores travando estacionamento
      
-        {type: 'arvorebloco001', x: -15, y: 1999},
-          {type: 'arvorebloco001', x: 1, y: 889},
+        {type: 'arvorebloco001', x: -15, y: 2900},
+        {type: 'arvorebloco001', x: 100, y: 2700},
+        {type: 'arvorebloco001', x: 1, y: 889},
         {type: 'arvore002', x: 10, y: 649},
         {type: 'arvore004', x: -20, y: 819},
+        {type: 'arvore004', x: -35, y: 1010},
         {type: 'arvore001', x: 280, y: 890},
+        {type: 'arvore001', x: 5, y: 2590},
         {type: 'arvore003', x: 380, y: 910},
         {type: 'arvore002', x: 250, y: 800},
         {type: 'arvore004', x: 360, y: 789},
         {type: 'arvore001', x: 460, y: 778},
         {type: 'arvore003', x: 500, y: 759},
+        {type: 'arvore003', x: 1900, y: 2809},
     
         // Três árvores no topo
         {type: 'arvore004', x: 100, y: -10},
@@ -485,7 +491,7 @@
             ],
             lights: [],
             shadows: [],
-            playerStart: {x: 300, y: 650},
+            playerStart: {x: 700, y: 650},
             playerStartEscape: {x: 300, y: 50},
             exit: {x: 200, y: 750, w: 150, h: 40},
             lixeira: {x: 280, y: 120, w: 40, h: 40},
