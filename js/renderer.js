@@ -721,9 +721,6 @@
                 {x: 1000, y: 2850, radius: 200},
                 {x: 1400, y: 2780, radius: 380},
                 {x: 1700, y: 2900, radius: 400},
-                {x: 300, y: 2950, radius: 350},
-                {x: 800, y: 2700, radius: 320},
-                {x: 1200, y: 2950, radius: 380},
                 
                 // Sombras médias espalhadas pelo mapa
                 {x: 500, y: 1500, radius: 300},
@@ -740,7 +737,18 @@
                 {x: 90, y: 1000, radius: 280},
                 {x: 16, y: 1300, radius: 320},
                 {x: 35, y: 1700, radius: 300},
-                {x: 120, y: 2000, radius: 280}
+                {x: 90, y: 2000, radius: 280},
+                {x: 70, y: 2400, radius: 280},
+                {x: 90, y: 2700, radius: 280},
+                {x: 1850, y: 100, radius: 300},
+                {x: 1810, y: 400, radius: 300},
+                {x: 1814, y: 700, radius: 350},
+                {x: 1890, y: 1000, radius: 280},
+                {x: 1886, y: 1300, radius: 320},
+                {x: 1835, y: 1700, radius: 300},
+                {x: 1890, y: 2000, radius: 280},
+                {x: 1870, y: 2400, radius: 280},
+                {x: 1890, y: 2700, radius: 280}
             ];
             
             // Renderizar cada sombra com gradiente suave
@@ -769,7 +777,7 @@
             // Sombras nos quatro cantos do mapa
             const cornerShadows = [
                 {x: 0, y: 0, radius: 500},
-                {x: 1920, y: 0, radius: 500},
+                {x: 1400, y: 0, radius: 500},
                 {x: 0, y: 3000, radius: 600},
                 {x: 1920, y: 3000, radius: 600}
             ];
