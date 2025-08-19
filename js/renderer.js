@@ -717,10 +717,10 @@
             const shadows = [
                 // Sombras na área inferior (0x2700 até 1900x3000)
                 {x: 200, y: 2750, radius: 350},
-                {x: 600, y: 2800, radius: 400},
-                {x: 1000, y: 2850, radius: 240},
+                {x: 600, y: 2800, radius: 350},
+                {x: 1000, y: 2850, radius: 400},
                 {x: 1400, y: 2780, radius: 380},
-                {x: 1700, y: 2900, radius: 400},
+                {x: 1700, y: 2900, radius: 380},
                 
                 // Sombras médias espalhadas pelo mapa
                 {x: 500, y: 50, radius: 300},
@@ -745,7 +745,6 @@
                 {x: 90, y: 2000, radius: 280},
                 {x: 70, y: 2400, radius: 280},
                 {x: 90, y: 2700, radius: 280},
-                {x: 1850, y: 100, radius: 300},
                 {x: 1810, y: 400, radius: 300},
                 {x: 1814, y: 700, radius: 350},
                 {x: 1890, y: 1000, radius: 280},
