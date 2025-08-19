@@ -168,17 +168,16 @@
             this.renderWalls(map, visibleArea);
 
             // Renderizar power-ups
-            if (map.powerups) {
-                const assets = MadNight.assets;
-                map.powerups.forEach(powerup => {
-                    if (!powerup.collected) {
-                        const img = assets.get('objects', powerup.type);
-                        if (img && img.complete) {
-                            ctx.drawImage(img, powerup.x, powerup.y, 40, 35);
-                        }
+        if (map.powerups) {
+            map.powerups.forEach(powerup => {
+                if (!powerup.collected) {
+                    const powerupAsset = MadNight.assets.get(powerup.type);  // SEM 'objects'
+                if (powerupAsset && powerupAsset.loaded && powerupAsset.img) {  // .loaded e .img
+                    ctx.drawImage(powerupAsset.img, powerup.x, powerup.y, 40, 35);  // .img aqui
                     }
-                });
-            }
+                }
+            });
+        }
             
             // NÃO renderizar elementos superiores aqui - eles vão DEPOIS do player
             
