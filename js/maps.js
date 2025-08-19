@@ -335,10 +335,10 @@
             x: 620,
             y: 645,
             collisionRects: [
-                {x: 900, y: 1016, w: 244, h: 60},
-                {x: 800, y: 1080, w: 330, h: 40},
+                {x: 800, y: 1016, w: 244, h: 60},
+                {x: 740, y: 1080, w: 330, h: 40},
                 {x: 760, y: 950, w: 265, h: 40},
-                {x: 630, y: 890, w: 230, h: 90}
+                {x: 635, y: 950, w: 230, h: 90}
             ]
         },
         {
@@ -424,8 +424,8 @@
             {type: 'poste001', x: 640, y: 1800, rotation: 0, lightRadius: 100, id: 'ks_post5'},
             {type: 'poste001', x: 500, y: 2400, rotation: 0, lightRadius: 100, id: 'ks_post6'},
             {type: 'poste000', x: 1800, y: 150, rotation: 0, lightRadius: 100, id: 'ks_post7'},
-            {type: 'poste000', x: 1240, y: 2720, rotation: 0, lightRadius: 100, id: 'ks_post8'},
-            {type: 'poste000', x: 200, y: 250, rotation: 0, lightRadius: 100, id: 'ks_post9'},
+            {type: 'poste000', x: 1240, y: 2620, rotation: 0, lightRadius: 100, id: 'ks_post8'},
+            {type: 'poste000', x: 180, y: 230, rotation: 0, lightRadius: 100, id: 'ks_post9'},
             ],
     objects: [
     // Objetos de decoração
