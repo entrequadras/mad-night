@@ -124,8 +124,8 @@
                 ctx.fillText('ERRO NO RENDER', this.canvas.width/2, this.canvas.height/2);
                 ctx.font = '20px Arial';
                 ctx.fillText(error.message, this.canvas.width/2, this.canvas.height/2 + 40);
-             }
-         },
+            }
+        },
         
         // Renderizar camadas do mapa
         renderMapLayers: function(map, visibleArea) {
@@ -153,37 +153,37 @@
             
             // Luz de TV no mapa 2 (antes dos prédios)
             if (MadNight.game && MadNight.game.state && 
-            MadNight.game.state.currentMap === 2) {
-            if (MadNight.lighting && MadNight.lighting.renderTVLight) {
-            MadNight.lighting.renderTVLight(this.ctx, map, visibleArea);
+                MadNight.game.state.currentMap === 2) {
+                if (MadNight.lighting && MadNight.lighting.renderTVLight) {
+                    MadNight.lighting.renderTVLight(this.ctx, map, visibleArea);
+                }
             }
-        }
-
+            
             // Objetos e estruturas
             this.renderObjects(map, visibleArea);
-
+            
             // IMPORTANTE: Prédios - camada BOTTOM (atrás do player)
             this.renderBuildings(map, visibleArea, 'bottom');
-
+            
             this.renderWalls(map, visibleArea);
 
             // Renderizar power-ups
             if (map.powerups) {
-            const assets = MadNight.assets;
-            map.powerups.forEach(powerup => {
-            if (!powerup.collected) {
-            const img = assets.get('objects', powerup.type);
-            if (img && img.complete) {
-                ctx.drawImage(img, powerup.x, powerup.y, 40, 35);
+                const assets = MadNight.assets;
+                map.powerups.forEach(powerup => {
+                    if (!powerup.collected) {
+                        const img = assets.get('objects', powerup.type);
+                        if (img && img.complete) {
+                            ctx.drawImage(img, powerup.x, powerup.y, 40, 35);
+                        }
+                    }
+                });
             }
-        }
-    });
-}
-
-// NÃO renderizar elementos superiores aqui - eles vão DEPOIS do player
-
-// Objetos especiais (orelhão, lixeira)
-this.renderSpecialObjects(map);
+            
+            // NÃO renderizar elementos superiores aqui - eles vão DEPOIS do player
+            
+            // Objetos especiais (orelhão, lixeira)
+            this.renderSpecialObjects(map);
             
             // NO MAPA 0: NÃO renderizar árvores e postes aqui
             if (MadNight.game && MadNight.game.state && 
@@ -224,6 +224,12 @@ this.renderSpecialObjects(map);
             if (MadNight.game && MadNight.game.state && 
                 MadNight.game.state.currentMap === 2) {
                 this.renderKSShadows(ctx);
+            }
+            
+            // Sombras especiais do mapa 3
+            if (MadNight.game && MadNight.game.state && 
+                MadNight.game.state.currentMap === 3) {
+                this.renderMap3Shadows(ctx);
             }
             
             // Overlay do Eixão (camada 2) ANTES do tráfego
@@ -680,6 +686,84 @@ this.renderSpecialObjects(map);
                 {x: 1920, y: 0, radius: 400},
                 {x: 0, y: 1610, radius: 400},
                 {x: 1920, y: 1610, radius: 400}
+            ];
+            
+            cornerShadows.forEach(function(corner) {
+                const gradient = ctx.createRadialGradient(
+                    corner.x, corner.y, 0,
+                    corner.x, corner.y, corner.radius
+                );
+                gradient.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
+                gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.36)');
+                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(
+                    corner.x - corner.radius,
+                    corner.y - corner.radius,
+                    corner.radius * 2,
+                    corner.radius * 2
+                );
+            });
+            
+            ctx.restore();
+        },
+        
+        // Renderizar sombras do Mapa 3 (Na área da KS)
+        renderMap3Shadows: function(ctx) {
+            ctx.save();
+            
+            // Sombras principais do mapa
+            const shadows = [
+                // Sombras na área inferior (0x2700 até 1900x3000)
+                {x: 200, y: 2750, radius: 350},
+                {x: 600, y: 2800, radius: 400},
+                {x: 1000, y: 2850, radius: 450},
+                {x: 1400, y: 2780, radius: 380},
+                {x: 1700, y: 2900, radius: 400},
+                {x: 300, y: 2950, radius: 350},
+                {x: 800, y: 2700, radius: 320},
+                {x: 1200, y: 2950, radius: 380},
+                {x: 1600, y: 2750, radius: 350},
+                
+                // Sombras médias espalhadas pelo mapa
+                {x: 500, y: 1500, radius: 300},
+                {x: 1400, y: 1200, radius: 350},
+                {x: 900, y: 800, radius: 280},
+                {x: 1600, y: 600, radius: 320},
+                {x: 350, y: 1950, radius: 300},
+                {x: 1200, y: 1600, radius: 280}
+            ];
+            
+            // Renderizar cada sombra com gradiente suave
+            shadows.forEach(function(shadow) {
+                const gradient = ctx.createRadialGradient(
+                    shadow.x, shadow.y, 0,
+                    shadow.x, shadow.y, shadow.radius
+                );
+                
+                gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+                gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.54)');
+                gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.42)');
+                gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.24)');
+                gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.12)');
+                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(
+                    shadow.x - shadow.radius,
+                    shadow.y - shadow.radius,
+                    shadow.radius * 2,
+                    shadow.radius * 2
+                );
+            });
+            
+            // Sombras nos quatro cantos do mapa
+            const cornerShadows = [
+                {x: 0, y: 0, radius: 500},
+                {x: 1920, y: 0, radius: 500},
+                {x: 0, y: 3000, radius: 600},
+                {x: 1920, y: 3000, radius: 600}
             ];
             
             cornerShadows.forEach(function(corner) {
