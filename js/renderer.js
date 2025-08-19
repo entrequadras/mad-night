@@ -724,7 +724,8 @@
                 
                 // Sombras médias espalhadas pelo mapa
                 {x: 500, y: 1500, radius: 300},
-                {x: 1400, y: 1200, radius: 350},
+                {x: 1300, y: 1200, radius: 350},
+                {x: 1250, y: 900, radius: 350},
                 {x: 900, y: 800, radius: 280},
                 {x: 1600, y: 600, radius: 320},
                 {x: 350, y: 1950, radius: 300},
@@ -732,6 +733,7 @@
 
                 // Sombras dos cantos do mapa
                 {x: 50, y: 100, radius: 300},
+                {x: 550, y: 60, radius: 300},
                 {x: 10, y: 400, radius: 300},
                 {x: 14, y: 700, radius: 350},
                 {x: 90, y: 1000, radius: 280},
