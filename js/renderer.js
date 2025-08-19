@@ -718,13 +718,12 @@
                 // Sombras na área inferior (0x2700 até 1900x3000)
                 {x: 200, y: 2750, radius: 350},
                 {x: 600, y: 2800, radius: 400},
-                {x: 1000, y: 2850, radius: 450},
+                {x: 1000, y: 2850, radius: 200},
                 {x: 1400, y: 2780, radius: 380},
                 {x: 1700, y: 2900, radius: 400},
                 {x: 300, y: 2950, radius: 350},
                 {x: 800, y: 2700, radius: 320},
                 {x: 1200, y: 2950, radius: 380},
-                {x: 1600, y: 2750, radius: 350},
                 
                 // Sombras médias espalhadas pelo mapa
                 {x: 500, y: 1500, radius: 300},
@@ -732,7 +731,16 @@
                 {x: 900, y: 800, radius: 280},
                 {x: 1600, y: 600, radius: 320},
                 {x: 350, y: 1950, radius: 300},
-                {x: 1200, y: 1600, radius: 280}
+                {x: 1200, y: 1600, radius: 280},
+
+                // Sombras dos cantos do mapa
+                {x: 50, y: 100, radius: 300},
+                {x: 10, y: 400, radius: 300},
+                {x: 14, y: 700, radius: 350},
+                {x: 90, y: 1000, radius: 280},
+                {x: 16, y: 1300, radius: 320},
+                {x: 35, y: 1700, radius: 300},
+                {x: 120, y: 2000, radius: 280}
             ];
             
             // Renderizar cada sombra com gradiente suave
