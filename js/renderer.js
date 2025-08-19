@@ -718,13 +718,16 @@
                 // Sombras na área inferior (0x2700 até 1900x3000)
                 {x: 200, y: 2750, radius: 350},
                 {x: 600, y: 2800, radius: 400},
-                {x: 1000, y: 2850, radius: 200},
+                {x: 1000, y: 2850, radius: 240},
                 {x: 1400, y: 2780, radius: 380},
                 {x: 1700, y: 2900, radius: 400},
                 
                 // Sombras médias espalhadas pelo mapa
+                {x: 500, y: 50, radius: 300},
+                {x: 500, y: 500, radius: 300},
                 {x: 500, y: 1500, radius: 300},
-                {x: 1300, y: 1200, radius: 350},
+                {x: 1100, y: 700, radius: 350},
+                {x: 1200, y: 1250, radius: 350},
                 {x: 1250, y: 900, radius: 350},
                 {x: 900, y: 800, radius: 280},
                 {x: 1600, y: 600, radius: 320},
