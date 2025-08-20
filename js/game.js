@@ -258,25 +258,34 @@ function checkSpecialInteractions() {
     // ADICIONADO - Verificar power-ups
     if (map.powerups) {
         map.powerups.forEach((powerup, index) => {
-            if (!powerup.collected && collision.checkRectCollision && 
-                collision.checkRectCollision(player, powerup)) {
-                // Marcar como coletado
-                powerup.collected = true;
+            if (!powerup.collected) {
+                // COLISÃO MANUAL DIRETA
+                const colide = (
+                    player.x < powerup.x + 40 && 
+                    player.x + player.width > powerup.x && 
+                    player.y < powerup.y + 35 && 
+                    player.y + player.height > powerup.y
+                );
                 
-                // Ativar dash infinito por 5 segundos
-                gameState.infiniteDashActive = true;
-                gameState.infiniteDashTime = 5000; // 5 segundos
-                
-                // Tocar som
-                if (audio && audio.playSound) {
-                    audio.playSound('muleque');
-                }
-                
-                console.log('🚀 DASH INFINITO ATIVADO!');
-                
-                // Mostrar mensagem
-                if (ui && ui.showMessage) {
-                    ui.showMessage("DASH INFINITO! 5 SEGUNDOS!");
+                if (colide) {
+                    // Marcar como coletado
+                    powerup.collected = true;
+                    
+                    // Ativar dash infinito por 5 segundos
+                    gameState.infiniteDashActive = true;
+                    gameState.infiniteDashTime = 5000; // 5 segundos
+                    
+                    // Tocar som
+                    if (audio && audio.playSound) {
+                        audio.playSound('muleque');
+                    }
+                    
+                    console.log('🚀 DASH INFINITO ATIVADO!');
+                    
+                    // Mostrar mensagem
+                    if (ui && ui.showMessage) {
+                        ui.showMessage("ATROPELA, FÍ! 5 SEGUNDOS!");
+                    }
                 }
             }
         });
