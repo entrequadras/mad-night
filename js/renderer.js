@@ -230,6 +230,12 @@
                 MadNight.game.state.currentMap === 3) {
                 this.renderMap3Shadows(ctx);
             }
+
+            // Sombras especiais do mapa 4
+            if (MadNight.game && MadNight.game.state && 
+                MadNight.game.state.currentMap === 4) {
+                this.renderMap3Shadows(ctx);
+            }
             
             // Overlay do Eixão (camada 2) ANTES do tráfego
             if (MadNight.game && MadNight.game.state && 
