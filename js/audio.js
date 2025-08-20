@@ -13,6 +13,7 @@ MadNight.audio = {
    sfx: {
        ataque_janis: null,
        dash: null,
+       muleque: null,
        mobilete: null,
        morte_caveira: null,
        morte_chacal: null,
@@ -185,6 +186,7 @@ toggleMusic: function() {
        // Carregar todos os SFX
        this.loadSFX('ataque_janis');
        this.loadSFX('dash');
+       this.loadSFX('muleque');
        this.loadSFX('mobilete', true);
        this.loadSFX('morte_caveira');
        this.loadSFX('morte_chacal');
