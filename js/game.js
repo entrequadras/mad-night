@@ -251,41 +251,36 @@
    }
    
    // Verificar interações especiais
-   function checkSpecialInteractions() {
-       const map = maps.getMap(gameState.currentMap);
-       if (!map || !collision) return;
-       
-       // ADICIONADO - Verificar power-ups
-       if (map.powerups) {
-           map.powerups.forEach((powerup, index) => {
-               if (!powerup.collected && collision.checkCollision && 
-                   collision.checkCollision(player, {
-                       x: powerup.x,
-                       y: powerup.y,
-                       w: 40,
-                       h: 35
-                   })) {
-                   // Marcar como coletado
-                   powerup.collected = true;
-                   
-                   // Ativar dash infinito por 5 segundos
-                   gameState.infiniteDashActive = true;
-                   gameState.infiniteDashTime = 5000; // 5 segundos
-                   
-                   // Tocar som
-                   if (audio && audio.playSound) {
-                       audio.playSound('muleque');
-                   }
-                   
-                   console.log('🚀 DASH INFINITO ATIVADO!');
-                   
-                   // Mostrar mensagem
-                   if (ui && ui.showMessage) {
-                       ui.showMessage("DASH INFINITO! 5 SEGUNDOS!");
-                   }
-               }
-           });
-       }
+function checkSpecialInteractions() {
+    const map = maps.getMap(gameState.currentMap);
+    if (!map || !collision) return;
+    
+    // ADICIONADO - Verificar power-ups
+    if (map.powerups) {
+        map.powerups.forEach((powerup, index) => {
+            if (!powerup.collected && collision.checkRectCollision && 
+                collision.checkRectCollision(player, powerup)) {
+                // Marcar como coletado
+                powerup.collected = true;
+                
+                // Ativar dash infinito por 5 segundos
+                gameState.infiniteDashActive = true;
+                gameState.infiniteDashTime = 5000; // 5 segundos
+                
+                // Tocar som
+                if (audio && audio.playSound) {
+                    audio.playSound('muleque');
+                }
+                
+                console.log('🚀 DASH INFINITO ATIVADO!');
+                
+                // Mostrar mensagem
+                if (ui && ui.showMessage) {
+                    ui.showMessage("DASH INFINITO! 5 SEGUNDOS!");
+                }
+            }
+        });
+    }
        
        // Orelhão - ativar dash
        if (map.orelhao && !gameState.dashUnlocked) {
