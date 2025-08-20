@@ -553,13 +553,17 @@ init: function() {
         ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
     );
     
-    // Mapas 4 e 5 - Mapas pequenos
-    for (let i = 4; i <= 5; i++) {
-        this.list[i].tiles = generateTiles(
-            600, 800, 120,
-            ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
-        );
-    }
+   // Mapa 4 - Entre Prédios
+    this.list[4].tiles = generateTiles(
+        1920, 3000, 120,  // ← MUDANÇA: era 600, 800
+        ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
+    );
+
+    // Mapa 5 - Ninho dos Ratos
+    this.list[5].tiles = generateTiles(
+        600, 800, 120,
+        ['asfaltosujo001', 'asfaltosujo002', 'asfaltosujo003', 'asfaltosujo004', 'asfaltosujo005']
+);
     
     console.log(`${this.list.length} mapas carregados`);
 },
