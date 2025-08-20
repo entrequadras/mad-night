@@ -456,38 +456,40 @@
 },
         
         // Mapa 4 - Entre Prédios
-        {
-            name: "Entre Prédios",
-            displayName: "Entre Prédios",
-            subtitle: "Muitas sombras",
-            width: 600,
-            height: 800,
-            enemies: [
-                {x: 150, y: 400, type: 'morcego'},
-                {x: 450, y: 400, type: 'faquinha'}
-            ],
-            escapeEnemies: [
-                {x: 300, y: 200, type: 'janis'},
-                {x: 200, y: 600, type: 'caveirinha'},
-                {x: 400, y: 350, type: 'caveirinha'}
-            ],
-            tiles: null, // Será gerado
-            trees: [],
-            streetLights: [],
-            objects: [],
-            walls: [
-                {x: 80, y: 120, w: 160, h: 160},
-                {x: 360, y: 120, w: 160, h: 160},
-                {x: 80, y: 500, w: 160, h: 160},
-                {x: 360, y: 500, w: 160, h: 160}
-            ],
-            lights: [],
-            shadows: [],
-            playerStart: {x: 300, y: 650},
-            playerStartEscape: {x: 300, y: 50},
-            exit: {x: 250, y: 10, w: 100, h: 30},
-            direction: 'up'
-        },
+{
+    name: "Entre Prédios",
+    displayName: "Entre Prédios",
+    subtitle: "Muitas sombras",
+    width: 1920,
+    height: 3000,
+    enemies: [
+        {x: 150, y: 400, type: 'morcego'},
+        {x: 450, y: 400, type: 'faquinha'}
+    ],
+    escapeEnemies: [
+        {x: 300, y: 200, type: 'janis'},
+        {x: 200, y: 600, type: 'caveirinha'},
+        {x: 400, y: 350, type: 'caveirinha'}
+    ],
+    tiles: null, // Será gerado
+    hasBackground: true,
+    backgroundAsset: 'mapa_entre_predios', // PNG com transparência sobre os tiles
+    buildings: [],
+    trees: [],
+    streetLights: [],
+    objects: [],
+    walls: [],
+    powerups: [
+    {type: 'm2000power', x: 150, y: 1420, collected: false},
+    {type: 'm2000power', x: 1780, y: 1400, collected: false}
+],
+    lights: [],
+    shadows: [],
+    playerStart: {x: 960, y: 2800},
+    playerStartEscape: {x: 960, y: 50},
+    exit: {x: 860, y: 10, w: 200, h: 30},
+    direction: 'up'
+},
         
         // Mapa 5 - Ninho dos Ratos
         {
