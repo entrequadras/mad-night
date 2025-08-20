@@ -445,7 +445,7 @@
     walls: [],
     powerups: [
     {type: 'm2000power', x: 50, y: 1420, collected: false},
-    {type: 'm2000power', x: 1900, y: 2900, collected: false}
+    {type: 'm2000power', x: 1880, y: 2900, collected: false}
 ],
     lights: [],
     shadows: [],
