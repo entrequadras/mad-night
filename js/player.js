@@ -152,9 +152,9 @@ kill: function() {
                 }
                 
                 // Iniciar dash
-                if (keys[' '] && gameState.pedalPower > 0 && 
-                    !this.isDashing && gameState.dashUnlocked) {
-                    this.startDash();
+            if (keys[' '] && !this.isDashing && gameState.dashUnlocked &&
+                (gameState.infiniteDashActive || gameState.pedalPower > 0)) {
+                this.startDash();
                 }
             }
             
@@ -192,8 +192,9 @@ kill: function() {
         // Iniciar dash
         startDash: function() {
             const gameState = MadNight.game.state;
-            
-            if (gameState.pedalPower <= 0) return;
+    
+            // ADICIONADO - Verificar dash infinito
+            if (!gameState.infiniteDashActive && gameState.pedalPower <= 0) return;
             
             this.isDashing = true;
             this.dashStart = Date.now();
