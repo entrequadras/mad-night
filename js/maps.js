@@ -287,7 +287,7 @@
     width: 1920,
     height: 3000,
     enemies: [
-        {x: 100, y: 424, type: 'morcego'}
+        {x: 100, y: 424, type: 'morcego'},
         {x: 60, y: 1040, type: 'morcego'},
         {x: 200, y: 1524, type: 'faquinha'},
         {x: 234, y: 1520, type: 'faquinha'},
