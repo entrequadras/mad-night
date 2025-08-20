@@ -734,9 +734,8 @@
                 {x: 1200, y: 1600, radius: 280},
 
                 // Sombras dos cantos do mapa
-                {x: 50, y: 100, radius: 300},
+                {x: 50, y: 50, radius: 300},
                 {x: 550, y: 60, radius: 300},
-                {x: 10, y: 400, radius: 300},
                 {x: 14, y: 700, radius: 350},
                 {x: 90, y: 1000, radius: 280},
                 {x: 16, y: 1300, radius: 320},
