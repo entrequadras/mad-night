@@ -474,7 +474,104 @@
     tiles: null, // Será gerado
     hasBackground: true,
     backgroundAsset: 'mapa_entre_predios', // PNG com transparência sobre os tiles
-    buildings: [],
+    buildings: [
+    {
+        type: 'predio0010',
+        x: 1323,
+        y: 55,
+        collisionRects: [
+            {x: 1323, y: 55, w: 597, h: 155}
+        ]
+    },
+    {
+        type: 'predio0010',
+        x: 1326,
+        y: 612,
+        collisionRects: [
+            {x: 1326, y: 612, w: 597, h: 155}
+        ]
+    },
+    {
+        type: 'predio0010',
+        x: 1326,
+        y: 1724,
+        collisionRects: [
+            {x: 1326, y: 1724, w: 597, h: 155}
+        ]
+    },
+    {
+        type: 'predio0010',
+        x: 1320,
+        y: 2236,
+        collisionRects: [
+            {x: 1320, y: 2236, w: 597, h: 155}
+        ]
+    },
+    {
+        type: 'predio0011',
+        x: 66,
+        y: 34,
+        collisionRects: [
+            {x: 66, y: 34, w: 754, h: 155}
+        ]
+    },
+    {
+        type: 'predio0011',
+        x: 80,
+        y: 608,
+        collisionRects: [
+            {x: 80, y: 608, w: 754, h: 155}
+        ]
+    },
+    {
+        type: 'predio0011',
+        x: 109,
+        y: 1705,
+        collisionRects: [
+            {x: 109, y: 1705, w: 754, h: 155}
+        ]
+    },
+    {
+        type: 'predio0011',
+        x: 70,
+        y: 2230,
+        collisionRects: [
+            {x: 70, y: 2230, w: 754, h: 155}
+        ]
+    },
+    {
+        type: 'predio0012',
+        x: 820,
+        y: 55,
+        collisionRects: [
+            {x: 820, y: 55, w: 503, h: 155}
+        ]
+    },
+    {
+        type: 'predio0012',
+        x: 817,
+        y: 612,
+        collisionRects: [
+            {x: 817, y: 612, w: 503, h: 155}
+        ]
+    },
+    {
+        type: 'predio0012',
+        x: 861,
+        y: 1724,
+        collisionRects: [
+            {x: 861, y: 1724, w: 503, h: 155}
+        ]
+    },
+    {
+        type: 'predio0012',
+        x: 822,
+        y: 2236,
+        collisionRects: [
+            {x: 822, y: 2236, w: 503, h: 155}
+        ]
+    }
+],
     trees: [],
     streetLights: [],
     objects: [],
