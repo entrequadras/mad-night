@@ -254,7 +254,7 @@
             // Carregar assets do mapa KS
             this.loadImage('entradaKS01', 'assets/floors/entrada_ks_01.png');
             this.loadImage('area_da_ks_chao', 'assets/floors/area_da_ks_chao.png');
-            this.loadImage('area_da_ks_chao', 'assets/floors/mapa_entre_predios.png');
+            this.loadImage('mapa_entre_predios', 'assets/floors/mapa_entre_predios.png');
             
             // Carregar prédios
             this.loadImage('predio0002', 'assets/buildings/predio0002.png');
