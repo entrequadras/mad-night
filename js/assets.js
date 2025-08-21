@@ -94,6 +94,9 @@
             predio0004_vira: { width: 520, height: 592 },
             predio0005_vira: { width: 540, height: 561 },
             predio0002_vira: { width: 520, height: 592 },
+            predio0010: { width: 550, height: 376 },
+            predio0011: { width: 486, height: 400 },
+            predio0012: { width: 488, height: 400 },
             
             // Setas direcionais
             setaesquerda: { width: 50, height: 59 },
