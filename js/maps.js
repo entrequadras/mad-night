@@ -582,6 +582,24 @@
         {type: 'arvore008', x: 1480, y: 420},
         {type: 'arvore007', x: 1675, y: 17},
          {type: 'arvore007', x: 415, y: 29},
+
+          // Florestinha central
+        {type: 'arvore002', x: 10, y: 1649},
+        {type: 'arvore004', x: -20, y: 1719},
+        {type: 'arvore004', x: -35, y: 1510},
+        {type: 'arvore001', x: 280, y: 1890},
+        {type: 'arvore001', x: 555, y: 1590},
+        {type: 'arvore003', x: 380, y: 1510},
+        {type: 'arvore002', x: 250, y: 1480},
+        {type: 'arvore004', x: 760, y: 1489},
+        {type: 'arvore004', x: 1000, y: 1533},
+        {type: 'arvore004', x: 1200, y: 1500},
+        {type: 'arvore004', x: 1400, y: 1510},
+        {type: 'arvore001', x: 1700, y: 1569},
+        {type: 'arvore001', x: 1800, y: 1559}
+          ]
+    }
+],
          
     streetLights: [],
     objects: [],
