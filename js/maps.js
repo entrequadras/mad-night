@@ -455,7 +455,7 @@
     direction: 'up'
 },
         
-        //  - Entre Prédios
+        // Mapa 4 - Entre Prédios
 {
     name: "Entre Prédios",
     displayName: "Entre Prédios",
@@ -610,8 +610,9 @@
     objects: [
         //carros estacionados
          {type: 'carro004fundos', x: 664, y: 572, rotation: 0},
+        {type: 'carro002fundos', x: 120, y: 2202, rotation: 0},
+        {type: 'carro003fundos', x: 1264, y: 572, rotation: 0},
         {type: 'carrolateral_07', x: 567, y: 327, rotation: 0}
-],
     ],
     walls: [],
     powerups: [
