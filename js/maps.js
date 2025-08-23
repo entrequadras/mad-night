@@ -581,6 +581,7 @@
         {type: 'arvore006', x: 1344, y: 600},
         {type: 'arvore008', x: 1480, y: 420},
         {type: 'arvore007', x: 1675, y: 17},
+         {type: 'arvore007', x: 2700, y: 903},
          {type: 'arvore007', x: 415, y: 29},
 
           // Florestinha central
@@ -591,7 +592,7 @@
         {type: 'arvore001', x: 555, y: 1390},
         {type: 'arvore003', x: 380, y: 1510},
         {type: 'arvore002', x: 950, y: 1330},
-        {type: 'arvorebloco001', x: 1, y: 1330},
+        {type: 'arvorebloco001', x: -31, y: 1330},
         {type: 'arvore004', x: 760, y: 1489},
         {type: 'arvore001', x: 1000, y: 1533},
         {type: 'arvore004', x: 1200, y: 1500},
@@ -600,13 +601,18 @@
         {type: 'arvore001', x: 1800, y: 1559},
          
          // Três árvores no topo
-        {type: 'arvore004', x: 1000, y: -10},
-        {type: 'arvore003', x: 1800, y: -15},
-        {type: 'arvore002', x: 460, y: -35}
+        {type: 'arvore004', x: 1000, y: -44},
+        {type: 'arvore003', x: 1800, y: -75},
+        {type: 'arvore002', x: 460, y: -55}
         ],
         
     streetLights: [],
-    objects: [],
+    objects: [
+        //carros estacionados
+         {type: 'carro004fundos', x: 664, y: 572, rotation: 0},
+        {type: 'carrolateral_07', x: 567, y: 327, rotation: 0}
+],
+    ],
     walls: [],
     powerups: [
     {type: 'm2000power', x: 150, y: 1420, collected: false},
