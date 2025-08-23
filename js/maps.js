@@ -596,11 +596,14 @@
         {type: 'arvore004', x: 1200, y: 1500},
         {type: 'arvore004', x: 1400, y: 1510},
         {type: 'arvore001', x: 1700, y: 1569},
-        {type: 'arvore001', x: 1800, y: 1559}
-          ]
-    }
-],
+        {type: 'arvore001', x: 1800, y: 1559},
          
+         // Três árvores no topo
+        {type: 'arvore004', x: 100, y: -10},
+        {type: 'arvore003', x: 180, y: -15},
+        {type: 'arvore002', x: 60, y: -35}
+        ],
+        
     streetLights: [],
     objects: [],
     walls: [],
