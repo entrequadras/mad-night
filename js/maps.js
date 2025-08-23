@@ -588,20 +588,21 @@
         {type: 'arvore004', x: -20, y: 1719},
         {type: 'arvore004', x: -35, y: 1510},
         {type: 'arvore001', x: 280, y: 1890},
-        {type: 'arvore001', x: 555, y: 1590},
+        {type: 'arvore001', x: 555, y: 1390},
         {type: 'arvore003', x: 380, y: 1510},
-        {type: 'arvore002', x: 250, y: 1480},
+        {type: 'arvore002', x: 950, y: 1330},
+        {type: 'arvorebloco001', x: 1, y: 1330},
         {type: 'arvore004', x: 760, y: 1489},
-        {type: 'arvore004', x: 1000, y: 1533},
+        {type: 'arvore001', x: 1000, y: 1533},
         {type: 'arvore004', x: 1200, y: 1500},
-        {type: 'arvore004', x: 1400, y: 1510},
+        {type: 'arvore002', x: 1400, y: 1510},
         {type: 'arvore001', x: 1700, y: 1569},
         {type: 'arvore001', x: 1800, y: 1559},
          
          // Três árvores no topo
-        {type: 'arvore004', x: 100, y: -10},
-        {type: 'arvore003', x: 180, y: -15},
-        {type: 'arvore002', x: 60, y: -35}
+        {type: 'arvore004', x: 1000, y: -10},
+        {type: 'arvore003', x: 1800, y: -15},
+        {type: 'arvore002', x: 460, y: -35}
         ],
         
     streetLights: [],
