@@ -455,7 +455,7 @@
     direction: 'up'
 },
         
-        // Mapa 4 - Entre Prédios
+        //  - Entre Prédios
 {
     name: "Entre Prédios",
     displayName: "Entre Prédios",
@@ -512,7 +512,7 @@
         x: 66,
         y: 34,
         collisionRects: [
-            {x: 100, y: 120, w: 400, h: 155}
+            {x: 100, y: 300, w: 400, h: 155}
         ]
     },
     {
@@ -520,7 +520,7 @@
         x: 80,
         y: 608,
         collisionRects: [
-            {x: 112, y: 750, w: 400, h: 155}
+            {x: 112, y: 850, w: 400, h: 155}
         ]
     },
     {
