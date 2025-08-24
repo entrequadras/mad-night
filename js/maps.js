@@ -610,9 +610,9 @@
     objects: [
         //carros estacionados
          {type: 'carro004fundos', x: 374, y: 600, rotation: 0},
-        {type: 'carro002fundos', x: 120, y: 2202, rotation: 0},
+        {type: 'carro002fundos', x: 120, y: 2802, rotation: 0},
         {type: 'carro003fundos', x: 1264, y: 602, rotation: 0},
-        {type: 'carrolateral_07', x: 800, y: 600, rotation: 0}
+        {type: 'carrolateral_07', x: 2, y: 600, rotation: 0}
     ],
     walls: [],
     powerups: [
