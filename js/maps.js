@@ -582,13 +582,13 @@
         // Ipês
         {type: 'arvore006', x: 1145, y: 1489},
         {type: 'arvore007', x: 600, y: 1203},
-        {type: 'arvore008', x: 1292, y: 920},
-        {type: 'arvore007', x: 1421, y: 886},
+        {type: 'arvore008', x: 1292, y: 890},
+        {type: 'arvore007', x: 1421, y: 845},
         {type: 'arvore006', x: 1344, y: 600},
         {type: 'arvore008', x: 1480, y: 420},
-        {type: 'arvore007', x: 1675, y: 17},
+        {type: 'arvore007', x: 1675, y: 1480},
          {type: 'arvore007', x: 2700, y: 903},
-         {type: 'arvore007', x: 415, y: 29},
+         {type: 'arvore007', x: 415, y: 360},
 
           // Florestinha central
         {type: 'arvore002', x: 10, y: 1649},
