@@ -608,7 +608,7 @@
         ],
         
     streetLights: [
-    {type: 'poste000', x: 790, y: 355, rotation: 0, lightRadius: 200, id: 'map4_post1'},
+    {type: 'poste000', x: 790, y: 355, rotation: 0, lightRadius: 400, id: 'map4_post1'},
     {type: 'poste000', x: 790, y: 941, rotation: 0, lightRadius: 200, id: 'map4_post2'},
     {type: 'poste000', x: 820, y: 2038, rotation: 0, lightRadius: 200, id: 'map4_post3'},
     {type: 'poste000', x: 780, y: 2550, rotation: 0, lightRadius: 200, id: 'map4_post4'},
