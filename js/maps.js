@@ -607,7 +607,20 @@
         {type: 'arvore002', x: 460, y: -55}
         ],
         
-    streetLights: [],
+    streetLights: [
+    {type: 'poste000', x: 790, y: 355, rotation: 0, lightRadius: 100, id: 'map4_post1'},
+    {type: 'poste000', x: 790, y: 941, rotation: 0, lightRadius: 100, id: 'map4_post2'},
+    {type: 'poste000', x: 820, y: 2038, rotation: 0, lightRadius: 100, id: 'map4_post3'},
+    {type: 'poste000', x: 780, y: 2550, rotation: 0, lightRadius: 100, id: 'map4_post4'},
+    {type: 'poste000', x: 790, y: 343, rotation: 0, lightRadius: 100, id: 'map4_post5'},
+    {type: 'poste000', x: 1300, y: 981, rotation: 0, lightRadius: 100, id: 'map4_post6'},
+    {type: 'poste000', x: 1530, y: 2053, rotation: 0, lightRadius: 100, id: 'map4_post7'},
+    {type: 'poste000', x: 1309, y: 2550, rotation: 0, lightRadius: 100, id: 'map4_post8'},
+    {type: 'poste001', x: 546, y: 343, rotation: 0, lightRadius: 100, id: 'map4_post9'},
+    {type: 'poste001', x: 533, y: 981, rotation: 0, lightRadius: 100, id: 'map4_post10'},
+    {type: 'poste001', x: 546, y: 2053, rotation: 0, lightRadius: 100, id: 'map4_post11'},
+    {type: 'poste001', x: 550, y: 2550, rotation: 0, lightRadius: 100, id: 'map4_post12'}
+],
     objects: [
         //carros estacionados
          {type: 'carro004fundos', x: 374, y: 600, rotation: 0},
