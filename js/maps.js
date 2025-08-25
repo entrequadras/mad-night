@@ -636,7 +636,13 @@
         {type: 'carro001fundos', x: 1530, y: 2902, rotation: 0},
         {type: 'carro003fundos', x: 1264, y: 482, rotation: 0},
         {type: 'carrolateral_11', x: 1790, y: 640, rotation: 0},
-        {type: 'carrolateral_07', x: 2, y: 640, rotation: 0}
+        {type: 'carrolateral_07', x: 2, y: 640, rotation: 0},
+        
+        //carros estacionados no começo do mapa
+        {type: 'carro001frente', x: 1530, y: 2700, rotation: 0},
+        {type: 'carro003fundos', x: 1264, y: 2702, rotation: 0},
+        {type: 'carro004fundos', x: 264, y: 2702, rotation: 0},
+        {type: 'carro003frente', x: 464, y: 2702, rotation: 0}
     ],
     walls: [],
     powerups: [
