@@ -466,6 +466,7 @@
     enemies: [
         {x: 150, y: 10, type: 'morcego'},
         {x: 1800, y: 1290, type: 'morcego'},
+        {x: 300, y: 2800, type: 'morcego'},
         {x: 150, y: 1300, type: 'morcego'},
         {x: 1850, y: 10, type: 'faquinha'}
     ],
@@ -612,7 +613,7 @@
         ],
         
     streetLights: [
-    {type: 'poste000', x: 790, y: 355, rotation: 0, lightRadius: 400, id: 'map4_post1'},
+    {type: 'poste000', x: 790, y: 355, rotation: 0, lightRadius: 200, id: 'map4_post1'},
     {type: 'poste000', x: 790, y: 941, rotation: 0, lightRadius: 200, id: 'map4_post2'},
     {type: 'poste000', x: 820, y: 2038, rotation: 0, lightRadius: 200, id: 'map4_post3'},
     {type: 'poste000', x: 780, y: 2550, rotation: 0, lightRadius: 200, id: 'map4_post4'},
@@ -629,6 +630,7 @@
         //carros estacionados
          {type: 'carro004fundos', x: 374, y: 600, rotation: 0},
         {type: 'carro002fundos', x: 30, y: 2902, rotation: 0},
+        {type: 'carro001fundos', x: 1530, y: 2902, rotation: 0},
         {type: 'carro003fundos', x: 1264, y: 482, rotation: 0},
         {type: 'carrolateral_07', x: 2, y: 640, rotation: 0}
     ],
