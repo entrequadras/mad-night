@@ -635,6 +635,12 @@
         {type: 'carro003fundos', x: 1264, y: 482, rotation: 0},
         {type: 'carrolateral_11', x: 1790, y: 482, rotation: 0},
         {type: 'carrolateral_07', x: 2, y: 640, rotation: 0},
+
+        //carros estacionados no meio mapa
+        {type: 'carro003frente', x: 1000, y: 1050, rotation: 0},
+        {type: 'carro001fundos', x: 1600, y: 1050, rotation: 0},
+        {type: 'carro003fundos', x: 200, y: 1250, rotation: 0},
+        {type: 'carro001fundos', x: 310, y: 1050, rotation: 0},
         
         //carros estacionados no começo do mapa
         {type: 'carro001frente', x: 1630, y: 2600, rotation: 0},
