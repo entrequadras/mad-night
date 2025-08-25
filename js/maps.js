@@ -464,13 +464,17 @@
     width: 1920,
     height: 3000,
     enemies: [
-        {x: 150, y: 100, type: 'morcego'},
-        {x: 450, y: 400, type: 'faquinha'}
+        {x: 150, y: 10, type: 'morcego'},
+        {x: 1800, y: 1290, type: 'morcego'},
+        {x: 150, y: 1300, type: 'morcego'},
+        {x: 1850, y: 10, type: 'faquinha'}
     ],
     escapeEnemies: [
-        {x: 300, y: 200, type: 'janis'},
-        {x: 200, y: 600, type: 'caveirinha'},
-        {x: 400, y: 350, type: 'caveirinha'}
+        {x: 660, y: 1540, type: 'janis'},
+        {x: 1420, y: 1330, type: 'faquinha'},
+        {x: 420, y: 1000, type: 'faquinha'},
+        {x: 650, y: 650, type: 'caveirinha'},
+        {x: 1700, y: 1050, type: 'caveirinha'}
     ],
     tiles: null, // Será gerado
     hasBackground: true,
@@ -625,8 +629,8 @@
         //carros estacionados
          {type: 'carro004fundos', x: 374, y: 600, rotation: 0},
         {type: 'carro002fundos', x: 30, y: 2902, rotation: 0},
-        {type: 'carro003fundos', x: 1264, y: 602, rotation: 0},
-        {type: 'carrolateral_07', x: 2, y: 600, rotation: 0}
+        {type: 'carro003fundos', x: 1264, y: 482, rotation: 0},
+        {type: 'carrolateral_07', x: 2, y: 640, rotation: 0}
     ],
     walls: [],
     powerups: [
