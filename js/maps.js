@@ -464,7 +464,7 @@
     width: 1920,
     height: 3000,
     enemies: [
-        {x: 150, y: 400, type: 'morcego'},
+        {x: 150, y: 100, type: 'morcego'},
         {x: 450, y: 400, type: 'faquinha'}
     ],
     escapeEnemies: [
@@ -575,8 +575,8 @@
 ],
      trees: [
         // Ipês
-        {type: 'arvore006', x: 1145, y: 1689},
-        {type: 'arvore007', x: 900, y: 1303},
+        {type: 'arvore006', x: 1145, y: 1489},
+        {type: 'arvore007', x: 600, y: 1203},
         {type: 'arvore008', x: 1292, y: 920},
         {type: 'arvore007', x: 1421, y: 886},
         {type: 'arvore006', x: 1344, y: 600},
