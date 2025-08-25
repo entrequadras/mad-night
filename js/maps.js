@@ -586,9 +586,9 @@
 
           // Florestinha central
         {type: 'arvore002', x: 10, y: 1649},
-        {type: 'arvore004', x: -20, y: 1719},
+        {type: 'arvore004', x: -20, y: 1700},
         {type: 'arvore004', x: -35, y: 1510},
-        {type: 'arvore001', x: 280, y: 1890},
+        {type: 'arvore001', x: 280, y: 1490},
         {type: 'arvore001', x: 555, y: 1390},
         {type: 'arvore003', x: 380, y: 1510},
         {type: 'arvore002', x: 950, y: 1330},
@@ -610,7 +610,7 @@
     objects: [
         //carros estacionados
          {type: 'carro004fundos', x: 374, y: 600, rotation: 0},
-        {type: 'carro002fundos', x: 120, y: 2802, rotation: 0},
+        {type: 'carro002fundos', x: 30, y: 2902, rotation: 0},
         {type: 'carro003fundos', x: 1264, y: 602, rotation: 0},
         {type: 'carrolateral_07', x: 2, y: 600, rotation: 0}
     ],
