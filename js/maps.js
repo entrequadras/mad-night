@@ -628,20 +628,20 @@
 ],
     objects: [
         //carros estacionados
-         {type: 'carro004fundos', x: 374, y: 470, rotation: 0},
-        {type: 'carro001fundos', x: 374, y: 470, rotation: 0},
-        {type: 'carro003frente', x: 1074, y: 470, rotation: 0},
-         {type: 'carro004frente', x: 1374, y: 470, rotation: 0},
-        {type: 'carro003fundos', x: 1264, y: 482, rotation: 0},
-        {type: 'carrolateral_11', x: 1790, y: 482, rotation: 0},
-        {type: 'carrolateral_07', x: 2, y: 660, rotation: 0},
+         {type: 'carro004fundos', x: 374, y: 450, rotation: 0},
+        {type: 'carro001fundos', x: 374, y: 450, rotation: 0},
+        {type: 'carro003frente', x: 1074, y: 450, rotation: 0},
+         {type: 'carro004frente', x: 1374, y: 450, rotation: 0},
+        {type: 'carro003fundos', x: 1264, y: 452, rotation: 0},
+        {type: 'carrolateral_11', x: 1790, y: 452, rotation: 0},
+        {type: 'carrolateral_07', x: 2, y: 680, rotation: 0},
 
         //carros estacionados no meio mapa
         {type: 'carro003frente', x: 1000, y: 1000, rotation: 0},
         {type: 'carro001fundos', x: 1600, y: 1000, rotation: 0},
         {type: 'carro003fundos', x: 200, y: 1200, rotation: 0},
         {type: 'carro001fundos', x: 310, y: 1000, rotation: 0},
-        {type: 'carrolateral_03', x: 1400, y: 2040, rotation: 0},
+        {type: 'carrolateral_03', x: 1400, y: 2110, rotation: 0},
         
         //carros estacionados no começo do mapa
         {type: 'carro001frente', x: 1600, y: 2640, rotation: 0},
