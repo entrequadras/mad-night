@@ -628,10 +628,10 @@
 ],
     objects: [
         //carros estacionados
-         {type: 'carro004fundos', x: 374, y: 500, rotation: 0},
-        {type: 'carro001fundos', x: 374, y: 500, rotation: 0},
-        {type: 'carro003frente', x: 1074, y: 500, rotation: 0},
-         {type: 'carro004frente', x: 1374, y: 500, rotation: 0},
+         {type: 'carro004fundos', x: 374, y: 470, rotation: 0},
+        {type: 'carro001fundos', x: 374, y: 470, rotation: 0},
+        {type: 'carro003frente', x: 1074, y: 470, rotation: 0},
+         {type: 'carro004frente', x: 1374, y: 470, rotation: 0},
         {type: 'carro003fundos', x: 1264, y: 482, rotation: 0},
         {type: 'carrolateral_11', x: 1790, y: 482, rotation: 0},
         {type: 'carrolateral_07', x: 2, y: 660, rotation: 0},
