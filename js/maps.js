@@ -377,7 +377,7 @@
     trees: [
         // Ipês
         {type: 'arvore006', x: 1145, y: 1689},
-        {type: 'arvore006', x: 1282, y: 2000},
+        {type: 'arvore006', x: 1282, y: 2630},
         {type: 'arvore007', x: 900, y: 1303},
         {type: 'arvore008', x: 1292, y: 920},
         {type: 'arvore007', x: 1421, y: 886},
@@ -641,7 +641,7 @@
         {type: 'carro001fundos', x: 1600, y: 1000, rotation: 0},
         {type: 'carro003fundos', x: 200, y: 1200, rotation: 0},
         {type: 'carro001fundos', x: 310, y: 1000, rotation: 0},
-        {type: 'carrolateral_03', x: 1400, y: 2110, rotation: 0},
+        {type: 'carrolateral_03', x: 1310, y: 2110, rotation: 0},
         
         //carros estacionados no começo do mapa
         {type: 'carro001frente', x: 1600, y: 2640, rotation: 0},
