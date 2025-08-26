@@ -634,18 +634,19 @@
          {type: 'carro004frente', x: 1374, y: 500, rotation: 0},
         {type: 'carro003fundos', x: 1264, y: 482, rotation: 0},
         {type: 'carrolateral_11', x: 1790, y: 482, rotation: 0},
-        {type: 'carrolateral_07', x: 2, y: 640, rotation: 0},
+        {type: 'carrolateral_07', x: 2, y: 660, rotation: 0},
 
         //carros estacionados no meio mapa
-        {type: 'carro003frente', x: 1000, y: 1050, rotation: 0},
-        {type: 'carro001fundos', x: 1600, y: 1050, rotation: 0},
-        {type: 'carro003fundos', x: 200, y: 1250, rotation: 0},
-        {type: 'carro001fundos', x: 310, y: 1050, rotation: 0},
+        {type: 'carro003frente', x: 1000, y: 1000, rotation: 0},
+        {type: 'carro001fundos', x: 1600, y: 1000, rotation: 0},
+        {type: 'carro003fundos', x: 200, y: 1200, rotation: 0},
+        {type: 'carro001fundos', x: 310, y: 1000, rotation: 0},
+        {type: 'carrolateral_03', x: 1400, y: 2040, rotation: 0},
         
         //carros estacionados no começo do mapa
-        {type: 'carro001frente', x: 1630, y: 2640, rotation: 0},
-        {type: 'carro001fundos', x: 1490, y: 2852, rotation: 0},
-        {type: 'carro003fundos', x: 1264, y: 2643, rotation: 0},
+        {type: 'carro001frente', x: 1600, y: 2640, rotation: 0},
+        {type: 'carro001fundos', x: 1460, y: 2852, rotation: 0},
+        {type: 'carro003fundos', x: 1244, y: 2643, rotation: 0},
         {type: 'carro004fundos', x: 264, y: 2642, rotation: 0},
         {type: 'carro003frente', x: 464, y: 2644, rotation: 0}
     ],
