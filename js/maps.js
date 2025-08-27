@@ -317,7 +317,7 @@
                 {x: 1533, y: 2218, w: 200, h: 60},
                 {x: 1583, y: 2278, w: 220, h: 40},
                 {x: 1683, y: 2358, w: 220, h: 40},
-                {x: 1633, y: 2318, w: 220, h: 40}
+                {x: 1633, y: 2330, w: 220, h: 60}
             ]
         },
         {
@@ -476,10 +476,12 @@
     ],
     escapeEnemies: [
         {x: 660, y: 1540, type: 'janis'},
-        {x: 1420, y: 1330, type: 'faquinha'},
-        {x: 420, y: 1000, type: 'faquinha'},
+        {x: 1420, y: 1340, type: 'faquinha'},
+        {x: 420, y: 1100, type: 'faquinha'},
         {x: 650, y: 650, type: 'caveirinha'},
-        {x: 1700, y: 1050, type: 'caveirinha'}
+        {x: 1800, y: 1100, type: 'faquinha'},
+        {x: 1750, y: 1200, type: 'morcego'},
+        {x: 1600, y: 1050, type: 'caveirinha'}
     ],
     tiles: null, // Será gerado
     hasBackground: true,
