@@ -42,7 +42,7 @@
               // Fica apagado 80% do tempo
               if (!light.flickering && now > light.nextFlicker) {
                   light.flickering = true;
-                  light.flickerTime = now + 200; // Acende brevemente (200ms)
+                  light.flickerTime = now + 450; // Acende brevemente (450ms)
                   light.targetIntensity = 0.8;
               }
               
@@ -52,7 +52,7 @@
                   } else {
                       light.flickering = false;
                       light.intensity = 0.1; // Fica quase apagado
-                      light.nextFlicker = now + 5000; // Espera 5 segundos para acender de novo
+                      light.nextFlicker = now + 4000; // Espera 4 segundos para acender de novo
                   }
               }
               
