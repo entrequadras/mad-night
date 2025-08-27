@@ -291,7 +291,7 @@
         {x: 60, y: 1040, type: 'morcego'},
         {x: 200, y: 1524, type: 'faquinha'},
         {x: 234, y: 1520, type: 'faquinha'},
-        {x: 610, y: 1035, type: 'faquinha'}
+        {x: 310, y: 1050, type: 'faquinha'}
     ],
     escapeEnemies: [],
     tiles: null, // Será gerado
@@ -306,6 +306,7 @@
                 {x: 1190, y: 2090, w: 180, h: 50},
                 {x: 1240, y: 2140, w: 200, h: 40},
                 {x: 1290, y: 2180, w: 200, h: 40},
+                {x: 1400, y: 2290, w: 160, h: 50}
                 {x: 1340, y: 2220, w: 180, h: 50}
             ]
         },
@@ -377,7 +378,7 @@
     trees: [
         // Ipês
         {type: 'arvore006', x: 1145, y: 1689},
-        {type: 'arvore006', x: 1282, y: 2630},
+        {type: 'arvore006', x: 1282, y: 2580},
         {type: 'arvore007', x: 900, y: 1303},
         {type: 'arvore008', x: 1292, y: 920},
         {type: 'arvore007', x: 1421, y: 886},
@@ -402,10 +403,10 @@
         {type: 'arvore002', x: 250, y: 800},
         {type: 'arvore004', x: 360, y: 789},
         {type: 'arvore004', x: 1440, y: 2333},
-        {type: 'arvore004', x: 1500, y: 2300},
+        {type: 'arvore004', x: 1550, y: 2400},
         {type: 'arvore004', x: 1410, y: 2310},
         {type: 'arvore001', x: 1470, y: 2369},
-        {type: 'arvore001', x: 1500, y: 2459},
+        {type: 'arvore001', x: 1500, y: 2488},
         {type: 'arvore001', x: 460, y: 778},
         {type: 'arvore003', x: 500, y: 759},
         {type: 'arvore003', x: 1740, y: 1400},
