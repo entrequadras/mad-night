@@ -683,6 +683,12 @@ function restart() {
 function handlePauseMenu(key) {
    if (!gameState.isPaused) return;
    
+   // ADICIONAR: ESC para despausar
+   if (key === 'Escape') {
+       togglePause();
+       return;
+   }
+   
    switch(key) {
        case 'ArrowUp':
            gameState.pauseOption = (gameState.pauseOption - 1 + 3) % 3;
@@ -715,12 +721,12 @@ function handlePauseMenu(key) {
                case 2: // Sair para menu
                    gameState.isPaused = false;
                    if (audio && audio.stopMusic) {
-        audio.stopMusic();
-    }
-    if (window.MadNightMain && window.MadNightMain.backToMenu) {
-        window.MadNightMain.backToMenu();
-    }
-    break;
+                       audio.stopMusic();
+                   }
+                   if (window.MadNightMain && window.MadNightMain.backToMenu) {
+                       window.MadNightMain.backToMenu();
+                   }
+                   break;
            }
            break;
    }
