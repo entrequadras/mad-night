@@ -661,8 +661,8 @@
 ],
     lights: [],
     shadows: [],
-    playerStart: {x: 960, y: 2800},
-    playerStartEscape: {x: 960, y: 50},
+    playerStart: {x: 400, y: 2800},
+    playerStartEscape: {x: 860, y: 50},
     exit: {x: 860, y: 10, w: 200, h: 30},
     direction: 'up'
 },
