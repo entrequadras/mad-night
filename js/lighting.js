@@ -52,7 +52,7 @@
                   } else {
                       light.flickering = false;
                       light.intensity = 0.1; // Fica quase apagado
-                      light.nextFlicker = now + 8000; // Espera 8 segundos para acender de novo
+                      light.nextFlicker = now + 5000; // Espera 5 segundos para acender de novo
                   }
               }
               
