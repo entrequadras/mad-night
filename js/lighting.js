@@ -1,61 +1,82 @@
 // lighting.js - Sistema de iluminação e sombras (Revisão Alpha-02 - TV Light)
-
 (function() {
-   'use strict';
-   
-   MadNight.lighting = {
-       // Sistema de flicker para postes
-       flickerLights: {},
-       
-       // Configurações
-       config: {
-           shadowOpacity: MadNight.config.lighting.shadowOpacity,
-           nightOverlayOpacity: MadNight.config.lighting.nightOverlayOpacity,
-           lightIntensity: MadNight.config.lighting.lightIntensity,
-           flickerMinTime: MadNight.config.lighting.flickerMinTime,
-           flickerMaxTime: MadNight.config.lighting.flickerMaxTime
-       },
-       
-       // Atualizar flicker de uma luz
-       updateFlicker: function(lightId) {
-           if (!this.flickerLights[lightId]) {
-               this.flickerLights[lightId] = {
-                   intensity: 1.0,
-                   targetIntensity: 1.0,
-                   flickering: false,
-                   flickerTime: 0,
-                   nextFlicker: Date.now() + Math.random() * 5000 + 3000
-               };
-           }
-           
-           const light = this.flickerLights[lightId];
-           const now = Date.now();
-           
-           // TV flicker mais rápido e sutil
-           if (lightId === 'ks_window1') {
-               // Flicker constante e rápido para simular TV
-               light.intensity = 0.7 + Math.sin(now * 0.008) * 0.15 + Math.sin(now * 0.03) * 0.15;
-               return light.intensity;
-           }
-           
-           if (!light.flickering && now > light.nextFlicker) {
-               light.flickering = true;
-               light.flickerTime = now + Math.random() * 500 + 200;
-               light.targetIntensity = 0.3 + Math.random() * 0.5;
-           }
-           
-           if (light.flickering) {
-               if (now < light.flickerTime) {
-                   light.intensity = light.targetIntensity + Math.sin(now * 0.05) * 0.2;
-               } else {
-                   light.flickering = false;
-                   light.intensity = 1.0;
-                   light.nextFlicker = now + Math.random() * this.config.flickerMaxTime + this.config.flickerMinTime;
-               }
-           }
-           
-           return light.intensity;
-       },
+  'use strict';
+  
+  MadNight.lighting = {
+      // Sistema de flicker para postes
+      flickerLights: {},
+      
+      // Configurações
+      config: {
+          shadowOpacity: MadNight.config.lighting.shadowOpacity,
+          nightOverlayOpacity: MadNight.config.lighting.nightOverlayOpacity,
+          lightIntensity: MadNight.config.lighting.lightIntensity,
+          flickerMinTime: MadNight.config.lighting.flickerMinTime,
+          flickerMaxTime: MadNight.config.lighting.flickerMaxTime
+      },
+      
+      // Atualizar flicker de uma luz
+      updateFlicker: function(lightId) {
+          if (!this.flickerLights[lightId]) {
+              this.flickerLights[lightId] = {
+                  intensity: 1.0,
+                  targetIntensity: 1.0,
+                  flickering: false,
+                  flickerTime: 0,
+                  nextFlicker: Date.now() + Math.random() * 5000 + 3000
+              };
+          }
+          
+          const light = this.flickerLights[lightId];
+          const now = Date.now();
+          
+          // TV flicker mais rápido e sutil
+          if (lightId === 'ks_window1') {
+              // Flicker constante e rápido para simular TV
+              light.intensity = 0.7 + Math.sin(now * 0.008) * 0.15 + Math.sin(now * 0.03) * 0.15;
+              return light.intensity;
+          }
+          
+          // Postes que ficam mais tempo apagados
+          if (lightId === 'map4_post3' || lightId === 'map4_post7' || lightId === 'map4_post10') {
+              // Fica apagado 80% do tempo
+              if (!light.flickering && now > light.nextFlicker) {
+                  light.flickering = true;
+                  light.flickerTime = now + 200; // Acende brevemente (200ms)
+                  light.targetIntensity = 0.8;
+              }
+              
+              if (light.flickering) {
+                  if (now < light.flickerTime) {
+                      light.intensity = light.targetIntensity;
+                  } else {
+                      light.flickering = false;
+                      light.intensity = 0.1; // Fica quase apagado
+                      light.nextFlicker = now + 8000; // Espera 8 segundos para acender de novo
+                  }
+              }
+              
+              return light.intensity;
+          }
+          
+          if (!light.flickering && now > light.nextFlicker) {
+              light.flickering = true;
+              light.flickerTime = now + Math.random() * 500 + 200;
+              light.targetIntensity = 0.3 + Math.random() * 0.5;
+          }
+          
+          if (light.flickering) {
+              if (now < light.flickerTime) {
+                  light.intensity = light.targetIntensity + Math.sin(now * 0.05) * 0.2;
+              } else {
+                  light.flickering = false;
+                  light.intensity = 1.0;
+                  light.nextFlicker = now + Math.random() * this.config.flickerMaxTime + this.config.flickerMinTime;
+              }
+          }
+          
+          return light.intensity;
+      },
        
        // Verificar se uma posição está na sombra
        isInShadow: function(x, y) {
