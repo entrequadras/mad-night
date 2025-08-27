@@ -448,7 +448,10 @@
     {type: 'm2000power', x: 50, y: 1420, collected: false},
     {type: 'm2000power', x: 1880, y: 2900, collected: false}
 ],
-    lights: [],
+    lights: [
+    {x: 800, y: 1021, radius: 120, id: 'map3_tv1'},
+    {x: 1480, y: 1510, radius: 120, id: 'map3_tv2'}
+],
     shadows: [],
     playerStart: {x: 1730, y: 2800},
     playerStartEscape: {x: 1220, y: 50},
