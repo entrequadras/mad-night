@@ -681,55 +681,55 @@ function restart() {
 }
 
 function handlePauseMenu(key) {
-   if (!gameState.isPaused) return;
-   
-   // ADICIONAR: ESC para despausar
-   if (key === 'Escape') {
-       togglePause();
-       return;
-   }
-   
-   switch(key) {
-       case 'ArrowUp':
-           gameState.pauseOption = (gameState.pauseOption - 1 + 3) % 3;
-           break;
-       case 'ArrowDown':
-           gameState.pauseOption = (gameState.pauseOption + 1) % 3;
-           break;
-       case 'Enter':
-       case ' ':
-           switch(gameState.pauseOption) {
-               case 0: // Continuar
-                   togglePause();
-                   break;
-               case 1: // Música On/Off
-                   gameState.musicEnabled = !gameState.musicEnabled;
-                   if (audio) {
-                       if (gameState.musicEnabled) {
-                           // Retomar música atual
-                           if (gameState.phase === 'escape') {
-                               audio.playMusic('fuga');
-                           } else {
-                               audio.playMusic('inicio');
-                           }
-                       } else {
-                           // Parar música
-                           audio.stopMusic();
-                       }
-                   }
-                   break;
-               case 2: // Sair para menu
-                   gameState.isPaused = false;
-                   if (audio && audio.stopMusic) {
-                       audio.stopMusic();
-                   }
-                   if (window.MadNightMain && window.MadNightMain.backToMenu) {
-                       window.MadNightMain.backToMenu();
-                   }
-                   break;
-           }
-           break;
-   }
+    // ESC para despausar
+    if (key === 'Escape') {
+        togglePause();
+        return;
+    }
+    
+    if (!gameState.isPaused) return;
+    
+    switch(key) {
+        case 'ArrowUp':
+            gameState.pauseOption = (gameState.pauseOption - 1 + 3) % 3;
+            break;
+        case 'ArrowDown':
+            gameState.pauseOption = (gameState.pauseOption + 1) % 3;
+            break;
+        case 'Enter':
+        case ' ':
+            switch(gameState.pauseOption) {
+                case 0: // Continuar
+                    togglePause();
+                    break;
+                case 1: // Música On/Off
+                    gameState.musicEnabled = !gameState.musicEnabled;
+                    if (audio) {
+                        if (gameState.musicEnabled) {
+                            // Retomar música atual
+                            if (gameState.phase === 'escape') {
+                                audio.playMusic('fuga');
+                            } else {
+                                audio.playMusic('inicio');
+                            }
+                        } else {
+                            // Parar música
+                            audio.stopMusic();
+                        }
+                    }
+                    break;
+                case 2: // Sair para menu
+                    gameState.isPaused = false;
+                    if (audio && audio.stopMusic) {
+                        audio.stopMusic();
+                    }
+                    if (window.MadNightMain && window.MadNightMain.backToMenu) {
+                        window.MadNightMain.backToMenu();
+                    }
+                    break;
+            }
+            break;
+    }
 }
    
    // Exportar módulo
