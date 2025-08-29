@@ -681,13 +681,13 @@ function restart() {
 }
 
 function handlePauseMenu(key) {
+    if (!gameState.isPaused) return;
+    
     // ESC para despausar
     if (key === 'Escape') {
         togglePause();
         return;
     }
-    
-    if (!gameState.isPaused) return;
     
     switch(key) {
         case 'ArrowUp':
