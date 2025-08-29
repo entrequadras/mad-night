@@ -405,44 +405,46 @@ function checkSpecialInteractions() {
    }
    
    // Configurar input handlers
-   function setupInputHandlers() {
-       window.addEventListener('keydown', handleKeyDown);
-       window.addEventListener('keyup', handleKeyUp);
-   }
-   
-  function handleKeyDown(e) {
-    keys[e.key] = true;
-    
-    // Se pausado, lidar com menu de pausa
-    if (gameState.isPaused) {
-        handlePauseMenu(e.key);
-        return;
-    }
-    
-    // Tecla ESC para pausar (só quando NÃO pausado)
-    if (e.key === 'Escape') {
-        togglePause();
-        return;
-    }
-    
-    // Passar para o player
-    if (player && player.handleKeyDown) {
-        player.handleKeyDown(e);
-    }
-    
-    // Debug keys (se habilitado)
-    if (MadNight.config.debug.enableDebugKeys) {
-        handleDebugKeys(e.key);
-    }
+function setupInputHandlers() {
+   window.addEventListener('keydown', handleKeyDown);
+   window.addEventListener('keyup', handleKeyUp);
 }
+
+function handleKeyDown(e) {
+   keys[e.key] = true;
    
-   function handleKeyUp(e) {
-       keys[e.key] = false;
-       
-       if (player && player.handleKeyUp) {
-           player.handleKeyUp(e);
-       }
+   // Se pausado, lidar com menu de pausa
+   if (gameState.isPaused) {
+       handlePauseMenu(e.key);
+       return;
    }
+   
+   // Tecla ESC para pausar
+   if (e.key === 'Escape') {
+       togglePause();
+       return;
+   }
+   
+   // Passar para o player
+   if (player && player.handleKeyDown) {
+       player.handleKeyDown(e);
+   }
+   
+   // Debug keys (se habilitado)
+   if (MadNight.config.debug.enableDebugKeys) {
+       handleDebugKeys(e.key);
+   }
+   
+   // Tentar tocar música na primeira interação (REMOVIDO - música agora começa no init)
+}
+
+function handleKeyUp(e) {
+   keys[e.key] = false;
+   
+   if (player && player.handleKeyUp) {
+       player.handleKeyUp(e);
+   }
+}
    
    // Debug keys
    function handleDebugKeys(key) {
