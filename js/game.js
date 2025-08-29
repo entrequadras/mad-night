@@ -411,32 +411,31 @@ function checkSpecialInteractions() {
    }
    
   function handleKeyDown(e) {
-   keys[e.key] = true;
-   
-   // Se pausado, lidar com menu de pausa
-   if (gameState.isPaused) {
-       handlePauseMenu(e.key);
-       return;
-   }
-   
-   // Tecla ESC para pausar
-   if (e.key === 'Escape') {
-       togglePause();
-       return;
-   }
-       
-       // Passar para o player
-       if (player && player.handleKeyDown) {
-           player.handleKeyDown(e);
-       }
-       
-       // Debug keys (se habilitado)
-       if (MadNight.config.debug.enableDebugKeys) {
-           handleDebugKeys(e.key);
-       }
-       
+    keys[e.key] = true;
+    
+    // Tecla ESC - toggle pause
+    if (e.key === 'Escape') {
+        togglePause();
+        return;
+    }
+    
+    // Se pausado, lidar com menu de pausa
+    if (gameState.isPaused) {
+        handlePauseMenu(e.key);
+        return;
+    }
+    
+    // Passar para o player
+    if (player && player.handleKeyDown) {
+        player.handleKeyDown(e);
+    }
+    
+    // Debug keys (se habilitado)
+    if (MadNight.config.debug.enableDebugKeys) {
+        handleDebugKeys(e.key);
+    }
+}    
        // Tentar tocar música na primeira interação (REMOVIDO - música agora começa no init)
-   }
    
    function handleKeyUp(e) {
        keys[e.key] = false;
