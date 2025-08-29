@@ -683,12 +683,6 @@ function restart() {
 function handlePauseMenu(key) {
     if (!gameState.isPaused) return;
     
-    // ESC para despausar
-    if (key === 'Escape') {
-        togglePause();
-        return;
-    }
-    
     switch(key) {
         case 'ArrowUp':
             gameState.pauseOption = (gameState.pauseOption - 1 + 3) % 3;
