@@ -419,7 +419,7 @@ function checkSpecialInteractions() {
         return;
     }
     
-    // Tecla ESC para pausar
+    // Tecla ESC para pausar (só quando NÃO pausado)
     if (e.key === 'Escape') {
         togglePause();
         return;
@@ -434,8 +434,6 @@ function checkSpecialInteractions() {
     if (MadNight.config.debug.enableDebugKeys) {
         handleDebugKeys(e.key);
     }
-    
-    // Tentar tocar música na primeira interação (REMOVIDO - música agora começa no init)
 }
    
    function handleKeyUp(e) {
